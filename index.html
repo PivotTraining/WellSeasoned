@@ -13,7 +13,11 @@
 <meta property="og:title" content="Well Seasoned — Two verdicts on every film">
 <meta property="og:description" content="The Kitchen is verified critics of the culture. The Table is the community that bought the ticket. When they agree, it earns the seal.">
 <meta property="og:site_name" content="Well Seasoned">
+<meta property="og:image" content="https://itswellseasoned.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://itswellseasoned.com/og.png">
 <meta name="twitter:title" content="Well Seasoned — Rated by the culture">
 <meta name="twitter:description" content="Two honest scores on every film. Built for the culture, rated by the culture.">
 <!-- Favicon: gold seasoning dot on paper -->
@@ -818,7 +822,7 @@
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Reviews count toward the official score</li>
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Say in editorial lists and features</li>
           </ul>
-          <button class="btn btn-ghost" onclick="toast('Application flow opens here (demo)')">Apply to The Kitchen</button>
+          <button class="btn btn-ghost" onclick="openApplyKitchen()">Apply to The Kitchen</button>
         </div>
       </div>
     </div>
@@ -867,9 +871,9 @@
 <footer>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span>Home · Browse · The Vault · Membership · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="openCurate()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('join')" style="cursor:pointer">Membership</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="openCurate()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
-  <div class="wrap"><p class="fine">Pre-production build. Films, directors, cast, posters, trailers, runtimes, and where-to-watch are real (via TMDB). Scores start unscored and are earned by real votes and verified critics, not placeholders. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords and are not a precise scene-by-scene guide. The catalog is auto-seeded from TMDB and pending editorial curation. Accounts are real (email + password via Supabase Auth); your watchlist, taste, and catalog choice are saved on this device. Where-to-watch links open each provider's search (and JustWatch for all options); showtimes rows are sample data until a live provider is connected, though the Fandango and Google links are real. A real product still needs a film metadata feed, a showtimes provider, and human moderation systems.</p></div>
+  <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
 
 <script>
@@ -2594,9 +2598,13 @@ function applyMeta(){
   });
 }
 /* Live audience score = share of the room that says it's seasoned. */
+/* The Table score needs a quorum before it counts — one early vote shouldn't
+   crown (or bury) a film. Below quorum the score reads pending; the raw tally
+   still shows so early voters see their vote land. */
+var TABLE_QUORUM=5;
 function tableScore(f){
   var tot=f.votes.for+f.votes.against;
-  return tot? Math.round(f.votes.for/tot*100) : null;
+  return (tot>=TABLE_QUORUM)? Math.round(f.votes.for/tot*100) : null;
 }
 /* Certified when both the Kitchen and the live Table clear 85. */
 function certified(f){ return f.k>=85 && tableScore(f)>=85; }
@@ -2957,12 +2965,25 @@ function go(view,arg){
   else { location.hash=h; }                     // else the hashchange listener renders
 }
 function goBack(){ if(history.length>1)history.back(); else go('home'); }
-window.addEventListener('hashchange',function(){ var r=parseHash(); render(r.view,r.arg); });
+/* Admin tools (Curate / Connect posters) stay hidden from visitors.
+   Visit #/admin once on your device to reveal them; #/admin-off hides them. */
+function refreshAdminUI(){
+  var el=byId('adminLinks'); if(!el)return;
+  var on=false; try{ on=localStorage.getItem('ws_admin')==='1'; }catch(e){}
+  el.hidden=!on;
+}
+function checkAdminHash(){
+  var h=location.hash;
+  if(h==='#/admin'){ try{localStorage.setItem('ws_admin','1');}catch(e){} refreshAdminUI(); toast('Admin tools unlocked on this device.'); location.hash='#/'; return true; }
+  if(h==='#/admin-off'){ try{localStorage.removeItem('ws_admin');}catch(e){} refreshAdminUI(); toast('Admin tools hidden.'); location.hash='#/'; return true; }
+  return false;
+}
+window.addEventListener('hashchange',function(){ if(checkAdminHash())return; var r=parseHash(); render(r.view,r.arg); });
 
 /* Live document + social meta per view/film. (Crawler-visible OG still needs a
    prerender step — see backend/README.md — but this fixes tab titles, canonical
    URLs, the back button, and in-app share previews.) */
-function setDocMeta(title,desc,path){
+function setDocMeta(title,desc,path,img){
   document.title=title;
   var url='https://itswellseasoned.com/'+(path||location.hash||'');
   function set(sel,attr,val){ var el=document.querySelector(sel); if(el&&val!=null)el.setAttribute(attr,val); }
@@ -2973,6 +2994,9 @@ function setDocMeta(title,desc,path){
   set('meta[name="twitter:description"]','content',desc);
   set('meta[property="og:url"]','content',url);
   set('link[rel="canonical"]','href',url);
+  var im=img||'https://itswellseasoned.com/og.png';
+  set('meta[property="og:image"]','content',im);
+  set('meta[name="twitter:image"]','content',im);
 }
 function applyMetaTags(view){
   setDocMeta('Well Seasoned — Two verdicts on every film',
@@ -3155,7 +3179,7 @@ function renderFilm(id){
       '<div class="film-verdict">'+
         '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
           '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
-        '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+((f.votes.for+f.votes.against)?fmt(f.votes.for+f.votes.against)+' voted':'Be the first')+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
+        '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+tblCountText(f)+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
         '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
         splitFlagHTML(f)+
       '</div>'+
@@ -3176,7 +3200,7 @@ function renderFilm(id){
           '<textarea id="cText" placeholder="Say your piece. Why is it seasoned, or why\u2019d you send it back?" aria-label="Your comment"></textarea>'+
           '<div class="cbox-row"><span class="cbox-hint" id="stanceHint">Pick a side above, then post.</span><button class="btn btn-gold btn-sm" onclick="postComment(\''+f.id+'\')">Post your read</button></div></div>'+
         '<div class="comments" id="commentList"></div>'+
-        '<div class="safety-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>One vote per film. Reads are held to our <a onclick="toast(\'Community guidelines open here (demo)\')" tabindex="0">community guidelines</a>.</div>'+
+        '<div class="safety-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>One vote per film. Reads are held to our <a onclick="openGuidelines()" tabindex="0" onkeydown="if(event.key===\'Enter\')openGuidelines()">community guidelines</a>.</div>'+
         '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'+
       '</div>'+
     '</div>';
@@ -3190,7 +3214,7 @@ function renderFilm(id){
   });
   setDocMeta(f.title+' ('+f.year+') — Well Seasoned',
     'The Kitchen and The Table weigh in on '+f.title+'. '+(f.syn||'').slice(0,140),
-    '#/film/'+encodeURIComponent(f.id));
+    '#/film/'+encodeURIComponent(f.id), f.poster||null);
   if(!app.taughtThis){ var ib=byId('filmContent').querySelector('.info-btn'); if(ib)ib.classList.add('pulse'); }
 }
 function numColor(n){return{certified:'gold-ink',well:'paprika-ink',light:'herb-ink',bland:'bland',pending:'ink-3'}[tier(n)];}
@@ -3220,6 +3244,13 @@ function splitFlagHTML(f){
   var split=(k==null||ts==null)?null:Math.abs(k-ts);
   var flag=(!certified(f)&&split!=null&&split>=12)?'<span class="split-flag">The split · '+split+' pts apart</span>':'';
   return '<span id="tblFlag" class="tbl-flag">'+flag+'</span>';
+}
+/* The Table's count line, quorum-aware: shows how close the room is to a score */
+function tblCountText(f){
+  var tot=f.votes.for+f.votes.against;
+  if(!tot) return 'Be the first';
+  if(tot<TABLE_QUORUM) return fmt(tot)+' voted · '+(TABLE_QUORUM-tot)+' more to score it';
+  return fmt(tot)+' voted';
 }
 /* the seasoning tier (ranking) a single score earns — shown as a chip on the score */
 function tierChip(n){
@@ -3278,7 +3309,7 @@ function loadBackendVotes(slug){
       f.votes={for:c.for_count||0,against:c.against_count||0}; app.tally[slug]={for:f.votes.for,against:f.votes.against};
       if(document.querySelector('.view.on')&&document.querySelector('.view.on').getAttribute('data-view')==='film'){
         var ts=tableScore(f), tr=byId('tblRing'); if(tr) tr.innerHTML=auraRing(ts,tier(ts),72,true);
-        if(byId('tblCount')) byId('tblCount').textContent=(f.votes.for+f.votes.against)?fmt(f.votes.for+f.votes.against)+' voted':'Be the first';
+        if(byId('tblCount')) byId('tblCount').textContent=tblCountText(f);
         refreshSeasoning(f); animateAura(byId('filmContent'));
       }
     }).catch(function(){});
@@ -3347,6 +3378,29 @@ function openWaitlist(plan){
 function doWaitlist(plan){
   var e=byId('wlEmail')?byId('wlEmail').value.trim():'';
   if(submitWaitlist(e,plan)){ closeModal(); toast('You’re on the list. We’ll be in touch at launch.'); }
+}
+/* critic application — captured to the backend for editorial review */
+function openApplyKitchen(){
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Apply to The Kitchen</h2><p class="m-sub">Verified critics of the culture. Application based, never bought. Leave your email and the editorial team will reach out for your work.</p>'+
+    '<div class="cbox"><input id="wlEmail" type="email" placeholder="you@email.com" aria-label="Email">'+
+    '<div class="cbox-row"><span class="cbox-hint">Reviewed by a human, not an algorithm.</span><button class="btn btn-gold btn-sm" onclick="doApplyKitchen()">Submit application</button></div></div>');
+}
+function doApplyKitchen(){
+  var e=byId('wlEmail')?byId('wlEmail').value.trim():'';
+  if(submitWaitlist(e,'kitchen-application')){ closeModal(); toast('Application received. The editorial team will be in touch.'); }
+}
+/* the house rules — linked from the vote panel */
+function openGuidelines(){
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>House rules at the Table</h2><p class="m-sub">Say your piece. Keep it about the work.</p>'+
+    '<ul class="tier-legend" style="gap:12px;font-size:14px;color:var(--ink-2);list-style:none">'+
+    '<li><b>Critique the film, not the person.</b> No harassment, slurs, or pile-ons — of anyone.</li>'+
+    '<li><b>One vote per film.</b> Gaming the Table gets votes removed and devices banned.</li>'+
+    '<li><b>Warn before you spoil.</b> Lead with "spoilers" or keep the reveal to yourself.</li>'+
+    '<li><b>No spam, no self-promo.</b> Links to your own stuff belong in a Kitchen application.</li>'+
+    '<li><b>Flags are read by humans.</b> Every report is reviewed; repeat offenders lose the seat.</li>'+
+    '</ul><button class="btn btn-gold" onclick="closeModal()">Got it</button>');
 }
 /* Read global curation (which shelf, featured, hidden, classic, order, Kitchen
    score) and merge it on top of the built-in catalog. Content stays in the file;
@@ -3418,7 +3472,7 @@ function castVote(id,side){
   renderVotes(f);
   var ts=tableScore(f), tr=byId('tblRing');
   if(tr){ tr.innerHTML=auraRing(ts,tier(ts),72); }
-  if(byId('tblCount')) byId('tblCount').textContent=fmt(f.votes.for+f.votes.against)+' voted';
+  if(byId('tblCount')) byId('tblCount').textContent=tblCountText(f);
   refreshSeasoning(f);
   saveState();
 }
@@ -3494,6 +3548,7 @@ function renderBrowse(){
   byId('filters').innerHTML=typeChips+chipset('Mood',moods)+chipset('Era',eras)+chipset('Where',wheres);
   refreshScopeToggles();
   var list=FILMS.filter(function(f){
+    if(f.noart)return false;
     if(!scopeMatch(f))return false;
     if(!contentMatch(f))return false;
     if(FILTERS.mood!=='All' && f.moods.indexOf(FILTERS.mood)<0)return false;
@@ -4055,9 +4110,9 @@ function forgetTmdbKey(){
 /* ============ INIT ============ */
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
-renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore();
+renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); refreshAdminUI();
 /* open whatever the URL points at (deep link / refresh / back button) */
-var _route0=parseHash(); render(_route0.view,_route0.arg);
+if(!checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
 loadBackendCuration(); loadAllBackendVotes();
 </script>
