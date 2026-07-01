@@ -3610,16 +3610,65 @@ function doWaitlist(plan){
   var e=byId('wlEmail')?byId('wlEmail').value.trim():'';
   if(submitWaitlist(e,plan)){ closeModal(); toast('You’re on the list. We’ll be in touch at launch.'); }
 }
-/* critic application — captured to the backend for editorial review */
+/* critic application — a real pipeline with a visible status, not an email into the void */
 function openApplyKitchen(){
+  var accountNote = app.signedIn
+    ? '<p class="m-sub" style="margin-top:2px">Applying as <strong>'+esc(app.name||app.email)+'</strong> — your seat ties to this account.</p>'
+    : '<p class="m-sub" style="margin-top:2px"><strong>Heads up:</strong> a seat ties to an account. <a onclick="app._afterAuth=function(){openApplyKitchen();};openAuth(\'signup\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Create yours first</a> (20 seconds) so we can seat you the moment you’re approved.</p>';
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
-    '<h2>Apply to The Kitchen</h2><p class="m-sub">Verified critics of the culture. Application based, never bought. Leave your email and the editorial team will reach out for your work.</p>'+
-    '<div class="cbox"><input id="wlEmail" type="email" placeholder="you@email.com" aria-label="Email">'+
-    '<div class="cbox-row"><span class="cbox-hint">Reviewed by a human, not an algorithm.</span><button class="btn btn-gold btn-sm" onclick="doApplyKitchen()">Submit application</button></div></div>');
+    '<h2>Apply to The Kitchen</h2><p class="m-sub">Verified critics of the culture. Application based, never bought.</p>'+accountNote+
+    '<div class="field"><label for="caName">Name</label><input id="caName" value="'+esc(app.name||'')+'" placeholder="Your byline"></div>'+
+    '<div class="field"><label for="caEmail">Email</label><input id="caEmail" type="email" value="'+esc(app.email||'')+'" placeholder="you@email.com"></div>'+
+    '<div class="field"><label for="caOutlet">Outlet</label><input id="caOutlet" placeholder="Where you publish (or “independent”)"></div>'+
+    '<div class="field"><label for="caWork">Your work</label><input id="caWork" type="url" placeholder="Link to reviews — site, Substack, YouTube, Letterboxd…"></div>'+
+    '<button class="btn btn-gold" onclick="doApplyKitchen()">Submit application</button>'+
+    '<p class="m-alt">Reviewed by a human on the editorial team, never an algorithm.</p>');
 }
 function doApplyKitchen(){
-  var e=byId('wlEmail')?byId('wlEmail').value.trim():'';
-  if(submitWaitlist(e,'kitchen-application')){ closeModal(); toast('Application received. The editorial team will be in touch.'); }
+  var name=byId('caName')?byId('caName').value.trim():'';
+  var e=byId('caEmail')?byId('caEmail').value.trim():'';
+  var outlet=byId('caOutlet')?byId('caOutlet').value.trim():'';
+  var work=byId('caWork')?byId('caWork').value.trim():'';
+  if(!e||e.indexOf('@')<1){ toast('Enter a valid email.'); return; }
+  var body={name:name||null,email:e,outlet:outlet||null,work_url:work||null,user_id:app.userId||null};
+  var finish=function(already){
+    try{ localStorage.setItem('ws_applied_kitchen',e); }catch(_){}
+    app.kitchenApp=already?'received':'received';
+    showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+      '<h2>'+(already?'You’re already in review':'Application received')+'</h2>'+
+      '<p class="m-sub">Here’s exactly what happens next:</p>'+
+      '<ul class="tier-legend" style="gap:12px;font-size:14px;color:var(--ink-2);list-style:none">'+
+      '<li><b>1 · Editorial review.</b> A human reads your work — no algorithm, no follower-count test.</li>'+
+      '<li><b>2 · We reach out.</b> You’ll hear back at <strong>'+esc(e)+'</strong> either way.</li>'+
+      '<li><b>3 · You’re seated.</b> A “Your Kitchen review” box appears on every film page, and your scores move the official Kitchen number.</li>'+
+      '</ul>'+
+      (app.signedIn?'<p class="m-sub">Track your status anytime on your <a onclick="closeModal();go(\'you\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">You page</a>.</p>'
+                   :'<p class="m-sub"><strong>One thing left:</strong> <a onclick="app._afterAuth=null;openAuth(\'signup\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">create your account</a> with this same email so we can seat you.</p>')+
+      '<button class="btn btn-gold" onclick="closeModal()">Got it</button>');
+    if(document.querySelector('.view.on')&&document.querySelector('.view.on').getAttribute('data-view')==='you')renderYou();
+  };
+  if(!sbConfigured()){ finish(false); return; }
+  fetch(SUPABASE_URL+'/rest/v1/critic_applications',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+    body:JSON.stringify(body)})
+    .then(function(r){
+      if(r.ok){ finish(false); }
+      else if(r.status===409){ finish(true); }
+      else { toast('Could not submit — try again.'); }
+    })
+    .catch(function(){ toast('Network error — try again.'); });
+}
+/* live application status for the signed-in member (feeds the You page) */
+function loadMyApplication(){
+  if(!sbConfigured()||!app.userId||!(authSession&&authSession.access_token))return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/critic_applications?user_id=eq.'+encodeURIComponent(app.userId)+'&select=status',{headers:sbUserHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        var a=rows&&rows[0]; if(!a)return;
+        app.kitchenApp=a.status;
+        var on=document.querySelector('.view.on');
+        if(on&&on.getAttribute('data-view')==='you')renderYou();
+      }).catch(function(){});
+  }catch(e){}
 }
 /* the house rules — linked from the vote panel */
 function openGuidelines(){
@@ -4121,7 +4170,9 @@ function renderTheaters(){
   var head='<div class="browse-head"><span class="eyebrow">Now playing</span>'+
     '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">In Theaters</h1>'+
     '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:60ch">New releases the culture is watching. Drop your location and grab showtimes and tickets near you.</p></div>'+
-    '<div class="st-field" style="max-width:440px;margin:2px 0 20px"><input id="theZip" placeholder="ZIP or city" aria-label="Your location" value="'+esc(app.zip||'')+'" onkeydown="if(event.key===\'Enter\')saveTheZip()"><button class="btn btn-gold" onclick="saveTheZip()">Set location</button></div>';
+    '<div class="st-field" style="max-width:440px;margin:2px 0 8px"><input id="theZip" placeholder="ZIP or city" aria-label="Your location" value="'+esc(app.zip||'')+'" onkeydown="if(event.key===\'Enter\')saveTheZip()"><button class="btn btn-gold" onclick="saveTheZip()">Set location</button></div>'+
+    '<p style="font-size:13px;margin:0 0 18px;color:'+(app.zip?'var(--herb-ink)':'var(--ink-3)')+'">'+
+      (app.zip?'✓ Showtimes set to <strong>'+esc(app.zip)+'</strong> — tap any title below.':'Set your ZIP or city once — every Showtimes button below uses it.')+'</p>';
   var body;
   if(!inTheaters.length){
     body='<div class="empty"><h3>No new releases loaded yet.</h3><p>Fresh theatrical titles will appear here as the catalog updates.</p></div>';
@@ -4141,7 +4192,7 @@ function theaterCard(f){
 }
 function saveTheZip(){
   var el=byId('theZip'), z=el?el.value.trim():'';
-  if(z){ app.zip=z; saveState(); toast('Location set to '+z+'. Tap any title for showtimes.'); }
+  if(z){ app.zip=z; saveState(); renderTheaters(); toast('Location set to '+z+'.'); }
   else { toast('Enter a ZIP or city.'); if(el)el.focus(); }
 }
 function renderVault(){
@@ -4221,7 +4272,34 @@ function renderYou(){
   }
   el.innerHTML='<div class="you-hero">'+av+'<div><h1>'+esc(app.name||'Your table')+'</h1><p class="you-sub">Signed in on this device. <a onclick="signOut()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Sign out</a></p></div></div>'+
     '<div class="you-stats"><div class="ys"><b>'+plateFilms.length+'</b><span>On My Plate</span></div><div class="ys"><b>'+voteIds.length+'</b><span>Films voted</span></div><div class="ys"><b>'+reads+'</b><span>Reads posted</span></div></div>'+
-    tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds);
+    kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds);
+}
+/* your standing with The Kitchen: seated / in review / invited to apply */
+function kitchenBlock(){
+  var inner;
+  if(app.isCritic){
+    inner='<b>You’re seated in the Kitchen'+(app.criticOutlet?' · '+esc(app.criticOutlet):'')+'.</b>'+
+      '<span>Open any film and use the “Your Kitchen review” box — your scores move the official number.</span>'+
+      '<button class="btn btn-gold btn-sm" onclick="go(\'browse\')">Review a film</button>';
+  } else if(app.kitchenApp==='received'||app.kitchenApp==='review'){
+    inner='<b>Your Kitchen application is in review.</b>'+
+      '<span>A human on the editorial team reads every application. We’ll reach out at '+esc(app.email||'your email')+' — once seated, a review box appears on every film page.</span>';
+  } else if(app.kitchenApp==='declined'){
+    inner='<b>Your Kitchen application wasn’t seated this round.</b>'+
+      '<span>Keep writing — you can reapply as your body of work grows.</span>'+
+      '<button class="btn btn-ghost btn-sm" onclick="openApplyKitchen()">Reapply</button>';
+  } else {
+    var appliedLocal=''; try{ appliedLocal=localStorage.getItem('ws_applied_kitchen')||''; }catch(e){}
+    if(appliedLocal){
+      inner='<b>Your Kitchen application is in.</b>'+
+        '<span>Submitted as '+esc(appliedLocal)+'. The editorial team reviews every application by hand and will reach out.</span>';
+    } else {
+      inner='<b>Write about film?</b>'+
+        '<span>The Kitchen is verified critics of the culture — application based, never bought. Your reviews would move the official score.</span>'+
+        '<button class="btn btn-ghost btn-sm" onclick="openApplyKitchen()">Apply to The Kitchen</button>';
+    }
+  }
+  return '<div class="panel" style="margin:14px 0;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><h3 style="font-size:16px">The Kitchen</h3>'+inner+'</div>';
 }
 
 /* ============ TASTE QUIZ ============ */
@@ -4373,7 +4451,7 @@ function authApply(session){
     app.name=meta.name||app.name||(session.user.email||'').split('@')[0];
     app.email=session.user.email||''; app.userId=session.user.id||'';
   }
-  saveState(); renderAuthSlot(); loadMyProfile();
+  saveState(); renderAuthSlot(); loadMyProfile(); loadMyApplication();
 }
 function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.email=''; app.userId=''; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
@@ -4426,7 +4504,24 @@ function doAuth(){
 function authWelcome(sess){
   authApply(normalizeSession(sess)); closeModal();
   toast(app.name?('Welcome to the table, '+app.name.split(' ')[0]+'.'):'Welcome to the table.');
-  if(app._afterAuth){var cb=app._afterAuth;app._afterAuth=null;cb();}
+  if(app._afterAuth){var cb=app._afterAuth;app._afterAuth=null;cb();return;}
+  var seen=false; try{ seen=localStorage.getItem('ws_welcomed')==='1'; }catch(e){}
+  if(!seen){ try{ localStorage.setItem('ws_welcomed','1'); }catch(e){} openWelcome(); }
+}
+/* first-signup orientation: three concrete next steps, not a dead end */
+function openWelcome(){
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>You’re at the table'+(app.name?', '+esc(app.name.split(' ')[0]):'')+'.</h2>'+
+    '<p class="m-sub">Three ways to start seasoning:</p>'+
+    '<ul class="tier-legend" style="gap:12px;font-size:14px;color:var(--ink-2);list-style:none">'+
+    '<li><b>Cast your first vote.</b> Open any film and call it — <em>It’s Seasoned</em> or <em>Send It Back</em>. Five votes give a film its first Table score.</li>'+
+    '<li><b>Rank the greats.</b> Push your Top Actors and Actresses up or down — every vote moves the board.</li>'+
+    '<li><b>Build My Plate.</b> Save what you’re watching next and take the taste quiz for picks made for you.</li>'+
+    '</ul>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+    '<button class="btn btn-gold" onclick="closeModal();go(\'browse\')">Start voting</button>'+
+    '<button class="btn btn-ghost" onclick="closeModal();go(\'ranked\')">See the rankings</button></div>'+
+    '<p class="m-alt">Write about film? <a onclick="openApplyKitchen()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Apply to The Kitchen</a>.</p>');
 }
 /* Restore a saved session on load; refresh it if it's expired. */
 function authRestore(){
@@ -4439,7 +4534,7 @@ function authRestore(){
   } else {
     authSession=s; app.signedIn=true;
     if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; app.userId=s.user.id||''; }
-    renderAuthSlot(); loadMyProfile();
+    renderAuthSlot(); loadMyProfile(); loadMyApplication();
   }
 }
 function initials(name){
