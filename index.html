@@ -529,6 +529,26 @@
   .rank-marks .cs-season .cs-lab{color:var(--gold-ink)}
   .rank-pending-note{color:var(--ink-3);font-size:13px;text-align:center;padding:6px 0 4px}
   @media(max-width:640px){ .rank-marks .cs:not(.cs-season){display:none} .rank-title{font-size:15px} .rank-num{font-size:22px;min-width:30px} }
+  /* rankings category tabs */
+  .rank-cats{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 14px;border-bottom:1px solid var(--line);padding-bottom:2px}
+  .rank-cat{background:none;border:none;border-bottom:3px solid transparent;padding:9px 4px;margin-bottom:-2px;font:inherit;font-size:15px;font-weight:800;color:var(--ink-3);cursor:pointer;letter-spacing:-.01em}
+  .rank-cat:hover{color:var(--ink-2)}
+  .rank-cat.on{color:var(--ink);border-bottom-color:var(--gold)}
+  /* people leaderboard */
+  .person-row{gap:14px}
+  .pl-av{width:58px;height:58px;border-radius:50%;flex:none;background-size:cover;background-position:center top;background-color:var(--inset);box-shadow:var(--shadow-1);border:2px solid var(--panel)}
+  .pl-av-init{display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:19px;color:var(--ink-3)}
+  .pl-net{display:inline-block;margin-top:3px;font-family:var(--mono);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+  .pl-net.pos{color:var(--herb-ink)} .pl-net.neg{color:var(--paprika-ink)} .pl-net.zero{color:var(--ink-3)}
+  .pl-net-lab{color:var(--ink-3);font-weight:500;font-size:11px}
+  .pl-vote{display:flex;flex-direction:column;gap:6px;flex:none}
+  .pl-arrow{width:44px;height:34px;display:grid;place-items:center;border-radius:9px;border:1.5px solid var(--line-strong);background:var(--panel);cursor:pointer;transition:transform .1s,background .15s,border-color .15s,color .15s}
+  .pl-arrow svg{width:18px;height:18px}
+  .pl-arrow:active{transform:scale(.9)}
+  .pl-arrow.up{color:var(--herb-ink)} .pl-arrow.down{color:var(--paprika-ink)}
+  .pl-arrow.up:hover,.pl-arrow.up.on{background:var(--herb);border-color:var(--herb);color:#fff}
+  .pl-arrow.down:hover,.pl-arrow.down.on{background:var(--paprika);border-color:var(--paprika);color:#fff}
+  @media(max-width:640px){ .pl-av{width:48px;height:48px} .pl-arrow{width:40px;height:32px} }
 
   /* ============ VAULT ============ */
   .collection{padding:22px 0 6px;border-top:1px solid var(--line)}
@@ -2904,13 +2924,13 @@ function cardPreviewOut(el){
 /* ============ STATE + PERSISTENCE ============ */
 /* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
    app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
     localStorage.setItem(STORE_KEY, JSON.stringify({
       signedIn:app.signedIn, name:app.name, email:app.email, userId:app.userId, plate:app.plate, taughtThis:app.taughtThis,
-      taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, comments:app.comments
+      taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, comments:app.comments, personVotes:app.personVotes
     }));
   }catch(e){/* storage unavailable — run in-memory */}
 }
@@ -2922,7 +2942,7 @@ function loadState(){
     app.signedIn=!!s.signedIn; app.name=s.name||''; app.email=s.email||''; app.userId=s.userId||''; app.plate=s.plate||[];
     app.taughtThis=!!s.taughtThis; app.taste=s.taste||null;
     app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{}};}
-    app.votes=s.votes||{}; app.tally=s.tally||{}; app.comments=s.comments||{};
+    app.votes=s.votes||{}; app.tally=s.tally||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{};
     // apply saved tallies onto the live film objects
     FILMS.forEach(function(f){ if(app.tally[f.id]){ f.votes.for=app.tally[f.id].for; f.votes.against=app.tally[f.id].against; } });
   }catch(e){/* corrupt — ignore */}
@@ -3942,9 +3962,16 @@ var VAULT=[
 /* Films ranked by the seasoning the culture votes them — the most seasoned first. */
 var RANK_BY='season';   // season | table | kitchen
 var RANK_N=100;         // chart depth: 10 | 50 | 100 | 0 (= all)
+var RANK_CAT='films';   // films | actor | actress
 function rankValue(f){ return RANK_BY==='table'?tableScore(f) : (RANK_BY==='kitchen'?f.k : overallScore(f)); }
 function setRankBy(v){ RANK_BY=v; renderRanked(); }
 function setRankN(n){ RANK_N=n; renderRanked(); }
+function setRankCat(c){ RANK_CAT=c; renderRanked(); }
+function rankTabs(){
+  return '<div class="rank-cats">'+[['films','Films'],['actor','Top Actors'],['actress','Top Actresses']].map(function(o){
+    return '<button class="rank-cat'+(RANK_CAT===o[0]?' on':'')+'" onclick="setRankCat(\''+o[0]+'\')">'+o[1]+'</button>';
+  }).join('')+'</div>';
+}
 function rankRow(f,rank){
   var os=overallScore(f), otk=overallTier(f), ts=tableScore(f);
   var votes=f.votes.for+f.votes.against;
@@ -3961,6 +3988,7 @@ function rankRow(f,rank){
     '</span></li>';
 }
 function renderRanked(){
+  if(RANK_CAT==='actor'||RANK_CAT==='actress'){ renderPeople(RANK_CAT); return; }
   var byLabel={season:'The Seasoning (overall)',table:'The Table (audience vote)',kitchen:'The Kitchen (critics)'}[RANK_BY];
   var list=FILMS.filter(function(f){ return !f.noart && scopeMatch(f); });
   var scored=list.filter(function(f){ return rankValue(f)!=null; });
@@ -3976,6 +4004,7 @@ function renderRanked(){
   var head='<div class="browse-head"><span class="eyebrow">Rated by the culture</span>'+
     '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">'+chartName+'</h1>'+
     '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:60ch">The most seasoned, as voted. Ranked by <strong>'+byLabel+'</strong> — the standings move as the culture votes.</p></div>'+
+    rankTabs()+
     '<div class="rank-toggle"><span class="flabel">Rank by</span>'+toggles+'<span class="flabel" style="margin-left:10px">Chart</span>'+depths+'</div>';
   var body;
   if(scored.length){
@@ -3989,6 +4018,89 @@ function renderRanked(){
   }
   byId('rankedContent').innerHTML=head+body;
   animateAura(byId('rankedContent'));
+}
+
+/* ============ TOP ACTORS / ACTRESSES — voted up/down by the culture ============ */
+var PEOPLE={actor:[],actress:[]};   // live standings from person_scores
+function pImg(pp){ return pp?'https://image.tmdb.org/t/p/w185'+pp:null; }
+/* sort by net desc; ties fall back to the seed so the board is stable pre-votes */
+function sortPeople(list){ return list.sort(function(a,b){ return (b.net-a.net) || (b.seed-a.seed); }); }
+function renderPeople(cat){
+  var title=cat==='actor'?'Top 50 Actors':'Top 50 Actresses';
+  var head='<div class="browse-head"><span class="eyebrow">Voted by the culture</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">'+title+'</h1>'+
+    '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:62ch">Push anyone up or down. Every vote moves the needle — the higher the pile, the harder they are to topple. The standings are cumulative and live.</p></div>'+
+    rankTabs();
+  var list=PEOPLE[cat]||[];
+  var body;
+  if(!list.length){
+    body='<div class="empty"><h3>Loading the culture’s picks…</h3><p>If this sticks, the backend just isn’t reachable yet.</p></div>';
+  } else {
+    sortPeople(list);
+    body='<ol class="rank-list people-list">'+list.slice(0,50).map(function(p,i){return personRow(p,i+1);}).join('')+'</ol>';
+  }
+  byId('rankedContent').innerHTML=head+body;
+  loadPeople(cat);   // refresh from backend
+}
+function personRow(p,rank){
+  var mine=app.personVotes[p.id];
+  var img=pImg(p.profile_path);
+  var av=img?'<span class="pl-av" style="background-image:url(\''+img+'\')"></span>'
+            :'<span class="pl-av pl-av-init">'+esc(initials(p.name))+'</span>';
+  var netCls=p.net>0?'pos':(p.net<0?'neg':'zero');
+  return '<li class="rank-row person-row" data-pid="'+p.id+'">'+
+    '<span class="rank-num">'+rank+'</span>'+av+
+    '<span class="rank-main"><span class="rank-title">'+esc(p.name)+'</span>'+
+      '<span class="pl-net '+netCls+'">'+(p.net>0?'+':'')+fmt(p.net)+' <span class="pl-net-lab">net</span></span></span>'+
+    '<span class="pl-vote">'+
+      '<button class="pl-arrow up'+(mine==='up'?' on':'')+'" aria-label="Vote up '+esc(p.name)+'" onclick="personVote('+p.id+',\'up\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>'+
+      '<button class="pl-arrow down'+(mine==='down'?' on':'')+'" aria-label="Vote down '+esc(p.name)+'" onclick="personVote('+p.id+',\'down\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button>'+
+    '</span></li>';
+}
+/* one up/down vote per device per person; pressing the same arrow again removes it */
+function personVote(pid,dir){
+  var cat=RANK_CAT, list=PEOPLE[cat]||[];
+  var p=list.filter(function(x){return x.id===pid;})[0]; if(!p)return;
+  var prev=app.personVotes[pid], remove=(prev===dir);
+  // optimistic net adjustment
+  if(prev==='up')p.net--; else if(prev==='down')p.net++;
+  if(!remove){ if(dir==='up')p.net++; else p.net--; }
+  if(remove){ delete app.personVotes[pid]; } else { app.personVotes[pid]=dir; }
+  saveState();
+  sortPeople(list);
+  renderPeopleList(cat);
+  syncPersonVote(pid,dir,remove);
+}
+function renderPeopleList(cat){
+  var ol=byId('rankedContent')?byId('rankedContent').querySelector('.people-list'):null;
+  if(!ol)return;
+  ol.innerHTML=(PEOPLE[cat]||[]).slice(0,50).map(function(p,i){return personRow(p,i+1);}).join('');
+}
+function syncPersonVote(pid,dir,remove){
+  if(!sbConfigured())return;
+  try{
+    if(remove){
+      fetch(SUPABASE_URL+'/rest/v1/person_votes?person_id=eq.'+pid+'&device_id=eq.'+encodeURIComponent(wsDevice()),
+        {method:'DELETE',headers:sbHeaders()}).catch(function(){});
+    } else {
+      fetch(SUPABASE_URL+'/rest/v1/person_votes?on_conflict=person_id,device_id',
+        {method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+         body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir})}).catch(function(){});
+    }
+  }catch(e){}
+}
+function loadPeople(cat){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/person_scores?category=eq.'+cat+'&select=id,name,category,profile_path,seed,net,ups,downs&order=net.desc,seed.desc&limit=50',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows)||!rows.length)return;
+        PEOPLE[cat]=rows;
+        if(RANK_CAT===cat){ var ol=byId('rankedContent')&&byId('rankedContent').querySelector('.people-list');
+          if(ol){ sortPeople(PEOPLE[cat]); renderPeopleList(cat); }
+          else renderPeople(cat); }
+      }).catch(function(){});
+  }catch(e){}
 }
 function renderVault(){
   var head='<button class="backbtn" onclick="go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
