@@ -787,7 +787,7 @@
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
     <span>Home · Browse · The Vault · Membership · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="openCurate()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span>
   </div>
-  <div class="wrap"><p class="fine">Pre-production build. Films, directors, cast, posters, trailers, runtimes, and where-to-watch are real (via TMDB). Scores start unscored and are earned by real votes and verified critics, not placeholders. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords and are not a precise scene-by-scene guide. The catalog is auto-seeded from TMDB and pending editorial curation. Your votes, watchlist, account, taste, and catalog choice are saved locally in this browser only. Where-to-watch links open each provider's search (and JustWatch for all options); showtimes rows are sample data until a live provider is connected, though the Fandango and Google links are real. A real product requires a film metadata feed, a showtimes provider, an accounts backend, and human moderation systems.</p></div>
+  <div class="wrap"><p class="fine">Pre-production build. Films, directors, cast, posters, trailers, runtimes, and where-to-watch are real (via TMDB). Scores start unscored and are earned by real votes and verified critics, not placeholders. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords and are not a precise scene-by-scene guide. The catalog is auto-seeded from TMDB and pending editorial curation. Accounts are real (email + password via Supabase Auth); your watchlist, taste, and catalog choice are saved on this device. Where-to-watch links open each provider's search (and JustWatch for all options); showtimes rows are sample data until a live provider is connected, though the Fandango and Google links are real. A real product still needs a film metadata feed, a showtimes provider, and human moderation systems.</p></div>
 </footer>
 
 <script>
@@ -2751,12 +2751,12 @@ function cardPreviewOut(el){
 /* ============ STATE + PERSISTENCE ============ */
 /* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
    app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
-var app={signedIn:false, name:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
     localStorage.setItem(STORE_KEY, JSON.stringify({
-      signedIn:app.signedIn, name:app.name, plate:app.plate, taughtThis:app.taughtThis,
+      signedIn:app.signedIn, name:app.name, email:app.email, userId:app.userId, plate:app.plate, taughtThis:app.taughtThis,
       taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, comments:app.comments
     }));
   }catch(e){/* storage unavailable — run in-memory */}
@@ -2766,7 +2766,7 @@ function loadState(){
   if(!raw)return;
   try{
     var s=JSON.parse(raw);
-    app.signedIn=!!s.signedIn; app.name=s.name||''; app.plate=s.plate||[];
+    app.signedIn=!!s.signedIn; app.name=s.name||''; app.email=s.email||''; app.userId=s.userId||''; app.plate=s.plate||[];
     app.taughtThis=!!s.taughtThis; app.taste=s.taste||null;
     app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{}};}
     app.votes=s.votes||{}; app.tally=s.tally||{}; app.comments=s.comments||{};
@@ -3664,18 +3664,88 @@ function openAuth(mode){
   var signup=mode==='signup';
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>'+(signup?'Join the table':'Welcome back')+'</h2><p class="m-sub">'+(signup?'Free to browse, vote, and comment.':'Sign in to pick up where you left off.')+'</p>'+
-    (signup?'<div class="field"><label for="auName">Name</label><input id="auName" placeholder="What should we call you"></div>':'')+
-    '<div class="field"><label for="auEmail">Email</label><input id="auEmail" type="email" placeholder="you@email.com"></div>'+
-    '<div class="field"><label for="auPass">Password</label><input id="auPass" type="password" placeholder="••••••••"></div>'+
-    '<button class="btn btn-gold" onclick="doAuth()">'+(signup?'Create account':'Sign in')+'</button>'+
+    (signup?'<div class="field"><label for="auName">Name</label><input id="auName" autocomplete="name" placeholder="What should we call you"></div>':'')+
+    '<div class="field"><label for="auEmail">Email</label><input id="auEmail" type="email" autocomplete="email" placeholder="you@email.com"></div>'+
+    '<div class="field"><label for="auPass">Password</label><input id="auPass" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" placeholder="••••••••" onkeydown="if(event.key===\'Enter\')doAuth()"></div>'+
+    '<button class="btn btn-gold" id="auBtn" onclick="doAuth()">'+(signup?'Create account':'Sign in')+'</button>'+
     '<p class="m-alt">'+(signup?'Already here? <a onclick="openAuth(\'signin\')">Sign in</a>':'New here? <a onclick="openAuth(\'signup\')">Create account</a>')+'</p>');
 }
+/* ============ AUTH — real Supabase email + password (GoTrue) ============ */
+/* Falls back to a local-only session when Supabase isn't configured, so the
+   site still works offline / before the backend is wired. */
+var AUTH_KEY='ws_auth_v1';
+var authSession=null;
+function authStore(s){ try{ if(s)localStorage.setItem(AUTH_KEY,JSON.stringify(s)); else localStorage.removeItem(AUTH_KEY); }catch(e){} }
+function authLoad(){ try{ return JSON.parse(localStorage.getItem(AUTH_KEY)||'null'); }catch(e){ return null; } }
+function normalizeSession(d){
+  if(!d||!d.access_token) return null;
+  var exp = d.expires_at ? d.expires_at*1000 : (Date.now()+((d.expires_in||3600)*1000));
+  return {access_token:d.access_token, refresh_token:d.refresh_token, expires_at:exp, user:d.user};
+}
+function authApply(session){
+  authSession=session; authStore(session);
+  if(session&&session.user){
+    var meta=session.user.user_metadata||{};
+    app.signedIn=true;
+    app.name=meta.name||app.name||(session.user.email||'').split('@')[0];
+    app.email=session.user.email||''; app.userId=session.user.id||'';
+  }
+  saveState(); renderAuthSlot();
+}
+function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.email=''; app.userId=''; saveState(); renderAuthSlot(); }
+function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
 function doAuth(){
-  var nameEl=byId('auName');
-  if(nameEl && nameEl.value.trim()) app.name=nameEl.value.trim();
-  app.signedIn=true; saveState(); closeModal(); renderAuthSlot();
-  toast(app.name?('Welcome to the table, '+app.name.split(' ')[0]+'.'):'Welcome to the table.');
-  if(app._afterAuth){var cb=app._afterAuth; app._afterAuth=null; cb();}
+  var signup=!!byId('auName');
+  var name=byId('auName')?byId('auName').value.trim():'';
+  var email=byId('auEmail')?byId('auEmail').value.trim():'';
+  var pass=byId('auPass')?byId('auPass').value:'';
+  // No backend configured → keep a local-only session so the UI still works.
+  if(!sbConfigured()){
+    if(name)app.name=name; app.signedIn=true; saveState(); closeModal(); renderAuthSlot();
+    toast('Signed in on this device (connect Supabase for real accounts).');
+    if(app._afterAuth){var cb0=app._afterAuth;app._afterAuth=null;cb0();}
+    return;
+  }
+  if(!email||email.indexOf('@')<1){ toast('Enter a valid email address.'); return; }
+  if(!pass||pass.length<6){ toast('Password needs at least 6 characters.'); return; }
+  authBusy(true);
+  var url=SUPABASE_URL+(signup?'/auth/v1/signup':'/auth/v1/token?grant_type=password');
+  var body=signup?{email:email,password:pass,data:{name:name}}:{email:email,password:pass};
+  fetch(url,{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify(body)})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      authBusy(false);
+      var d=res.d||{};
+      if(!res.ok){
+        toast(d.msg||d.error_description||d.error||d.message||'Could not sign you in. Check your details.');
+        return;
+      }
+      var sess = d.access_token ? d : (d.session&&d.session.access_token ? d.session : null);
+      if(sess){
+        authApply(normalizeSession(sess)); closeModal();
+        toast(app.name?('Welcome to the table, '+app.name.split(' ')[0]+'.'):'Welcome to the table.');
+        if(app._afterAuth){var cb=app._afterAuth;app._afterAuth=null;cb();}
+        return;
+      }
+      // Signup with email confirmation on: user created, no session until they confirm.
+      if(signup && (d.id||d.user)){ closeModal(); toast('Account created — check your email to confirm, then sign in.'); return; }
+      toast('Something went wrong. Try again.');
+    })
+    .catch(function(){ authBusy(false); toast('Network error — try again.'); });
+}
+/* Restore a saved session on load; refresh it if it's expired. */
+function authRestore(){
+  var s=authLoad(); if(!s){ return; }
+  if(s.expires_at && s.expires_at < Date.now()+60000 && sbConfigured() && s.refresh_token){
+    fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({refresh_token:s.refresh_token})})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ if(d&&d.access_token)authApply(normalizeSession(d)); else authClearLocal(); })
+      .catch(function(){ authSession=s; app.signedIn=true; renderAuthSlot(); });
+  } else {
+    authSession=s; app.signedIn=true;
+    if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; app.userId=s.user.id||''; }
+    renderAuthSlot();
+  }
 }
 function initials(name){
   if(!name) return 'YT';
@@ -3687,7 +3757,12 @@ function renderAuthSlot(){
     ? '<div class="avatar" role="button" tabindex="0" aria-label="Your account, open You page" onclick="go(\'you\')" onkeydown="if(event.key===\'Enter\')go(\'you\')">'+initials(app.name)+'</div>'
     : '<button class="btn btn-ghost btn-sm" onclick="openAuth(\'signin\')">Sign in</button><button class="btn btn-gold btn-sm" onclick="openAuth(\'signup\')" style="margin-left:8px">Join</button>';
 }
-function signOut(){app.signedIn=false;saveState();renderAuthSlot();go('home');toast('Signed out. Your saves are kept on this device.');}
+function signOut(){
+  if(sbConfigured() && authSession && authSession.access_token){
+    fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Authorization':'Bearer '+authSession.access_token})}).catch(function(){});
+  }
+  authClearLocal(); go('home'); toast('Signed out. Your saves are kept on this device.');
+}
 
 /* ============ MY PLATE (funnel gate) ============ */
 function savePlate(id){
@@ -3732,7 +3807,7 @@ function forgetTmdbKey(){
 /* ============ INIT ============ */
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
-renderHome(); renderAuthSlot(); hydrateFromTMDB();
+renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore();
 /* open whatever the URL points at (deep link / refresh / back button) */
 var _route0=parseHash(); render(_route0.view,_route0.arg);
 /* bring the catalog to life from the backend when configured */
