@@ -324,6 +324,40 @@
   .film-poster .fp-play{position:absolute;top:14px;right:14px;z-index:3;width:42px;height:42px;border-radius:50%;background:rgba(20,14,8,.6);border:1px solid rgba(255,255,255,.35);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(3px)}
   .film-info h1{font-size:clamp(30px,4.4vw,46px)}
   .film-info .meta{color:var(--ink-2);font-size:15px;margin-top:6px}
+  /* ===== FILM ROOM (cinematic backdrop hero) ===== */
+  .film-room{margin-top:6px}
+  .room-backdrop{position:relative;border-radius:var(--r-xl);overflow:hidden;min-height:360px;display:flex;align-items:flex-end;background:var(--jewel);box-shadow:var(--shadow-3)}
+  .room-backdrop.noart{background:repeating-linear-gradient(135deg,var(--inset),var(--inset) 12px,var(--deep) 12px,var(--deep) 24px)}
+  .room-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,12,4,.12) 0,rgba(20,12,4,.5) 52%,rgba(12,7,2,.92) 100%),linear-gradient(90deg,rgba(12,7,2,.62) 0,rgba(12,7,2,0) 62%)}
+  .room-hero{position:relative;z-index:2;display:flex;gap:26px;align-items:flex-end;padding:30px;width:100%}
+  .room-poster{width:158px;flex:none;aspect-ratio:2/3;border-radius:var(--r-lg);overflow:hidden;position:relative;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-3);border:1px solid rgba(0,0,0,.2)}
+  .room-poster .fp-play{position:absolute;top:10px;right:10px;z-index:3;width:38px;height:38px;border-radius:50%;background:rgba(20,14,8,.62);border:1px solid rgba(255,255,255,.35);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(3px)}
+  .room-lead{flex:1;min-width:0;color:var(--on-dark);padding-bottom:4px}
+  .room-lead h1{font-size:clamp(28px,4.6vw,50px);color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.55)}
+  .room-meta{color:rgba(246,236,215,.85);font-size:14.5px;margin-top:8px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+  .room-meta strong{color:var(--gold-soft)}
+  .room-where{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:15px}
+  .room-where .where-lab{color:rgba(246,236,215,.72)}
+  .room-where .svc-all,.room-where .svc-show{cursor:pointer;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.12);color:#fff}
+  .room-where .svc-all:hover,.room-where .svc-show:hover{background:rgba(255,255,255,.2)}
+  .film-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+  .btn-ghost.light{border-color:rgba(255,255,255,.42);color:#fff;background:rgba(255,255,255,.08)}
+  .btn-ghost.light:hover{border-color:var(--gold-soft);color:var(--gold-soft)}
+  .film-room .film-verdict{margin-top:20px}
+  .film-room .film-syn{max-width:74ch;margin-top:4px}
+  /* ===== CAST & CREW ===== */
+  .castcrew{margin:24px 0 8px}
+  .cc-h{font-size:18px;margin-bottom:13px}
+  .cast-rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity}
+  .cast-rail::-webkit-scrollbar{height:7px}.cast-rail::-webkit-scrollbar-thumb{background:var(--deep);border-radius:99px}
+  .cast-card{flex:none;width:96px;display:flex;flex-direction:column;align-items:center;text-align:center;scroll-snap-align:start}
+  .cast-av{width:80px;height:80px;border-radius:50%;background-size:cover;background-position:center top;background-color:var(--inset);box-shadow:var(--shadow-1);border:2px solid var(--panel)}
+  .cast-av-init{display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:25px;color:var(--ink-3)}
+  .cast-lead .cast-av{border-color:var(--gold)}
+  .cast-name{font-size:12.5px;font-weight:700;margin-top:9px;line-height:1.2}
+  .cast-role{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .cast-lead .cast-role{color:var(--gold-ink);font-weight:700}
+  @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
   .film-verdict{display:flex;gap:22px;align-items:center;margin:22px 0 18px;flex-wrap:wrap}
   .verdict-lg{display:flex;align-items:center;gap:14px;background:linear-gradient(155deg,var(--jewel-2),var(--jewel));border:1px solid rgba(228,155,11,.24);border-radius:var(--r-lg);padding:15px 20px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,235,190,.08)}
   .verdict-lg .vl-num{font-weight:900;font-size:44px;line-height:.9;font-variant-numeric:tabular-nums}
@@ -2754,6 +2788,65 @@ function hydrateFromTMDB(){
   });
 }
 
+/* ============ FILM ROOM: backdrop + cast/crew (TMDB, lazy per film) ============ */
+var MEDIA_CACHE_KEY='ws_media_v1';
+function loadMediaCache(){ try{return JSON.parse(localStorage.getItem(MEDIA_CACHE_KEY)||'{}');}catch(e){return {};} }
+function saveMediaCache(c){ try{localStorage.setItem(MEDIA_CACHE_KEY,JSON.stringify(c));}catch(e){} }
+function applyMedia(f,m){
+  if(!m)return;
+  if(m.b) f.backdrop='https://image.tmdb.org/t/p/w1280'+m.b;
+  if(m.dp) f.dirPhoto='https://image.tmdb.org/t/p/w185'+m.dp;
+  if(m.cast&&m.cast.length) f.castFull=m.cast.map(function(c){ return {name:c.n,character:c.c,profile:c.p?'https://image.tmdb.org/t/p/w185'+c.p:null}; });
+}
+/* the hero background: real TMDB backdrop if we have it, else the designed gradient */
+function roomBg(f){
+  if(f.noart) return '';
+  if(f.backdrop) return "background-image:url('"+f.backdrop+"');background-size:cover;background-position:center 22%";
+  return 'background:'+f.grad;
+}
+function castAvatar(name,photo){
+  return photo
+    ? '<span class="cast-av" style="background-image:url(\''+photo+'\')"></span>'
+    : '<span class="cast-av cast-av-init">'+esc(initials(name))+'</span>';
+}
+/* the actors + directors list — a Fandango-style headshot rail */
+function castCrewHTML(f){
+  var people=[];
+  if(f.dir&&f.dir!=='—') people.push({name:f.dir,role:(f.type==='tv'?'Creator':'Director'),photo:f.dirPhoto||null,lead:true});
+  if(f.castFull&&f.castFull.length){
+    f.castFull.forEach(function(c){ people.push({name:c.name,role:c.character||'Cast',photo:c.profile}); });
+  } else if(f.cast&&f.cast.length){
+    f.cast.forEach(function(n){ people.push({name:n,role:'Cast',photo:null}); });
+  }
+  if(!people.length) return '';
+  var cards=people.map(function(p){
+    return '<div class="cast-card'+(p.lead?' cast-lead':'')+'">'+castAvatar(p.name,p.photo)+
+      '<span class="cast-name">'+esc(p.name)+'</span>'+
+      '<span class="cast-role">'+esc(p.role)+'</span></div>';
+  }).join('');
+  return '<section class="castcrew" id="castSection"><h3 class="cc-h">Cast &amp; Crew</h3><div class="cast-rail">'+cards+'</div></section>';
+}
+/* fetch backdrop + top-billed cast (with headshots) for one film. key required; cached. */
+function hydrateFilmMedia(f){
+  var cache=loadMediaCache();
+  if(cache[f.id]){ applyMedia(f,cache[f.id]); return Promise.resolve(false); }
+  if(!TMDB_KEY||f.noart) return Promise.resolve(false);
+  return fetch('https://api.themoviedb.org/3/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&year='+f.year)
+    .then(function(r){return r.json();})
+    .then(function(d){ var hit=d&&d.results&&d.results[0]; if(!hit)return null;
+      var m={b:hit.backdrop_path||null};
+      return fetch('https://api.themoviedb.org/3/movie/'+hit.id+'/credits?api_key='+TMDB_KEY)
+        .then(function(r){return r.json();})
+        .then(function(cr){
+          if(cr&&cr.cast) m.cast=cr.cast.slice(0,12).map(function(c){ return {n:c.name,c:c.character,p:c.profile_path}; });
+          if(cr&&cr.crew){ var dir=cr.crew.filter(function(c){return c.job==='Director';})[0]; if(dir&&dir.profile_path)m.dp=dir.profile_path; }
+          return m;
+        }).catch(function(){ return m; });
+    })
+    .then(function(m){ if(!m)return false; cache[f.id]=m; saveMediaCache(cache); applyMedia(f,m); return true; })
+    .catch(function(){ return false; });
+}
+
 /* ============ HELPERS ============ */
 function tier(n){ if(n==null)return'pending'; if(n>=85)return'certified'; if(n>=70)return'well'; if(n>=55)return'light'; return'bland';}
 function tierName(n){return tierLabelKey(tier(n));}
@@ -3026,9 +3119,7 @@ function cardPeppers(f){
 function renderFilm(id){
   var f=find(id); if(!f){go('home');return;}
   var ts=tableScore(f), isCert=certified(f), split=Math.abs(f.k-ts);
-  var credits = (f.cast&&f.cast.length)
-    ? '<div class="credits"><div class="cr-row"><b>Director</b>&nbsp;&nbsp;<span class="cr-name">'+esc(f.dir)+'</span></div><div class="cr-row"><b>Starring</b>&nbsp;&nbsp;'+f.cast.map(esc).join(', ')+'</div></div>'
-    : '';
+  applyMedia(f, loadMediaCache()[f.id]);   // paint cached backdrop/cast on first render
   var reviews=f.reviews.map(function(r){
     return '<div class="review"><div class="rv-top"><span class="rv-crit" onclick="go(\'critic\',\''+r.c+'\')" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'critic\',\''+r.c+'\')">'+esc(r.c)+'</span>'+
       (r.v?'<span class="rv-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1C6B41" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>':'')+
@@ -3044,28 +3135,34 @@ function renderFilm(id){
 
   byId('filmContent').innerHTML=
     '<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
-    '<div class="film-hero">'+
-      '<div class="film-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+
-        (f.trailer?'<button class="fp-play" aria-label="Play trailer" onclick="openTrailer(\''+f.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>':'')+
-        posterInner(f,'p-ttl')+'</div>'+
-      '<div class="film-info">'+
-        '<h1>'+esc(f.title)+'</h1>'+
-        '<div class="meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+f.genre+(f.type==='tv'?' &nbsp;·&nbsp; <strong style="color:var(--gold-ink)">Series</strong>':'')+'</div>'+
-        '<div class="film-verdict">'+
-          '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
-            '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
-          '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+((f.votes.for+f.votes.against)?fmt(f.votes.for+f.votes.against)+' voted':'Be the first')+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
-          '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
-          splitFlagHTML(f)+
+    '<div class="film-room">'+
+      '<div class="room-backdrop'+(f.noart?' noart':'')+'" id="roomBackdrop" style="'+roomBg(f)+'">'+
+        '<div class="room-scrim"></div>'+
+        '<div class="room-hero">'+
+          '<div class="room-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+
+            (f.trailer?'<button class="fp-play" aria-label="Play trailer" onclick="openTrailer(\''+f.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>':'')+
+            posterInner(f,'p-ttl')+'</div>'+
+          '<div class="room-lead">'+
+            '<h1>'+esc(f.title)+'</h1>'+
+            '<div class="room-meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+f.genre+(f.type==='tv'?' &nbsp;·&nbsp; <strong>Series</strong>':'')+'</div>'+
+            '<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
+              '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
+              (f.type!=='tv'?'<button class="svc svc-show" onclick="openShowtimes(\''+f.id+'\')">Showtimes</button>':'')+'</div>'+
+            '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="shareFilm(\''+f.id+'\')">Share</button></div>'+
+          '</div>'+
         '</div>'+
-        '<p class="film-syn">'+esc(f.syn)+'</p>'+
-        credits+pepperRow(f)+
-        '<div class="where-row"><span class="where-lab">Where to watch</span>'+where+
-          '<a class="btn btn-ink btn-sm" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
-          (f.type!=='tv'?'<button class="btn btn-ghost btn-sm" onclick="openShowtimes(\''+f.id+'\')">Find showtimes</button>':'')+'</div>'+
-        '<div class="tag-row">'+tags+'</div>'+
-        '<div class="film-actions">'+(f.trailer?'<button class="btn btn-ink" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn '+(f.trailer?'btn-ghost':'btn-ink')+'" onclick="savePlate(\''+f.id+'\')">＋ Add to My Plate</button><button class="btn btn-ghost" onclick="shareFilm(\''+f.id+'\')">Share</button></div>'+
       '</div>'+
+      '<div class="film-verdict">'+
+        '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
+          '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
+        '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+((f.votes.for+f.votes.against)?fmt(f.votes.for+f.votes.against)+' voted':'Be the first')+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
+        '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
+        splitFlagHTML(f)+
+      '</div>'+
+      '<p class="film-syn">'+esc(f.syn)+'</p>'+
+      pepperRow(f)+
+      castCrewHTML(f)+
+      '<div class="tag-row">'+tags+'</div>'+
     '</div>'+
     '<div class="detail-cols">'+
       '<div class="panel"><h3>The Kitchen</h3><p class="p-sub">Verified critics of the culture. These reviews move the official score.</p>'+(reviews||'<p class="empty-note">The Kitchen is being seated. Verified critic reviews are on the way — the culture writes them.</p>')+'</div>'+
@@ -3084,6 +3181,13 @@ function renderFilm(id){
       '</div>'+
     '</div>';
   renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id);
+  hydrateFilmMedia(f).then(function(changed){
+    if(!changed)return;
+    var on=document.querySelector('.view.on');
+    if(!(on&&on.getAttribute('data-view')==='film'&&byId('roomBackdrop')))return;
+    byId('roomBackdrop').setAttribute('style',roomBg(f));
+    var cs=byId('castSection'); if(cs) cs.outerHTML=castCrewHTML(f);
+  });
   setDocMeta(f.title+' ('+f.year+') — Well Seasoned',
     'The Kitchen and The Table weigh in on '+f.title+'. '+(f.syn||'').slice(0,140),
     '#/film/'+encodeURIComponent(f.id));
@@ -3143,10 +3247,11 @@ function restoreVoteUI(f){
    (Supabase) are merged in by loadBackendComments() when configured. */
 function ensureComments(f){ if(!f._comments){ f._comments=(app.comments[f.id]||[]).slice(); } }
 function renderVotes(f){
-  var total=f.votes.for+f.votes.against, pf=Math.round(f.votes.for/total*100);
+  var total=f.votes.for+f.votes.against, pf=total?Math.round(f.votes.for/total*100):0;
   byId('forNum').textContent=fmt(f.votes.for); byId('againstNum').textContent=fmt(f.votes.against);
-  byId('sbFor').style.width=pf+'%'; byId('sbAgainst').style.width=(100-pf)+'%';
-  byId('pctFor').textContent=pf+'% seasoned'; byId('totalVotes').textContent=fmt(total)+' votes';
+  byId('sbFor').style.width=pf+'%'; byId('sbAgainst').style.width=(total?100-pf:0)+'%';
+  byId('pctFor').textContent=total?(pf+'% seasoned'):'Be the first to weigh in';
+  byId('totalVotes').textContent=total?(fmt(total)+' vote'+(total===1?'':'s')):'';
 }
 /* Shared vote math. One vote per film on this device: casting the same side again is a no-op,
    casting the other side switches it. True one-person-per-film comes with accounts in the backend. */
