@@ -3957,17 +3957,29 @@ function doAuth(){
         return;
       }
       var sess = d.access_token ? d : (d.session&&d.session.access_token ? d.session : null);
-      if(sess){
-        authApply(normalizeSession(sess)); closeModal();
-        toast(app.name?('Welcome to the table, '+app.name.split(' ')[0]+'.'):'Welcome to the table.');
-        if(app._afterAuth){var cb=app._afterAuth;app._afterAuth=null;cb();}
+      if(sess){ authWelcome(sess); return; }
+      // Signup returned no session. Try to sign in immediately — this succeeds the
+      // moment email confirmation is off / auto-confirm is set, so nobody is stranded
+      // waiting on a confirmation email. Falls back to the confirm-your-email message.
+      if(signup && (d.id||d.user)){
+        fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({email:email,password:pass})})
+          .then(function(r){ return r.json().then(function(dd){ return {ok:r.ok,d:dd}; }); })
+          .then(function(r2){
+            if(r2.ok && r2.d && r2.d.access_token){ authWelcome(r2.d); }
+            else { closeModal(); toast('Account created — check your email to confirm, then sign in.'); }
+          })
+          .catch(function(){ closeModal(); toast('Account created. Try signing in.'); });
         return;
       }
-      // Signup with email confirmation on: user created, no session until they confirm.
-      if(signup && (d.id||d.user)){ closeModal(); toast('Account created — check your email to confirm, then sign in.'); return; }
       toast('Something went wrong. Try again.');
     })
     .catch(function(){ authBusy(false); toast('Network error — try again.'); });
+}
+/* apply a session, close the modal, greet, and run any pending post-auth action */
+function authWelcome(sess){
+  authApply(normalizeSession(sess)); closeModal();
+  toast(app.name?('Welcome to the table, '+app.name.split(' ')[0]+'.'):'Welcome to the table.');
+  if(app._afterAuth){var cb=app._afterAuth;app._afterAuth=null;cb();}
 }
 /* Restore a saved session on load; refresh it if it's expired. */
 function authRestore(){
