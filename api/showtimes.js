@@ -1,0 +1,44 @@
+// Live showtimes proxy (Vercel serverless function).
+// The site calls /api/showtimes?q=<title>&location=<zip-or-city>; this fetches
+// Google showtimes via SerpApi and returns a trimmed payload. The SerpApi key
+// stays server-side: set SERPAPI_KEY in Vercel → Project → Settings →
+// Environment Variables, then redeploy. Without the key this returns 501 and
+// the site falls back to sample rows + live Fandango/Google links.
+export default async function handler(req, res) {
+  const key = process.env.SERPAPI_KEY;
+  const { q, location } = req.query || {};
+  if (!key) return res.status(501).json({ error: 'not_configured' });
+  if (!q || !location) return res.status(400).json({ error: 'missing_params' });
+
+  try {
+    const url =
+      'https://serpapi.com/search.json?engine=google&google_domain=google.com&hl=en&gl=us' +
+      '&q=' + encodeURIComponent(q + ' theater showtimes') +
+      '&location=' + encodeURIComponent(String(location) + ', United States') +
+      '&api_key=' + key;
+    const r = await fetch(url);
+    if (!r.ok) return res.status(502).json({ error: 'provider_error' });
+    const data = await r.json();
+
+    // Trim to what the UI needs: days -> theaters -> times
+    const days = (data.showtimes || []).slice(0, 2).map((d) => ({
+      day: d.day || '',
+      date: d.date || '',
+      theaters: (d.theaters || []).slice(0, 8).map((t) => ({
+        name: t.name || '',
+        address: t.address || '',
+        distance: t.distance || '',
+        link: t.link || null,
+        showing: (t.showing || []).map((s) => ({
+          type: s.type || '',
+          times: s.time || [],
+        })),
+      })),
+    }));
+
+    res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800');
+    return res.status(200).json({ days });
+  } catch (e) {
+    return res.status(502).json({ error: 'provider_error' });
+  }
+}
