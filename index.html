@@ -2592,11 +2592,12 @@ function applyMeta(){
     if(!f.scope){f.scope='ours';}
     if(!f.type){f.type='movie';}
     if(TUBI_IDS.indexOf(f.id)>=0 && f.where.indexOf('Tubi')<0){ f.where=f.where.concat(['Tubi']); }
-    // The Kitchen (score + reviews) is editorial and ships authored; backend
-    // curation can override per film. The Table is earned live — seeded vote
-    // tallies are always wiped so audience numbers only ever come from real votes.
-    f.k=(typeof f.k==='number')?f.k:null; f.reviews=f.reviews||[];
-    f.t=null; f.votes={for:0,against:0};
+    // Nothing fake, ever. The Kitchen stays unscored until real verified
+    // critics review (scores can be set via backend curation when they do).
+    // The Table is earned live — seeded tallies are wiped so audience numbers
+    // only ever come from real votes. The illustrative reviews in the data are
+    // never shown; the review panel reads "The Kitchen is being seated."
+    f.k=null; f.t=null; f.votes={for:0,against:0}; f.reviews=[];
     var sp=WS_SPICE[f.id]; f.spice = sp?{l:sp[0],v:sp[1],s:sp[2],cert:sp[3]}:null;
   });
 }
