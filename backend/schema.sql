@@ -233,3 +233,71 @@ grant usage, select on all sequences in schema public to anon, authenticated;
 --   create policy votes_update on public.votes for update
 --     using (user_id = auth.uid()) with check (stance in ('for','against'));
 -- ============================================================
+
+-- ============================================================
+-- CRITIC PIPELINE — real verified critics ARE the Kitchen
+-- (applied to the live project as migrations critic_pipeline +
+--  fix_verify_critic_rowcount; kept here for parity)
+-- ============================================================
+alter table public.profiles add column if not exists is_critic boolean not null default false;
+alter table public.profiles add column if not exists critic_outlet text;
+alter table public.profiles add column if not exists critic_bio text;
+
+drop policy if exists profiles_critics_public on public.profiles;
+create policy profiles_critics_public on public.profiles for select using (is_critic = true);
+grant select on public.profiles to anon;
+
+create table if not exists public.critic_reviews (
+  id         bigint generated always as identity primary key,
+  film_slug  text not null,
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  score      int not null check (score between 0 and 100),
+  body       text check (body is null or char_length(body) <= 2000),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (film_slug, user_id)
+);
+create index if not exists critic_reviews_film_idx on public.critic_reviews (film_slug, created_at desc);
+
+drop trigger if exists critic_reviews_touch on public.critic_reviews;
+create trigger critic_reviews_touch before update on public.critic_reviews
+  for each row execute function public.touch_updated_at();
+
+alter table public.critic_reviews enable row level security;
+drop policy if exists cr_read   on public.critic_reviews;
+drop policy if exists cr_insert on public.critic_reviews;
+drop policy if exists cr_update on public.critic_reviews;
+create policy cr_read on public.critic_reviews for select
+  using (exists (select 1 from public.profiles p where p.id = user_id and p.is_critic));
+create policy cr_insert on public.critic_reviews for insert
+  with check (auth.uid() = user_id
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_critic));
+create policy cr_update on public.critic_reviews for update
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+grant select on public.critic_reviews to anon, authenticated;
+grant insert, update on public.critic_reviews to authenticated;
+
+create or replace view public.kitchen_scores
+with (security_invoker = true) as
+  select film_slug, round(avg(score))::int as k, count(*)::int as critics
+  from public.critic_reviews
+  group by film_slug;
+grant select on public.kitchen_scores to anon, authenticated;
+
+create or replace function public.verify_critic(p_secret text, p_email text, p_outlet text default null, p_on boolean default true)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare expected text; n int;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if expected is null or p_secret is distinct from expected then
+    raise exception 'unauthorized';
+  end if;
+  update public.profiles
+    set is_critic = p_on, critic_outlet = coalesce(p_outlet, critic_outlet)
+    where lower(email) = lower(p_email);
+  get diagnostics n = row_count;
+  return n > 0;
+end $$;
+revoke all on function public.verify_critic(text, text, text, boolean) from public;
+grant execute on function public.verify_critic(text, text, text, boolean) to anon, authenticated;

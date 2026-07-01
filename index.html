@@ -3137,7 +3137,7 @@ function curToggleClassic(id){ var f=find(id); app.curation.classic[id]=!isClass
 function openCurate(){
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Curate the shelves</h2><p class="m-sub">Move titles between Our Films and All Films, feature them on home, or hide them. Saved on this device — <strong>Publish to backend</strong> pushes your choices live for everyone (needs the admin passphrase from backend/schema.sql).</p>'+
-    '<div class="cur-tools"><input id="curSearch" placeholder="Search titles…" oninput="renderCurList(this.value)"><button class="btn btn-gold btn-sm" onclick="publishCuration()">Publish to backend</button><button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
+    '<div class="cur-tools"><input id="curSearch" placeholder="Search titles…" oninput="renderCurList(this.value)"><button class="btn btn-gold btn-sm" onclick="publishCuration()">Publish to backend</button><button class="btn btn-ghost btn-sm" onclick="seatCritic()">Seat a critic</button><button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
     '<div class="cur-list" id="curList"></div>');
   byId('modal').classList.add('wide');
   renderCurList('');
@@ -3260,11 +3260,18 @@ function renderFilm(id){
   var ts=tableScore(f), isCert=certified(f), split=Math.abs(f.k-ts);
   applyMedia(f, loadMediaCache()[f.id]);   // paint cached backdrop/cast on first render
   var reviews=f.reviews.map(function(r){
-    return '<div class="review"><div class="rv-top"><span class="rv-crit" onclick="go(\'critic\',\''+r.c+'\')" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'critic\',\''+r.c+'\')">'+esc(r.c)+'</span>'+
+    return '<div class="review"><div class="rv-top"><span class="rv-crit">'+esc(r.c)+'</span>'+
       (r.v?'<span class="rv-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1C6B41" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>':'')+
       '<span class="rv-out">'+esc(r.o)+'</span><span class="pill '+tier(r.s)+'" style="margin-left:auto;padding:4px 8px;font-size:13px">'+r.s+'</span></div>'+
-      '<p>&ldquo;'+esc(r.q)+'&rdquo;</p></div>';
+      (r.q?'<p>&ldquo;'+esc(r.q)+'&rdquo;</p>':'')+'</div>';
   }).join('');
+  var myRev=(app.userId&&f.reviews.filter(function(r){return r.uid===app.userId;})[0])||null;
+  var criticForm=app.isCritic
+    ? '<div class="cbox" style="margin-top:14px"><div style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);margin-bottom:8px">Your Kitchen review'+(app.criticOutlet?' · '+esc(app.criticOutlet):'')+'</div>'+
+      '<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><input id="crScore" type="number" min="0" max="100" inputmode="numeric" placeholder="0–100" value="'+(myRev?myRev.s:'')+'" style="width:100px;background:var(--paper);border:1px solid var(--line-strong);border-radius:8px;padding:9px 10px;font:inherit;font-weight:800;font-size:16px;outline:none" aria-label="Your score"><span style="font-size:12.5px;color:var(--ink-3)">Your score, 0–100</span></div>'+
+      '<textarea id="crBody" placeholder="Your pull quote (optional)" aria-label="Your review">'+(myRev?esc(myRev.q):'')+'</textarea>'+
+      '<div class="cbox-row"><span class="cbox-hint">Publishes under your name and moves the official Kitchen score.</span><button class="btn btn-gold btn-sm" onclick="submitCriticReview(\''+f.id+'\')">'+(myRev?'Update review':'Publish review')+'</button></div></div>'
+    : '';
   var where=f.where.map(function(w){
     var cl=w==='Tubi'?' svc-free':(w==='Rent'?' svc-rent':'');
     var lab=w==='Tubi'?'Tubi · Free':(w==='Rent'?'Rent or buy':w);
@@ -3304,7 +3311,7 @@ function renderFilm(id){
       '<div class="tag-row">'+tags+'</div>'+
     '</div>'+
     '<div class="detail-cols">'+
-      '<div class="panel"><h3>The Kitchen</h3><p class="p-sub">Verified critics of the culture. These reviews move the official score.</p>'+(reviews||'<p class="empty-note">The Kitchen is being seated. Verified critic reviews are on the way — the culture writes them.</p>')+'</div>'+
+      '<div class="panel"><h3>The Kitchen</h3><p class="p-sub">Verified critics of the culture. These reviews move the official score.</p>'+(reviews||'<p class="empty-note">The Kitchen is being seated. Verified critic reviews are on the way — the culture writes them.</p>')+criticForm+'</div>'+
       '<div class="panel" id="votePanel"><h3>The Table</h3><p class="p-sub">The People\u2019s Cut. Did it earn a seat at the table?</p>'+
         '<div class="vote-btns"><button class="vbtn for" id="btnFor" onclick="castVote(\''+f.id+'\',\'for\')">It\u2019s Seasoned</button>'+
         '<button class="vbtn against" id="btnAgainst" onclick="castVote(\''+f.id+'\',\'against\')">Send It Back</button></div>'+
@@ -3319,7 +3326,7 @@ function renderFilm(id){
         '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'+
       '</div>'+
     '</div>';
-  renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id);
+  renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id);
   hydrateFilmMedia(f).then(function(changed){
     if(!changed)return;
     var on=document.querySelector('.view.on');
@@ -3433,6 +3440,84 @@ function loadBackendVotes(slug){
 /* ============ BACKEND: shared votes, reads, curation ============ */
 function sbConfigured(){ return !!(SUPABASE_URL&&SUPABASE_KEY); }
 function sbHeaders(extra){ var h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}; if(extra)for(var k in extra)h[k]=extra[k]; return h; }
+/* authenticated variant: the signed-in member's token so RLS sees auth.uid() */
+function sbUserHeaders(extra){ var h=sbHeaders(extra); if(authSession&&authSession.access_token)h['Authorization']='Bearer '+authSession.access_token; return h; }
+
+/* ============ THE KITCHEN: real verified-critic reviews ============ */
+/* Kitchen score = live average of verified critic reviews (kitchen_scores view). */
+function loadKitchenScores(){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/kitchen_scores?select=film_slug,k,critics',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows)||!rows.length)return;
+        rows.forEach(function(r){ var f=find(r.film_slug); if(f){ f.k=r.k; f.kN=r.critics; } });
+        rerenderActive();
+      }).catch(function(){});
+  }catch(e){}
+}
+/* Pull the verified reviews for one film into the same shape the renderer uses. */
+function loadKitchenReviews(slug){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/critic_reviews?film_slug=eq.'+encodeURIComponent(slug)+'&select=score,body,user_id,profiles(name,critic_outlet)&order=created_at.desc',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows))return;
+        var f=find(slug); if(!f)return;
+        var prev=JSON.stringify(f.reviews||[]);
+        f.reviews=rows.map(function(r){
+          return {c:(r.profiles&&r.profiles.name)||'Verified critic', v:true,
+                  o:(r.profiles&&r.profiles.critic_outlet)||'The Kitchen',
+                  s:r.score, q:r.body||'', uid:r.user_id};
+        });
+        var on=document.querySelector('.view.on');
+        if(on&&on.getAttribute('data-view')==='film'&&JSON.stringify(f.reviews)!==prev) renderFilm(slug);
+      }).catch(function(){});
+  }catch(e){}
+}
+/* Am I a verified critic? Checked against my own profile after sign-in. */
+function loadMyProfile(){
+  if(!sbConfigured()||!app.userId||!(authSession&&authSession.access_token))return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+encodeURIComponent(app.userId)+'&select=is_critic,critic_outlet',{headers:sbUserHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        var p=rows&&rows[0]; if(!p)return;
+        var was=app.isCritic;
+        app.isCritic=!!p.is_critic; app.criticOutlet=p.critic_outlet||'';
+        if(app.isCritic!==was){ var r0=parseHash(); if(r0.view==='film')renderFilm(r0.arg); }
+      }).catch(function(){});
+  }catch(e){}
+}
+/* Publish or update this critic's review; RLS verifies critic status server-side. */
+function submitCriticReview(id){
+  var s=parseInt(byId('crScore')?byId('crScore').value:'',10);
+  if(!(s>=0&&s<=100)){ toast('Score the film 0–100 first.'); if(byId('crScore'))byId('crScore').focus(); return; }
+  if(!(authSession&&authSession.access_token)){ toast('Sign in to your critic account first.'); return; }
+  var q=byId('crBody')?byId('crBody').value.trim():'';
+  fetch(SUPABASE_URL+'/rest/v1/critic_reviews?on_conflict=film_slug,user_id',{
+    method:'POST',
+    headers:sbUserHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}),
+    body:JSON.stringify({film_slug:id,user_id:app.userId,score:s,body:q||null})})
+    .then(function(r){
+      if(r.ok){ toast('Published. Your score moves the Kitchen.'); loadKitchenScores(); loadKitchenReviews(id); }
+      else if(r.status===401){ toast('Session expired — sign in again.'); }
+      else { toast('Only seated critics can post to the Kitchen.'); }
+    })
+    .catch(function(){ toast('Network error — try again.'); });
+}
+/* Admin: seat (verify) a critic by account email. Gated by the admin passphrase. */
+function seatCritic(){
+  if(!sbConfigured()){ toast('Backend not configured.'); return; }
+  var email=window.prompt('Critic’s account email (they must join the site first):'); if(!email)return;
+  var outlet=window.prompt('Their outlet (optional, e.g. “The Marrow”):')||null;
+  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
+  if(!secret){ secret=window.prompt('Admin passphrase:')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({p_secret:secret,p_email:email,p_outlet:outlet})})
+    .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
+    .then(function(ok){ toast(ok?'Critic seated. Their reviews now move the Kitchen.':'No member with that email — they need to create an account first.'); })
+    .catch(function(){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){ } toast('Failed — check the passphrase.'); });
+}
 /* One batched pull of every film's live tally, so The Table score on grid cards
    matches the film page instead of showing stale seeds. */
 function loadAllBackendVotes(){
@@ -3478,7 +3563,10 @@ function reportBackend(id){
 function submitWaitlist(email,plan){
   if(!email||email.indexOf('@')<1){ toast('Enter a valid email.'); return false; }
   if(sbConfigured()){
-    try{ fetch(SUPABASE_URL+'/rest/v1/waitlist',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'resolution=ignore-duplicates'}),
+    // NOTE: no 'resolution=ignore-duplicates' — that Prefer header needs SELECT rights
+    // the write-only waitlist doesn't grant, so every insert 401'd silently. A duplicate
+    // email now just 409s, which is fine: they're already on the list.
+    try{ fetch(SUPABASE_URL+'/rest/v1/waitlist',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
       body:JSON.stringify({email:email,plan:plan||null})}).catch(function(){}); }catch(e){}
   }
   try{ localStorage.setItem('ws_waitlist',email); }catch(e){}
@@ -3853,8 +3941,10 @@ var VAULT=[
 /* ============ THE RANKINGS ============ */
 /* Films ranked by the seasoning the culture votes them — the most seasoned first. */
 var RANK_BY='season';   // season | table | kitchen
+var RANK_N=100;         // chart depth: 10 | 50 | 100 | 0 (= all)
 function rankValue(f){ return RANK_BY==='table'?tableScore(f) : (RANK_BY==='kitchen'?f.k : overallScore(f)); }
 function setRankBy(v){ RANK_BY=v; renderRanked(); }
+function setRankN(n){ RANK_N=n; renderRanked(); }
 function rankRow(f,rank){
   var os=overallScore(f), otk=overallTier(f), ts=tableScore(f);
   var votes=f.votes.for+f.votes.against;
@@ -3879,13 +3969,20 @@ function renderRanked(){
   var toggles=[['season','Seasoning'],['table','The Table'],['kitchen','The Kitchen']].map(function(o){
     return '<button class="chip'+(RANK_BY===o[0]?' on':'')+'" onclick="setRankBy(\''+o[0]+'\')">'+o[1]+'</button>';
   }).join('');
+  var depths=[[10,'Top 10'],[50,'Top 50'],[100,'Top 100'],[0,'All']].map(function(o){
+    return '<button class="chip'+(RANK_N===o[0]?' on':'')+'" onclick="setRankN('+o[0]+')">'+o[1]+'</button>';
+  }).join('');
+  var chartName=RANK_N?('The Top '+RANK_N):'The Rankings';
   var head='<div class="browse-head"><span class="eyebrow">Rated by the culture</span>'+
-    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">The Rankings</h1>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">'+chartName+'</h1>'+
     '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:60ch">The most seasoned, as voted. Ranked by <strong>'+byLabel+'</strong> — the standings move as the culture votes.</p></div>'+
-    '<div class="rank-toggle"><span class="flabel">Rank by</span>'+toggles+'</div>';
+    '<div class="rank-toggle"><span class="flabel">Rank by</span>'+toggles+'<span class="flabel" style="margin-left:10px">Chart</span>'+depths+'</div>';
   var body;
   if(scored.length){
-    body='<ol class="rank-list">'+scored.map(function(f,i){return rankRow(f,i+1);}).join('')+'</ol>'+
+    var capped=RANK_N?scored.slice(0,RANK_N):scored;
+    var below=scored.length-capped.length;
+    body='<ol class="rank-list">'+capped.map(function(f,i){return rankRow(f,i+1);}).join('')+'</ol>'+
+      (below>0?'<p class="rank-pending-note">'+fmt(below)+' more scored film'+(below===1?'':'s')+' sit below the Top '+RANK_N+'.</p>':'')+
       (pending.length?'<p class="rank-pending-note">'+fmt(pending.length)+' more film'+(pending.length===1?'':'s')+' awaiting votes — they join the rankings once the table weighs in.</p>':'');
   } else {
     body='<div class="empty"><h3>No films seasoned yet.</h3><p>The rankings fill in as the culture votes. Cast the first vote on any film and it climbs the board.</p><button class="btn btn-gold" onclick="go(\'browse\')">Start voting</button></div>';
@@ -4122,7 +4219,7 @@ function authApply(session){
     app.name=meta.name||app.name||(session.user.email||'').split('@')[0];
     app.email=session.user.email||''; app.userId=session.user.id||'';
   }
-  saveState(); renderAuthSlot();
+  saveState(); renderAuthSlot(); loadMyProfile();
 }
 function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.email=''; app.userId=''; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
@@ -4188,7 +4285,7 @@ function authRestore(){
   } else {
     authSession=s; app.signedIn=true;
     if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; app.userId=s.user.id||''; }
-    renderAuthSlot();
+    renderAuthSlot(); loadMyProfile();
   }
 }
 function initials(name){
@@ -4255,7 +4352,7 @@ renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); refreshAdminUI
 /* open whatever the URL points at (deep link / refresh / back button) */
 if(!checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
-loadBackendCuration(); loadAllBackendVotes();
+loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores();
 </script>
 </body>
 </html>
