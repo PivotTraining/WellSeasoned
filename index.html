@@ -3263,7 +3263,7 @@ function syncVote(slug,side){
     fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side})
+      body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:app.userId||null})
     }).catch(function(){});
   }catch(e){}
 }
@@ -3319,7 +3319,7 @@ function syncComment(slug,c){
   if(!sbConfigured())return;
   try{
     fetch(SUPABASE_URL+'/rest/v1/comments',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-      body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice()})}).catch(function(){});
+      body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice(),user_id:app.userId||null})}).catch(function(){});
   }catch(e){}
 }
 function reportBackend(id){
