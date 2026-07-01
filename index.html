@@ -335,6 +335,19 @@
   .verdict-lg.vl-overall{border-color:rgba(228,155,11,.5);box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,235,190,.14),0 0 0 1px rgba(228,155,11,.12)}
   .verdict-lg.vl-overall .vl-meta b{color:var(--gold-soft)}
   .verdict-lg .vl-await{color:rgba(246,236,215,.5);font-style:italic}
+  /* tier chip: the seasoning ranking a score earns (light-bg default) */
+  .tchip{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);white-space:nowrap}
+  .tchip.sr-certified{color:var(--gold-ink);border-color:rgba(228,155,11,.5);background:rgba(228,155,11,.12)}
+  .tchip.sr-well{color:var(--paprika-ink);border-color:rgba(196,69,31,.35);background:rgba(196,69,31,.1)}
+  .tchip.sr-light{color:var(--herb-ink);border-color:rgba(46,139,87,.4);background:rgba(46,139,87,.12)}
+  .tchip.sr-bland{color:var(--bland)}
+  .tchip.sr-pending{color:var(--ink-3)}
+  /* dark context (verdict blocks) */
+  .verdict-lg .tchip{background:rgba(255,243,222,.08);color:rgba(246,236,215,.7);border-color:rgba(255,243,222,.16)}
+  .verdict-lg .tchip.sr-certified{color:var(--gold-soft)}
+  .verdict-lg .tchip.sr-well{color:#f0a58c}
+  .verdict-lg .tchip.sr-light{color:#8fd6ad}
+  .verdict-lg .tchip.sr-bland{color:rgba(246,236,215,.6)}
   .info-btn.pulse{color:var(--gold-ink);animation:infopulse 1.6s ease-in-out 3}
   @keyframes infopulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.22);opacity:1}}
   .pepper-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 15px}
@@ -457,6 +470,27 @@
   .plan li{font-size:14px;display:flex;gap:8px;align-items:flex-start}
   .plan li svg{flex:none;margin-top:3px}
   .plan .btn{margin-top:auto}
+
+  /* ============ RANKINGS ============ */
+  .rank-toggle{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 18px}
+  .rank-list{list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;margin:0 0 14px}
+  .rank-row{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:10px 16px 10px 10px;cursor:pointer;transition:transform .12s,border-color .18s,box-shadow .18s}
+  .rank-row:hover{transform:translateY(-1px);border-color:var(--gold-ink);box-shadow:var(--shadow-2)}
+  .rank-num{font-family:var(--display);font-weight:800;font-size:26px;color:var(--ink-3);min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
+  .rank-row:nth-child(1) .rank-num{color:var(--gold-ink)}
+  .rank-row:nth-child(2) .rank-num,.rank-row:nth-child(3) .rank-num{color:var(--paprika-ink)}
+  .rank-poster{width:46px;height:66px;border-radius:8px;flex:none;overflow:hidden;box-shadow:var(--shadow-1);position:relative}
+  .rank-poster img{width:100%;height:100%;object-fit:cover;display:block}
+  .rank-poster.noart{background:var(--inset)}
+  .rank-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .rank-title{font-weight:800;font-size:16px;letter-spacing:-.01em;line-height:1.1}
+  .rank-sub{font-size:12.5px;color:var(--ink-3)}
+  .rank-marks{display:flex;align-items:center;gap:12px;flex:none}
+  .rank-marks .cs{display:flex;align-items:center;gap:4px}
+  .rank-marks .cs-season{padding-right:12px;border-right:1px solid var(--line)}
+  .rank-marks .cs-season .cs-lab{color:var(--gold-ink)}
+  .rank-pending-note{color:var(--ink-3);font-size:13px;text-align:center;padding:6px 0 4px}
+  @media(max-width:640px){ .rank-marks .cs:not(.cs-season){display:none} .rank-title{font-size:15px} .rank-num{font-size:22px;min-width:30px} }
 
   /* ============ VAULT ============ */
   .collection{padding:22px 0 6px;border-top:1px solid var(--line)}
@@ -627,6 +661,7 @@
     <nav aria-label="Primary">
       <a data-nav="home" onclick="go('home')" tabindex="0">Home</a>
       <a data-nav="browse" onclick="go('browse')" tabindex="0">Browse</a>
+      <a data-nav="ranked" onclick="go('ranked')" tabindex="0">Rankings</a>
       <a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a>
       <a data-nav="join" onclick="go('join')" tabindex="0">Membership</a>
     </nav>
@@ -760,6 +795,11 @@
     <div class="wrap" id="vaultContent"></div>
   </section>
 
+  <!-- ============ RANKINGS ============ -->
+  <section class="view" data-view="ranked" aria-label="The Rankings">
+    <div class="wrap" id="rankedContent"></div>
+  </section>
+
   <!-- ============ YOU ============ -->
   <section class="view" data-view="you" aria-label="Your page">
     <div class="wrap" id="youContent"></div>
@@ -771,6 +811,7 @@
   <div class="row">
     <button data-nav="home" class="active" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
     <button data-nav="browse" onclick="go('browse')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>Browse</button>
+    <button data-nav="ranked" onclick="go('ranked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V10M12 21V4M19 21v-7"/></svg>Rankings</button>
     <button data-nav="vault" onclick="go('vault')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg>Vault</button>
     <button data-nav="you" onclick="go('you')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>You</button>
   </div>
@@ -2694,7 +2735,7 @@ function savePosterCache(c){ try{localStorage.setItem(POSTER_CACHE_KEY,JSON.stri
 function applyPoster(f,path){ if(path) f.poster='https://image.tmdb.org/t/p/w500'+path; }
 function rerenderActive(){
   var cur=document.querySelector('.view.on'); var v=cur?cur.getAttribute('data-view'):'home';
-  if(v==='home')renderHome(); else if(v==='browse')renderBrowse(); else if(v==='vault')renderVault(); else if(v==='you')renderYou();
+  if(v==='home')renderHome(); else if(v==='browse')renderBrowse(); else if(v==='vault')renderVault(); else if(v==='ranked')renderRanked(); else if(v==='you')renderYou();
 }
 function hydrateFromTMDB(){
   var cache=loadPosterCache();
@@ -2791,7 +2832,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -2813,6 +2854,7 @@ function render(view,arg){
   else if(view==='browse')renderBrowse();
   else if(view==='critic')renderCritic(arg);
   else if(view==='vault')renderVault(arg);
+  else if(view==='ranked')renderRanked();
   else if(view==='you')renderYou();
   if(view!=='film')applyMetaTags(view);
 }
@@ -3010,9 +3052,9 @@ function renderFilm(id){
         '<h1>'+esc(f.title)+'</h1>'+
         '<div class="meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+f.genre+(f.type==='tv'?' &nbsp;·&nbsp; <strong style="color:var(--gold-ink)">Series</strong>':'')+'</div>'+
         '<div class="film-verdict">'+
-          '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span></div>'+
+          '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
             '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
-          '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+((f.votes.for+f.votes.against)?fmt(f.votes.for+f.votes.against)+' voted':'Be the first')+'</span></div></div>'+
+          '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+((f.votes.for+f.votes.against)?fmt(f.votes.for+f.votes.against)+' voted':'Be the first')+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
           '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
           splitFlagHTML(f)+
         '</div>'+
@@ -3075,9 +3117,16 @@ function splitFlagHTML(f){
   var flag=(!certified(f)&&split!=null&&split>=12)?'<span class="split-flag">The split · '+split+' pts apart</span>':'';
   return '<span id="tblFlag" class="tbl-flag">'+flag+'</span>';
 }
-/* refresh the Seasoning block + split flag after a vote changes The Table */
+/* the seasoning tier (ranking) a single score earns — shown as a chip on the score */
+function tierChip(n){
+  if(n==null) return '';
+  var tk=tier(n);
+  return '<span class="tchip sr-'+tk+'">'+seasonIcon(tk,12)+' '+esc(tierLabelKey(tk))+'</span>';
+}
+/* refresh the Seasoning block + Table tier chip + split flag after a vote changes The Table */
 function refreshSeasoning(f){
   var sb=byId('seasonBlock'); if(sb){ sb.innerHTML=seasoningVerdict(f); animateAura(sb); }
+  var tt=byId('tblTier'); if(tt) tt.innerHTML=tierChip(tableScore(f));
   var tf=byId('tblFlag'); if(tf) tf.outerHTML=splitFlagHTML(f);
 }
 /* reflect this device's saved vote on the film detail */
@@ -3405,6 +3454,7 @@ function setScope(s){
   app.scope=s; saveState(); renderHome();
   var cur=document.querySelector('.view.on'); var v=cur?cur.getAttribute('data-view'):'home';
   if(v==='browse')renderBrowse();
+  if(v==='ranked')renderRanked();
   refreshScopeToggles();
   toast(s==='ours'?'Showing Our Films.':'Showing All Films.');
 }
@@ -3499,6 +3549,49 @@ var VAULT=[
    blurb:'The story is not only American. From Dakar to South London, the lens travels and the context comes with it.',
    films:['atlantics','his-house','rye-lane']}
 ];
+/* ============ THE RANKINGS ============ */
+/* Films ranked by the seasoning the culture votes them — the most seasoned first. */
+var RANK_BY='season';   // season | table | kitchen
+function rankValue(f){ return RANK_BY==='table'?tableScore(f) : (RANK_BY==='kitchen'?f.k : overallScore(f)); }
+function setRankBy(v){ RANK_BY=v; renderRanked(); }
+function rankRow(f,rank){
+  var os=overallScore(f), otk=overallTier(f), ts=tableScore(f);
+  var votes=f.votes.for+f.votes.against;
+  return '<li class="rank-row" tabindex="0" role="button" aria-label="'+esc(f.title)+'" onclick="go(\'film\',\''+f.id+'\')" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
+    '<span class="rank-num">'+rank+'</span>'+
+    '<span class="rank-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+(f.poster?'<img src="'+f.poster+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</span>'+
+    '<span class="rank-main"><span class="rank-title">'+esc(f.title)+'</span>'+
+      '<span class="rank-sub">'+f.year+' &middot; '+esc(f.genre)+(votes?' &middot; '+fmt(votes)+' voted':'')+'</span>'+
+      tierChip(rankValue(f))+'</span>'+
+    '<span class="rank-marks">'+
+      '<span class="cs cs-season"><span class="cs-lab">Season</span>'+auraRing(os,otk,30)+'</span>'+
+      '<span class="cs"><span class="cs-lab">K</span>'+auraRing(f.k,tier(f.k),26)+'</span>'+
+      '<span class="cs"><span class="cs-lab">T</span>'+auraRing(ts,tier(ts),26)+'</span>'+
+    '</span></li>';
+}
+function renderRanked(){
+  var byLabel={season:'The Seasoning (overall)',table:'The Table (audience vote)',kitchen:'The Kitchen (critics)'}[RANK_BY];
+  var list=FILMS.filter(function(f){ return !f.noart && scopeMatch(f); });
+  var scored=list.filter(function(f){ return rankValue(f)!=null; });
+  var pending=list.filter(function(f){ return rankValue(f)==null; });
+  scored.sort(function(a,b){ var d=rankValue(b)-rankValue(a); if(d)return d; return (b.votes.for+b.votes.against)-(a.votes.for+a.votes.against); });
+  var toggles=[['season','Seasoning'],['table','The Table'],['kitchen','The Kitchen']].map(function(o){
+    return '<button class="chip'+(RANK_BY===o[0]?' on':'')+'" onclick="setRankBy(\''+o[0]+'\')">'+o[1]+'</button>';
+  }).join('');
+  var head='<div class="browse-head"><span class="eyebrow">Rated by the culture</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">The Rankings</h1>'+
+    '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:60ch">The most seasoned, as voted. Ranked by <strong>'+byLabel+'</strong> — the standings move as the culture votes.</p></div>'+
+    '<div class="rank-toggle"><span class="flabel">Rank by</span>'+toggles+'</div>';
+  var body;
+  if(scored.length){
+    body='<ol class="rank-list">'+scored.map(function(f,i){return rankRow(f,i+1);}).join('')+'</ol>'+
+      (pending.length?'<p class="rank-pending-note">'+fmt(pending.length)+' more film'+(pending.length===1?'':'s')+' awaiting votes — they join the rankings once the table weighs in.</p>':'');
+  } else {
+    body='<div class="empty"><h3>No films seasoned yet.</h3><p>The rankings fill in as the culture votes. Cast the first vote on any film and it climbs the board.</p><button class="btn btn-gold" onclick="go(\'browse\')">Start voting</button></div>';
+  }
+  byId('rankedContent').innerHTML=head+body;
+  animateAura(byId('rankedContent'));
+}
 function renderVault(){
   var head='<button class="backbtn" onclick="go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
     '<div class="browse-head"><span class="eyebrow">Curated by the Kitchen</span>'+
