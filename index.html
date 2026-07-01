@@ -720,6 +720,7 @@
       <a data-nav="home" onclick="go('home')" tabindex="0">Home</a>
       <a data-nav="browse" onclick="go('browse')" tabindex="0">Browse</a>
       <a data-nav="ranked" onclick="go('ranked')" tabindex="0">Rankings</a>
+      <a data-nav="theaters" onclick="go('theaters')" tabindex="0">In Theaters</a>
       <a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a>
       <a data-nav="join" onclick="go('join')" tabindex="0">Membership</a>
     </nav>
@@ -858,6 +859,11 @@
     <div class="wrap" id="rankedContent"></div>
   </section>
 
+  <!-- ============ IN THEATERS ============ -->
+  <section class="view" data-view="theaters" aria-label="In Theaters">
+    <div class="wrap" id="theatersContent"></div>
+  </section>
+
   <!-- ============ YOU ============ -->
   <section class="view" data-view="you" aria-label="Your page">
     <div class="wrap" id="youContent"></div>
@@ -870,6 +876,7 @@
     <button data-nav="home" class="active" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
     <button data-nav="browse" onclick="go('browse')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>Browse</button>
     <button data-nav="ranked" onclick="go('ranked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V10M12 21V4M19 21v-7"/></svg>Rankings</button>
+    <button data-nav="theaters" onclick="go('theaters')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>Theaters</button>
     <button data-nav="vault" onclick="go('vault')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg>Vault</button>
     <button data-nav="you" onclick="go('you')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>You</button>
   </div>
@@ -2957,7 +2964,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -2980,6 +2987,7 @@ function render(view,arg){
   else if(view==='critic')renderCritic(arg);
   else if(view==='vault')renderVault(arg);
   else if(view==='ranked')renderRanked();
+  else if(view==='theaters')renderTheaters();
   else if(view==='you')renderYou();
   if(view!=='film')applyMetaTags(view);
 }
@@ -4101,6 +4109,40 @@ function loadPeople(cat){
           else renderPeople(cat); }
       }).catch(function(){});
   }catch(e){}
+}
+/* ============ IN THEATERS ============ */
+/* A discoverable home for showtimes: newest theatrical titles + a location box,
+   each opening the live showtimes lookup. */
+function renderTheaters(){
+  var now=2026;
+  // catalog order = curated prominence (flagships first); keep it, just filter to
+  // current theatrical-window movies.
+  var inTheaters=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && f.year>=now-1; });
+  var head='<div class="browse-head"><span class="eyebrow">Now playing</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">In Theaters</h1>'+
+    '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:60ch">New releases the culture is watching. Drop your location and grab showtimes and tickets near you.</p></div>'+
+    '<div class="st-field" style="max-width:440px;margin:2px 0 20px"><input id="theZip" placeholder="ZIP or city" aria-label="Your location" value="'+esc(app.zip||'')+'" onkeydown="if(event.key===\'Enter\')saveTheZip()"><button class="btn btn-gold" onclick="saveTheZip()">Set location</button></div>';
+  var body;
+  if(!inTheaters.length){
+    body='<div class="empty"><h3>No new releases loaded yet.</h3><p>Fresh theatrical titles will appear here as the catalog updates.</p></div>';
+  } else {
+    body='<div class="grid-cards">'+inTheaters.map(function(f){ return theaterCard(f); }).join('')+'</div>';
+  }
+  byId('theatersContent').innerHTML=head+body;
+}
+function theaterCard(f){
+  var hov=f.trailer?' onmouseenter="cardPreview(this,\''+f.trailer+'\')" onmouseleave="cardPreviewOut(this)"':'';
+  return '<div class="card">'+
+    '<div class="poster'+(f.noart?' noart':'')+'"'+hov+' style="'+(f.noart?'':'background:'+f.grad)+';cursor:pointer" onclick="go(\'film\',\''+f.id+'\')">'+posterInner(f,'p-ttl')+'</div>'+
+    '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div>'+
+      '<div class="c-sub">'+(f.dir&&f.dir!=='—'?'Dir. '+esc(f.dir)+' · ':'')+f.year+'</div>'+
+      '<button class="btn btn-gold btn-sm" style="margin-top:8px;width:100%" onclick="openShowtimes(\''+f.id+'\')">Showtimes &amp; tickets</button>'+
+    '</div></div>';
+}
+function saveTheZip(){
+  var el=byId('theZip'), z=el?el.value.trim():'';
+  if(z){ app.zip=z; saveState(); toast('Location set to '+z+'. Tap any title for showtimes.'); }
+  else { toast('Enter a ZIP or city.'); if(el)el.focus(); }
 }
 function renderVault(){
   var head='<button class="backbtn" onclick="go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
