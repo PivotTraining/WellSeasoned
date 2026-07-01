@@ -725,14 +725,14 @@
         </div>
         <div class="plan feature">
           <span class="p-tag">Most popular</span>
-          <h3>The Regular</h3><div class="p-price">$6<small>/mo</small></div>
-          <p class="p-note">For the one who plans the whole watch night.</p>
+          <h3>The Regular</h3><div class="p-price">$6<small>/mo · at launch</small></div>
+          <p class="p-note">For the one who plans the whole watch night. Billing opens at launch — join the waitlist and lock in founding-member pricing.</p>
           <ul>
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>My Plate watchlist and where-to-watch alerts</li>
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Personalized picks and early lists</li>
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Ad-free, plus showtimes and tickets</li>
           </ul>
-          <button class="btn btn-gold" onclick="openAuth('signup')">Start The Regular</button>
+          <button class="btn btn-gold" onclick="openWaitlist('The Regular')">Join the waitlist</button>
         </div>
         <div class="plan">
           <h3>The Kitchen</h3><div class="p-price">Earned</div>
@@ -2781,15 +2781,72 @@ function setActiveNav(view){
     el.classList.toggle('active', el.getAttribute('data-nav')===view);
   });
 }
-function go(view,arg){
+/* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
+   go() writes the hash; the hashchange listener does the actual render, so links pasted
+   straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1};
+function hashFor(view,arg){
+  if(!view||view==='home')return '#/';
+  if(arg==null||arg==='')return '#/'+view;
+  return '#/'+view+'/'+encodeURIComponent(arg);
+}
+function parseHash(){
+  var h=(location.hash||'').replace(/^#\/?/,'');
+  if(!h)return {view:'home',arg:null};
+  var parts=h.split('/'), view=parts[0]||'home';
+  if(!KNOWN_VIEWS[view])return {view:'home',arg:null};
+  var arg=parts.length>1?decodeURIComponent(parts.slice(1).join('/')):null;
+  return {view:view,arg:arg};
+}
+function render(view,arg){
   document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')===view);});
   setActiveNav(view);
   window.scrollTo({top:0,behavior:'auto'});
   if(view==='film')renderFilm(arg);
-  if(view==='browse')renderBrowse();
-  if(view==='critic')renderCritic(arg);
-  if(view==='vault')renderVault(arg);
-  if(view==='you')renderYou();
+  else if(view==='browse')renderBrowse();
+  else if(view==='critic')renderCritic(arg);
+  else if(view==='vault')renderVault(arg);
+  else if(view==='you')renderYou();
+  if(view!=='film')applyMetaTags(view);
+}
+function go(view,arg){
+  var h=hashFor(view,arg);
+  if(location.hash===h){ render(view,arg); }   // same hash fires no event — render now
+  else { location.hash=h; }                     // else the hashchange listener renders
+}
+function goBack(){ if(history.length>1)history.back(); else go('home'); }
+window.addEventListener('hashchange',function(){ var r=parseHash(); render(r.view,r.arg); });
+
+/* Live document + social meta per view/film. (Crawler-visible OG still needs a
+   prerender step — see backend/README.md — but this fixes tab titles, canonical
+   URLs, the back button, and in-app share previews.) */
+function setDocMeta(title,desc,path){
+  document.title=title;
+  var url='https://itswellseasoned.com/'+(path||location.hash||'');
+  function set(sel,attr,val){ var el=document.querySelector(sel); if(el&&val!=null)el.setAttribute(attr,val); }
+  set('meta[name="description"]','content',desc);
+  set('meta[property="og:title"]','content',title);
+  set('meta[name="twitter:title"]','content',title);
+  set('meta[property="og:description"]','content',desc);
+  set('meta[name="twitter:description"]','content',desc);
+  set('meta[property="og:url"]','content',url);
+  set('link[rel="canonical"]','href',url);
+}
+function applyMetaTags(view){
+  setDocMeta('Well Seasoned — Two verdicts on every film',
+    'Rated by the culture. The Kitchen is verified critics of the culture. The Table is the community that bought the ticket. Two honest scores on every film.',
+    hashFor(view));
+}
+function shareFilm(id){
+  var f=find(id); if(!f)return;
+  var url='https://itswellseasoned.com/#/film/'+encodeURIComponent(id);
+  var data={title:f.title+' — Well Seasoned', text:'Two verdicts on '+f.title+', rated by the culture.', url:url};
+  if(navigator.share){ navigator.share(data).catch(function(){}); return; }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){toast('Link copied — share it.');},function(){toast(url);});
+    return;
+  }
+  toast(url);
 }
 
 var WS_CLASSICS=["do the right thing","malcolm x","boyz n the hood","the color purple","coming to america","love jones","love & basketball","menace ii society","juice","friday","set it off","poetic justice","waiting to exhale","soul food","eve's bayou","school daze","jungle fever","crooklyn","mo' better blues","he got game","the best man","baby boy","training day","shaft","brown sugar","barbershop","daughters of the dust","new jack city","house party","hustle & flow","ray","hotel rwanda","the wood","dead presidents","higher learning","bamboozled","antwone fisher","drumline","devil in a blue dress","rosewood","the great debaters","akeelah and the bee","what's love got to do with it","how stella got her groove back"];
@@ -2798,8 +2855,8 @@ function isClassic(f){ if(app.curation.classic.hasOwnProperty(f.id)) return !!ap
 function curToggleClassic(id){ var f=find(id); app.curation.classic[id]=!isClassic(f); saveState(); renderCurList(curQ()); }
 function openCurate(){
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
-    '<h2>Curate the shelves</h2><p class="m-sub">Move titles between Our Films and All Films, feature them on home, or hide them. Saved on this device; export to seed the backend.</p>'+
-    '<div class="cur-tools"><input id="curSearch" placeholder="Search titles…" oninput="renderCurList(this.value)"><button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
+    '<h2>Curate the shelves</h2><p class="m-sub">Move titles between Our Films and All Films, feature them on home, or hide them. Saved on this device — <strong>Publish to backend</strong> pushes your choices live for everyone (needs the admin passphrase from backend/schema.sql).</p>'+
+    '<div class="cur-tools"><input id="curSearch" placeholder="Search titles…" oninput="renderCurList(this.value)"><button class="btn btn-gold btn-sm" onclick="publishCuration()">Publish to backend</button><button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
     '<div class="cur-list" id="curList"></div>');
   byId('modal').classList.add('wide');
   renderCurList('');
@@ -2934,7 +2991,7 @@ function renderFilm(id){
   var tags=f.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('');
 
   byId('filmContent').innerHTML=
-    '<button class="backbtn" onclick="go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
+    '<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
     '<div class="film-hero">'+
       '<div class="film-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+
         (f.trailer?'<button class="fp-play" aria-label="Play trailer" onclick="openTrailer(\''+f.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>':'')+
@@ -2954,7 +3011,7 @@ function renderFilm(id){
           '<a class="btn btn-ink btn-sm" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
           (f.type!=='tv'?'<button class="btn btn-ghost btn-sm" onclick="openShowtimes(\''+f.id+'\')">Find showtimes</button>':'')+'</div>'+
         '<div class="tag-row">'+tags+'</div>'+
-        '<div class="film-actions">'+(f.trailer?'<button class="btn btn-ink" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn '+(f.trailer?'btn-ghost':'btn-ink')+'" onclick="savePlate(\''+f.id+'\')">＋ Add to My Plate</button><button class="btn btn-ghost" onclick="toast(\'Share sheet opens here (demo)\')">Share</button></div>'+
+        '<div class="film-actions">'+(f.trailer?'<button class="btn btn-ink" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn '+(f.trailer?'btn-ghost':'btn-ink')+'" onclick="savePlate(\''+f.id+'\')">＋ Add to My Plate</button><button class="btn btn-ghost" onclick="shareFilm(\''+f.id+'\')">Share</button></div>'+
       '</div>'+
     '</div>'+
     '<div class="detail-cols">'+
@@ -2973,7 +3030,10 @@ function renderFilm(id){
         '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'+
       '</div>'+
     '</div>';
-  renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id);
+  renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id);
+  setDocMeta(f.title+' ('+f.year+') — Well Seasoned',
+    'The Kitchen and The Table weigh in on '+f.title+'. '+(f.syn||'').slice(0,140),
+    '#/film/'+encodeURIComponent(f.id));
   if(!app.taughtThis){ var ib=byId('filmContent').querySelector('.info-btn'); if(ib)ib.classList.add('pulse'); }
 }
 function numColor(n){return{certified:'gold-ink',well:'paprika-ink',light:'herb-ink',bland:'bland',pending:'ink-3'}[tier(n)];}
@@ -2992,12 +3052,10 @@ function restoreVoteUI(f){
 }
 
 /* ============ VOTING ============ */
-function seedComments(){return [
-  {name:'Tasha, the Bronx',stance:'for',text:'The craft in this is a whole character. Seasoned front to back.',reported:false},
-  {name:'Marcus D.',stance:'for',text:'Second watch hit harder than the first. This one is ours.',reported:false},
-  {name:'K. Rivers',stance:'against',text:'Loved the first hour. The ending felt rushed to me. Still good, short of the seal.',reported:false}
-];}
-function ensureComments(f){ if(!f._comments){ f._comments=(app.comments[f.id]||[]).slice().concat(seedComments()); } }
+/* Reads come from real people. No seeded/fake comments — an empty Table reads
+   "be the first" rather than pretending a crowd is already here. Backend reads
+   (Supabase) are merged in by loadBackendComments() when configured. */
+function ensureComments(f){ if(!f._comments){ f._comments=(app.comments[f.id]||[]).slice(); } }
 function renderVotes(f){
   var total=f.votes.for+f.votes.against, pf=Math.round(f.votes.for/total*100);
   byId('forNum').textContent=fmt(f.votes.for); byId('againstNum').textContent=fmt(f.votes.against);
@@ -3035,6 +3093,113 @@ function loadBackendVotes(slug){
     }).catch(function(){});
   }catch(e){}
 }
+/* ============ BACKEND: shared votes, reads, curation ============ */
+function sbConfigured(){ return !!(SUPABASE_URL&&SUPABASE_KEY); }
+function sbHeaders(extra){ var h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}; if(extra)for(var k in extra)h[k]=extra[k]; return h; }
+/* One batched pull of every film's live tally, so The Table score on grid cards
+   matches the film page instead of showing stale seeds. */
+function loadAllBackendVotes(){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/vote_counts?select=film_slug,for_count,against_count',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!rows||!rows.length)return;
+        rows.forEach(function(c){ var f=find(c.film_slug); if(f){ f.votes={for:c.for_count||0,against:c.against_count||0}; app.tally[c.film_slug]=f.votes; } });
+        rerenderActive();
+      }).catch(function(){});
+  }catch(e){}
+}
+/* Real reads from The Table (Supabase), merged under this device's local posts. */
+function loadBackendComments(slug){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/comments?film_slug=eq.'+encodeURIComponent(slug)+'&reported=is.false&select=id,name,stance,body,created_at&order=created_at.desc&limit=100',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows))return;
+        var f=find(slug); if(!f)return;
+        var backend=rows.map(function(r){ return {id:r.id,name:r.name||'Guest',stance:r.stance||'for',text:r.body,reported:false,backend:true}; });
+        f._comments=(app.comments[slug]||[]).slice().concat(backend);
+        var on=document.querySelector('.view.on');
+        if(on&&on.getAttribute('data-view')==='film')renderComments(f);
+      }).catch(function(){});
+  }catch(e){}
+}
+function syncComment(slug,c){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/comments',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice()})}).catch(function(){});
+  }catch(e){}
+}
+function reportBackend(id){
+  if(!sbConfigured()||id==null)return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/rpc/report_comment',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify({p_id:id})}).catch(function(){});
+  }catch(e){}
+}
+function submitWaitlist(email,plan){
+  if(!email||email.indexOf('@')<1){ toast('Enter a valid email.'); return false; }
+  if(sbConfigured()){
+    try{ fetch(SUPABASE_URL+'/rest/v1/waitlist',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'resolution=ignore-duplicates'}),
+      body:JSON.stringify({email:email,plan:plan||null})}).catch(function(){}); }catch(e){}
+  }
+  try{ localStorage.setItem('ws_waitlist',email); }catch(e){}
+  return true;
+}
+function openWaitlist(plan){
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Join the waitlist</h2><p class="m-sub">'+(plan?esc(plan)+' — ':'')+'be first in line when memberships open. Founding-member pricing, no charge today.</p>'+
+    '<div class="cbox"><input id="wlEmail" type="email" placeholder="you@email.com" aria-label="Email">'+
+    '<div class="cbox-row"><span class="cbox-hint">We’ll only email you about launch.</span><button class="btn btn-gold btn-sm" onclick="doWaitlist(\''+esc(plan||'').replace(/["\\]/g,'')+'\')">Save my spot</button></div></div>');
+}
+function doWaitlist(plan){
+  var e=byId('wlEmail')?byId('wlEmail').value.trim():'';
+  if(submitWaitlist(e,plan)){ closeModal(); toast('You’re on the list. We’ll be in touch at launch.'); }
+}
+/* Read global curation (which shelf, featured, hidden, classic, order, Kitchen
+   score) and merge it on top of the built-in catalog. Content stays in the file;
+   only the editorial overrides come from the backend. */
+function loadBackendCuration(){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/film_curation?select=slug,scope,featured,hidden,classic,sort_order,kitchen_score',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows)||!rows.length)return;
+        var order={};
+        rows.forEach(function(r){
+          var f=find(r.slug); if(!f)return;
+          if(r.scope) app.curation.scope[r.slug]=r.scope;
+          if(r.hidden===true && app.curation.hidden.indexOf(r.slug)<0) app.curation.hidden.push(r.slug);
+          if(r.hidden===false){ var hi=app.curation.hidden.indexOf(r.slug); if(hi>=0)app.curation.hidden.splice(hi,1); }
+          if(r.featured===true && app.curation.featured.indexOf(r.slug)<0) app.curation.featured.push(r.slug);
+          if(r.featured===false){ var fi=app.curation.featured.indexOf(r.slug); if(fi>=0)app.curation.featured.splice(fi,1); }
+          if(r.classic!=null) app.curation.classic[r.slug]=!!r.classic;
+          if(r.sort_order!=null) order[r.slug]=r.sort_order;
+          if(r.kitchen_score!=null) f.k=r.kitchen_score;
+        });
+        if(Object.keys(order).length) app.curation.featured.sort(function(a,b){ return (order[a]==null?999:order[a])-(order[b]==null?999:order[b]); });
+        rerenderActive();
+      }).catch(function(){});
+  }catch(e){}
+}
+/* Publish this device's curation to the backend for everyone. Gated by the
+   admin passphrase you set in backend/schema.sql (app_secrets.curation_admin). */
+function publishCuration(){
+  if(!sbConfigured()){ toast('Add your Supabase URL + key first.'); return; }
+  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
+  if(!secret){ secret=window.prompt('Admin passphrase (from backend/schema.sql):')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
+  var items=FILMS.map(function(f,i){
+    return {slug:f.id, scope:effScope(f), featured:app.curation.featured.indexOf(f.id)>=0, hidden:isHidden(f), classic:isClassic(f),
+      sort_order:app.curation.featured.indexOf(f.id), kitchen_score:(f.k==null?null:f.k)};
+  }).filter(function(it){ return it.scope!=='ours'||it.featured||it.hidden||it.classic||it.kitchen_score!=null; });
+  toast('Publishing '+items.length+' titles…');
+  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_curation',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({p_secret:secret,p_items:items})})
+    .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
+    .then(function(n){ toast('Published '+n+' titles to the backend.'); })
+    .catch(function(e){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){}; toast('Publish failed — check the passphrase.'); });
+}
 function applyVote(id,side){
   var f=find(id), prev=app.votes[id];
   if(prev===side) return false;
@@ -3068,6 +3233,10 @@ function castVote(id,side){
 }
 function renderComments(f){
   ensureComments(f);
+  if(!f._comments.length){
+    byId('commentList').innerHTML='<div class="cmt-empty" style="padding:16px 2px;color:var(--ink-3);font-size:14px">No reads at the table yet. Pull up a chair — be the first to say your piece.</div>';
+    return;
+  }
   byId('commentList').innerHTML=f._comments.map(function(c,i){
     var lab=c.stance==='for'?'Seasoned':'Sent it back';
     return '<div class="cmt'+(c.reported?' reported':'')+(c.mine?' mine':'')+'"><div class="cmt-top"><span class="cmt-name">'+esc(c.name||'Guest')+'</span>'+(c.mine?'<span class="mine-tag">You</span>':'')+'<span class="stance '+c.stance+'">'+lab+'</span></div>'+
@@ -3084,6 +3253,7 @@ function postComment(id){
   var c={name:name||app.name||'Guest',stance:app.votes[id]||'for',text:t,reported:false,mine:true};
   if(!app.comments[id])app.comments[id]=[];
   app.comments[id].unshift(c); f._comments.unshift(c);
+  syncComment(id,c);
   byId('cText').value='';byId('cName').value='';renderComments(f);saveState();toast('Posted to The Table.');
 }
 
@@ -3095,7 +3265,7 @@ function openReport(i,fid){
     '<div class="report-opts">'+opts.map(function(o){return '<button onclick="submitReport('+i+',\''+fid+'\')">'+o+'</button>';}).join('')+'</div>');
 }
 function submitReport(i,fid){
-  var f=find(fid); f._comments[i].reported=true; closeModal(); renderComments(f); saveState();
+  var f=find(fid); var c=f._comments[i]; c.reported=true; if(c&&c.backend)reportBackend(c.id); closeModal(); renderComments(f); saveState();
   toast('Thanks. Our team will review this.');
 }
 
@@ -3170,7 +3340,7 @@ function renderCritic(name){
       '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div><div class="c-sub">'+f.year+'</div></div></div>';
   }).join('');
   byId('criticContent').innerHTML=
-    '<button class="backbtn" onclick="history.length>1?go(\'home\'):go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
+    '<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
     '<div class="critic-head"><div class="critic-av">'+c.init+'</div><div>'+
       '<h1>'+esc(name)+' <span class="vbadge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1C6B41" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified · The Kitchen</span></h1>'+
       '<p class="c-bio">'+esc(c.bio)+'</p>'+
@@ -3557,6 +3727,10 @@ function forgetTmdbKey(){
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
 renderHome(); renderAuthSlot(); hydrateFromTMDB();
+/* open whatever the URL points at (deep link / refresh / back button) */
+var _route0=parseHash(); render(_route0.view,_route0.arg);
+/* bring the catalog to life from the backend when configured */
+loadBackendCuration(); loadAllBackendVotes();
 </script>
 </body>
 </html>

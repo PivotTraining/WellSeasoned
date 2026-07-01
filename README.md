@@ -29,4 +29,18 @@ Votes stay a harmless no-op until both are set. The publishable key is meant to 
 
 ## Backend setup
 
-Run `../well-seasoned-backend/votes_migration.sql` once in the Supabase SQL Editor to create the `votes` table and `vote_counts` view. After that, the Table score aggregates across everyone in real time.
+Run [`backend/schema.sql`](backend/schema.sql) once in the Supabase SQL Editor (Dashboard → SQL Editor → New query → paste → Run). It's idempotent and safe to re-run. It creates:
+
+- **`votes`** + **`vote_counts`** view — The Table score, aggregated across everyone in real time. One row per device per film (unique constraint), so a device can't stack votes.
+- **`comments`** — real reads from The Table. (The old hardcoded seed comments were removed; an empty film now reads "be the first" instead of faking a crowd.)
+- **`film_curation`** — the "move things around" table. The catalog content stays in `index.html`; this table holds only the editorial overrides the app merges on top (which shelf a title sits on, featured/hidden, classics, display order, and an optional Kitchen score).
+- **`waitlist`** — membership sign-ups.
+- RPCs: `publish_curation()` (admin-gated) and `report_comment()`.
+
+### Curating live (moving titles around)
+
+1. In `backend/schema.sql`, change the seeded admin passphrase (`app_secrets.curation_admin`) to something long and private before running it — or update it later in the SQL Editor.
+2. On the site, open **Curate the shelves** (the curation modal), move titles between Our Films / All Films, feature, hide, or mark classics.
+3. Click **Publish to backend** and enter the passphrase. Your choices go live for everyone; every visitor's app reads `film_curation` on load and merges it in. The passphrase is remembered in your browser so you only enter it once.
+
+See [`backend/README.md`](backend/README.md) for security notes (vote integrity, per-film social previews, and the optional anonymous-auth hardening).
