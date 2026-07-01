@@ -2592,8 +2592,11 @@ function applyMeta(){
     if(!f.scope){f.scope='ours';}
     if(!f.type){f.type='movie';}
     if(TUBI_IDS.indexOf(f.id)>=0 && f.where.indexOf('Tubi')<0){ f.where=f.where.concat(['Tubi']); }
-    // Pre-production: no illustrative scores. Unscored until real votes + verified critics.
-    f.k=null; f.t=null; f.votes={for:0,against:0}; f.reviews=[];
+    // The Kitchen (score + reviews) is editorial and ships authored; backend
+    // curation can override per film. The Table is earned live — seeded vote
+    // tallies are always wiped so audience numbers only ever come from real votes.
+    f.k=(typeof f.k==='number')?f.k:null; f.reviews=f.reviews||[];
+    f.t=null; f.votes={for:0,against:0};
     var sp=WS_SPICE[f.id]; f.spice = sp?{l:sp[0],v:sp[1],s:sp[2],cert:sp[3]}:null;
   });
 }
