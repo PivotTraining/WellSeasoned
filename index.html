@@ -164,6 +164,45 @@
   .search input::placeholder{color:var(--ink-3)}
   .avatar{width:34px;height:34px;border-radius:50%;background:var(--sumac);color:var(--on-dark);display:grid;place-items:center;font-weight:800;font-size:14px;cursor:pointer}
 
+  /* ============ SERVE ME SOMETHING ============ */
+  .serve-chips{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:14px 0 4px}
+  .serve-chip{font-family:inherit;font-weight:800;font-size:14px;padding:13px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;transition:transform .12s,border-color .12s}
+  .serve-chip:hover{transform:translateY(-2px);border-color:var(--gold)}
+  .serve-spin{display:grid;place-items:center;padding:34px 0 40px}
+  .serve-plate{width:120px;height:120px;border-radius:50%;border:6px solid var(--gold);border-top-color:var(--paprika);animation:servespin .8s linear infinite;display:grid;place-items:center;font-size:34px}
+  @keyframes servespin{to{transform:rotate(360deg)}}
+  .serve-result{display:flex;gap:18px;align-items:flex-start;margin-top:12px}
+  .serve-poster{flex:0 0 128px;aspect-ratio:2/3;border-radius:12px;background-size:cover;background-position:center;box-shadow:var(--shadow-2)}
+  .serve-info{flex:1;min-width:0}
+  .serve-info h3{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.05;margin-bottom:4px}
+  .serve-where{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+  .serve-where span{font-family:var(--mono);font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 9px;color:var(--ink-2)}
+  .serve-acts{display:flex;gap:8px;flex-wrap:wrap}
+  @media (max-width:520px){ .serve-result{flex-direction:row} .serve-poster{flex-basis:104px} }
+  /* ============ DINNER TABLE DEBATE ============ */
+  .debate-box{background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid rgba(40,26,10,.12);border-left:4px solid var(--paprika);border-radius:var(--r-lg);padding:18px 20px 20px;margin-bottom:22px;box-shadow:var(--shadow-2)}
+  .debate-face{display:grid;grid-template-columns:1fr 54px 1fr;gap:12px;align-items:center;margin-top:12px}
+  .debate-side{border:none;padding:0;background:none;cursor:pointer;text-align:center;font-family:inherit;color:var(--ink)}
+  .debate-side .dp{aspect-ratio:2/3;border-radius:12px;background-size:cover;background-position:center;box-shadow:var(--shadow-2);transition:transform .15s;max-width:190px;margin:0 auto}
+  .debate-side:hover .dp{transform:scale(1.04)}
+  .debate-side.picked .dp{outline:3px solid var(--gold);outline-offset:2px}
+  .debate-side .dt{font-weight:800;font-size:14px;margin-top:8px;line-height:1.1}
+  .debate-vs{width:54px;height:54px;border-radius:50%;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;justify-self:center;box-shadow:var(--shadow-2)}
+  .debate-split{margin-top:14px}
+  .debate-bar{display:flex;height:14px;border-radius:999px;overflow:hidden;border:1px solid rgba(40,26,10,.15)}
+  .debate-bar .l{background:var(--gold)} .debate-bar .r{background:var(--paprika)}
+  .debate-nums{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink-2);margin-top:6px}
+  /* ============ FIRST-VISIT SEAL MOMENT ============ */
+  .ws-intro{position:fixed;inset:0;z-index:300;background:radial-gradient(90% 90% at 50% 40%,#2A1A0B,#170F07);display:grid;place-items:center;text-align:center;padding:26px;transition:opacity .45s}
+  .ws-intro.bye{opacity:0;pointer-events:none}
+  .ws-intro .in{max-width:520px}
+  .ws-intro .seal-anim{width:110px;height:110px;margin:0 auto 22px;animation:stampin .9s cubic-bezier(.18,1.5,.3,1) both}
+  @keyframes stampin{from{transform:scale(2.6) rotate(-18deg);opacity:0}60%{transform:scale(.9) rotate(2deg);opacity:1}to{transform:scale(1) rotate(0)}}
+  .ws-intro h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,40px);color:#FFF3DE;line-height:1.05;animation:introfade .7s .45s both}
+  .ws-intro p{color:rgba(255,243,222,.75);font-size:16px;margin:14px 0 24px;animation:introfade .7s .8s both}
+  .ws-intro button{animation:introfade .7s 1.1s both}
+  @keyframes introfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .ws-intro .seal-anim,.ws-intro h2,.ws-intro p,.ws-intro button{animation:none} }
   /* ============ COMING SOON ============ */
   .soon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:14px 0 40px}
   @media (max-width:820px){ .soon-grid{grid-template-columns:repeat(2,1fr);gap:12px} }
@@ -815,8 +854,9 @@
           <div class="teach-verdict2" id="teachVerdict"></div>
           <p><b>How to read a score.</b> The Kitchen number comes from verified critics of the culture. The Table number is the audience. When they agree, it earns the seal. When they split, that gap tells you something.</p>
           <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
-          <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button>
+          <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
         </div>
+        <div id="debateBox" class="debate-box" style="display:none"></div>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
       </div>
@@ -959,7 +999,15 @@
 </main>
 
 <!-- BOTTOM TABS (mobile) -->
-  <nav class="tabbar" aria-label="Mobile">
+  <div id="wsIntro" class="ws-intro" hidden>
+  <div class="in">
+    <svg class="seal-anim" viewBox="0 0 100 100" aria-hidden="true"><polygon fill="#E2A831" points="50,2 59,14 73,8 76,23 91,22 87,37 100,43 90,55 98,68 83,71 83,86 68,83 62,97 50,88 38,97 32,83 17,86 17,71 2,68 10,55 0,43 13,37 9,22 24,23 27,8 41,14"/><circle cx="50" cy="50" r="26" fill="#170F07"/><text x="50" y="58" text-anchor="middle" font-family="Georgia" font-weight="700" font-size="22" fill="#FFF3DE">WS</text></svg>
+    <h2>Two verdicts on every film.</h2>
+    <p>The Kitchen is verified critics of the culture. The Table is the community that bought the ticket. When they agree, the seal lands.</p>
+    <button class="btn btn-gold" onclick="dismissIntro()">Pull up a chair</button>
+  </div>
+</div>
+<nav class="tabbar" aria-label="Mobile">
   <div class="row">
     <button data-nav="home" class="active" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
     <button data-nav="browse" onclick="go('browse')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>Browse</button>
@@ -3748,6 +3796,134 @@ function exportCuration(){
   try{ navigator.clipboard.writeText(data); toast('Curation JSON copied to clipboard.'); }
   catch(e){ showModal('<button class="close" onclick="closeModal()">✕</button><h2>Curation JSON</h2><p class="m-sub">Copy this to seed the backend.</p><textarea class="cur-export" readonly>'+esc(data)+'</textarea>'); byId('modal').classList.add('wide'); }
 }
+/* ============ SERVE ME SOMETHING ============ */
+var SERVE_MOODS=[
+ ['feelgood','Feel-good',function(f){return f.moods&&f.moods.indexOf('Playful')>=0;}],
+ ['date','Date night',function(f){return (f.moods&&f.moods.indexOf('Tender')>=0)||(f.tags&&f.tags.indexOf('Romance')>=0);}],
+ ['heavy','Something heavy',function(f){return f.moods&&f.moods.indexOf('Contemplative')>=0&&f.type!=='tv';}],
+ ['edge','Edge of the seat',function(f){return f.moods&&f.moods.indexOf('Intense')>=0;}],
+ ['kids','With the kids',function(f){return f.tags&&(f.tags.indexOf('Family')>=0||f.tags.indexOf('Animation')>=0);}],
+ ['laughs','Straight laughs',function(f){return f.tags&&f.tags.indexOf('Stand-Up')>=0;}],
+ ['classic','Grandma approved',function(f){return isClassic(f);}],
+ ['binge','Series to binge',function(f){return f.type==='tv';}]
+];
+function servePoster(f){ return (typeof WS_POSTERS!=='undefined'&&WS_POSTERS[f.id])||f.poster||null; }
+function openServe(){
+  track('serve_open',{});
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">\u2715</button>'+
+    '<h2>What are you hungry for?</h2><p class="m-sub">Pick a flavor. The kitchen picks the plate.</p>'+
+    '<div class="serve-chips">'+SERVE_MOODS.map(function(m){
+      return '<button class="serve-chip" onclick="serveSpin(\''+m[0]+'\')">'+m[1]+'</button>';
+    }).join('')+'</div>');
+}
+function serveSpin(mood){
+  var body=byId('modal'); if(!body)return;
+  var mb=body.querySelector('.m-body')||body;
+  mb.innerHTML='<button class="close" aria-label="Close" onclick="closeModal()">\u2715</button>'+
+    '<h2>Plating\u2026</h2><div class="serve-spin"><div class="serve-plate">\uD83C\uDF7D</div></div>';
+  setTimeout(function(){ serveResult(mood); }, 1100);
+}
+function serveResult(mood){
+  var m=null,i; for(i=0;i<SERVE_MOODS.length;i++) if(SERVE_MOODS[i][0]===mood) m=SERVE_MOODS[i];
+  if(!m) return;
+  var pool=FILMS.filter(function(f){ return scopeMatch(f)&&!isHidden(f)&&!f.noart&&servePoster(f)&&m[2](f); });
+  if(!pool.length) pool=FILMS.filter(function(f){ return scopeMatch(f)&&!isHidden(f)&&servePoster(f); });
+  var f=pool[Math.floor(Math.random()*pool.length)];
+  track('serve',{film:f.id,mood:mood});
+  var os=overallScore(f), otk=overallTier(f);
+  var mb=byId('modal'); mb=(mb&&mb.querySelector('.m-body'))||mb; if(!mb)return;
+  mb.innerHTML='<button class="close" aria-label="Close" onclick="closeModal()">\u2715</button>'+
+    '<h2>Tonight, you\u2019re having\u2026</h2>'+
+    '<div class="serve-result">'+
+      '<div class="serve-poster" style="background-image:url(\''+servePoster(f)+'\')"></div>'+
+      '<div class="serve-info"><h3>'+esc(f.title)+'</h3>'+
+      '<div class="c-sub" style="white-space:normal">'+(f.dir&&f.dir!=='\u2014'?(f.type==='tv'?'By ':'Dir. ')+esc(f.dir)+' \u00b7 ':'')+f.year+' \u00b7 '+esc(f.genre)+'</div>'+
+      '<div style="margin-top:8px">'+auraRing(os,otk,44)+'</div>'+
+      '<div class="serve-where">'+(f.where||[]).map(function(w){return '<span>'+esc(w)+'</span>';}).join('')+'</div>'+
+      '<div class="serve-acts">'+
+        '<button class="btn btn-gold btn-sm" onclick="closeModal();go(\'film\',\''+f.id+'\')">Open the film room</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="serveSpin(\''+mood+'\')">Spin again</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="savePlate(\''+f.id+'\')">\uFF0B My Plate</button>'+
+      '</div></div></div>';
+}
+/* ============ DINNER TABLE DEBATE ============ */
+var DEBATES=[{"a":"love-jones","b":"brown-sugar","q":"Which love story gets the plate?"},{"a":"do-the-right-thing","b":"boyz","q":"Which one raised you?"},{"a":"getout","b":"us","q":"Peak Peele?"},{"a":"friday","b":"house-party","q":"Which one still gets the whole room?"},{"a":"coming-to-america","b":"harlem-nights","q":"Eddie at his best?"},{"a":"juice","b":"menace-ii-society","q":"Which one hits harder?"},{"a":"set-it-off","b":"waiting-to-exhale","q":"The sisterhood classic?"},{"a":"love-basketball","b":"the-best-man","q":"Date night canon?"},{"a":"training-day","b":"american-gangster","q":"Denzel’s coldest?"},{"a":"moonlight","b":"beale","q":"Jenkins’ masterpiece?"},{"a":"black-panther","b":"creed","q":"The modern crown?"},{"a":"atl","b":"stomp-the-yard","q":"2000s ATL energy?"},{"a":"girls-trip","b":"think-like-a-man","q":"The group-chat pick?"},{"a":"coach-carter","b":"remember-the-titans","q":"Greatest locker-room speech?"},{"a":"martin","b":"the-fresh-prince-of-bel-ai","q":"90s sitcom king?"},{"a":"atlanta","b":"insecure","q":"Which show understood us better?"},{"a":"the-wire","b":"snowfall","q":"The streets, told right?"},{"a":"good-times","b":"the-jeffersons","q":"The classic that mattered most?"},{"a":"drumline","b":"sister-act-2-back-in-the-h","q":"Best musical moment?"},{"a":"purple-rain","b":"the-wiz","q":"The musical monument?"},{"a":"new-jack-city","b":"dead-presidents","q":"The 90s crime saga?"},{"a":"the-boondocks","b":"the-proud-family","q":"Animated GOAT?"},{"a":"dreamgirls","b":"sparkle-2012","q":"The showstopper?"},{"a":"house-party","b":"next-friday","q":"The party movie?"}];
+function todayDebate(){
+  if(!DEBATES.length) return null;
+  var days=Math.floor(Date.now()/86400000);
+  var d=DEBATES[days%DEBATES.length];
+  var fa=find(d.a), fb=find(d.b);
+  if(!fa||!fb) return null;
+  return {id:'d'+(days%DEBATES.length)+'-'+d.a+'-vs-'+d.b, a:fa, b:fb, q:d.q};
+}
+function debatePicked(id){ try{ return localStorage.getItem('ws_dv_'+id); }catch(e){ return null; } }
+function renderDebate(){
+  var box=byId('debateBox'); if(!box)return;
+  var d=todayDebate(); if(!d){ box.style.display='none'; return; }
+  box.style.display='';
+  var picked=debatePicked(d.id);
+  function side(f,which){
+    var p=servePoster(f);
+    return '<button class="debate-side'+(picked===f.id?' picked':'')+'" '+(picked?'disabled':'')+' onclick="debateVote(\''+d.id+'\',\''+f.id+'\')">'+
+      '<div class="dp" style="'+(p?'background-image:url(\''+p+'\')':'background:'+f.grad)+'"></div>'+
+      '<div class="dt">'+esc(f.title)+'</div></button>';
+  }
+  box.innerHTML='<span class="eyebrow" style="color:var(--paprika-ink)">DINNER TABLE DEBATE \u00b7 TODAY ONLY</span>'+
+    '<div style="font-family:var(--display);font-weight:800;font-size:21px;margin-top:4px">'+esc(d.q)+'</div>'+
+    '<div class="debate-face">'+side(d.a,'a')+'<div class="debate-vs">VS</div>'+side(d.b,'b')+'</div>'+
+    '<div class="debate-split" id="debateSplit">'+(picked?'':'<div class="debate-nums" style="justify-content:center">Pick a side to see where the table stands.</div>')+'</div>';
+  if(picked) loadDebateTallies(d);
+}
+function loadDebateTallies(d){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/debate_tallies?debate_id=eq.'+encodeURIComponent(d.id),{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        var a=0,b=0,i; rows=rows||[];
+        for(i=0;i<rows.length;i++){ if(rows[i].pick===d.a.id)a=rows[i].n; if(rows[i].pick===d.b.id)b=rows[i].n; }
+        var tot=a+b; if(!tot){a=1;tot=1;}
+        var pa=Math.round(a*100/tot), pb=100-pa;
+        var el=byId('debateSplit'); if(!el)return;
+        el.innerHTML='<div class="debate-bar"><div class="l" style="width:'+pa+'%"></div><div class="r" style="width:'+pb+'%"></div></div>'+
+          '<div class="debate-nums"><span>'+esc(d.a.title)+' \u00b7 '+pa+'%</span><span>'+(a+b)+' vote'+((a+b)===1?'':'s')+'</span><span>'+esc(d.b.title)+' \u00b7 '+pb+'%</span></div>';
+      }).catch(function(){});
+  }catch(e){}
+}
+function debateVote(id,pick){
+  if(debatePicked(id))return;
+  try{ localStorage.setItem('ws_dv_'+id,pick); }catch(e){}
+  sfx('for'); track('debate',{debate:id,pick:pick});
+  if(sbConfigured()){
+    ensureIdentityThen(function(){
+      try{
+        fetch(SUPABASE_URL+'/rest/v1/debate_votes?on_conflict=debate_id,device_id',{
+          method:'POST',
+          headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body:JSON.stringify({debate_id:id,pick:pick,device_id:wsDevice(),user_id:myUid()})
+        }).then(function(){ renderDebate(); }).catch(function(){ renderDebate(); });
+      }catch(e){ renderDebate(); }
+    });
+  } else { renderDebate(); }
+  renderDebate();
+}
+/* ============ FIRST-VISIT SEAL MOMENT ============ */
+function maybeIntro(){
+  var seen=null; try{ seen=localStorage.getItem('ws_intro_v1'); }catch(e){}
+  if(seen) return;
+  var r=parseHash(); if(r.view!=='home') { try{ localStorage.setItem('ws_intro_v1','1'); }catch(e){} return; }
+  var el=byId('wsIntro'); if(!el) return;
+  el.hidden=false;
+  try{ localStorage.setItem('ws_intro_v1','1'); }catch(e){}
+  track('intro',{});
+  el._t=setTimeout(function(){ dismissIntro(); }, 7500);
+  el.addEventListener('click',function(ev){ if(ev.target===el) dismissIntro(); });
+}
+function dismissIntro(){
+  var el=byId('wsIntro'); if(!el) return;
+  if(el._t)clearTimeout(el._t);
+  el.classList.add('bye');
+  setTimeout(function(){ el.hidden=true; },500);
+}
 /* ============ COMING SOON (baked from TMDB person credits of the tracked 100;
    refresh alongside catalog imports) ============ */
 var COMING_SOON=[{"id":"cs-1368337","title":"The Odyssey","date":"2026-07-15","poster":"https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg","backdrop":"https://image.tmdb.org/t/p/w780/m3Pom6pbD51bBv3syz8NMHda3fz.jpg","trailer":"AyIZ9tiiN8I","cast":["Matt Damon","Tom Holland","Anne Hathaway","Robert Pattinson"],"dir":"Christopher Nolan","syn":"Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, ","tracked":2,"lead":false},{"id":"cs-969681","title":"Spider-Man: Brand New Day","date":"2026-07-29","poster":"https://image.tmdb.org/t/p/w500/yyB2VJEW3an2xCdcYCPQhn9QERR.jpg","backdrop":"https://image.tmdb.org/t/p/w780/vjMvFSmGUxEtqVdaZgvFee9XkZl.jpg","trailer":"62bIsvRcPv0","cast":["Tom Holland","Zendaya","Sadie Sink","Jacob Batalon"],"dir":"Destin Daniel Cretton","syn":"Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to ","tracked":1,"lead":true},{"id":"cs-1226699","title":"The Wrong Girls","date":"2026-08-14","poster":"https://image.tmdb.org/t/p/w500/rwLgmo32j1O91D2xPXOrGUcyzn5.jpg","backdrop":"https://image.tmdb.org/t/p/w780/opubkXrPWbXKXIv8hBsiamTmKoM.jpg","trailer":null,"cast":["Kristen Stewart","Alia Shawkat","LaKeith Stanfield","Zack Fox"],"dir":"Dylan Meyer","syn":"Two aimless young women inadvertently gain telepathic abilities after ingesting an experimental drug, pitting them against dangerous rivals pursuing the same powerful substance.","tracked":1,"lead":false},{"id":"cs-1380417","title":"By Any Means","date":"2026-09-03","poster":"https://image.tmdb.org/t/p/w500/f4hdIed8vh10O8TkQ1CkHS8MQ3G.jpg","backdrop":"https://image.tmdb.org/t/p/w780/eAouIDoMDhLetm6CtmDKIGEaaCi.jpg","trailer":"ej8pjisr0Pc","cast":["Mark Wahlberg","Yahya Abdul-Mateen II","Nicole Beharie","David Strathairn"],"dir":"Elegance Bratton","syn":"A young Black FBI agent is sent into 1960s Mississippi to investigate a wave of brutal killings targeting civil rights leaders. Forced to work alongside notorious mafia hitman Greg Scarpa, he finds hi","tracked":2,"lead":true},{"id":"cs-1522689","title":"Why Did I Get Married Again?","date":"2026-09-09","poster":"https://image.tmdb.org/t/p/w500/rwaxLuOkJ5mMvJU5juNaPcKADOW.jpg","backdrop":"https://image.tmdb.org/t/p/w780/lJYniNRM2i9wXnfWVHOB4PxygFZ.jpg","trailer":null,"cast":["Tyler Perry","Taraji P. Henson","Jill Scott","Richard T. Jones"],"dir":"Tyler Perry","syn":"The couples reunite for the destination wedding of Marcus and Angela's daughter, bringing drama old and new as they ask, \"Why did we get married again?\"","tracked":1,"lead":true},{"id":"cs-1148365","title":"Matchbox","date":"2026-10-08","poster":"https://image.tmdb.org/t/p/w500/nR6GyhyS1skt36VM4TKyqtUyQN3.jpg","backdrop":"https://image.tmdb.org/t/p/w780/bDHCTnzeWqNEajyFPhyRnWo0E4O.jpg","trailer":null,"cast":["John Cena","Jessica Biel","Danai Gurira","Sam Richardson"],"dir":"Sam Hargrave","syn":"When a group of former childhood friends reconnect, their reunion takes a wild turn as they stumble upon a dangerous international plot—and must save the world.","tracked":2,"lead":false},{"id":"cs-1458099","title":"The Only Living Pickpocket in New York","date":"2026-10-16","poster":"https://image.tmdb.org/t/p/w500/otJsgLxFhsa43dTknU9NqxdkdP4.jpg","backdrop":"https://image.tmdb.org/t/p/w780/oahXjJ0UxnkJthITntGMrXVXQsJ.jpg","trailer":null,"cast":["John Turturro","Giancarlo Esposito","Will Price","Tatiana Maslany"],"dir":"Noah Segan","syn":"Harry Lehman is an aging pickpocket who plies his trade with ever-diminishing returns in a drastically changed New York. Wallets stuffed with cash have been replaced by easily cancelled credit cards, ","tracked":1,"lead":true},{"id":"cs-791523","title":"Wildwood","date":"2026-10-22","poster":"https://image.tmdb.org/t/p/w500/feyEk59rpGXZHKqej9HkUHOnIg2.jpg","backdrop":"https://image.tmdb.org/t/p/w780/sl5NJ1vtyhP9Vr88bB4blULsJYp.jpg","trailer":"POneS8h1jyU","cast":["Peyton Elizabeth Lee","Jacob Tremblay","Carey Mulligan","Mahershala Ali"],"dir":"Travis Knight","syn":"Prue and her classmate Curtis are drawn into a forbidden magical forest filled with enchanted creatures, loyal allies, and formidable adversaries as they embark on a desperate quest to save Prue’s kid","tracked":2,"lead":false},{"id":"cs-1288211","title":"The Great Beyond","date":"2026-11-11","poster":"https://image.tmdb.org/t/p/w500/qq3Ynsokc1AtmExfeYoOnUclk3k.jpg","backdrop":null,"trailer":null,"cast":["Glen Powell","Jenna Ortega","Emma Mackey","Samuel L. Jackson"],"dir":"J.J. Abrams","syn":"An author of popular fantasy novels discovers that the mythical world he’s known for creating is actually real.","tracked":1,"lead":false},{"id":"cs-1286656","title":"I Play Rocky","date":"2026-11-13","poster":"https://image.tmdb.org/t/p/w500/9v0QSzKscxuorhk8d9Z11ixzIWE.jpg","backdrop":"https://image.tmdb.org/t/p/w780/fHglOsKJXo44dTXrjHoJJoxB3RO.jpg","trailer":null,"cast":["Anthony Ippolito","Stephan James","Matt Dillon","AnnaSophia Robb"],"dir":"Peter Farrelly","syn":"A struggling actor with a partially paralyzed face and a speech impediment writes a script that a big movie studio wants to buy, but he refuses to sell it unless he gets to play the lead. Turning down","tracked":1,"lead":true},{"id":"cs-1700713","title":"National Theatre at Home: The Story","date":"2026-12-01","poster":"https://image.tmdb.org/t/p/w500/fOTrhkERG72k9c0u4zC2jITjdft.jpg","backdrop":"https://image.tmdb.org/t/p/w780/udkD0AWrrRur8tof4xTZJgujTqB.jpg","trailer":null,"cast":["Letitia Wright","Lorraine Toussaint","Unique Spencer","Wilf Scolding"],"dir":"Clint Dyer","syn":"When a white teacher is killed in a black neighbourhood, four journalists race to get the headline – at any cost. But when shocking new evidence pulls them into the dark heart of the case, they are ea","tracked":1,"lead":true},{"id":"cs-1630464","title":"Clarissa","date":"2026-12-11","poster":"https://image.tmdb.org/t/p/w500/yrKycv1LhA18RZKr6YqbBRe8Zet.jpg","backdrop":"https://image.tmdb.org/t/p/w780/m0zUUOMaBKOF9kaaJycEX454jqe.jpg","trailer":null,"cast":["Sophie Okonedo","David Oyelowo","India Ria Amarteifio","Ayo Edebiri"],"dir":"Chuko Esiri","syn":"A modern reimagining of the Virginia Woolf novel Mrs. Dalloway. Follows society woman Clarissa as she prepares to host a party at her home in Lagos, Nigeria, where she will unexpectedly encounter once","tracked":1,"lead":true},{"id":"cs-923493","title":"Samo Lives","date":"2026-12-12","poster":"https://image.tmdb.org/t/p/w500/4bogKZqdE3PYXYrXeQCxIAZ7VVQ.jpg","backdrop":null,"trailer":null,"cast":["Kelvin Harrison Jr.","Danny Ramirez","Dane DeHaan","Priah Ferguson"],"dir":"Julius Onah","syn":"A vibrant portrait of Jean-Michel Basquiat, the NYC artist who revolutionized 1980s art. From street graffiti to gallery stardom, his bold Neo-expressionist works left an indelible mark on the art wor","tracked":1,"lead":true},{"id":"cs-1003596","title":"Avengers: Doomsday","date":"2026-12-16","poster":"https://image.tmdb.org/t/p/w500/8HkIe2i4ScpCkcX9SzZ9IPasqWV.jpg","backdrop":"https://image.tmdb.org/t/p/w780/4OZznMYFmQPP4orKgbLaWRyYmBb.jpg","trailer":"399Ez7WHK5s","cast":["Robert Downey Jr.","Chris Evans","Chris Hemsworth","Pedro Pascal"],"dir":"Joe Russo","syn":"Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.","tracked":1,"lead":false},{"id":"cs-1170608","title":"Dune: Part Three","date":"2026-12-16","poster":"https://image.tmdb.org/t/p/w500/b4wekkUaxExzOeGe7hKXzhnyXHt.jpg","backdrop":"https://image.tmdb.org/t/p/w780/5jnVGQXsc0oXLlWD9q6KuwacWQ2.jpg","trailer":"3_9vCamtuPY","cast":["Timothée Chalamet","Zendaya","Jason Momoa","Florence Pugh"],"dir":"Denis Villeneuve","syn":"As Emperor, Paul Atreides grapples with the consequences of his rise to power as political conspiracies and a galaxy-spanning holy war threaten the future he alone can foresee.","tracked":1,"lead":true},{"id":"cs-621304","title":"Children of Blood and Bone","date":"2027-01-14","poster":"https://image.tmdb.org/t/p/w500/pCzdQJzDuHgYjVpmVJXsOXPZ11r.jpg","backdrop":null,"trailer":null,"cast":["Thuso Mbedu","Amandla Stenberg","Damson Idris","Tosin Cole"],"dir":"Gina Prince-Bythewood","syn":"Zelie and her older brother Tzain form an alliance with the king’s daughter, Princess Amari, and son, Prince Inan, to fight back against his brutal rule.","tracked":7,"lead":true},{"id":"cs-1384758","title":"Ice Age: Boiling Point","date":"2027-02-03","poster":"https://image.tmdb.org/t/p/w500/hNfEXv5pKWw3raOghlspn8zFjm4.jpg","backdrop":"https://image.tmdb.org/t/p/w780/pJfMliqzzVzTU634zpYDMfYNX6c.jpg","trailer":"3fjmjX0QOIg","cast":["Ray Romano","Denis Leary","John Leguizamo","Simon Pegg"],"dir":"John C. Donkin","syn":"A madcap adventure filled with dinosaurs and lava that takes Manny, Sid, Diego, Ellie, Scrat and the herd through the uncharted regions of the dangerous Lost World.","tracked":2,"lead":false},{"id":"cs-1397972","title":"Panic Carefully","date":"2027-02-25","poster":"https://image.tmdb.org/t/p/w500/h8Nh8xIPUtztXxRxSBfLizwqY9.jpg","backdrop":null,"trailer":null,"cast":["Julia Roberts","Elizabeth Olsen","Eddie Redmayne","Brian Tyree Henry"],"dir":"Sam Esmail","syn":"Described as a paranoid thriller about a hunt for a cyber-terrorist in the vein of Mr. Robot and The Silence of the Lambs.","tracked":1,"lead":false},{"id":"cs-1497464","title":"Gatto","date":"2027-03-03","poster":"https://image.tmdb.org/t/p/w500/bgt6dSrwkJCMqdKWRpN4ZTAd1kL.jpg","backdrop":"https://image.tmdb.org/t/p/w780/gwD2auEzFOwGddfFDujwxYMwWy9.jpg","trailer":"NIKfR_uF_d0","cast":["Mark Ruffalo","Laurence Fishburne","Enrico Casarosa"],"dir":"Enrico Casarosa","syn":"After years of maneuvering the canal-ridden, superstitious city, a black cat named Nero begins to question whether he’s lived the right lives. Indebted to a local feline mob boss, Nero finds himself i","tracked":1,"lead":true},{"id":"cs-1401586","title":"Sonic the Hedgehog 4","date":"2027-03-11","poster":"https://image.tmdb.org/t/p/w500/t8uoHBODkFlSQJRL6qc4IclUBlH.jpg","backdrop":"https://image.tmdb.org/t/p/w780/4Sh2c33WHf1KxX8UYuYLIroaVEv.jpg","trailer":"YShjCIA9aXk","cast":["Ben Schwartz","Jim Carrey","Kristen Bell","Idris Elba"],"dir":"Jeff Fowler","syn":"Sonic the Hedgehog, joined by a new hero named Amy, faces a new technological nemesis known as Metal Sonic.","tracked":1,"lead":false},{"id":"cs-814795","title":"Pierre the Pigeon-Hawk","date":"2027-03-24","poster":"https://image.tmdb.org/t/p/w500/nD32Jqgh7DHVXriBcHMlwwzQkay.jpg","backdrop":"https://image.tmdb.org/t/p/w780/980RYfvb2sBGX9X6FHuHmyFhwWU.jpg","trailer":null,"cast":["will.i.am","Jennifer Hudson","Snoop Dogg","Whoopi Goldberg"],"dir":"John D. Eraklis","syn":"Set in NYC, the musically driven comedy centers on Pierre, born as a product of forbidden love between a hawk and a pigeon. Pierre is rejected by both communities. Tired of not fitting in, Pierre sets","tracked":1,"lead":false},{"id":"cs-1288438","title":"Godzilla x Kong: Supernova","date":"2027-03-25","poster":"https://image.tmdb.org/t/p/w500/gEGDDG6QMDFZ1sV32CGxvzaVPnv.jpg","backdrop":"https://image.tmdb.org/t/p/w780/gLjZC1YGcujC82DF5subtEXWg7F.jpg","trailer":"pa3nW0EYYcQ","cast":["Kaitlyn Dever","Harriet Joyce","Dan Stevens","Jack O'Connell"],"dir":"Grant Sputore","syn":"As the sixth installment in the MonsterVerse film series, this movie will delve deeper into the delicate relationship of coexistence and trust between humans and prehistoric behemoths. Meanwhile, the ","tracked":1,"lead":false},{"id":"cs-1306322","title":"Spaceballs: The New One","date":"2027-04-23","poster":"https://image.tmdb.org/t/p/w500/cb9y8JiwXoC1iss4yUjuspJcpsJ.jpg","backdrop":"https://image.tmdb.org/t/p/w780/6dOmk6RoedeTSelTj2b473xThZH.jpg","trailer":"WsK-KPi_w3w","cast":["Mel Brooks","Rick Moranis","Bill Pullman","Daphne Zuniga"],"dir":"Josh Greenbaum","syn":"Described as \"a non-prequel non-reboot sequel part two but with reboot elements franchise expansion film\". Plot TBA.","tracked":1,"lead":false},{"id":"cs-1138528","title":"Bad Fairies","date":"2027-05-20","poster":"https://image.tmdb.org/t/p/w500/h0JbLsPVEJModp73t2Os7a3z8Ay.jpg","backdrop":"https://image.tmdb.org/t/p/w780/hAogEcaosQ0RJBjZ8B9ehFgH69Q.jpg","trailer":null,"cast":["Cynthia Erivo","Ncuti Gatwa","James Acaster","Dee Bradley Baker"],"dir":"Megan Nicole Dong","syn":"An original musical comedy that follows a delightfully subversive gang of fairies as they shake up their magical world.","tracked":1,"lead":true},{"id":"cs-911916","title":"Spider-Man: Beyond the Spider-Verse","date":"2027-06-17","poster":"https://image.tmdb.org/t/p/w500/9PIhQqqI6Q4a5YjwMjxvzZcPJhf.jpg","backdrop":"https://image.tmdb.org/t/p/w780/6yZgfrPJGhXEHD2jH7hzmRt9KpQ.jpg","trailer":null,"cast":["Shameik Moore","Hailee Steinfeld","Brian Tyree Henry","Luna Lauren Vélez"],"dir":"Bob Persichetti","syn":"Hunted by Miguel O'Hara's Spider Society and betrayed by his friends, Miles finds himself in the darkest corners of the Spider-Verse in search of a way home. Knowing that his family has been not only ","tracked":2,"lead":false},{"id":"cs-421892","title":"Shrek 5","date":"2027-06-30","poster":"https://image.tmdb.org/t/p/w500/zVGvsXptUWd1PgptipLNoIQYytW.jpg","backdrop":"https://image.tmdb.org/t/p/w780/wHbZr627WHFPMpfskRwX6NBgjxv.jpg","trailer":"Swiz1XyfhcI","cast":["Mike Myers","Eddie Murphy","Cameron Diaz","Zendaya"],"dir":"Walt Dohrn","syn":"Shrek and Donkey team up for another whirlwind, big-city adventure.","tracked":2,"lead":true},{"id":"cs-656618","title":"High in the Clouds","date":"2027-07-07","poster":"https://image.tmdb.org/t/p/w500/4ciGq6LMflg2AkmUxx5XAMmg8FN.jpg","backdrop":"https://image.tmdb.org/t/p/w780/ye3LoKYqp4ab9q2sYXxsnfMzItP.jpg","trailer":null,"cast":["Himesh Patel","Céline Dion","Hannah Waddingham","Paul McCartney"],"dir":"Toby Genkel","syn":"After he accidentally sparked a revolution against Gretsch, the bossy diva-owl who has banned all music from his town, a teenage squirrel named Wirral embarks on an extraordinary journey to set music ","tracked":1,"lead":false},{"id":"cs-806704","title":"The Batman: Part II","date":"2027-09-30","poster":"https://image.tmdb.org/t/p/w500/qv4YTyxvaujP79a5XZJ6F4G8Nyi.jpg","backdrop":"https://image.tmdb.org/t/p/w780/naZFeXyIBdqIZo1JjSrrhbcTB4P.jpg","trailer":null,"cast":["Robert Pattinson","Jeffrey Wright","Andy Serkis","Colin Farrell"],"dir":"Matt Reeves","syn":"Sequel to the 2022 film The Batman.","tracked":1,"lead":true},{"id":"cs-1720841","title":"Jurassic World: Liberation","date":"2028-06-09","poster":"https://image.tmdb.org/t/p/w500/7WtteFZnNic9uhqyFUgSvlhcmh0.jpg","backdrop":null,"trailer":null,"cast":["Scarlett Johansson","Mahershala Ali"],"dir":"Gareth Edwards","syn":"Sequel to the Gareth Edwards movie, Jurassic World: Rebirth. 5th Jurassic World movie.","tracked":1,"lead":true},{"id":"cs-1110132","title":"Donkey","date":"2028-06-30","poster":"https://image.tmdb.org/t/p/w500/fvsSEJXkUV2tIh6kuCVk2icfFYw.jpg","backdrop":null,"trailer":null,"cast":["Eddie Murphy"],"dir":"Charlie Bean","syn":"Said to be the origin of how Donkey became Donkey. Plot TBA.","tracked":1,"lead":true},{"id":"cs-216527","title":"Avatar 4","date":"2029-12-19","poster":"https://image.tmdb.org/t/p/w500/qzMYKnT4MG1d0gnhwytr4cKhUvS.jpg","backdrop":null,"trailer":null,"cast":["Sam Worthington","Zoe Saldaña","Stephen Lang","Sigourney Weaver"],"dir":"James Cameron","syn":"The fourth installment of the franchise. Plot TBA.","tracked":1,"lead":true},{"id":"cs-393209","title":"Avatar 5","date":"2031-12-17","poster":"https://image.tmdb.org/t/p/w500/rtmmvqkIC5zDMEd638Es2woxbz8.jpg","backdrop":null,"trailer":null,"cast":["Sam Worthington","Zoe Saldaña","Sigourney Weaver","Oona Chaplin"],"dir":"James Cameron","syn":"The fifth installment of the franchise. Plot TBA.","tracked":1,"lead":true}];
@@ -3857,6 +4033,7 @@ function renderHome(){
       return '<button class="chip'+(HOME_SORT===o[0]?' on':'')+'" onclick="setHomeSort(\''+o[0]+'\')">'+o[1]+'</button>';
     }).join('');
   byId('mosaic').innerHTML=focus.map(cardHTML).join('');
+  renderDebate();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+
@@ -5601,7 +5778,7 @@ function forgetTmdbKey(){
 /* ============ INIT ============ */
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
-renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); ensureIdentity(); refreshAdminUI();
+renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); ensureIdentity(); refreshAdminUI(); maybeIntro();
 /* open whatever the URL points at (deep link / refresh / back button) */
 if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
