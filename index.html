@@ -207,6 +207,11 @@
   .rail::-webkit-scrollbar{height:7px}.rail::-webkit-scrollbar-thumb{background:var(--deep);border-radius:99px}
 
   .card{flex:0 0 136px;scroll-snap-align:start;cursor:pointer}
+  /* grid items must be allowed to shrink below their content (the score row),
+     or the page blows out past the phone's width, the browser zooms out, and
+     modals render tiny/off-center */
+  .mosaic .card,.grid-cards .card{min-width:0}
+  body{overflow-x:clip}
   .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px}
   .card .poster{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-2);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s,filter .24s}
   .card:hover .poster{box-shadow:var(--shadow-3)}
@@ -601,9 +606,11 @@
   .position .src{font-size:12px;color:rgba(245,235,214,.55);margin-top:12px}
 
   /* ============ MODAL ============ */
-  .overlay{position:fixed;inset:0;z-index:120;background:rgba(30,18,8,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay{position:fixed;inset:0;z-index:120;background:rgba(30,18,8,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:16px}
   .overlay.on{display:flex}
-  .modal{background:var(--panel);border-radius:var(--r-xl);width:100%;max-width:430px;padding:28px 28px 26px;box-shadow:var(--shadow-3);border:1px solid var(--line);position:relative;animation:pop .2s ease}
+  .modal{background:var(--panel);border-radius:var(--r-xl);width:100%;max-width:430px;padding:28px 28px 26px;box-shadow:var(--shadow-3);border:1px solid var(--line);position:relative;animation:pop .2s ease;
+    max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  @media(max-width:480px){ .modal{padding:24px 18px 20px;border-radius:18px} .modal h2{font-size:22px} }
   @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
   .modal.wide{max-width:840px}
   .tr-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;box-shadow:var(--shadow-2)}
@@ -683,6 +690,9 @@
     .cscores{gap:10px}
     .card .qv{gap:5px}
   }
+  @media (max-width:480px){
+    .mosaic{grid-template-columns:repeat(2,1fr)}
+  }
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     html{scroll-behavior:auto}
@@ -754,6 +764,7 @@
           <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
           <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button>
         </div>
+        <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
       </div>
 
@@ -2632,7 +2643,7 @@ function applyMeta(){
 /* The Table score needs a quorum before it counts — one early vote shouldn't
    crown (or bury) a film. Below quorum the score reads pending; the raw tally
    still shows so early voters see their vote land. */
-var TABLE_QUORUM=5;
+var TABLE_QUORUM=3;
 function tableScore(f){
   var tot=f.votes.for+f.votes.against;
   return (tot>=TABLE_QUORUM)? Math.round(f.votes.for/tot*100) : null;
@@ -3197,6 +3208,8 @@ function exportCuration(){
   catch(e){ showModal('<button class="close" onclick="closeModal()">✕</button><h2>Curation JSON</h2><p class="m-sub">Copy this to seed the backend.</p><textarea class="cur-export" readonly>'+esc(data)+'</textarea>'); byId('modal').classList.add('wide'); }
 }
 /* ============ HOME RENDER ============ */
+var HOME_SORT='curated';   // curated | popular | new
+function setHomeSort(v){ HOME_SORT=v; renderHome(); }
 function renderHome(){
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
     .filter(function(id,i,a){return a.indexOf(id)===i;})
@@ -3205,7 +3218,22 @@ function renderHome(){
     var pad=FILMS.filter(function(f){return !f.noart&&f.type!=='tv'&&scopeMatch(f)&&focus.indexOf(f.id)<0;}).map(function(f){return f.id;});
     focus=focus.concat(pad);
   }
+  if(HOME_SORT==='popular'){
+    // most votes first (the crowd decides), curated order breaks ties
+    var pos={}; focus.forEach(function(id,i){pos[id]=i;});
+    focus=focus.slice().sort(function(a,b){
+      var fa=find(a),fb=find(b);
+      var va=fa.votes.for+fa.votes.against, vb=fb.votes.for+fb.votes.against;
+      return (vb-va)||(pos[a]-pos[b]);
+    });
+  } else if(HOME_SORT==='new'){
+    focus=focus.slice().sort(function(a,b){ return find(b).year-find(a).year; });
+  }
   focus=focus.slice(0,12);   // exactly two/three/four full rows, no gaps
+  if(byId('homeSortBar')) byId('homeSortBar').innerHTML='<span class="flabel">Show</span>'+
+    [['curated','Curated'],['popular','Most voted'],['new','Newest']].map(function(o){
+      return '<button class="chip'+(HOME_SORT===o[0]?' on':'')+'" onclick="setHomeSort(\''+o[0]+'\')">'+o[1]+'</button>';
+    }).join('');
   byId('mosaic').innerHTML=focus.map(cardHTML).join('');
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
@@ -4160,13 +4188,45 @@ function loadPeople(cat){
   }catch(e){}
 }
 /* ============ IN THEATERS ============ */
-/* A discoverable home for showtimes: newest theatrical titles + a location box,
-   each opening the live showtimes lookup. */
+/* What's ACTUALLY in theaters right now: TMDB's live Now Playing list (US),
+   cross-referenced against the catalog. Cached for 12h. Falls back to
+   current-year titles if the fetch fails. */
+var NP_KEY='ws_nowplaying_v2';
+var _npTitles=null;
+function loadNowPlaying(cb){
+  if(_npTitles){ cb(_npTitles); return; }
+  try{
+    var c=JSON.parse(localStorage.getItem(NP_KEY)||'null');
+    if(c&&c.t&&(Date.now()-c.t)<43200000&&c.titles&&c.titles.length){ _npTitles=c.titles; cb(_npTitles); return; }
+  }catch(e){}
+  if(!TMDB_KEY){ cb(null); return; }
+  var titles=[], done=0, pages=[1,2,3,4];
+  pages.forEach(function(pg){
+    fetch('https://api.themoviedb.org/3/movie/now_playing?api_key='+TMDB_KEY+'&region=US&page='+pg)
+      .then(function(r){return r.json();})
+      .then(function(d){ (d&&d.results||[]).forEach(function(m){ if(m.title)titles.push(m.title.toLowerCase()); }); })
+      .catch(function(){})
+      .then(function(){ done++; if(done===pages.length){
+        if(titles.length){ _npTitles=titles; try{ localStorage.setItem(NP_KEY,JSON.stringify({t:Date.now(),titles:titles})); }catch(e){}; cb(titles); }
+        else cb(null);
+      }});
+  });
+}
 function renderTheaters(){
-  var now=2026;
-  // catalog order = curated prominence (flagships first); keep it, just filter to
-  // current theatrical-window movies.
-  var inTheaters=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && f.year>=now-1; });
+  var now=new Date().getFullYear();
+  // provisional list while the live Now Playing check runs: this year's titles
+  var inTheaters=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && f.year>=now; });
+  loadNowPlaying(function(titles){
+    var on=document.querySelector('.view.on');
+    if(!(on&&on.getAttribute('data-view')==='theaters'))return;
+    if(!titles)return;   // no key / fetch failed: keep the year-based fallback
+    var np=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && titles.indexOf(f.title.toLowerCase())>=0; });
+    if(np.length){ renderTheatersList(np,true); }
+    else renderTheatersList([],true);
+  });
+  renderTheatersList(inTheaters,false);
+}
+function renderTheatersList(inTheaters,verified){
   var head='<div class="browse-head"><span class="eyebrow">Now playing</span>'+
     '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">In Theaters</h1>'+
     '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:60ch">New releases the culture is watching. Drop your location and grab showtimes and tickets near you.</p></div>'+
@@ -4175,9 +4235,12 @@ function renderTheaters(){
       (app.zip?'✓ Showtimes set to <strong>'+esc(app.zip)+'</strong> — tap any title below.':'Set your ZIP or city once — every Showtimes button below uses it.')+'</p>';
   var body;
   if(!inTheaters.length){
-    body='<div class="empty"><h3>No new releases loaded yet.</h3><p>Fresh theatrical titles will appear here as the catalog updates.</p></div>';
+    body= verified
+      ? '<div class="empty"><h3>Nothing from the catalog is on the big screen this week.</h3><p>Check back — new releases land here the day they open.</p><button class="btn btn-gold" onclick="go(\'browse\')">Browse everything streaming</button></div>'
+      : '<div class="empty"><h3>No new releases loaded yet.</h3><p>Fresh theatrical titles will appear here as the catalog updates.</p></div>';
   } else {
-    body='<div class="grid-cards">'+inTheaters.map(function(f){ return theaterCard(f); }).join('')+'</div>';
+    body=(verified?'<p style="font-size:12px;color:var(--ink-3);margin:0 0 12px;font-family:var(--mono)">✓ VERIFIED AGAINST LIVE NOW-PLAYING LISTINGS</p>':'')+
+      '<div class="grid-cards">'+inTheaters.map(function(f){ return theaterCard(f); }).join('')+'</div>';
   }
   byId('theatersContent').innerHTML=head+body;
 }
@@ -4427,9 +4490,59 @@ function openAuth(mode){
     '<h2>'+(signup?'Join the table':'Welcome back')+'</h2><p class="m-sub">'+(signup?'Free to browse, vote, and comment.':'Sign in to pick up where you left off.')+'</p>'+
     (signup?'<div class="field"><label for="auName">Name</label><input id="auName" autocomplete="name" placeholder="What should we call you"></div>':'')+
     '<div class="field"><label for="auEmail">Email</label><input id="auEmail" type="email" autocomplete="email" placeholder="you@email.com"></div>'+
-    '<div class="field"><label for="auPass">Password</label><input id="auPass" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" placeholder="••••••••" onkeydown="if(event.key===\'Enter\')doAuth()"></div>'+
+    '<div class="field"><label for="auPass">Password'+(signup?' <span style="font-weight:500;color:var(--ink-3)">(8+ characters)</span>':'')+'</label>'+
+      '<div style="position:relative"><input id="auPass" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" placeholder="••••••••" style="padding-right:58px" onkeydown="if(event.key===\'Enter\')doAuth()">'+
+      '<button type="button" onclick="togglePw()" id="pwToggle" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--gold-ink);font-family:var(--mono)">SHOW</button></div></div>'+
     '<button class="btn btn-gold" id="auBtn" onclick="doAuth()">'+(signup?'Create account':'Sign in')+'</button>'+
-    '<p class="m-alt">'+(signup?'Already here? <a onclick="openAuth(\'signin\')">Sign in</a>':'New here? <a onclick="openAuth(\'signup\')">Create account</a>')+'</p>');
+    '<p class="m-alt">'+(signup
+      ?'Already here? <a onclick="openAuth(\'signin\')">Sign in</a>'
+      :'New here? <a onclick="openAuth(\'signup\')">Create account</a> · <a onclick="forgotPassword()">Forgot password?</a>')+'</p>');
+}
+function togglePw(){
+  var i=byId('auPass')||byId('rpPass'), b=byId('pwToggle');
+  if(!i)return;
+  var show=i.type==='password';
+  i.type=show?'text':'password';
+  if(b){ b.textContent=show?'HIDE':'SHOW'; b.setAttribute('aria-label',show?'Hide password':'Show password'); }
+}
+/* ---- password recovery: request the reset email... ---- */
+function forgotPassword(){
+  var e=byId('auEmail')?byId('auEmail').value.trim():'';
+  if(!e||e.indexOf('@')<1){ toast('Type your email above first, then tap Forgot password.'); if(byId('auEmail'))byId('auEmail').focus(); return; }
+  if(!sbConfigured()){ toast('Backend not configured.'); return; }
+  fetch(SUPABASE_URL+'/auth/v1/recover',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({email:e})})
+    .then(function(r){ toast(r.ok?'Reset link sent to '+e+' — check your inbox (and spam).':'Could not send — try again in a minute.'); })
+    .catch(function(){ toast('Network error — try again.'); });
+}
+/* ---- ...and land the reset: Supabase redirects back with #access_token&type=recovery ---- */
+function checkRecoveryHash(){
+  var h=location.hash||'';
+  if(h.indexOf('type=recovery')<0||h.indexOf('access_token=')<0) return false;
+  var m=h.match(/access_token=([^&]+)/); if(!m) return false;
+  var token=decodeURIComponent(m[1]);
+  location.hash='#/';
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Set a new password</h2><p class="m-sub">You’re verified — pick a new password for your account.</p>'+
+    '<div class="field"><label for="rpPass">New password <span style="font-weight:500;color:var(--ink-3)">(8+ characters)</span></label>'+
+    '<div style="position:relative"><input id="rpPass" type="password" autocomplete="new-password" placeholder="••••••••" style="padding-right:58px" onkeydown="if(event.key===\'Enter\')doResetPassword()">'+
+    '<button type="button" onclick="togglePw()" id="pwToggle" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--gold-ink);font-family:var(--mono)">SHOW</button></div></div>'+
+    '<button class="btn btn-gold" onclick="doResetPassword()">Save new password</button>');
+  window._recoveryToken=token;
+  return true;
+}
+function doResetPassword(){
+  var p=byId('rpPass')?byId('rpPass').value:'';
+  if(p.length<8){ toast('Password needs at least 8 characters.'); return; }
+  fetch(SUPABASE_URL+'/auth/v1/user',{method:'PUT',
+    headers:sbHeaders({'Content-Type':'application/json','Authorization':'Bearer '+window._recoveryToken}),
+    body:JSON.stringify({password:p})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      if(res.ok){ closeModal(); toast('Password updated — sign in with it now.'); openAuth('signin'); }
+      else toast(res.d&&(res.d.msg||res.d.message)||'Could not update — the link may have expired.');
+    })
+    .catch(function(){ toast('Network error — try again.'); });
 }
 /* ============ AUTH — real Supabase email + password (GoTrue) ============ */
 /* Falls back to a local-only session when Supabase isn't configured, so the
@@ -4468,7 +4581,8 @@ function doAuth(){
     return;
   }
   if(!email||email.indexOf('@')<1){ toast('Enter a valid email address.'); return; }
-  if(!pass||pass.length<6){ toast('Password needs at least 6 characters.'); return; }
+  if(signup && (!pass||pass.length<8)){ toast('Password needs at least 8 characters.'); return; }
+  if(!signup && !pass){ toast('Enter your password.'); return; }
   authBusy(true);
   var url=SUPABASE_URL+(signup?'/auth/v1/signup':'/auth/v1/token?grant_type=password');
   var body=signup?{email:email,password:pass,data:{name:name}}:{email:email,password:pass};
@@ -4514,7 +4628,7 @@ function openWelcome(){
     '<h2>You’re at the table'+(app.name?', '+esc(app.name.split(' ')[0]):'')+'.</h2>'+
     '<p class="m-sub">Three ways to start seasoning:</p>'+
     '<ul class="tier-legend" style="gap:12px;font-size:14px;color:var(--ink-2);list-style:none">'+
-    '<li><b>Cast your first vote.</b> Open any film and call it — <em>It’s Seasoned</em> or <em>Send It Back</em>. Five votes give a film its first Table score.</li>'+
+    '<li><b>Cast your first vote.</b> Open any film and call it — <em>It’s Seasoned</em> or <em>Send It Back</em>. Three votes give a film its first Table score.</li>'+
     '<li><b>Rank the greats.</b> Push your Top Actors and Actresses up or down — every vote moves the board.</li>'+
     '<li><b>Build My Plate.</b> Save what you’re watching next and take the taste quiz for picks made for you.</li>'+
     '</ul>'+
@@ -4599,7 +4713,7 @@ applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
 renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); refreshAdminUI();
 /* open whatever the URL points at (deep link / refresh / back button) */
-if(!checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
+if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
 loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores();
 </script>
