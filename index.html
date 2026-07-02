@@ -3491,13 +3491,15 @@ function wsDevice(){ try{ var d=localStorage.getItem('ws_device'); if(!d){ d=(cr
 /* Upsert this device's vote to Supabase (one row per device per film). No-op if unconfigured. */
 function syncVote(slug,side){
   if(!SUPABASE_URL||!SUPABASE_KEY) return;
-  try{
-    fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
-      method:'POST',
-      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
-      body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
-    }).then(function(r){ if(r&&r.status===403||r&&r.status===429){ toast('Whoa — slow down a sec.'); } }).catch(function(){});
-  }catch(e){}
+  ensureIdentityThen(function(){
+    try{
+      fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
+        method:'POST',
+        headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+        body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
+      }).then(function(r){ if(r&&(r.status===403||r.status===429)){ toast('Whoa — slow down a sec.'); } }).catch(function(){});
+    }catch(e){}
+  });
 }
 /* Pull the live aggregate counts for a film and refresh The Table. No-op if unconfigured. */
 function loadBackendVotes(slug){
@@ -3628,11 +3630,13 @@ function loadBackendComments(slug){
 }
 function syncComment(slug,c){
   if(!sbConfigured())return;
-  try{
-    fetch(SUPABASE_URL+'/rest/v1/comments',{method:'POST',
-      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-      body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice(),user_id:myUid()})}).catch(function(){});
-  }catch(e){}
+  ensureIdentityThen(function(){
+    try{
+      fetch(SUPABASE_URL+'/rest/v1/comments',{method:'POST',
+        headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+        body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice(),user_id:myUid()})}).catch(function(){});
+    }catch(e){}
+  });
 }
 function reportBackend(id){
   if(!sbConfigured()||id==null)return;
@@ -4199,16 +4203,18 @@ function renderPeopleList(cat){
 }
 function syncPersonVote(pid,dir,remove){
   if(!sbConfigured())return;
-  try{
-    if(remove){
-      fetch(SUPABASE_URL+'/rest/v1/person_votes?person_id=eq.'+pid+'&device_id=eq.'+encodeURIComponent(wsDevice()),
-        {method:'DELETE',headers:sbVoteHeaders()}).catch(function(){});
-    } else {
-      fetch(SUPABASE_URL+'/rest/v1/person_votes?on_conflict=person_id,device_id',
-        {method:'POST',headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
-         body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir,user_id:myUid()})}).then(function(r){ if(r&&(r.status===403||r.status===429)) toast('Whoa — slow down a sec.'); }).catch(function(){});
-    }
-  }catch(e){}
+  ensureIdentityThen(function(){
+    try{
+      if(remove){
+        fetch(SUPABASE_URL+'/rest/v1/person_votes?person_id=eq.'+pid+'&device_id=eq.'+encodeURIComponent(wsDevice()),
+          {method:'DELETE',headers:sbVoteHeaders()}).catch(function(){});
+      } else {
+        fetch(SUPABASE_URL+'/rest/v1/person_votes?on_conflict=person_id,device_id',
+          {method:'POST',headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+           body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir,user_id:myUid()})}).then(function(r){ if(r&&(r.status===403||r.status===429)) toast('Whoa — slow down a sec.'); }).catch(function(){});
+      }
+    }catch(e){}
+  });
 }
 function loadPeople(cat){
   if(!sbConfigured())return;
@@ -4698,13 +4704,24 @@ function authRestore(){
 /* Give every visitor a silent, real identity so votes tie to auth.uid() (forge-proof,
    rate-limited) instead of a spoofable device string. Falls back to device_id if the
    project hasn't enabled Anonymous sign-ins yet. */
+var _identityPromise=null, _anonDisabled=false;
 function ensureIdentity(){
-  if(!sbConfigured()) return;
-  if(authSession&&authSession.access_token) return;   // already have an account or anon identity
-  fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})})
-    .then(function(r){ return r.ok?r.json():null; })
-    .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); loadAllBackendVotes(); } })
-    .catch(function(){});
+  if(!sbConfigured()) return Promise.resolve(false);
+  if(haveSession()) return Promise.resolve(true);
+  if(_anonDisabled) return Promise.resolve(false);
+  if(_identityPromise) return _identityPromise;
+  _identityPromise=fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})})
+    .then(function(r){ if(r.status===422){ _anonDisabled=true; } return r.ok?r.json():null; })
+    .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); loadAllBackendVotes(); return true; } return false; })
+    .catch(function(){ return false; })
+    .then(function(v){ _identityPromise=null; return v; });
+  return _identityPromise;
+}
+/* run fn once we hold a real identity (so the write carries auth.uid()); if
+   anonymous auth is unavailable, run it anyway on the device fallback. */
+function ensureIdentityThen(fn){
+  if(haveSession()||!sbConfigured()||_anonDisabled){ fn(); return; }
+  ensureIdentity().then(function(){ fn(); });
 }
 /* Vote requests must carry the user's JWT when we have one, or RLS rejects the
    user_id as forged. Device-only (no session) keeps working during transition. */
