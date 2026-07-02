@@ -4006,6 +4006,11 @@ function fetchShowtimes(f,zip){
     .then(function(d){
       var el=byId('stResults'); if(!el)return;
       if(d&&d.days&&d.days.length&&d.days[0].theaters&&d.days[0].theaters.length){ el.innerHTML=renderRealShowtimes(f,zip,d.days); }
+      else if(d&&d.not_in_theaters){
+        el.innerHTML='<div class="empty" style="padding:26px 16px"><h3 style="font-size:19px">This one has left theaters.</h3>'+
+          '<p>No showtimes near '+esc(zip)+' — but you can stream it tonight.</p>'+
+          '<a class="btn btn-gold" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">Where to stream it ↗</a></div>';
+      }
       else el.innerHTML=sampleShowtimes(f,zip);
     })
     .catch(function(){ var el=byId('stResults'); if(el) el.innerHTML=sampleShowtimes(f,zip); });
