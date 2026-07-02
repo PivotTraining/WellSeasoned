@@ -3020,6 +3020,7 @@ function render(view,arg){
   else if(view==='theaters')renderTheaters();
   else if(view==='you')renderYou();
   if(view!=='film')applyMetaTags(view);
+  track('view',{view:view});
 }
 function go(view,arg){
   var h=hashFor(view,arg);
@@ -3149,7 +3150,7 @@ function buildShareCard(f,done){
 var _shareCanvas=null;
 function openShareCard(id){
   var f=find(id); if(!f)return;
-  _shareCanvas=null;   // a previous film's card must never be saved/shared for this one
+  _shareCanvas=null; track('share',{film:id});   // a previous film's card must never be saved/shared for this one
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Share the verdict</h2><p class="m-sub">'+esc(f.title)+' — post the card, spread the seasoning.</p>'+
     '<div id="scWrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Cooking up your card…</span></div>'+
@@ -3650,6 +3651,7 @@ function submitWaitlist(email,plan){
       body:JSON.stringify({email:email,plan:plan||null})}).catch(function(){}); }catch(e){}
   }
   try{ localStorage.setItem('ws_waitlist',email); }catch(e){}
+  track('waitlist',{plan:plan||null});
   return true;
 }
 function openWaitlist(plan){
@@ -3685,6 +3687,7 @@ function doApplyKitchen(){
   var body={name:name||null,email:e,outlet:outlet||null,work_url:work||null,user_id:app.userId||null};
   var finish=function(already){
     try{ localStorage.setItem('ws_applied_kitchen',e); }catch(_){}
+    if(!already)track('kitchen_apply');
     app.kitchenApp=already?'received':'received';
     showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
       '<h2>'+(already?'You’re already in review':'Application received')+'</h2>'+
@@ -3788,7 +3791,7 @@ function applyVote(id,side){
 function castVote(id,side){
   var f=find(id), prev=app.votes[id];
   if(prev===side){toast('You already picked '+(side==='for'?'seasoned':'sent back')+'.');return;}
-  applyVote(id,side);
+  applyVote(id,side); track('vote',{film:id,side:side});
   byId('btnFor').classList.toggle('on',side==='for'); byId('btnAgainst').classList.toggle('on',side==='against');
   byId('stanceHint').textContent = side==='for'?'Vote counted \u2713 Want to say why? Totally optional.':'Vote counted \u2713 Want to say why? Totally optional.';
   if(side==='for'){ sprinkle(byId('btnFor')); sfx('for'); stampSeal(f); toast('Seasoned. Your vote counted.'); }
@@ -3823,7 +3826,7 @@ function postComment(id){
   var c={name:name||app.name||'Guest',stance:app.votes[id],text:t,reported:false,mine:true};
   if(!app.comments[id])app.comments[id]=[];
   app.comments[id].unshift(c); f._comments.unshift(c);
-  syncComment(id,c);
+  syncComment(id,c); track('comment',{film:id,stance:c.stance});
   byId('cText').value='';byId('cName').value='';renderComments(f);saveState();toast('Posted to The Table.');
 }
 
@@ -3999,7 +4002,7 @@ function openShowtimes(id){
 function runShowtimes(id){
   var f=find(id), el=byId('stZip'), zip=el?el.value.trim():app.zip;
   if(!zip){toast('Enter a ZIP or city first.');if(el)el.focus();return;}
-  app.zip=zip; saveState();
+  app.zip=zip; saveState(); track('showtimes',{film:id});
   // Always try the live proxy first; it fails fast (501) when no provider key
   // is configured on Vercel and we fall back to sample rows + real links.
   fetchShowtimes(f,zip);
@@ -4184,7 +4187,7 @@ function personVote(pid,dir){
   if(prev==='up')p.net--; else if(prev==='down')p.net++;
   if(!remove){ if(dir==='up')p.net++; else p.net--; }
   if(remove){ delete app.personVotes[pid]; } else { app.personVotes[pid]=dir; }
-  saveState();
+  saveState(); track('person_vote',{id:pid,dir:dir,remove:remove});
   sortPeople(list);
   renderPeopleList(cat);
   syncPersonVote(pid,dir,remove);
@@ -4654,6 +4657,7 @@ function doAuth(){
 }
 /* apply a session, close the modal, greet, and run any pending post-auth action */
 function authWelcome(sess){
+  var isNew=!!(byId('auName')); track(isNew?'signup':'signin');
   authApply(normalizeSession(sess)); closeModal();
   toast(app.name?('Welcome to the table, '+app.name.split(' ')[0]+'.'):'Welcome to the table.');
   if(app._afterAuth){var cb=app._afterAuth;app._afterAuth=null;cb();return;}
@@ -4707,6 +4711,18 @@ function ensureIdentity(){
 function haveSession(){ return !!(authSession&&authSession.access_token); }
 function sbVoteHeaders(extra){ return haveSession()?sbUserHeaders(extra):sbHeaders(extra); }
 function myUid(){ return haveSession()?(app.userId||null):null; }
+/* ============ ANALYTICS ============ */
+/* First-party, privacy-first event log (no PII, no IPs). Also mirrors to Vercel
+   Web Analytics custom events when that's enabled. Fire-and-forget. */
+function track(name,props){
+  try{ if(window.va) window.va('event',{name:name}); }catch(e){}
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/events',{method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify({name:name,props:props||null,path:location.hash||'/',device_id:wsDevice(),user_id:myUid()})}).catch(function(){});
+  }catch(e){}
+}
 function initials(name){
   if(!name) return 'YT';
   var p=name.trim().split(/\s+/);
@@ -4772,5 +4788,9 @@ if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_
 /* bring the catalog to life from the backend when configured */
 loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores();
 </script>
+<!-- Vercel Web Analytics (cookieless, privacy-friendly). Enable Web Analytics in
+     Vercel → Project → Analytics; until then this 404s harmlessly. -->
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
