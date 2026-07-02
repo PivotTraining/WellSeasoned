@@ -150,15 +150,16 @@
   .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
   .brand-badge{width:38px;height:38px;border-radius:11px;background:var(--ink);display:grid;place-items:center;flex:none;box-shadow:0 3px 10px -3px rgba(70,46,18,.5);border:1.5px solid var(--gold)}
   .brand-type{display:flex;flex-direction:column;line-height:1}
-  .brand-word{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--ink);line-height:.9}
+  .brand-word{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--ink);line-height:.9;white-space:nowrap}
   .brand-tag{font-size:8px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-ink);margin-top:3px}
   .brand .dot{display:none}
-  .topnav nav{display:flex;gap:26px;margin-left:14px;align-items:center;height:100%}
-  .topnav nav a{font-size:15px;font-weight:700;letter-spacing:.01em;line-height:1;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;height:100%;padding:0 1px;border-bottom:2.5px solid transparent;margin-bottom:-1px}
+  .topnav nav{display:flex;gap:20px;margin-left:12px;align-items:center;height:100%}
+  .topnav nav a{font-size:15px;font-weight:700;letter-spacing:.01em;line-height:1;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;height:100%;padding:0 1px;border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap}
   .topnav nav a:hover{color:var(--ink)}
   .topnav nav a.active{color:var(--ink);border-color:var(--paprika)}
-  .topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px}
-  .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;min-width:210px}
+  .topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;flex:none}
+  .topnav .right .btn{white-space:nowrap}
+  .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;min-width:150px;max-width:230px;flex:1}
   .search input{background:none;border:none;outline:none;color:var(--ink);font:inherit;font-size:14px;width:100%}
   .search input::placeholder{color:var(--ink-3)}
   .avatar{width:34px;height:34px;border-radius:50%;background:var(--sumac);color:var(--on-dark);display:grid;place-items:center;font-weight:800;font-size:14px;cursor:pointer}
