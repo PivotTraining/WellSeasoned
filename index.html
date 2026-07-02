@@ -721,6 +721,10 @@
   }
   @media (max-width:640px){
     .aura,.cert-seal{filter:none!important}   /* glow costs GPU memory phones don't have */
+    /* one-tap voting on phones: cards are narrow, so the two pills stack into
+       full-width thumb targets instead of getting crushed side by side */
+    .qv-row{flex-direction:column;gap:5px}
+    .qv{padding:9px 6px;font-size:12.5px}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
