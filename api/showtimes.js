@@ -11,10 +11,12 @@ export default async function handler(req, res) {
   if (!q || !location) return res.status(400).json({ error: 'missing_params' });
 
   try {
+    // Put the place in the query itself: Google's showtimes panel triggers on
+    // "<title> showtimes near <zip/city>", and SerpApi's `location` param
+    // rejects bare ZIP codes anyway.
     const url =
       'https://serpapi.com/search.json?engine=google&google_domain=google.com&hl=en&gl=us' +
-      '&q=' + encodeURIComponent(q + ' theater showtimes') +
-      '&location=' + encodeURIComponent(String(location) + ', United States') +
+      '&q=' + encodeURIComponent(q + ' showtimes near ' + String(location)) +
       '&api_key=' + key;
     const r = await fetch(url);
     if (!r.ok) return res.status(502).json({ error: 'provider_error' });
