@@ -3881,7 +3881,9 @@ function loadDebateTallies(d){
       .then(function(r){return r.json();}).then(function(rows){
         var a=0,b=0,i; rows=rows||[];
         for(i=0;i<rows.length;i++){ if(rows[i].pick===d.a.id)a=rows[i].n; if(rows[i].pick===d.b.id)b=rows[i].n; }
-        var tot=a+b; if(!tot){a=1;tot=1;}
+        var mine=debatePicked(d.id);
+        if(mine&&!a&&!b){ if(mine===d.a.id)a=1; else b=1; }   // my vote is in flight; count it honestly
+        var tot=a+b; if(!tot)return;
         var pa=Math.round(a*100/tot), pb=100-pa;
         var el=byId('debateSplit'); if(!el)return;
         el.innerHTML='<div class="debate-bar"><div class="l" style="width:'+pa+'%"></div><div class="r" style="width:'+pb+'%"></div></div>'+
@@ -3896,9 +3898,9 @@ function debateVote(id,pick){
   if(sbConfigured()){
     ensureIdentityThen(function(){
       try{
-        fetch(SUPABASE_URL+'/rest/v1/debate_votes?on_conflict=debate_id,device_id',{
+        fetch(SUPABASE_URL+'/rest/v1/debate_votes',{
           method:'POST',
-          headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+          headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
           body:JSON.stringify({debate_id:id,pick:pick,device_id:wsDevice(),user_id:myUid()})
         }).then(function(){ renderDebate(); }).catch(function(){ renderDebate(); });
       }catch(e){ renderDebate(); }
