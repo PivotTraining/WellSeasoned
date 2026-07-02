@@ -231,11 +231,6 @@
   .card .c-sub{font-size:12px;color:var(--ink-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card .c-where{font-size:12px;color:var(--gold-ink);font-weight:700;margin-top:4px;display:inline-flex;align-items:center;gap:5px}
   /* quick vote on cards */
-  .card .qv{display:flex;gap:6px;margin-top:8px}
-  .qv-btn{flex:1;font-family:var(--sans);font-size:11px;font-weight:700;border:1px solid var(--line-strong);background:var(--panel);border-radius:8px;padding:6px 4px;cursor:pointer;color:var(--ink-2);white-space:nowrap;transition:background .14s,color .14s,border-color .14s}
-  .qv-btn:hover{border-color:var(--gold-ink);color:var(--ink)}
-  .qv-btn.qv-for.on{background:var(--gold);color:#20160B;border-color:var(--gold)}
-  .qv-btn.qv-against.on{background:var(--paprika);color:#fff;border-color:var(--paprika)}
 
   /* real poster image (hydrated via TMDB) sits under the scrim + grain */
   .poster-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
@@ -435,8 +430,7 @@
   .review{padding:14px 0;border-top:1px solid var(--line)}
   .review:first-of-type{border-top:none;padding-top:4px}
   .review .rv-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
-  .review .rv-crit{font-weight:700;font-size:14.5px;cursor:pointer}
-  .review .rv-crit:hover{color:var(--gold-ink)}
+  .review .rv-crit{font-weight:700;font-size:14.5px}
   .review .rv-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--herb-ink);background:rgba(46,139,87,.15);padding:2px 7px;border-radius:99px}
   .review .rv-out{font-size:12.5px;color:var(--ink-3)}
   .review p{font-family:var(--serif);font-size:19px;color:var(--ink);font-style:italic;line-height:1.42}
@@ -689,7 +683,6 @@
     .hero-top h1{font-size:clamp(26px,8vw,38px)}
     .vote-btns .vbtn{min-width:0}
     .cscores{gap:10px}
-    .card .qv{gap:5px}
   }
   @media (max-width:480px){
     .mosaic{grid-template-columns:repeat(2,1fr)}
@@ -2858,7 +2851,7 @@ function hydrateFromTMDB(){
 }
 
 /* ============ FILM ROOM: backdrop + cast/crew (TMDB, lazy per film) ============ */
-var MEDIA_CACHE_KEY='ws_media_v1';
+var MEDIA_CACHE_KEY='ws_media_v2';   // v2: purge wrong movie-matched media for TV titles
 function loadMediaCache(){ try{return JSON.parse(localStorage.getItem(MEDIA_CACHE_KEY)||'{}');}catch(e){return {};} }
 function saveMediaCache(c){ try{localStorage.setItem(MEDIA_CACHE_KEY,JSON.stringify(c));}catch(e){} }
 function applyMedia(f,m){
@@ -2900,11 +2893,17 @@ function hydrateFilmMedia(f){
   var cache=loadMediaCache();
   if(cache[f.id]){ applyMedia(f,cache[f.id]); return Promise.resolve(false); }
   if(!TMDB_KEY||f.noart) return Promise.resolve(false);
-  return fetch('https://api.themoviedb.org/3/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&year='+f.year)
+  // Series must use the TV endpoints — the movie search either misses them or
+  // caches a wrong same-named film's backdrop/cast permanently.
+  var isTV=f.type==='tv';
+  var searchUrl=isTV
+    ? 'https://api.themoviedb.org/3/search/tv?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&first_air_date_year='+f.year
+    : 'https://api.themoviedb.org/3/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&year='+f.year;
+  return fetch(searchUrl)
     .then(function(r){return r.json();})
     .then(function(d){ var hit=d&&d.results&&d.results[0]; if(!hit)return null;
       var m={b:hit.backdrop_path||null};
-      return fetch('https://api.themoviedb.org/3/movie/'+hit.id+'/credits?api_key='+TMDB_KEY)
+      return fetch('https://api.themoviedb.org/3/'+(isTV?'tv':'movie')+'/'+hit.id+'/credits?api_key='+TMDB_KEY)
         .then(function(r){return r.json();})
         .then(function(cr){
           if(cr&&cr.cast) m.cast=cr.cast.slice(0,12).map(function(c){ return {n:c.name,c:c.character,p:c.profile_path}; });
@@ -3005,7 +3004,8 @@ function parseHash(){
   if(!h)return {view:'home',arg:null};
   var parts=h.split('/'), view=parts[0]||'home';
   if(!KNOWN_VIEWS[view])return {view:'home',arg:null};
-  var arg=parts.length>1?decodeURIComponent(parts.slice(1).join('/')):null;
+  var arg=null;
+  if(parts.length>1){ var raw=parts.slice(1).join('/'); try{ arg=decodeURIComponent(raw); }catch(e){ arg=raw; } }
   return {view:view,arg:arg};
 }
 function render(view,arg){
@@ -3149,6 +3149,7 @@ function buildShareCard(f,done){
 var _shareCanvas=null;
 function openShareCard(id){
   var f=find(id); if(!f)return;
+  _shareCanvas=null;   // a previous film's card must never be saved/shared for this one
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Share the verdict</h2><p class="m-sub">'+esc(f.title)+' — post the card, spread the seasoning.</p>'+
     '<div id="scWrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Cooking up your card…</span></div>'+
@@ -3330,8 +3331,10 @@ function cardPeppers(f){
   if(sp.s){out+=pepperSVG('#C4302B',13);lab.push('sexual content');}
   return out?'<span class="card-peppers" title="Content: '+lab.join(', ')+'">'+out+'</span>':'';
 }
+var _activeFilm=null;   // which film the film view currently shows; async loaders must match it
 function renderFilm(id){
   var f=find(id); if(!f){go('home');return;}
+  _activeFilm=id;
   var ts=tableScore(f), isCert=certified(f), split=Math.abs(f.k-ts);
   applyMedia(f, loadMediaCache()[f.id]);   // paint cached backdrop/cast on first render
   var reviews=f.reviews.map(function(r){
@@ -3405,7 +3408,7 @@ function renderFilm(id){
   hydrateFilmMedia(f).then(function(changed){
     if(!changed)return;
     var on=document.querySelector('.view.on');
-    if(!(on&&on.getAttribute('data-view')==='film'&&byId('roomBackdrop')))return;
+    if(!(on&&on.getAttribute('data-view')==='film'&&_activeFilm===f.id&&byId('roomBackdrop')))return;
     byId('roomBackdrop').setAttribute('style',roomBg(f));
     var cs=byId('castSection'); if(cs) cs.outerHTML=castCrewHTML(f);
   });
@@ -3504,9 +3507,10 @@ function loadBackendVotes(slug){
     }).then(function(r){return r.json();}).then(function(rows){
       var f=find(slug); if(!f)return; var c=(rows&&rows[0])||{for_count:0,against_count:0};
       f.votes={for:c.for_count||0,against:c.against_count||0}; app.tally[slug]={for:f.votes.for,against:f.votes.against};
-      if(document.querySelector('.view.on')&&document.querySelector('.view.on').getAttribute('data-view')==='film'){
+      if(document.querySelector('.view.on')&&document.querySelector('.view.on').getAttribute('data-view')==='film'&&_activeFilm===slug){
         var ts=tableScore(f), tr=byId('tblRing'); if(tr) tr.innerHTML=auraRing(ts,tier(ts),72,true);
         if(byId('tblCount')) byId('tblCount').textContent=tblCountText(f);
+        if(byId('forNum')) renderVotes(f);   // keep the tally row + split bar in sync with backend counts
         refreshSeasoning(f); animateAura(byId('filmContent'));
       }
     }).catch(function(){});
@@ -3546,7 +3550,7 @@ function loadKitchenReviews(slug){
                   s:r.score, q:r.body||'', uid:r.user_id};
         });
         var on=document.querySelector('.view.on');
-        if(on&&on.getAttribute('data-view')==='film'&&JSON.stringify(f.reviews)!==prev) renderFilm(slug);
+        if(on&&on.getAttribute('data-view')==='film'&&_activeFilm===slug&&JSON.stringify(f.reviews)!==prev) renderFilm(slug);
       }).catch(function(){});
   }catch(e){}
 }
@@ -3617,7 +3621,7 @@ function loadBackendComments(slug){
         var backend=rows.map(function(r){ return {id:r.id,name:r.name||'Guest',stance:r.stance||'for',text:r.body,reported:false,backend:true}; });
         f._comments=(app.comments[slug]||[]).slice().concat(backend);
         var on=document.querySelector('.view.on');
-        if(on&&on.getAttribute('data-view')==='film')renderComments(f);
+        if(on&&on.getAttribute('data-view')==='film'&&_activeFilm===slug)renderComments(f);
       }).catch(function(){});
   }catch(e){}
 }
@@ -3775,18 +3779,10 @@ function publishCuration(){
 function applyVote(id,side){
   var f=find(id), prev=app.votes[id];
   if(prev===side) return false;
-  if(prev==='for')f.votes.for--; if(prev==='against')f.votes.against--;
+  if(prev==='for')f.votes.for=Math.max(0,f.votes.for-1); if(prev==='against')f.votes.against=Math.max(0,f.votes.against-1);
   app.votes[id]=side; if(side==='for')f.votes.for++; else f.votes.against++;
   app.tally[id]={for:f.votes.for,against:f.votes.against};
   saveState(); syncVote(id,side); return true;
-}
-/* Quick vote straight from a poster card, no need to open the film or confirm you've seen it. */
-function quickVote(id,side,ev){
-  if(ev){ev.stopPropagation();}
-  if(app.votes[id]===side){ toast('You already voted on this one. One vote per film.'); return; }
-  applyVote(id,side); sfx(side);
-  toast(side==='for'?'Seasoned. Your vote counted.':'Sent it back. Your vote counted.');
-  rerenderActive();
 }
 function castVote(id,side){
   var f=find(id), prev=app.votes[id];
@@ -3821,8 +3817,9 @@ function postComment(id){
   var f=find(id), t=byId('cText').value.trim();
   if(!t){toast('Add a few words before posting.');byId('cText').focus();return;}
   ensureComments(f);
+  if(!app.votes[id]){ toast('Pick a side first — It\u2019s Seasoned or Send It Back.'); return; }
   var name=byId('cName').value.trim();
-  var c={name:name||app.name||'Guest',stance:app.votes[id]||'for',text:t,reported:false,mine:true};
+  var c={name:name||app.name||'Guest',stance:app.votes[id],text:t,reported:false,mine:true};
   if(!app.comments[id])app.comments[id]=[];
   app.comments[id].unshift(c); f._comments.unshift(c);
   syncComment(id,c);
@@ -3837,7 +3834,9 @@ function openReport(i,fid){
     '<div class="report-opts">'+opts.map(function(o){return '<button onclick="submitReport('+i+',\''+fid+'\')">'+o+'</button>';}).join('')+'</div>');
 }
 function submitReport(i,fid){
-  var f=find(fid); var c=f._comments[i]; c.reported=true; if(c&&c.backend)reportBackend(c.id); closeModal(); renderComments(f); saveState();
+  var f=find(fid); var c=f._comments&&f._comments[i];
+  if(!c){ closeModal(); renderComments(f); toast('That read just refreshed — try flagging it again.'); return; }
+  c.reported=true; if(c.backend)reportBackend(c.id); closeModal(); renderComments(f); saveState();
   toast('Thanks. Our team will review this.');
 }
 
@@ -4013,7 +4012,8 @@ function fetchShowtimes(f,zip){
     .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(d){
       var el=byId('stResults'); if(!el)return;
-      if(d&&d.days&&d.days.length&&d.days[0].theaters&&d.days[0].theaters.length){ el.innerHTML=renderRealShowtimes(f,zip,d.days); }
+      var liveDays=(d&&d.days||[]).filter(function(x){return x.theaters&&x.theaters.length;});
+      if(liveDays.length){ el.innerHTML=renderRealShowtimes(f,zip,liveDays); }
       else if(d&&d.not_in_theaters){
         el.innerHTML='<div class="empty" style="padding:26px 16px"><h3 style="font-size:19px">This one has left theaters.</h3>'+
           '<p>No showtimes near '+esc(zip)+' — but you can stream it tonight.</p>'+
@@ -4248,15 +4248,14 @@ function renderTheaters(){
   var now=new Date().getFullYear();
   // provisional list while the live Now Playing check runs: this year's titles
   var inTheaters=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && f.year>=now; });
-  loadNowPlaying(function(titles){
-    var on=document.querySelector('.view.on');
+  renderTheatersList(inTheaters,false);   // provisional paint first...
+  loadNowPlaying(function(titles){         // ...so the verified list always lands last,
+    var on=document.querySelector('.view.on');   // even when the cache answers synchronously
     if(!(on&&on.getAttribute('data-view')==='theaters'))return;
     if(!titles)return;   // no key / fetch failed: keep the year-based fallback
     var np=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && titles.indexOf(f.title.toLowerCase())>=0; });
-    if(np.length){ renderTheatersList(np,true); }
-    else renderTheatersList([],true);
+    renderTheatersList(np,true);
   });
-  renderTheatersList(inTheaters,false);
 }
 function renderTheatersList(inTheaters,verified){
   var head='<div class="browse-head"><span class="eyebrow">Now playing</span>'+
@@ -4716,7 +4715,6 @@ function toast(msg){
   byId('toastWrap').appendChild(el);
   setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove();},300);},2200);
 }
-function scrollToVote(){var p=byId('votePanel');if(p){p.scrollIntoView({behavior:'smooth',block:'center'});}else{toast('Open a film to vote.');go('home');}}
 
 /* ============ TMDB CONNECT (self-serve, no code editing) ============ */
 function openConnect(){
