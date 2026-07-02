@@ -3977,7 +3977,15 @@ function openTrailer(id){
     '<div class="tr-wrap"><iframe src="https://www.youtube-nocookie.com/embed/'+f.trailer+'?autoplay=1&rel=0&modestbranding=1" title="'+esc(f.title)+' trailer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>');
   byId('modal').classList.add('wide');
 }
-function fandangoUrl(title){ return 'https://www.fandango.com/search?q='+encodeURIComponent(title); }
+/* Fandango via CJ Affiliate: once approved, put your CJ publisher ID (PID)
+   below and every Fandango link on the site becomes a commission-tracked
+   deep link (CJ's standard /links/<PID>/type/dlg/<destination> format,
+   30-day cookie). Empty = plain links, exactly as before. */
+var CJ_PID='';   // e.g. '101234567' from your CJ dashboard
+function fandangoUrl(title){
+  var dest='https://www.fandango.com/search?q='+encodeURIComponent(title);
+  return CJ_PID ? 'https://www.anrdoezrs.net/links/'+CJ_PID+'/type/dlg/'+dest : dest;
+}
 
 /* SHOWTIMES_PROVIDER is set in the CONFIG block at the top. Empty = sample fallback. */
 function openShowtimes(id){
