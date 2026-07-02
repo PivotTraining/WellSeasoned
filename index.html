@@ -3080,7 +3080,7 @@ function refreshAdminUI(){
 }
 function checkAdminHash(){
   var h=location.hash;
-  if(h==='#/admin'){ try{localStorage.setItem('ws_admin','1');}catch(e){} refreshAdminUI(); toast('Admin tools unlocked on this device.'); location.hash='#/'; return true; }
+  if(h==='#/admin'){ try{localStorage.setItem('ws_admin','1');}catch(e){} refreshAdminUI(); toast('Admin tools unlocked on this device.'); location.hash='#/'; setTimeout(function(){ openCurate(); },350); return true; }
   if(h==='#/admin-off'){ try{localStorage.removeItem('ws_admin');}catch(e){} refreshAdminUI(); toast('Admin tools hidden.'); location.hash='#/'; return true; }
   return false;
 }
