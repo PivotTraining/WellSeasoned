@@ -946,6 +946,7 @@ var SHOWTIMES_PROVIDER='';  // e.g. SerpApi key for live showtimes
    Empty = votes stay on this device only. */
 var SUPABASE_URL='https://iherwgeuxwpapjreoofq.supabase.co';        // e.g. 'https://xxxx.supabase.co'
 var SUPABASE_KEY='sb_publishable_Owy8s8-j6LzxYhDmpCo53w_7ehrsGuh';        // e.g. 'sb_publishable_...' or the legacy anon key
+var TURNSTILE_KEY='0x4AAAAAADdxQCMcqgc0yXX1';                       // Cloudflare Turnstile site key (public); '' disables captcha
 
 /* ============ DATA (shape mirrors a real metadata feed) ============ */
 var FILMS=[
@@ -4689,8 +4690,9 @@ function forgotPassword(){
   var e=byId('auEmail')?byId('auEmail').value.trim():'';
   if(!e||e.indexOf('@')<1){ toast('Type your email above first, then tap Forgot password.'); if(byId('auEmail'))byId('auEmail').focus(); return; }
   if(!sbConfigured()){ toast('Backend not configured.'); return; }
-  fetch(SUPABASE_URL+'/auth/v1/recover',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({email:e})})
+  captchaToken().then(function(ct){
+    return fetch(SUPABASE_URL+'/auth/v1/recover',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify(withCaptcha({email:e},ct))});})
     .then(function(r){ toast(r.ok?'Reset link sent to '+e+' — check your inbox (and spam).':'Could not send — try again in a minute.'); })
     .catch(function(){ toast('Network error — try again.'); });
 }
@@ -4771,7 +4773,8 @@ function doAuth(){
   authBusy(true);
   var url=SUPABASE_URL+(signup?'/auth/v1/signup':'/auth/v1/token?grant_type=password');
   var body=signup?{email:email,password:pass,data:{name:name}}:{email:email,password:pass};
-  fetch(url,{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify(body)})
+  captchaToken().then(function(ct){
+  return fetch(url,{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify(withCaptcha(body,ct))})
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
     .then(function(res){
       authBusy(false);
@@ -4786,7 +4789,8 @@ function doAuth(){
       // moment email confirmation is off / auto-confirm is set, so nobody is stranded
       // waiting on a confirmation email. Falls back to the confirm-your-email message.
       if(signup && (d.id||d.user)){
-        fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({email:email,password:pass})})
+        captchaToken().then(function(ct2){   // tokens are single-use — fresh one for the follow-up sign-in
+        return fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify(withCaptcha({email:email,password:pass},ct2))});})
           .then(function(r){ return r.json().then(function(dd){ return {ok:r.ok,d:dd}; }); })
           .then(function(r2){
             if(r2.ok && r2.d && r2.d.access_token){ authWelcome(r2.d); }
@@ -4798,6 +4802,7 @@ function doAuth(){
       toast('Something went wrong. Try again.');
     })
     .catch(function(){ authBusy(false); toast('Network error — try again.'); });
+  });
 }
 /* apply a session, close the modal, greet, and run any pending post-auth action */
 function authWelcome(sess){
@@ -4843,12 +4848,61 @@ function authRestore(){
    rate-limited) instead of a spoofable device string. Falls back to device_id if the
    project hasn't enabled Anonymous sign-ins yet. */
 var _identityPromise=null, _anonDisabled=false;
+/* ---- Cloudflare Turnstile (invisible) — one fresh token per auth call ----
+   Supabase verifies the token server-side when Attack Protection → CAPTCHA is
+   on. Fail-open here: if the challenge script can't load (blocked, offline)
+   we send no token and let the server decide, so auth never hangs locally. */
+var _tsLoading=null;
+function tsLoad(){
+  if(window.turnstile) return Promise.resolve(true);
+  if(_tsLoading) return _tsLoading;
+  _tsLoading=new Promise(function(res){
+    var s=document.createElement('script');
+    s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    s.async=true;
+    s.onload=function(){ res(true); };
+    s.onerror=function(){ _tsLoading=null; res(false); };
+    document.head.appendChild(s);
+  });
+  return _tsLoading;
+}
+function captchaToken(){
+  if(!TURNSTILE_KEY) return Promise.resolve(null);
+  return tsLoad().then(function(ok){
+    if(!ok||!window.turnstile) return null;
+    return new Promise(function(res){
+      var host=document.createElement('div');
+      host.style.cssText='position:fixed;left:-9999px;bottom:0';
+      document.body.appendChild(host);
+      var done=false, wid=null;
+      function finish(t){
+        if(done)return; done=true;
+        try{ if(wid!=null)window.turnstile.remove(wid); }catch(e){}
+        if(host.parentNode)host.parentNode.removeChild(host);
+        res(t);
+      }
+      setTimeout(function(){ finish(null); },12000);   // never hang auth on CF
+      try{
+        wid=window.turnstile.render(host,{
+          sitekey:TURNSTILE_KEY,
+          callback:function(t){ finish(t); },
+          'error-callback':function(){ finish(null); },
+          'unsupported-callback':function(){ finish(null); }
+        });
+      }catch(e){ finish(null); }
+    });
+  });
+}
+/* body helper: attach the token the way GoTrue expects */
+function withCaptcha(body,t){ if(t)body.gotrue_meta_security={captcha_token:t}; return body; }
 function ensureIdentity(){
   if(!sbConfigured()) return Promise.resolve(false);
   if(haveSession()) return Promise.resolve(true);
   if(_anonDisabled) return Promise.resolve(false);
   if(_identityPromise) return _identityPromise;
-  _identityPromise=fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})})
+  _identityPromise=captchaToken().then(function(t){
+    return fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify(withCaptcha({},t))});
+  })
     .then(function(r){ if(r.status===422){ _anonDisabled=true; } return r.ok?r.json():null; })
     .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); loadAllBackendVotes(); return true; } return false; })
     .catch(function(){ return false; })
