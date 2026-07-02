@@ -19,8 +19,18 @@ export default async function handler(req, res) {
       '&q=' + encodeURIComponent(q + ' showtimes near ' + String(location)) +
       '&api_key=' + key;
     const r = await fetch(url);
-    if (!r.ok) return res.status(502).json({ error: 'provider_error' });
+    if (!r.ok) return res.status(502).json({ error: 'provider_error', status: r.status });
     const data = await r.json();
+
+    // ?debug=1 → reveal the response SHAPE (keys + provider error text), never content/keys
+    if (req.query && req.query.debug === '1') {
+      return res.status(200).json({
+        q: q + ' showtimes near ' + String(location),
+        provider_error: data.error || null,
+        top_keys: Object.keys(data),
+        showtimes_len: (data.showtimes || []).length,
+      });
+    }
 
     // Trim to what the UI needs: days -> theaters -> times
     const days = (data.showtimes || []).slice(0, 2).map((d) => ({
