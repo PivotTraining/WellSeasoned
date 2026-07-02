@@ -824,7 +824,7 @@
       <a data-nav="ranked" onclick="go('ranked')" tabindex="0">Rankings</a>
       <a data-nav="theaters" onclick="go('theaters')" tabindex="0">In Theaters</a><a data-nav="soon" onclick="go('soon')" tabindex="0">Coming Soon</a>
       <a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a>
-      <a data-nav="join" onclick="go('join')" tabindex="0">Membership</a>
+      
     </nav>
     <div class="right">
       <div class="search" role="search">
@@ -1035,7 +1035,7 @@
 <footer>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('join')" style="cursor:pointer">Membership</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -3205,7 +3205,7 @@ function applyMeta(){
 /* The Table score needs a quorum before it counts — one early vote shouldn't
    crown (or bury) a film. Below quorum the score reads pending; the raw tally
    still shows so early voters see their vote land. */
-var TABLE_QUORUM=3;
+var TABLE_QUORUM=1;   /* every vote counts from the jump — no waiting room */
 function tableScore(f){
   var tot=f.votes.for+f.votes.against;
   return (tot>=TABLE_QUORUM)? Math.round(f.votes.for/tot*100) : null;
