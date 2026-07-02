@@ -164,72 +164,7 @@
   .search input::placeholder{color:var(--ink-3)}
   .avatar{width:34px;height:34px;border-radius:50%;background:var(--sumac);color:var(--on-dark);display:grid;place-items:center;font-weight:800;font-size:14px;cursor:pointer}
 
-  /* ============ SUBMIT YOUR FILM (indie intake) ============ */
-function renderSubmit(){
-  var w=byId('submitWrap'); if(!w)return;
-  w.innerHTML='<div class="submit-card" style="padding:22px">'+
-    '<label class="f-lab">Film title</label><input id="sbTitle" class="f-in" placeholder="Your film">'+
-    '<label class="f-lab">Filmmaker name</label><input id="sbMaker" class="f-in" placeholder="Who made it">'+
-    '<label class="f-lab">Email</label><input id="sbEmail" class="f-in" type="email" placeholder="you@email.com">'+
-    '<label class="f-lab">Logline</label><textarea id="sbLog" class="f-in" rows="2" placeholder="One or two sentences. Make us lean in."></textarea>'+
-    '<label class="f-lab">Screener link (Vimeo, YouTube, Drive\u2026)</label><input id="sbLink" class="f-in" placeholder="https://\u2026">'+
-    '<label class="f-lab">Runtime</label><input id="sbRt" class="f-in" placeholder="e.g. 14 min short / 1h 38m feature">'+
-    '<label class="f-lab">Socials (optional)</label><input id="sbSoc" class="f-in" placeholder="@yourhandle">'+
-    '<label class="f-lab">Anything else (optional)</label><textarea id="sbNotes" class="f-in" rows="2" placeholder="Festivals, cast, the story behind it\u2026"></textarea>'+
-    '<button class="btn btn-gold" style="margin-top:14px" onclick="submitFilm()">Send it to the Kitchen</button>'+
-  '</div>';
-}
-function submitFilm(){
-  var t=byId('sbTitle').value.trim(), m=byId('sbMaker').value.trim(), e=byId('sbEmail').value.trim(), l=byId('sbLink').value.trim();
-  if(!t||!m||!e){ toast('Title, name and email are required.'); return; }
-  if(e.indexOf('@')<1){ toast('That email doesn\u2019t look right.'); return; }
-  var body={title:t,filmmaker:m,email:e,logline:byId('sbLog').value.trim()||null,link:l||null,
-    runtime:byId('sbRt').value.trim()||null,socials:byId('sbSoc').value.trim()||null,
-    notes:byId('sbNotes').value.trim()||null,device_id:wsDevice(),user_id:myUid()};
-  track('film_submit',{});
-  ensureIdentityThen(function(){
-    fetch(SUPABASE_URL+'/rest/v1/film_submissions',{method:'POST',
-      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-      body:JSON.stringify(body)})
-    .then(function(r){
-      if(r.status===201){
-        byId('submitWrap').innerHTML='<div class="submit-card" style="padding:26px;text-align:center">'+
-          '<h3 style="font-family:var(--display);font-weight:800;font-size:24px">It\u2019s in the Kitchen.</h3>'+
-          '<p style="color:var(--ink-2);margin:12px 0 4px;line-height:1.6">Here\u2019s what happens next: a human watches your film. If it\u2019s selected, we reach out at your email and your work takes its seat on the shelves \u2014 verdicts, votes, and all. Either way, keep making. The culture needs it.</p></div>';
-        toast('Submission received.');
-      } else if(r.status===409){ toast('We already have that one from you \u2014 it\u2019s in the queue.'); }
-      else { toast('Something hiccuped \u2014 try again in a minute.'); }
-    }).catch(function(){ toast('Something hiccuped \u2014 try again in a minute.'); });
-  });
-}
-/* Admin: review the submission queue (passphrase-gated RPC) */
-function adminSubs(){
-  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
-  if(!secret){ secret=window.prompt('Admin passphrase:')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
-  fetch(SUPABASE_URL+'/rest/v1/rpc/list_film_submissions',{method:'POST',
-    headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({secret:secret})})
-  .then(function(r){ if(!r.ok){ try{localStorage.removeItem('ws_admin_secret');}catch(e){} toast('Failed \u2014 check the passphrase.'); return null; } return r.json(); })
-  .then(function(rows){
-    if(!rows)return;
-    var w=byId('curPageList'); if(!w)return;
-    byId('curpChips').innerHTML=''; byId('curpCount').textContent=rows.length+' film submission'+(rows.length===1?'':'s');
-    byId('curpMore').style.display='none';
-    w.innerHTML=rows.map(function(x){
-      return '<div class="cur-row" style="flex-wrap:wrap"><span class="cur-ttl">'+esc(x.title)+' <em>'+esc(x.filmmaker)+'</em><br><span style="font-size:12px;color:var(--ink-3)">'+esc(x.email)+(x.runtime?' \u00b7 '+esc(x.runtime):'')+' \u00b7 '+esc(x.status)+'</span>'+(x.logline?'<br><span style="font-size:12.5px">'+esc(x.logline)+'</span>':'')+'</span>'+
-        (x.link?'<a class="btn btn-ghost btn-sm" href="'+esc(x.link)+'" target="_blank" rel="noopener">Screen</a>':'')+
-        '<button class="cur-ic" onclick="subStatus(\''+x.id+'\',\'review\')">Review</button>'+
-        '<button class="cur-ic" onclick="subStatus(\''+x.id+'\',\'selected\')">Select</button>'+
-        '<button class="cur-ic hidebtn" onclick="subStatus(\''+x.id+'\',\'passed\')">Pass</button></div>';
-    }).join('')||'<p class="empty-note">No submissions yet. Announce it and they\u2019ll come.</p>';
-  }).catch(function(){ toast('Could not load submissions.'); });
-}
-function subStatus(id,st){
-  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
-  fetch(SUPABASE_URL+'/rest/v1/rpc/set_submission_status',{method:'POST',
-    headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({secret:secret,sub_id:id,new_status:st})})
-  .then(function(r){ if(r.ok){ toast('Marked '+st+'.'); adminSubs(); } else toast('Failed.'); });
-}
-  /* ============ SUBMIT YOUR FILM ============ */
+    /* ============ SUBMIT YOUR FILM ============ */
   .submit-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-2)}
   .f-lab{display:block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 5px}
   .f-in{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14.5px;color:var(--ink);outline:none}
@@ -3877,6 +3812,71 @@ function exportCuration(){
   var data=JSON.stringify(app.curation,null,2);
   try{ navigator.clipboard.writeText(data); toast('Curation JSON copied to clipboard.'); }
   catch(e){ showModal('<button class="close" onclick="closeModal()">✕</button><h2>Curation JSON</h2><p class="m-sub">Copy this to seed the backend.</p><textarea class="cur-export" readonly>'+esc(data)+'</textarea>'); byId('modal').classList.add('wide'); }
+}
+/* ============ SUBMIT YOUR FILM (indie intake) ============ */
+function renderSubmit(){
+  var w=byId('submitWrap'); if(!w)return;
+  w.innerHTML='<div class="submit-card" style="padding:22px">'+
+    '<label class="f-lab">Film title</label><input id="sbTitle" class="f-in" placeholder="Your film">'+
+    '<label class="f-lab">Filmmaker name</label><input id="sbMaker" class="f-in" placeholder="Who made it">'+
+    '<label class="f-lab">Email</label><input id="sbEmail" class="f-in" type="email" placeholder="you@email.com">'+
+    '<label class="f-lab">Logline</label><textarea id="sbLog" class="f-in" rows="2" placeholder="One or two sentences. Make us lean in."></textarea>'+
+    '<label class="f-lab">Screener link (Vimeo, YouTube, Drive\u2026)</label><input id="sbLink" class="f-in" placeholder="https://\u2026">'+
+    '<label class="f-lab">Runtime</label><input id="sbRt" class="f-in" placeholder="e.g. 14 min short / 1h 38m feature">'+
+    '<label class="f-lab">Socials (optional)</label><input id="sbSoc" class="f-in" placeholder="@yourhandle">'+
+    '<label class="f-lab">Anything else (optional)</label><textarea id="sbNotes" class="f-in" rows="2" placeholder="Festivals, cast, the story behind it\u2026"></textarea>'+
+    '<button class="btn btn-gold" style="margin-top:14px" onclick="submitFilm()">Send it to the Kitchen</button>'+
+  '</div>';
+}
+function submitFilm(){
+  var t=byId('sbTitle').value.trim(), m=byId('sbMaker').value.trim(), e=byId('sbEmail').value.trim(), l=byId('sbLink').value.trim();
+  if(!t||!m||!e){ toast('Title, name and email are required.'); return; }
+  if(e.indexOf('@')<1){ toast('That email doesn\u2019t look right.'); return; }
+  var body={title:t,filmmaker:m,email:e,logline:byId('sbLog').value.trim()||null,link:l||null,
+    runtime:byId('sbRt').value.trim()||null,socials:byId('sbSoc').value.trim()||null,
+    notes:byId('sbNotes').value.trim()||null,device_id:wsDevice(),user_id:myUid()};
+  track('film_submit',{});
+  ensureIdentityThen(function(){
+    fetch(SUPABASE_URL+'/rest/v1/film_submissions',{method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify(body)})
+    .then(function(r){
+      if(r.status===201){
+        byId('submitWrap').innerHTML='<div class="submit-card" style="padding:26px;text-align:center">'+
+          '<h3 style="font-family:var(--display);font-weight:800;font-size:24px">It\u2019s in the Kitchen.</h3>'+
+          '<p style="color:var(--ink-2);margin:12px 0 4px;line-height:1.6">Here\u2019s what happens next: a human watches your film. If it\u2019s selected, we reach out at your email and your work takes its seat on the shelves \u2014 verdicts, votes, and all. Either way, keep making. The culture needs it.</p></div>';
+        toast('Submission received.');
+      } else if(r.status===409){ toast('We already have that one from you \u2014 it\u2019s in the queue.'); }
+      else { toast('Something hiccuped \u2014 try again in a minute.'); }
+    }).catch(function(){ toast('Something hiccuped \u2014 try again in a minute.'); });
+  });
+}
+/* Admin: review the submission queue (passphrase-gated RPC) */
+function adminSubs(){
+  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
+  if(!secret){ secret=window.prompt('Admin passphrase:')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
+  fetch(SUPABASE_URL+'/rest/v1/rpc/list_film_submissions',{method:'POST',
+    headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({secret:secret})})
+  .then(function(r){ if(!r.ok){ try{localStorage.removeItem('ws_admin_secret');}catch(e){} toast('Failed \u2014 check the passphrase.'); return null; } return r.json(); })
+  .then(function(rows){
+    if(!rows)return;
+    var w=byId('curPageList'); if(!w)return;
+    byId('curpChips').innerHTML=''; byId('curpCount').textContent=rows.length+' film submission'+(rows.length===1?'':'s');
+    byId('curpMore').style.display='none';
+    w.innerHTML=rows.map(function(x){
+      return '<div class="cur-row" style="flex-wrap:wrap"><span class="cur-ttl">'+esc(x.title)+' <em>'+esc(x.filmmaker)+'</em><br><span style="font-size:12px;color:var(--ink-3)">'+esc(x.email)+(x.runtime?' \u00b7 '+esc(x.runtime):'')+' \u00b7 '+esc(x.status)+'</span>'+(x.logline?'<br><span style="font-size:12.5px">'+esc(x.logline)+'</span>':'')+'</span>'+
+        (x.link?'<a class="btn btn-ghost btn-sm" href="'+esc(x.link)+'" target="_blank" rel="noopener">Screen</a>':'')+
+        '<button class="cur-ic" onclick="subStatus(\''+x.id+'\',\'review\')">Review</button>'+
+        '<button class="cur-ic" onclick="subStatus(\''+x.id+'\',\'selected\')">Select</button>'+
+        '<button class="cur-ic hidebtn" onclick="subStatus(\''+x.id+'\',\'passed\')">Pass</button></div>';
+    }).join('')||'<p class="empty-note">No submissions yet. Announce it and they\u2019ll come.</p>';
+  }).catch(function(){ toast('Could not load submissions.'); });
+}
+function subStatus(id,st){
+  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
+  fetch(SUPABASE_URL+'/rest/v1/rpc/set_submission_status',{method:'POST',
+    headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({secret:secret,sub_id:id,new_status:st})})
+  .then(function(r){ if(r.ok){ toast('Marked '+st+'.'); adminSubs(); } else toast('Failed.'); });
 }
 /* ============ SERVE ME SOMETHING ============ */
 var SERVE_MOODS=[
