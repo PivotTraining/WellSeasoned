@@ -655,6 +655,21 @@
   .foot-row .ftag{font-style:italic;font-weight:600;color:var(--ink)}
   .fine{font-size:12px;color:var(--ink-3);margin-top:10px}
 
+  /* ============ LEGAL (Privacy / Terms) ============ */
+  .legal{max-width:760px;margin:0 auto;padding:26px 0 60px}
+  .legal-nav{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+  .legal-nav a{cursor:pointer;padding:8px 15px;border:1px solid var(--line);border-radius:999px;font-weight:700;font-size:13.5px;color:var(--ink-2);background:transparent}
+  .legal-nav a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .legal h1{font-size:30px;letter-spacing:-.4px;margin:6px 0 4px}
+  .legal h2{font-size:18px;margin:26px 0 8px;color:var(--ink)}
+  .legal p,.legal li{color:var(--ink-2);line-height:1.62;font-size:15px}
+  .legal ul{margin:6px 0 6px;padding-left:20px}
+  .legal li{margin:5px 0}
+  .legal b{color:var(--ink)}
+  .legal a[href],.legal-back a{color:var(--gold-ink);font-weight:700}
+  .legal-eff{font-size:13px;color:var(--ink-3);margin:0 0 18px}
+  .legal-back{margin-top:34px;padding-top:18px;border-top:1px solid var(--line)}
+
   /* ============ RESPONSIVE ============ */
   @media (max-width:820px){
     .topnav nav,.search{display:none}
@@ -876,6 +891,11 @@
   <section class="view" data-view="you" aria-label="Your page">
     <div class="wrap" id="youContent"></div>
   </section>
+
+  <!-- ============ LEGAL (Privacy / Terms) ============ -->
+  <section class="view" data-view="legal" aria-label="Legal">
+    <div class="wrap" id="legalContent"></div>
+  </section>
 </main>
 
 <!-- BOTTOM TABS (mobile) -->
@@ -906,7 +926,7 @@
 <footer>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('join')" style="cursor:pointer">Membership</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="openCurate()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('join')" style="cursor:pointer">Membership</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="openCurate()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -2993,7 +3013,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -3019,7 +3039,8 @@ function render(view,arg){
   else if(view==='ranked')renderRanked();
   else if(view==='theaters')renderTheaters();
   else if(view==='you')renderYou();
-  if(view!=='film')applyMetaTags(view);
+  else if(view==='legal')renderLegal(arg);
+  if(view!=='film'&&view!=='legal')applyMetaTags(view);
   track('view',{view:view});
 }
 function go(view,arg){
@@ -4377,6 +4398,123 @@ function renderYou(){
   el.innerHTML='<div class="you-hero">'+av+'<div><h1>'+esc(app.name||'Your table')+'</h1><p class="you-sub">Signed in on this device. <a onclick="signOut()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Sign out</a></p></div></div>'+
     '<div class="you-stats"><div class="ys"><b>'+plateFilms.length+'</b><span>On My Plate</span></div><div class="ys"><b>'+voteIds.length+'</b><span>Films voted</span></div><div class="ys"><b>'+reads+'</b><span>Reads posted</span></div></div>'+
     kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds);
+}
+
+/* ================= LEGAL: Privacy Policy + Terms ================= */
+var LEGAL_EFFECTIVE='July 2, 2026';
+function renderLegal(arg){
+  var which=(arg==='terms')?'terms':'privacy';
+  var el=byId('legalContent');
+  var nav='<div class="legal-nav">'+
+    '<a class="'+(which==='privacy'?'on':'')+'" onclick="go(\'legal\',\'privacy\')">Privacy Policy</a>'+
+    '<a class="'+(which==='terms'?'on':'')+'" onclick="go(\'legal\',\'terms\')">Terms of Use</a>'+
+    '</div>';
+  el.innerHTML='<div class="legal">'+nav+(which==='terms'?legalTerms():legalPrivacy())+
+    '<p class="legal-back"><a onclick="go(\'home\')" style="cursor:pointer">← Back to Well Seasoned</a></p></div>';
+  setDocMeta(
+    (which==='terms'?'Terms of Use':'Privacy Policy')+' · Well Seasoned',
+    which==='terms'
+      ? 'The terms that govern your use of Well Seasoned.'
+      : 'How Well Seasoned collects, uses, and protects your information.',
+    location.hash);
+}
+function legalPrivacy(){
+  return '<h1>Privacy Policy</h1>'+
+  '<p class="legal-eff">Effective '+LEGAL_EFFECTIVE+'</p>'+
+  '<p>Well Seasoned ("we," "us," "the site") is a film &amp; TV rating community. This policy explains what we collect, why, and the choices you have. We keep it plain because that is the point — we collect the minimum we need to run the site, and we do not sell your data.</p>'+
+
+  '<h2>What we collect</h2>'+
+  '<ul>'+
+  '<li><b>Account information.</b> If you create an account, we store the email address and password you provide. Passwords are hashed by our authentication provider (Supabase); we never see or store them in plain text.</li>'+
+  '<li><b>Anonymous identity.</b> To keep voting fair, the site assigns your browser a silent, randomly-generated identity even if you never sign up. It is not tied to your name, email, or any personal detail — it exists only so one person cannot stuff the ballot.</li>'+
+  '<li><b>Your activity.</b> The films and people you vote on, the reads (comments) you post, and the titles you save to My Plate. Comments are public by design.</li>'+
+  '<li><b>Usage analytics.</b> We record basic, non-identifying events — which pages open, which features get used — to understand what is working. These events carry a random device identifier, never your name or email.</li>'+
+  '<li><b>Location for showtimes.</b> When you look up theater showtimes, the ZIP code or city you type is sent to our showtimes provider to find nearby theaters. We do not store it after the lookup.</li>'+
+  '<li><b>Critic applications.</b> If you apply to The Kitchen, we keep the outlet and details you submit so we can review you.</li>'+
+  '</ul>'+
+  '<p>We do <b>not</b> knowingly collect precise GPS location, contacts, payment card numbers, or any special-category personal data.</p>'+
+
+  '<h2>How we use it</h2>'+
+  '<ul>'+
+  '<li>To run the core product: sign-in, fair voting, saving films, posting reads, and showing scores.</li>'+
+  '<li>To keep the site honest — detect and block ballot-stuffing, spam, and abuse.</li>'+
+  '<li>To understand aggregate usage and improve the site.</li>'+
+  '<li>To contact you about your account or, if you opt in, about Well Seasoned.</li>'+
+  '</ul>'+
+
+  '<h2>Who we share it with</h2>'+
+  '<p>We do not sell your personal information. We share data only with the service providers that make the site run, and only so they can perform that service for us:</p>'+
+  '<ul>'+
+  '<li><b>Supabase</b> — database, accounts, and authentication.</li>'+
+  '<li><b>Vercel</b> — hosting and privacy-friendly aggregate web analytics.</li>'+
+  '<li><b>TMDB</b> — film, cast, and where-to-watch data (we send it title lookups, not your identity).</li>'+
+  '<li><b>Our showtimes provider</b> — receives the ZIP/city you enter to return nearby showtimes.</li>'+
+  '</ul>'+
+  '<p>We may also disclose information if required by law, or to protect the rights, safety, and integrity of the site and its community.</p>'+
+
+  '<h2>Cookies &amp; local storage</h2>'+
+  '<p>We use your browser’s local storage to keep you signed in, remember your saved films and votes on this device, and hold your anonymous identity. We do not use third-party advertising or cross-site tracking cookies.</p>'+
+
+  '<h2>Your choices &amp; rights</h2>'+
+  '<ul>'+
+  '<li><b>Access or deletion.</b> You can ask us to see or delete the personal data tied to your account. Email us at the address below.</li>'+
+  '<li><b>Sign out / clear device.</b> Signing out and clearing your browser storage removes the local identity and saved data on that device.</li>'+
+  '<li><b>Public content.</b> Reads you post are public; deleting your account does not retract quotes others may have already seen or shared.</li>'+
+  '</ul>'+
+
+  '<h2>Data retention</h2>'+
+  '<p>We keep account and activity data for as long as your account is active or as needed to run the site. Analytics events are kept in aggregate. Showtime lookups are not retained after they return results.</p>'+
+
+  '<h2>Children</h2>'+
+  '<p>Well Seasoned is not directed to children under 13, and we do not knowingly collect their personal information. Some titles carry mature content; pepper flags are estimates, not a scene-by-scene guide.</p>'+
+
+  '<h2>Changes</h2>'+
+  '<p>We may update this policy as the site grows. Material changes will be reflected here with a new effective date.</p>'+
+
+  '<h2>Contact</h2>'+
+  '<p>Questions or requests: <a href="mailto:hello@itswellseasoned.com">hello@itswellseasoned.com</a>.</p>';
+}
+function legalTerms(){
+  return '<h1>Terms of Use</h1>'+
+  '<p class="legal-eff">Effective '+LEGAL_EFFECTIVE+'</p>'+
+  '<p>Welcome to Well Seasoned. By using the site you agree to these terms. If you do not agree, please do not use the site.</p>'+
+
+  '<h2>What Well Seasoned is</h2>'+
+  '<p>Well Seasoned is a community for rating film &amp; TV built for Black culture. Scores come in two forms: <b>The Kitchen</b> (verified critics) and <b>The Table</b> (the community’s live vote). A seal is earned only when both agree. Titles, cast, and where-to-watch data come from TMDB and are provided for information only.</p>'+
+
+  '<h2>Your account</h2>'+
+  '<ul>'+
+  '<li>You are responsible for keeping your login secure and for activity under your account.</li>'+
+  '<li>Provide accurate information. Do not impersonate a critic, outlet, or another person.</li>'+
+  '<li>One person, one voice — do not create multiple accounts or use bots, scripts, or other means to manipulate votes or rankings. We enforce vote integrity and may void votes or suspend accounts that break this rule.</li>'+
+  '</ul>'+
+
+  '<h2>Community conduct</h2>'+
+  '<p>Reads (comments) are public. When you post, you agree not to submit content that is unlawful, hateful, harassing, threatening, defamatory, obscene, infringing, spam, or otherwise harmful. We may remove content and suspend accounts at our discretion to protect the community. Flagged content may be hidden pending review.</p>'+
+
+  '<h2>Your content</h2>'+
+  '<p>You keep ownership of the reads and ratings you post. By posting, you grant Well Seasoned a non-exclusive, worldwide, royalty-free license to display, distribute, and promote that content in connection with the site. You represent that you have the right to post what you submit.</p>'+
+
+  '<h2>Critics &amp; The Kitchen</h2>'+
+  '<p>Verification as a critic is at our discretion and may be revoked. Critic scores must reflect your honest assessment. Selling, trading, or coordinating scores is prohibited and grounds for removal.</p>'+
+
+  '<h2>Third-party links &amp; data</h2>'+
+  '<p>The site links to third-party services (streaming providers, ticketing, TMDB, JustWatch). We do not control those services and are not responsible for their content, availability, pricing, or practices. Where-to-watch and showtime information may be inaccurate or out of date. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>'+
+
+  '<h2>Intellectual property</h2>'+
+  '<p>The Well Seasoned name, look, and original content are ours. Film artwork, posters, and metadata belong to their respective owners and are shown under TMDB’s terms for informational purposes.</p>'+
+
+  '<h2>Disclaimers</h2>'+
+  '<p>The site is provided “as is” and “as available,” without warranties of any kind. Scores, pepper flags, and where-to-watch data are community- and estimate-based and may be incomplete or wrong. We do not guarantee the site will be uninterrupted or error-free.</p>'+
+
+  '<h2>Limitation of liability</h2>'+
+  '<p>To the fullest extent permitted by law, Well Seasoned and its team are not liable for any indirect, incidental, or consequential damages arising from your use of the site. Nothing here limits liability that cannot be limited by law.</p>'+
+
+  '<h2>Changes &amp; termination</h2>'+
+  '<p>We may update these terms or change, suspend, or discontinue any part of the site at any time. Continued use after changes means you accept the updated terms. We may suspend or terminate access for conduct that violates these terms.</p>'+
+
+  '<h2>Contact</h2>'+
+  '<p>Questions: <a href="mailto:hello@itswellseasoned.com">hello@itswellseasoned.com</a>.</p>';
 }
 /* your standing with The Kitchen: seated / in review / invited to apply */
 function kitchenBlock(){
