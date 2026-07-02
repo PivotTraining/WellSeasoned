@@ -3493,9 +3493,9 @@ function syncVote(slug,side){
   try{
     fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:app.userId||null})
-    }).catch(function(){});
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
+    }).then(function(r){ if(r&&r.status===403||r&&r.status===429){ toast('Whoa — slow down a sec.'); } }).catch(function(){});
   }catch(e){}
 }
 /* Pull the live aggregate counts for a film and refresh The Table. No-op if unconfigured. */
@@ -3628,8 +3628,9 @@ function loadBackendComments(slug){
 function syncComment(slug,c){
   if(!sbConfigured())return;
   try{
-    fetch(SUPABASE_URL+'/rest/v1/comments',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-      body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice(),user_id:app.userId||null})}).catch(function(){});
+    fetch(SUPABASE_URL+'/rest/v1/comments',{method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify({film_slug:slug,name:c.name,stance:c.stance,body:c.text,device_id:wsDevice(),user_id:myUid()})}).catch(function(){});
   }catch(e){}
 }
 function reportBackend(id){
@@ -4198,11 +4199,11 @@ function syncPersonVote(pid,dir,remove){
   try{
     if(remove){
       fetch(SUPABASE_URL+'/rest/v1/person_votes?person_id=eq.'+pid+'&device_id=eq.'+encodeURIComponent(wsDevice()),
-        {method:'DELETE',headers:sbHeaders()}).catch(function(){});
+        {method:'DELETE',headers:sbVoteHeaders()}).catch(function(){});
     } else {
       fetch(SUPABASE_URL+'/rest/v1/person_votes?on_conflict=person_id,device_id',
-        {method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
-         body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir})}).catch(function(){});
+        {method:'POST',headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+         body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir,user_id:myUid()})}).then(function(r){ if(r&&(r.status===403||r.status===429)) toast('Whoa — slow down a sec.'); }).catch(function(){});
     }
   }catch(e){}
 }
@@ -4590,14 +4591,20 @@ function normalizeSession(d){
 function authApply(session){
   authSession=session; authStore(session);
   if(session&&session.user){
-    var meta=session.user.user_metadata||{};
-    app.signedIn=true;
-    app.name=meta.name||app.name||(session.user.email||'').split('@')[0];
-    app.email=session.user.email||''; app.userId=session.user.id||'';
+    app.userId=session.user.id||'';
+    app.anon=!!session.user.is_anonymous;
+    if(session.user.is_anonymous){
+      app.signedIn=false;   // silent voting identity — visitor still sees Sign in / Join
+    }else{
+      var meta=session.user.user_metadata||{};
+      app.signedIn=true;
+      app.name=meta.name||app.name||(session.user.email||'').split('@')[0];
+      app.email=session.user.email||'';
+    }
   }
-  saveState(); renderAuthSlot(); loadMyProfile(); loadMyApplication();
+  saveState(); renderAuthSlot(); if(!app.anon){ loadMyProfile(); loadMyApplication(); }
 }
-function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.email=''; app.userId=''; saveState(); renderAuthSlot(); }
+function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
 function doAuth(){
   var signup=!!byId('auName');
@@ -4677,11 +4684,29 @@ function authRestore(){
       .then(function(d){ if(d&&d.access_token)authApply(normalizeSession(d)); else authClearLocal(); })
       .catch(function(){ authSession=s; app.signedIn=true; renderAuthSlot(); });
   } else {
-    authSession=s; app.signedIn=true;
-    if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; app.userId=s.user.id||''; }
-    renderAuthSlot(); loadMyProfile(); loadMyApplication();
+    authSession=s;
+    var anon=!!(s.user&&s.user.is_anonymous);
+    app.anon=anon; app.userId=(s.user&&s.user.id)||'';
+    if(!anon){ app.signedIn=true; if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; } }
+    renderAuthSlot(); if(!anon){ loadMyProfile(); loadMyApplication(); }
   }
 }
+/* Give every visitor a silent, real identity so votes tie to auth.uid() (forge-proof,
+   rate-limited) instead of a spoofable device string. Falls back to device_id if the
+   project hasn't enabled Anonymous sign-ins yet. */
+function ensureIdentity(){
+  if(!sbConfigured()) return;
+  if(authSession&&authSession.access_token) return;   // already have an account or anon identity
+  fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({})})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); loadAllBackendVotes(); } })
+    .catch(function(){});
+}
+/* Vote requests must carry the user's JWT when we have one, or RLS rejects the
+   user_id as forged. Device-only (no session) keeps working during transition. */
+function haveSession(){ return !!(authSession&&authSession.access_token); }
+function sbVoteHeaders(extra){ return haveSession()?sbUserHeaders(extra):sbHeaders(extra); }
+function myUid(){ return haveSession()?(app.userId||null):null; }
 function initials(name){
   if(!name) return 'YT';
   var p=name.trim().split(/\s+/);
@@ -4741,7 +4766,7 @@ function forgetTmdbKey(){
 /* ============ INIT ============ */
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
-renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); refreshAdminUI();
+renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); ensureIdentity(); refreshAdminUI();
 /* open whatever the URL points at (deep link / refresh / back button) */
 if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
