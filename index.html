@@ -761,6 +761,8 @@
   .vote-row .vr-ttl{font-weight:700;font-size:14.5px}
   .vote-row .vr-yr{font-size:12.5px;color:var(--ink-2)}
   .plate-remove{background:none;border:1px solid var(--line-strong);border-radius:99px;font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer;padding:5px 11px}
+  .plate-actions{display:flex;gap:7px;align-items:center;margin-top:8px;justify-content:center}
+  .plate-watch{background:var(--gold);color:#241703;border-radius:99px;font-size:12px;font-weight:800;padding:6px 12px;text-decoration:none}
   .plate-remove:hover{border-color:var(--paprika);color:var(--paprika)}
   .card .plate-remove{margin-top:8px}
 
@@ -970,7 +972,7 @@
           <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
         </div>
         <div id="debateBox" class="debate-box" style="display:none"></div>
-        <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl">Best of the 90s — vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
+        <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
       </div>
@@ -4256,14 +4258,29 @@ function debateVote(id,pick){
 /* Reuses the debate_votes table (each matchup is a "debate" with its own id),
    so no new backend. One tournament runs at a time; rounds advance on a
    schedule and winners are computed live from the tallies. */
-var BRACKETS=[{
-  id:'90s',
-  title:'Best of the 90s',
-  sub:'Eight films from the decade that shaped the culture. One matchup at a time — you crown the champion.',
-  start:'2026-07-06', roundDays:2,
-  seeds:['boyz','menace-ii-society','friday','love-jones','set-it-off','juice','new-jack-city','waiting-to-exhale']
-}];
-function activeBracket(){ return BRACKETS.length?BRACKETS[0]:null; }
+/* Tournaments run in sequence — each ~8 days (QF→SF→Final over 6, then the
+   champion stands for a couple days before the next opens). activeBracket()
+   is the latest one whose start has arrived, so they roll over on their own. */
+var BRACKETS=[
+  { id:'90s', title:'Best of the 90s', start:'2026-07-06', roundDays:2,
+    sub:'Eight films from the decade that shaped the culture. One matchup at a time — you crown the champion.',
+    seeds:['boyz','menace-ii-society','friday','love-jones','set-it-off','juice','new-jack-city','waiting-to-exhale'] },
+  { id:'horror', title:'Best Black Horror', start:'2026-07-14', roundDays:2,
+    sub:'Eight that used the scare to tell the truth. Vote the one that still keeps you up.',
+    seeds:['getout','us','his-house','sinners','candyman','nope','tales-from-the-hood','def-by-temptation'] },
+  { id:'denzel', title:'Greatest Denzel Role', start:'2026-07-22', roundDays:2,
+    sub:'Eight turns from the man himself. Which one is the coldest?',
+    seeds:['training-day','malcolm-x','american-gangster','glory','fences','devil-in-a-blue-dress','the-hurricane','he-got-game'] },
+  { id:'2000s', title:'The 2000s Cookout', start:'2026-07-30', roundDays:2,
+    sub:'Eight from the era that scored every barbecue and date night. Pick the plate.',
+    seeds:['atl','love-basketball','brown-sugar','the-best-man','baby-boy','drumline','stomp-the-yard','two-can-play-that-game'] }
+];
+function activeBracket(){
+  if(!BRACKETS.length) return null;
+  var now=new Date(), pick=BRACKETS[0];
+  for(var i=0;i<BRACKETS.length;i++){ if(new Date(BRACKETS[i].start+'T00:00:00')<=now) pick=BRACKETS[i]; }
+  return pick;
+}
 var _brTallies={};
 function mMatchId(bid,round,a,b){ return 'br-'+bid+'-r'+round+'-'+a+'-'+b; }
 function mWinner(bk,round,a,b){
@@ -4449,6 +4466,25 @@ function refreshExcitement(soonId){
 function findSoon(id){ for(var i=0;i<COMING_SOON.length;i++){ if(COMING_SOON[i].id===id)return COMING_SOON[i]; } return null; }
 function soonIndex(id){ for(var i=0;i<COMING_SOON.length;i++){ if(COMING_SOON[i].id===id)return i; } return -1; }
 function openSoonTrailerId(id){ var i=soonIndex(id); if(i>=0)openSoonTrailer(i); }
+/* Add-to-calendar (.ics) for an upcoming film's release date — cross-platform,
+   no third party. Downloads an event the user's calendar app imports. */
+function icsEsc(s){ return String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n'); }
+function addSoonCalendar(id){
+  var c=findSoon(id); if(!c||!c.date){ toast('No release date yet.'); return; }
+  function p2(n){ return ('0'+n).slice(-2); }
+  var d=new Date(), stamp=d.getUTCFullYear()+p2(d.getUTCMonth()+1)+p2(d.getUTCDate())+'T'+p2(d.getUTCHours())+p2(d.getUTCMinutes())+p2(d.getUTCSeconds())+'Z';
+  var day=c.date.replace(/-/g,'');
+  var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Well Seasoned//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    'UID:ws-'+id+'@itswellseasoned.com','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+day,
+    'SUMMARY:'+icsEsc(c.title)+' — out today','DESCRIPTION:'+icsEsc('Release day. See it on Well Seasoned: https://itswellseasoned.com/#/film/'+id),
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  try{
+    var blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+    track('cal_add',{film:id}); toast('Saved to your calendar for '+soonDate(c.date)+'.');
+  }catch(e){ toast('Couldn’t create the reminder on this device.'); }
+}
 /* Detail page for an upcoming film — same "room" as released films, minus the
    released-only bits (no Table/Kitchen vote yet; excitement stands in). */
 function renderSoonDetail(id){
@@ -4476,6 +4512,7 @@ function renderSoonDetail(id){
             '<div class="room-meta">'+castLine+'</div>'+
             '<div class="film-actions">'+
               (c.trailer?'<button class="btn btn-gold" onclick="openSoonTrailerId(\''+c.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+
+              (!soonReleased(c)?'<button class="btn btn-ghost light" onclick="addSoonCalendar(\''+c.id+'\')">🗓 Remind me</button>':'')+
               '<button class="btn btn-ghost light" onclick="openShareCardSoon(\''+c.id+'\')">Share</button>'+
             '</div>'+
             voteBlock+
@@ -4653,6 +4690,8 @@ function renderHome(){
     byId('forYouRail').innerHTML=recs.map(cardHTML).join('');
     sec.style.display='';
   }else{ sec.style.display='none'; }
+  // Bracket teaser reflects the current tournament
+  (function(){ var abk=activeBracket(); if(byId('brtTitle')&&abk) byId('brtTitle').textContent=abk.title+' — vote the tournament'; })();
   // Just Dropped — Coming Soon titles whose release date has arrived (last 45 days)
   (function(){
     var s=byId('dropSection'), g=byId('dropGrid'); if(!s||!g)return;
@@ -5950,7 +5989,8 @@ function plateBlock(plateFilms){
     return '<div class="card"><div onclick="go(\'film\',\''+f.id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
       '<div class="poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+posterInner(f,'p-ttl')+'</div>'+
       '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div>'+cardScores(f)+'<div class="c-sub">'+f.year+' · '+f.genre+'</div></div></div>'+
-      '<button class="plate-remove" onclick="removePlate(\''+f.id+'\')">Remove</button></div>';
+      '<div class="plate-actions"><a class="plate-watch" href="'+(f.where&&f.where.length?watchUrl(f.where[0],f.title):justWatchUrl(f.title))+'" target="_blank" rel="noopener noreferrer" onclick="track(\'plate_watch\',{film:\''+f.id+'\'})">Watch ↗</a>'+
+      '<button class="plate-remove" onclick="removePlate(\''+f.id+'\')">Remove</button></div></div>';
   }).join('');
   return '<div class="you-sec"><h2>My Plate</h2><div class="grid-cards">'+cards+'</div></div>';
 }

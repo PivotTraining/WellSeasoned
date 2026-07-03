@@ -88,6 +88,9 @@ docs. Every push deploys production — verify locally (headless Chromium,
 `/opt/pw-browsers/chromium`) before pushing.
 
 ## Conventions
+- After changing the FILMS catalog, regenerate crawler share data:
+  `node scripts/build-films-json.cjs` (zero-dep; adds missing films to
+  `api/films.json` + backfills posters, so every title has a `/f/<id>` preview).
 - ES5 only in `index.html` (no arrow functions, template literals, let/const).
 - Match the existing comment voice; comments explain constraints, not diffs.
 - Test-harness gotcha: with Playwright routes, register the catch-all
