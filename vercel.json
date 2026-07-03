@@ -3,6 +3,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/f/:id", "destination": "/api/f?id=:id" }
+    { "source": "/f/:id", "destination": "/api/f?id=:id" },
+    { "source": "/apply/:role", "destination": "/api/apply?role=:role" },
+    { "source": "/apply", "destination": "/api/apply?role=critic" }
   ]
 }

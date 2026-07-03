@@ -5725,7 +5725,9 @@ function openContribute(role){
 function openApplyKitchen(){ openContribute('critic'); }
 function openApplyWriter(){ openContribute('writer'); }
 /* Public, shareable apply links — post them anywhere; they open the form. */
-function applyLink(role){ return 'https://itswellseasoned.com/#/apply/'+((role==='writer')?'writer':'critic'); }
+/* Shared link points at the server route (/apply/<role>) so it carries its own
+   preview ("Want to be a critic?"); that route bounces humans into #/apply. */
+function applyLink(role){ return 'https://itswellseasoned.com/apply/'+((role==='writer')?'writer':'critic'); }
 function copyApplyLink(role){
   var u=applyLink(role), lane=(role==='writer')?'The Word':'The Kitchen';
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(u).then(function(){ toast(lane+' apply link copied — share it.'); },function(){ toast(u); }); }
