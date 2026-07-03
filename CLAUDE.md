@@ -100,15 +100,19 @@ Done and verified live:
   no passphrase prompt. Applicant `work_url`/`socials` render through
   `linkifyList` (splits on comma, prepends `https://` to bare domains) so a
   link like `youtube.com/@x` no longer 404s as a relative path.
-- Critic agreement: a 3-step onboarding popup (`openCriticTerms`/
-  `paintCriticTerms`/`ctGo`/`acceptCriticTerms`, `CRITIC_STEPS`, `.ct-*` CSS)
-  covering the job, the ethics they agree to, and what the seat is NOT. Shown
-  automatically to a seated critic who hasn't accepted (`loadMyProfile` reads
-  `profiles.critic_agreed_at`) and gates their first review (`submitCriticReview`).
-  Acceptance recorded via SECURITY DEFINER RPC `accept_critic_terms()`
-  (sets `critic_agreed_at` for the calling critic). Inbox has a **Remove critic**
-  action for seated critics (`inboxRemove` → `verify_critic` with `p_on=false`,
-  clears `is_critic`); writer "Remove" reverts status.
+- Contributor agreements: a shared 3-step onboarding popup (`openTerms(kind)`/
+  `paintTerms`/`termsGo`/`acceptTerms`, `TERMS`={critic,writer}, `CRITIC_STEPS`
+  + `WRITER_STEPS`, `.ct-*` CSS) covering the job, the ethics they agree to, and
+  what the role is NOT. Shown automatically to a seated critic OR approved
+  writer who hasn't accepted (`loadMyProfile` reads `critic_agreed_at`/
+  `writer_agreed_at`; critic gates `submitCriticReview`). Acceptance via
+  SECURITY DEFINER RPCs `accept_critic_terms()` / `accept_writer_terms()`.
+  Writers now have full parity: `profiles.is_writer`, approve/remove via
+  `verify_writer(p_secret,p_email,p_on)` (owner-login or passphrase, copies
+  bio/avatar like `verify_critic`). Inbox actions per lane: critic
+  Seat/Remove critic (`inboxSeat`/`inboxRemove` → `verify_critic`), writer
+  Approve/Remove writer (`inboxApproveWriter`/`inboxRemoveWriter` →
+  `verify_writer`).
 - Shareable apply links: `#/apply/critic`, `#/apply/writer` (`#/apply` →
   critic) open the application form over home (`render` special-cases `apply` →
   `openContribute`). Helpers `applyLink`/`copyApplyLink`/`shareApplyLink`.

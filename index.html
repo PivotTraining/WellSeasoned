@@ -5265,15 +5265,17 @@ function loadKitchenReviews(slug){
 function loadMyProfile(){
   if(!sbConfigured()||!app.userId||!(authSession&&authSession.access_token))return;
   try{
-    fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+encodeURIComponent(app.userId)+'&select=is_critic,critic_outlet,critic_agreed_at',{headers:sbUserHeaders()})
+    fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+encodeURIComponent(app.userId)+'&select=is_critic,critic_outlet,critic_agreed_at,is_writer,writer_agreed_at',{headers:sbUserHeaders()})
       .then(function(r){return r.json();}).then(function(rows){
         var p=rows&&rows[0]; if(!p)return;
         var was=app.isCritic;
         app.isCritic=!!p.is_critic; app.criticOutlet=p.critic_outlet||'';
         app.criticAgreed=!!p.critic_agreed_at;
+        app.isWriter=!!p.is_writer; app.writerAgreed=!!p.writer_agreed_at;
         if(app.isCritic!==was){ var r0=parseHash(); if(r0.view==='film')renderFilm(r0.arg); }
-        // Newly seated critic who hasn't accepted the agreement: onboard them.
+        // Newly seated contributor who hasn't accepted their agreement: onboard them.
         if(app.isCritic && !app.criticAgreed){ setTimeout(function(){ if(app.isCritic&&!app.criticAgreed)openCriticTerms(); },600); }
+        else if(app.isWriter && !app.writerAgreed){ setTimeout(function(){ if(app.isWriter&&!app.writerAgreed)openWriterTerms(); },600); }
       }).catch(function(){});
   }catch(e){}
 }
@@ -5326,34 +5328,68 @@ var CRITIC_STEPS=[
      ['Not guaranteed.','A seat is a trust. Break these and it can be taken back.']
    ]}
 ];
-var _ctStep=0;
-function openCriticTerms(){ _ctStep=0; paintCriticTerms(); }
-function paintCriticTerms(){
-  var n=CRITIC_STEPS.length, s=CRITIC_STEPS[_ctStep], last=(_ctStep===n-1);
-  var dots=''; for(var i=0;i<n;i++){ dots+='<span class="ct-dot'+(i===_ctStep?' on':'')+(i<_ctStep?' done':'')+'"></span>'; }
+var WRITER_STEPS=[
+  {ic:'✍️',t:'Your byline in The Word',
+   lead:'You’ve been approved to write for The Word. Here’s what that means.',
+   items:[
+     ['You have a real byline.','Your essays, features, and reviews run in The Word — in front of the whole community, under your own name and voice.'],
+     ['You shape the conversation.','The Word is where the culture thinks out loud. Bring a genuine point of view.'],
+     ['You represent the house.','Readers trust what runs here. Your work carries that trust.']
+   ]},
+  {ic:'🤝',t:'What you agree to',
+   lead:'The byline runs on trust. By taking it, you commit to this.',
+   items:[
+     ['Your own words.','Original writing — no plagiarism, and no AI passed off as you.'],
+     ['Say true things.','Get the facts right, and correct what you get wrong.'],
+     ['Nothing bought.','No pay-for-coverage, no undisclosed sponsorships. Disclose any tie to what you cover.'],
+     ['Credit others.','Quote, link, and attribute honestly.'],
+     ['Write with care for the culture.','Strong takes welcome — cheap shots and bigotry are not.']
+   ]},
+  {ic:'🚫',t:'What this byline is NOT',
+   lead:'Just as important — the things a byline in The Word is not.',
+   items:[
+     ['Not a press-release desk.','Not free PR for anyone.'],
+     ['Not for sale.','No paid placements dressed up as editorial.'],
+     ['Not anonymous sniping.','Your name is on every piece.'],
+     ['Not a soapbox for hate.','Critique work and ideas, never identities.'],
+     ['Not guaranteed.','A byline is a trust. Break these and it can be taken back.']
+   ]}
+];
+var TERMS={
+  critic:{steps:CRITIC_STEPS, agree:'I agree — take my seat', rpc:'accept_critic_terms', welcome:'Welcome to The Kitchen. Your seat is live.', fine:'By accepting you agree to uphold The Kitchen’s standards. Seats can be reviewed or removed by the editors.', set:function(){ app.criticAgreed=true; }},
+  writer:{steps:WRITER_STEPS, agree:'I agree — start writing', rpc:'accept_writer_terms', welcome:'Welcome to The Word. Your byline is live.', fine:'By accepting you agree to uphold The Word’s standards. Bylines can be reviewed or removed by the editors.', set:function(){ app.writerAgreed=true; }}
+};
+var _termsKind='critic', _termsStep=0;
+function openTerms(kind){ _termsKind=TERMS[kind]?kind:'critic'; _termsStep=0; paintTerms(); }
+function openCriticTerms(){ openTerms('critic'); }
+function openWriterTerms(){ openTerms('writer'); }
+function paintTerms(){
+  var cfg=TERMS[_termsKind], steps=cfg.steps, n=steps.length, s=steps[_termsStep], last=(_termsStep===n-1);
+  var dots=''; for(var i=0;i<n;i++){ dots+='<span class="ct-dot'+(i===_termsStep?' on':'')+(i<_termsStep?' done':'')+'"></span>'; }
   var items=s.items.map(function(it){ return '<li><b>'+esc(it[0])+'</b><span>'+esc(it[1])+'</span></li>'; }).join('');
-  var back=_ctStep>0?'<button class="btn btn-ghost" onclick="ctGo(-1)">Back</button>':'<span></span>';
+  var back=_termsStep>0?'<button class="btn btn-ghost" onclick="termsGo(-1)">Back</button>':'<span></span>';
   var next=last
-    ? '<button class="btn btn-gold" onclick="acceptCriticTerms()">I agree — take my seat</button>'
-    : '<button class="btn btn-gold" onclick="ctGo(1)">Next</button>';
+    ? '<button class="btn btn-gold" onclick="acceptTerms()">'+esc(cfg.agree)+'</button>'
+    : '<button class="btn btn-gold" onclick="termsGo(1)">Next</button>';
   showModal('<div class="ct-wrap">'+
     '<div class="ct-steps">'+dots+'</div>'+
     '<div class="ct-ic">'+s.ic+'</div>'+
-    '<div class="ct-num">Step '+(_ctStep+1)+' of '+n+'</div>'+
+    '<div class="ct-num">Step '+(_termsStep+1)+' of '+n+'</div>'+
     '<h2 class="ct-title">'+esc(s.t)+'</h2>'+
     '<p class="ct-lead">'+esc(s.lead)+'</p>'+
     '<ul class="ct-list">'+items+'</ul>'+
     '<div class="ct-nav">'+back+next+'</div>'+
-    (last?'<p class="ct-fine">By accepting you agree to uphold The Kitchen’s standards. Seats can be reviewed or removed by the editors.</p>':'')+
+    (last?'<p class="ct-fine">'+esc(cfg.fine)+'</p>':'')+
   '</div>');
   var m=byId('modal'); if(m){ m.classList.add('wide'); }
 }
-function ctGo(d){ _ctStep=Math.max(0,Math.min(CRITIC_STEPS.length-1,_ctStep+d)); paintCriticTerms(); }
-function acceptCriticTerms(){
-  if(!sbConfigured()){ app.criticAgreed=true; closeModal(); return; }
-  fetch(SUPABASE_URL+'/rest/v1/rpc/accept_critic_terms',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:'{}'})
+function termsGo(d){ var n=TERMS[_termsKind].steps.length; _termsStep=Math.max(0,Math.min(n-1,_termsStep+d)); paintTerms(); }
+function acceptTerms(){
+  var cfg=TERMS[_termsKind];
+  if(!sbConfigured()){ cfg.set(); closeModal(); return; }
+  fetch(SUPABASE_URL+'/rest/v1/rpc/'+cfg.rpc,{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:'{}'})
     .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
-    .then(function(){ app.criticAgreed=true; closeModal(); toast('Welcome to The Kitchen. Your seat is live.'); var r0=parseHash(); if(r0.view==='film')renderFilm(r0.arg); })
+    .then(function(){ cfg.set(); closeModal(); toast(cfg.welcome); var r0=parseHash(); if(r0.view==='film')renderFilm(r0.arg); })
     .catch(function(){ toast('Couldn’t save — try again.'); });
 }
 /* Admin: seat (verify) a critic by account email. Gated by the admin passphrase. */
@@ -5442,8 +5478,8 @@ function inboxCardHTML(a){
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
   } else {
     actions = seated
-      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxSetStatus('+a.id+',\'received\')">Remove</button>'
-      : '<button class="btn btn-gold btn-sm" onclick="inboxSetStatus('+a.id+',\'seated\')">Approve</button>'
+      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemoveWriter('+a.id+',\''+esc(eArg)+'\')">Remove writer</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxApproveWriter('+a.id+',\''+esc(eArg)+'\')">Approve</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
   }
@@ -5479,6 +5515,22 @@ function inboxRemove(id,email){
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(){ toast('Critic removed. Seat revoked.'); inboxLoad(); })
+    .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
+}
+/* Admin: approve / remove a writer for The Word (mirrors critic seating). */
+function inboxApproveWriter(id,email){
+  if(!sbConfigured())return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:true})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(ok){ toast(ok?'Approved. They’ll accept the writer agreement, then their byline is live.':'They need an account with this email first — then approve again.'); inboxLoad(); })
+    .catch(function(){ toast('Couldn’t approve — make sure you’re signed in as the owner.'); });
+}
+function inboxRemoveWriter(id,email){
+  if(!sbConfigured())return;
+  if(!window.confirm('Remove this writer? Their byline in The Word is revoked.'))return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(){ toast('Writer removed. Byline revoked.'); inboxLoad(); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* One batched pull of every film's live tally, so The Table score on grid cards
