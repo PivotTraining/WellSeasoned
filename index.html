@@ -946,14 +946,14 @@
   .ct-dot.done{background:var(--gold)}
   .ct-dot.on{background:var(--gold);width:24px;border-radius:5px}
   .ct-ic{font-size:44px;line-height:1;margin-bottom:6px}
-  .ct-num{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
-  .ct-title{font-family:var(--display);font-weight:800;font-size:26px;margin:6px 0 6px;color:var(--ink)}
-  .ct-lead{color:var(--ink-2);font-size:15px;line-height:1.5;max-width:44ch;margin:0 auto 16px}
-  .ct-list{list-style:none;text-align:left;display:flex;flex-direction:column;gap:11px;margin:0 auto 8px;max-width:460px;padding:0}
-  .ct-list li{display:flex;flex-direction:column;gap:2px;padding-left:24px;position:relative}
-  .ct-list li::before{content:'';position:absolute;left:2px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--gold)}
-  .ct-list li b{font-size:15px;color:var(--ink)}
-  .ct-list li span{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+  .ct-num{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
+  .ct-title{font-family:var(--display);font-weight:800;font-size:29px;margin:6px 0 8px;color:var(--ink)}
+  .ct-lead{color:var(--ink-2);font-size:16.5px;line-height:1.5;max-width:46ch;margin:0 auto 18px}
+  .ct-list{list-style:none;text-align:left;display:flex;flex-direction:column;gap:13px;margin:0 auto 8px;max-width:480px;padding:0}
+  .ct-list li{display:flex;flex-direction:column;gap:3px;padding-left:26px;position:relative}
+  .ct-list li::before{content:'';position:absolute;left:2px;top:8px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+  .ct-list li b{font-size:16.5px;color:var(--ink)}
+  .ct-list li span{font-size:15px;color:var(--ink-2);line-height:1.5}
   .ct-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px}
   .ct-nav .btn{width:auto;margin-top:0;flex:0 0 auto;min-width:120px}
   .ct-fine{font-size:12px;color:var(--ink-3);margin-top:12px;line-height:1.5}
@@ -5468,18 +5468,18 @@ function inboxCardHTML(a){
   if(a.socials) lines.push('<span class="ic-line"><b>Social:</b> '+linkifyList(a.socials)+'</span>');
   if(a.work_url) lines.push('<span class="ic-line"><b>'+(role==='writer'?'Writing':'Work')+':</b> '+linkifyList(a.work_url)+'</span>');
   var meta=lines.length?'<div class="ic-lines">'+lines.join('')+'</div>':'';
-  var eArg=(a.email||'').replace(/'/g,"\\'"), oArg=(a.outlet||'').replace(/'/g,"\\'");
+  var eArg=(a.email||'').replace(/'/g,"\\'"), oArg=(a.outlet||'').replace(/'/g,"\\'"), nArg=(a.name||'').replace(/'/g,"\\'");
   var seated=(status==='seated'), actions;
   if(role==='critic'){
     actions = seated
       ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemove('+a.id+',\''+esc(eArg)+'\')">Remove critic</button>'
-      : '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\')">Seat as critic</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\',\''+esc(nArg)+'\')">Seat as critic</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
   } else {
     actions = seated
       ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemoveWriter('+a.id+',\''+esc(eArg)+'\')">Remove writer</button>'
-      : '<button class="btn btn-gold btn-sm" onclick="inboxApproveWriter('+a.id+',\''+esc(eArg)+'\')">Approve</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxApproveWriter('+a.id+',\''+esc(eArg)+'\',\''+esc(nArg)+'\')">Approve</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
   }
@@ -5500,12 +5500,41 @@ function inboxSetStatus(id,status){
     .then(function(){ toast('Updated.'); inboxLoad(); })
     .catch(function(){ toast('Couldn’t update — make sure you’re signed in as the owner.'); });
 }
-function inboxSeat(id,email,outlet){
+function inboxSeat(id,email,outlet,name){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ toast(ok?'Seated. They’ll accept the critic agreement, then their scores move the Kitchen.':'They need an account with this email first — then seat again.'); inboxLoad(); })
+    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('critic',email,name); } else { toast('They need an account with this email first — then seat again.'); } })
     .catch(function(){ toast('Couldn’t seat — make sure you’re signed in as the owner.'); });
+}
+/* After seating/approving: confirm to the owner (immediate feedback) and offer
+   to notify the contributor. Automated email needs Resend SMTP (owner setup);
+   until then "Email them" opens a ready-to-send message in the owner's mail app. */
+function seatedConfirm(kind,email,name){
+  var writer=(kind==='writer'), lane=writer?'The Word':'The Kitchen';
+  var who=esc(name||email);
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<div style="text-align:center">'+
+      '<div style="font-size:46px;line-height:1">🎉</div>'+
+      '<h2>'+who+' is '+(writer?'approved':'seated')+'</h2>'+
+      '<p class="m-sub">They’re part of <b>'+lane+'</b> now. The next time they sign in with <b>'+esc(email)+'</b>, they’ll be asked to accept the '+(writer?'writer':'critic')+' agreement — then they’re live.</p>'+
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px">'+
+        '<button class="btn btn-gold" onclick="notifyContributor(\''+kind+'\',\''+esc((email||'').replace(/\x27/g,"\\\x27"))+'\',\''+esc((name||'').replace(/\x27/g,"\\\x27"))+'\')">✉️ Email them the news</button>'+
+        '<button class="btn btn-ghost" onclick="closeModal()">Done</button>'+
+      '</div>'+
+      '<p class="m-alt" style="margin-top:14px">Tip: automated emails turn on once Resend SMTP is connected.</p>'+
+    '</div>');
+}
+function notifyContributor(kind,email,name){
+  var writer=(kind==='writer'), lane=writer?'The Word':'The Kitchen';
+  var subj=writer?'You’re approved to write for The Word — Well Seasoned':'You’re seated at The Kitchen — Well Seasoned';
+  var body='Hi '+(name||'there')+',\n\n'+
+    (writer
+      ? 'Great news — you’ve been approved to write for The Word on Well Seasoned. You’ve got a real byline, in front of the whole community.'
+      : 'Great news — you’ve been seated as a verified critic in The Kitchen on Well Seasoned. Your reviews now move the official Kitchen score.')+'\n\n'+
+    'Next step: sign in at https://itswellseasoned.com with this email, and you’ll be asked to accept a short '+(writer?'writer':'critic')+' agreement — then you’re live.\n\n'+
+    'Welcome to the table.\n— Well Seasoned';
+  window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
 /* Admin: remove a seated critic (un-verify). verify_critic(p_on=false) clears
    is_critic so their reviews stop moving the Kitchen score. */
@@ -5518,11 +5547,11 @@ function inboxRemove(id,email){
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* Admin: approve / remove a writer for The Word (mirrors critic seating). */
-function inboxApproveWriter(id,email){
+function inboxApproveWriter(id,email,name){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:true})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ toast(ok?'Approved. They’ll accept the writer agreement, then their byline is live.':'They need an account with this email first — then approve again.'); inboxLoad(); })
+    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('writer',email,name); } else { toast('They need an account with this email first — then approve again.'); } })
     .catch(function(){ toast('Couldn’t approve — make sure you’re signed in as the owner.'); });
 }
 function inboxRemoveWriter(id,email){

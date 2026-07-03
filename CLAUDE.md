@@ -113,6 +113,11 @@ Done and verified live:
   Seat/Remove critic (`inboxSeat`/`inboxRemove` → `verify_critic`), writer
   Approve/Remove writer (`inboxApproveWriter`/`inboxRemoveWriter` →
   `verify_writer`).
+- Seat/approve gives the owner an immediate confirmation modal (`seatedConfirm`)
+  with an "✉️ Email them the news" button (`notifyContributor` → a pre-filled
+  `mailto:` in the owner's mail app — automated email awaits Resend SMTP). The
+  contributor's own onboarding popup still appears in THEIR browser on next
+  sign-in. Agreement popup font sizes bumped up for readability.
 - Shareable apply links: `#/apply/critic`, `#/apply/writer` (`#/apply` →
   critic) open the application form over home (`render` special-cases `apply` →
   `openContribute`). Helpers `applyLink`/`copyApplyLink`/`shareApplyLink`.
