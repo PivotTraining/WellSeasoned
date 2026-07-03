@@ -63,6 +63,24 @@ Done and verified live:
   forged user_id + bad stance rejected.
 - Transfer (2025, dir. Paul D. Hannah, TMDB 1557378) added to catalog on
   Tubi with real pinned poster in `WS_POSTERS`; no fake score/votes.
+- Featured spotlight carousel on the home page (`FEATURED` array →
+  `paintFeatured`/`featSlideHTML`/`featGo`/`featSet`, auto-rotates, pinned
+  backdrops for cinematic art, `.feat-car` CSS). Editorial pick of
+  genuinely-current, prominently-Black titles (lead and/or creator suffices —
+  owner's bar). Currently: Man of War (2026 film, LaMonica Garrett, dir.
+  William Kaufman, real Apple TV deep link via per-film `f.watch` override),
+  Survival of the Thickest (Netflix, S3 dropped 2026-07-02), All the Queen's
+  Men (BET+, S5 dropped 2026-06-10). All real TMDB art/data, `k/t:null`,
+  `votes:0`, no reviews — nothing fake.
+- Search typeahead (`searchSuggest`/`searchKey`/`pickSuggest`, `#searchSuggest`
+  dropdown): as you spell, prompts title matches (starts-with ranked first,
+  then contains, then dir/cast), poster thumb + year·dir, arrow/enter to open,
+  Enter-with-nothing runs the full Browse search. Desktop header only (search
+  is hidden on mobile).
+- Per-film where-to-watch deep links: optional `f.watch` map ({provider:url})
+  overrides the generic provider-search `watchUrl()` when a title has a
+  verified direct link (used for Man of War → Apple TV, since TMDB's
+  watch/providers feed is empty for day-one VOD releases).
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already
