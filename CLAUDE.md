@@ -69,7 +69,9 @@ Done and verified live:
   catalog films on the fight against injustice / for freedom — Birth of a Nation
   (2016 Nat Turner rebellion, the only slavery-era title, owner's call), Selma,
   Judas and the Black Messiah, Malcolm X, 13th, The Hate U Give. To change the
-  picks edit `FREEDOM_FILMS`; recurs every July 4.
+  picks edit `FREEDOM_FILMS`; recurs every July 4. Header shows the
+  **African-American flag** (David Hammons, red/black stripes + green canton
+  with black stars) as inline SVG (`.aa-flag`); section accent is red/black/green.
 - Featured spotlight carousel on the home page (`FEATURED` array →
   `paintFeatured`/`featSlideHTML`/`featGo`/`featSet`, auto-rotates, pinned
   backdrops for cinematic art, `.feat-car` CSS). Editorial pick of
