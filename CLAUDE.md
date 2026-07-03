@@ -100,6 +100,13 @@ Done and verified live:
   p_secret,p_id,p_status)` shortlists/passes; critic "Seat" reuses
   `verify_critic` (flips `profiles.is_critic`). Cards show photo/bio/socials/
   work, lane badge, and status.
+- Seated-critic bylines: `profiles` gained `avatar_url`/`bio` (public via the
+  existing `profiles_critics_public` policy). `verify_critic` now copies the
+  applicant's photo + bio from their latest `critic_applications` row onto the
+  profile when seating (coalesce — never wipes). `loadKitchenReviews` selects
+  `profiles(name,critic_outlet,avatar_url,bio)`; the film-page review card
+  renders the photo (initial-letter fallback) + bio as a real byline. No fake
+  data — only shows once a real critic is seated and posts.
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already
