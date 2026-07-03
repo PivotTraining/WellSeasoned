@@ -91,6 +91,15 @@ Done and verified live:
   `contribPickAvatar`. Applications land in `critic_applications` with a
   `role` column (`critic`|`writer`) plus `bio`/`avatar_url`/`socials` columns —
   one editorial inbox, human review, nothing bought.
+- Admin applications inbox at `#/inbox` (`renderInbox`/`inboxLoad`/
+  `inboxCardHTML`/`inboxSetStatus`/`inboxSeat`, footer "Applications" admin
+  link). Gated by the `ws_admin` device flag + the admin passphrase (same
+  `app_secrets.curation_admin` as `verify_critic`). Reads every application via
+  SECURITY DEFINER RPC `admin_list_applications(p_secret)` (bypasses the
+  own-row RLS only for a verified admin); `admin_set_application_status(
+  p_secret,p_id,p_status)` shortlists/passes; critic "Seat" reuses
+  `verify_critic` (flips `profiles.is_critic`). Cards show photo/bio/socials/
+  work, lane badge, and status.
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already

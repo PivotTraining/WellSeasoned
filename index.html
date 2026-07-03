@@ -903,6 +903,31 @@
   .jp-card p{color:var(--ink-2);font-size:14px;line-height:1.5;margin:0 0 6px;flex:1}
   .jp-card .btn{margin-top:2px}
   @media(max-width:640px){ .jp-lanes{grid-template-columns:1fr} .jp-head h2{font-size:25px} }
+  /* Admin: contributor applications inbox */
+  .inbox-tools{display:flex;align-items:center;gap:12px;margin:14px 0 16px}
+  .inbox-count{font-size:13px;color:var(--ink-3)}
+  .inbox-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .inbox-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px}
+  .inbox-card.st-seated{border-color:var(--gold)}
+  .inbox-card.st-declined{opacity:.6}
+  .ic-top{display:flex;align-items:flex-start;gap:12px}
+  .ic-av{width:52px;height:52px;flex:none;border-radius:50%;background:var(--paper) center/cover no-repeat;border:1px solid var(--line-strong)}
+  .ic-av-none{display:grid;place-items:center;font-weight:800;font-size:20px;color:var(--gold-ink);background:var(--gold-wash,rgba(228,155,11,.14))}
+  .ic-id{flex:1;min-width:0}
+  .ic-name{font-family:var(--display);font-weight:800;font-size:16.5px;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ic-role{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:999px}
+  .ic-role.r-critic{background:rgba(228,155,11,.16);color:var(--gold-ink)}
+  .ic-role.r-writer{background:rgba(46,139,87,.16);color:#2e8b57}
+  .ic-email{display:block;font-size:13px;color:var(--ink-2);margin-top:2px;word-break:break-all}
+  .ic-when{font-size:12px;color:var(--ink-3);margin-top:2px}
+  .ic-status{flex:none;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--paper);color:var(--ink-2);border:1px solid var(--line-strong);height:-moz-fit-content;height:fit-content}
+  .ic-status.s-seated{background:var(--gold);color:#241703;border-color:var(--gold)}
+  .ic-status.s-declined{color:var(--ink-3)}
+  .ic-bio{font-size:14px;line-height:1.5;color:var(--ink-2);margin:0}
+  .ic-lines{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+  .ic-link{color:var(--gold-ink);font-weight:700;text-decoration:none}
+  .ic-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .ic-actions .btn{flex:0 0 auto}
   .foot-row .ftag{font-style:italic;font-weight:600;color:var(--ink)}
   .fine{font-size:12px;color:var(--ink-3);margin-top:10px}
 
@@ -1215,6 +1240,12 @@
     </div>
   </section>
 
+  <section class="view" data-view="inbox" aria-label="Contributor applications">
+    <div class="wrap" style="padding-top:26px">
+      <div id="inboxWrap"></div>
+    </div>
+  </section>
+
   <section class="view" data-view="legal" aria-label="Legal">
     <div class="wrap" id="legalContent"></div>
   </section>
@@ -1288,7 +1319,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('inbox')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Applications</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -3897,7 +3928,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -3929,6 +3960,7 @@ function render(view,arg){
   else if(view==='you')renderYou();
   else if(view==='legal')renderLegal(arg);
   else if(view==='curate')renderCuratePage();
+  else if(view==='inbox')renderInbox();
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   if(view!=='film'&&view!=='legal')applyMetaTags(view);
@@ -5218,6 +5250,82 @@ function seatCritic(){
     .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
     .then(function(ok){ toast(ok?'Critic seated. Their reviews now move the Kitchen.':'No member with that email — they need to create an account first.'); })
     .catch(function(){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){ } toast('Failed — check the passphrase.'); });
+}
+/* ============ ADMIN: contributor applications inbox (#/inbox) ============
+   Reads every Kitchen/Word application through admin_list_applications (a
+   SECURITY DEFINER RPC gated by the same passphrase as verify_critic, so the
+   own-row RLS on critic_applications is bypassed only for a verified admin).
+   Seat a critic (flips profiles.is_critic via verify_critic), shortlist, or
+   pass — treat them like gold. */
+function renderInbox(){
+  var w=byId('inboxWrap'); if(!w)return;
+  var on=false; try{ on=localStorage.getItem('ws_admin')==='1'; }catch(e){}
+  if(!on){ w.innerHTML='<div class="browse-head"><h1>Applications</h1><p class="hero-lead" style="margin-top:8px">Admin only. Visit <b>#/admin</b> to unlock on this device.</p></div>'; return; }
+  w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">ADMIN</span><h1>Contributor applications</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Everyone who applied to The Kitchen or The Word — photo, bio, socials, and work. Read them like gold, then seat, shortlist, or pass.</p></div>'+
+    '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">↻ Refresh</button><span id="inboxCount" class="inbox-count"></span></div>'+
+    '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading…</p></div>';
+  inboxLoad();
+}
+function inboxLoad(){
+  var list=byId('inboxList'); if(!list)return;
+  if(!sbConfigured()){ list.innerHTML='<p class="hero-lead">Backend not configured.</p>'; return; }
+  var secret=_adminSecret(); if(!secret){ list.innerHTML='<p class="hero-lead">Admin passphrase needed.</p>'; return; }
+  list.innerHTML='<p class="hero-lead">Loading…</p>';
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_applications',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:secret})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(rows){
+      rows=rows||[];
+      var cnt=byId('inboxCount'); if(cnt) cnt.textContent=rows.length+' application'+(rows.length===1?'':'s');
+      if(!rows.length){ list.innerHTML='<p class="hero-lead">No applications yet.</p>'; return; }
+      list.innerHTML=rows.map(inboxCardHTML).join('');
+    })
+    .catch(function(){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){ } list.innerHTML='<p class="hero-lead">Couldn’t load — check the admin passphrase and <a onclick="inboxLoad()" style="color:var(--gold-ink);cursor:pointer;font-weight:700">try again</a>.</p>'; });
+}
+function inboxCardHTML(a){
+  var role=(a.role==='writer')?'writer':'critic';
+  var lane=role==='writer'?'The Word':'The Kitchen';
+  var nm=esc(a.name||'—');
+  var av=a.avatar_url?'<div class="ic-av" style="background-image:url(\''+esc(a.avatar_url)+'\')"></div>':'<div class="ic-av ic-av-none">'+esc((a.name||'?').slice(0,1).toUpperCase())+'</div>';
+  var when=a.created_at?esc(String(a.created_at).slice(0,10)):'';
+  var status=esc(a.status||'received');
+  var email=esc(a.email||'');
+  var bio=a.bio?'<p class="ic-bio">'+esc(a.bio)+'</p>':'';
+  var lines=[];
+  if(a.outlet) lines.push('<span class="ic-line"><b>'+(role==='writer'?'Beat':'Outlet')+':</b> '+esc(a.outlet)+'</span>');
+  if(a.socials) lines.push('<span class="ic-line"><b>Social:</b> '+esc(a.socials)+'</span>');
+  if(a.work_url) lines.push('<a class="ic-line ic-link" href="'+esc(a.work_url)+'" target="_blank" rel="noopener noreferrer">'+(role==='writer'?'Writing samples':'Their work')+' ↗</a>');
+  var meta=lines.length?'<div class="ic-lines">'+lines.join('')+'</div>':'';
+  var eArg=(a.email||'').replace(/'/g,"\\'"), oArg=(a.outlet||'').replace(/'/g,"\\'");
+  var seatBtn=role==='critic'
+    ? '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\')">Seat as critic</button>'
+    : '<button class="btn btn-gold btn-sm" onclick="inboxSetStatus('+a.id+',\'seated\')">Approve</button>';
+  return '<div class="inbox-card st-'+status+'">'+
+    '<div class="ic-top">'+av+
+      '<div class="ic-id"><div class="ic-name">'+nm+' <span class="ic-role r-'+role+'">'+lane+'</span></div>'+
+        '<a class="ic-email" href="mailto:'+email+'">'+email+'</a>'+
+        '<div class="ic-when">Applied '+when+'</div></div>'+
+      '<span class="ic-status s-'+status+'">'+status+'</span>'+
+    '</div>'+ bio + meta +
+    '<div class="ic-actions">'+seatBtn+
+      '<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>'+
+    '</div>'+
+  '</div>';
+}
+function inboxSetStatus(id,status){
+  if(!sbConfigured())return; var secret=_adminSecret(); if(!secret)return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:secret,p_id:id,p_status:status})})
+    .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
+    .then(function(){ toast('Updated.'); inboxLoad(); })
+    .catch(function(){ toast('Couldn’t update — check the passphrase.'); });
+}
+function inboxSeat(id,email,outlet){
+  if(!sbConfigured())return; var secret=_adminSecret(); if(!secret)return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:secret,p_email:email,p_outlet:outlet||null})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(ok){ toast(ok?'Seated. Their reviews now move the Kitchen.':'They need an account with this email first — then seat again.'); inboxLoad(); })
+    .catch(function(){ toast('Couldn’t seat — check the passphrase.'); });
 }
 /* One batched pull of every film's live tally, so The Table score on grid cards
    matches the film page instead of showing stale seeds. */
