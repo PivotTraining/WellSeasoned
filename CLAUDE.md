@@ -137,9 +137,13 @@ Done and verified live:
   `mailto:` in the owner's mail app — automated email awaits Resend SMTP). The
   contributor's own onboarding popup still appears in THEIR browser on next
   sign-in. Agreement popup font sizes bumped up for readability.
-- Shareable apply links: `#/apply/critic`, `#/apply/writer` (`#/apply` →
+- Shareable apply links: in-app `#/apply/critic`/`#/apply/writer` (`#/apply` →
   critic) open the application form over home (`render` special-cases `apply` →
-  `openContribute`). Helpers `applyLink`/`copyApplyLink`/`shareApplyLink`.
+  `openContribute`). For SHARING, `applyLink()` returns the server route
+  `/apply/<role>` (`api/apply.js` + `vercel.json` rewrite) which serves its own
+  OG/Twitter preview ("Want to be a critic?" / "Want to write for the culture?")
+  then bounces humans to `#/apply/<role>` — same pattern as `/f/<slug>`. Helpers
+  `applyLink`/`copyApplyLink`/`shareApplyLink`.
   Footer portal cards have a "Share link ↗" (native share/copy); the admin
   inbox has a "Recruit beyond the site" row with Copy Kitchen/Word link
   buttons. So recruiting isn't only internally driven. Reads every application via
