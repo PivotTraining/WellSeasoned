@@ -457,6 +457,28 @@
   .cast-name{font-size:12.5px;font-weight:700;margin-top:9px;line-height:1.2}
   .cast-role{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .cast-lead .cast-role{color:var(--gold-ink);font-weight:700}
+  .cast-card.linked{cursor:pointer}
+  .cast-card.linked .cast-av{transition:transform .18s,box-shadow .18s,border-color .18s}
+  .cast-card.linked:hover .cast-av{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--gold)}
+  .cast-card.linked:hover .cast-name{color:var(--gold-ink)}
+  /* ARTIST PAGE */
+  .artist-hero{display:flex;gap:22px;align-items:flex-start;margin:18px 0 6px}
+  .artist-photo{flex:none;width:150px;height:150px;border-radius:50%;background-size:cover;background-position:center top;background-color:var(--inset);box-shadow:var(--shadow-2);border:3px solid var(--panel)}
+  .artist-photo-init{display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:46px;color:var(--ink-3)}
+  .artist-lead h1{font-size:clamp(26px,3.6vw,40px);letter-spacing:-.4px;margin:2px 0 6px}
+  .artist-meta{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
+  .artist-bio{color:var(--ink-2);line-height:1.6;font-size:15px;max-width:680px}
+  .art-films{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:12px}
+  .art-film{display:flex;flex-direction:column}
+  .art-film.linked .art-film-poster{transition:transform .2s,box-shadow .2s}
+  .art-film.linked:hover .art-film-poster{transform:translateY(-4px);box-shadow:var(--shadow-3)}
+  .art-film.linked:hover .art-film-ttl{color:var(--gold-ink)}
+  .art-film-poster{position:relative;aspect-ratio:2/3;border-radius:12px;background-size:cover;background-position:center;background-color:var(--inset);box-shadow:var(--shadow-1)}
+  .art-film-tag{position:absolute;left:8px;bottom:8px;background:var(--gold);color:#241703;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 7px;border-radius:999px}
+  .art-film-ttl{font-weight:700;font-size:13px;margin-top:8px;line-height:1.2}
+  .art-film-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  @media(max-width:900px){ .art-films{grid-template-columns:repeat(4,1fr)} }
+  @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,1fr)} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
   @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
   .film-verdict{display:flex;gap:22px;align-items:center;margin:22px 0 18px;flex-wrap:wrap}
   .verdict-lg{display:flex;align-items:center;gap:14px;background:linear-gradient(155deg,var(--jewel-2),var(--jewel));border:1px solid rgba(228,155,11,.24);border-radius:var(--r-lg);padding:15px 20px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,235,190,.08)}
@@ -1000,6 +1022,11 @@
   <!-- ============ YOU ============ -->
   <section class="view" data-view="you" aria-label="Your page">
     <div class="wrap" id="youContent"></div>
+  </section>
+
+  <!-- ============ ARTIST (actor / director bio + films) ============ -->
+  <section class="view" data-view="artist" aria-label="Artist">
+    <div class="wrap" id="artistContent"></div>
   </section>
 
   <!-- ============ LEGAL (Privacy / Terms) ============ -->
@@ -3513,14 +3540,15 @@ function hydrateFromTMDB(){
 }
 
 /* ============ FILM ROOM: backdrop + cast/crew (TMDB, lazy per film) ============ */
-var MEDIA_CACHE_KEY='ws_media_v2';   // v2: purge wrong movie-matched media for TV titles
+var MEDIA_CACHE_KEY='ws_media_v3';   // v3: also store TMDB person ids so cast/crew link to artist pages
 function loadMediaCache(){ try{return JSON.parse(localStorage.getItem(MEDIA_CACHE_KEY)||'{}');}catch(e){return {};} }
 function saveMediaCache(c){ try{localStorage.setItem(MEDIA_CACHE_KEY,JSON.stringify(c));}catch(e){} }
 function applyMedia(f,m){
   if(!m)return;
   if(m.b) f.backdrop='https://image.tmdb.org/t/p/w1280'+m.b;
   if(m.dp) f.dirPhoto='https://image.tmdb.org/t/p/w185'+m.dp;
-  if(m.cast&&m.cast.length) f.castFull=m.cast.map(function(c){ return {name:c.n,character:c.c,profile:c.p?'https://image.tmdb.org/t/p/w185'+c.p:null}; });
+  if(m.di) f.dirId=m.di;
+  if(m.cast&&m.cast.length) f.castFull=m.cast.map(function(c){ return {name:c.n,character:c.c,profile:c.p?'https://image.tmdb.org/t/p/w185'+c.p:null,id:c.i}; });
 }
 /* the hero background: real TMDB backdrop if we have it, else the designed gradient */
 function roomBg(f){
@@ -3536,15 +3564,20 @@ function castAvatar(name,photo){
 /* the actors + directors list — a Fandango-style headshot rail */
 function castCrewHTML(f){
   var people=[];
-  if(f.dir&&f.dir!=='—') people.push({name:f.dir,role:(f.type==='tv'?'Creator':'Director'),photo:f.dirPhoto||null,lead:true});
+  if(f.dir&&f.dir!=='—') people.push({name:f.dir,role:(f.type==='tv'?'Creator':'Director'),photo:f.dirPhoto||null,lead:true,pid:f.dirId||null});
   if(f.castFull&&f.castFull.length){
-    f.castFull.forEach(function(c){ people.push({name:c.name,role:c.character||'Cast',photo:c.profile}); });
+    f.castFull.forEach(function(c){ people.push({name:c.name,role:c.character||'Cast',photo:c.profile,pid:c.id||null}); });
   } else if(f.cast&&f.cast.length){
-    f.cast.forEach(function(n){ people.push({name:n,role:'Cast',photo:null}); });
+    f.cast.forEach(function(n){ people.push({name:n,role:'Cast',photo:null,pid:null}); });
   }
   if(!people.length) return '';
   var cards=people.map(function(p){
-    return '<div class="cast-card'+(p.lead?' cast-lead':'')+'">'+castAvatar(p.name,p.photo)+
+    // Once media is hydrated we have TMDB person ids, so each face opens their
+    // artist page. Before hydration (no id) the card is just a name, not a link.
+    var clickable=!!p.pid;
+    return '<div class="cast-card'+(p.lead?' cast-lead':'')+(clickable?' linked':'')+'"'+
+      (clickable?' onclick="go(\'artist\',\''+p.pid+'\')" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'artist\',\''+p.pid+'\')"':'')+'>'+
+      castAvatar(p.name,p.photo)+
       '<span class="cast-name">'+esc(p.name)+'</span>'+
       '<span class="cast-role">'+esc(p.role)+'</span></div>';
   }).join('');
@@ -3568,8 +3601,8 @@ function hydrateFilmMedia(f){
       return fetch('https://api.themoviedb.org/3/'+(isTV?'tv':'movie')+'/'+hit.id+'/credits?api_key='+TMDB_KEY)
         .then(function(r){return r.json();})
         .then(function(cr){
-          if(cr&&cr.cast) m.cast=cr.cast.slice(0,12).map(function(c){ return {n:c.name,c:c.character,p:c.profile_path}; });
-          if(cr&&cr.crew){ var dir=cr.crew.filter(function(c){return c.job==='Director';})[0]; if(dir&&dir.profile_path)m.dp=dir.profile_path; }
+          if(cr&&cr.cast) m.cast=cr.cast.slice(0,12).map(function(c){ return {n:c.name,c:c.character,p:c.profile_path,i:c.id}; });
+          if(cr&&cr.crew){ var dir=cr.crew.filter(function(c){return c.job==='Director';})[0]; if(dir){ if(dir.profile_path)m.dp=dir.profile_path; m.di=dir.id; } }
           return m;
         }).catch(function(){ return m; });
     })
@@ -3655,7 +3688,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -3679,6 +3712,7 @@ function render(view,arg){
   else if(view==='critic')renderCritic(arg);
   else if(view==='vault')renderVault(arg);
   else if(view==='ranked')renderRanked();
+  else if(view==='artist')renderArtist(arg);
   else if(view==='theaters')renderTheaters();
   else if(view==='you')renderYou();
   else if(view==='legal')renderLegal(arg);
@@ -4295,7 +4329,7 @@ function curRefresh(){
   else renderCurList(curQ());
 }
 /* ============ HOME RENDER ============ */
-var HOME_SORT='curated';   // curated | popular | new
+var HOME_SORT='new';   // curated | popular | new — default 'new' so the top rows open on the newest titles
 function setHomeSort(v){ HOME_SORT=v; renderHome(); }
 /* Rotate the shelves so home doesn't look identical every visit. One seed per
    page load: stable across in-session re-renders (scope toggles, nav-back) so
@@ -5231,6 +5265,66 @@ function rankRow(f,rank){
       '<span class="cs"><span class="cs-lab">K</span>'+auraRing(f.k,tier(f.k),26)+'</span>'+
       '<span class="cs"><span class="cs-lab">T</span>'+auraRing(ts,tier(ts),26)+'</span>'+
     '</span></li>';
+}
+/* ============ ARTIST PAGE — TMDB person bio + filmography, interconnected ============ */
+var PEOPLE_CACHE_KEY='ws_people_v1';
+function loadPeopleCache(){ try{return JSON.parse(localStorage.getItem(PEOPLE_CACHE_KEY)||'{}');}catch(e){return {};} }
+function savePeopleCache(c){ try{localStorage.setItem(PEOPLE_CACHE_KEY,JSON.stringify(c));}catch(e){} }
+var _artistId=null;
+function renderArtist(pid){
+  if(!pid){ go('home'); return; }
+  _artistId=pid;
+  var el=byId('artistContent');
+  var cache=loadPeopleCache();
+  if(cache[pid]){ paintArtist(cache[pid]); }
+  else el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button><p class="empty-note" style="margin-top:20px">Loading…</p>';
+  if(!TMDB_KEY){ if(!cache[pid]) el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Artist details need the TMDB connection.</p>'; return; }
+  Promise.all([
+    fetch('https://api.themoviedb.org/3/person/'+pid+'?api_key='+TMDB_KEY).then(function(r){return r.json();}),
+    fetch('https://api.themoviedb.org/3/person/'+pid+'/movie_credits?api_key='+TMDB_KEY).then(function(r){return r.json();})
+  ]).then(function(res){
+    var p=res[0]||{}, cr=res[1]||{};
+    if(!p.id) return;
+    var seen={}, films=[];
+    (cr.cast||[]).concat((cr.crew||[]).filter(function(c){return c.job==='Director';}))
+      .forEach(function(c){
+        if(!c.poster_path||seen[c.id])return; seen[c.id]=1;
+        films.push({id:c.id,title:c.title,year:(c.release_date||'').slice(0,4),poster:c.poster_path,pop:c.popularity||0,ch:c.character||(c.job==='Director'?'Director':'')});
+      });
+    films.sort(function(a,b){ return (parseInt(b.year||0,10)-parseInt(a.year||0,10)) || (b.pop-a.pop); });
+    var data={id:p.id,name:p.name,bio:p.biography||'',photo:p.profile_path||null,dept:p.known_for_department||'',
+      birthday:p.birthday||'',place:p.place_of_birth||'',films:films.slice(0,24)};
+    cache[pid]=data; savePeopleCache(cache);
+    if(_artistId===pid) paintArtist(data);
+  }).catch(function(){ if(!loadPeopleCache()[pid]) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t load this artist right now.</p>'; });
+}
+/* match a TMDB filmography entry to a title already in our catalog */
+function ourFilmByTitleYear(title,year){
+  if(!title)return null; var t=title.toLowerCase();
+  for(var i=0;i<FILMS.length;i++){ var f=FILMS[i]; if(f.title.toLowerCase()===t && (!year || Math.abs((f.year||0)-parseInt(year||0,10))<=1)) return f; }
+  return null;
+}
+function paintArtist(d){
+  var el=byId('artistContent'); if(!el)return;
+  var av=d.photo?'<span class="artist-photo" style="background-image:url(\'https://image.tmdb.org/t/p/w342'+d.photo+'\')"></span>'
+                :'<span class="artist-photo artist-photo-init">'+esc(initials(d.name))+'</span>';
+  var meta=[]; if(d.dept)meta.push(esc(d.dept)); if(d.birthday)meta.push('b. '+esc(d.birthday)); if(d.place)meta.push(esc(d.place));
+  var rawbio=(d.bio||''); if(rawbio.length>900){ rawbio=rawbio.slice(0,900); var sp=rawbio.lastIndexOf(' '); if(sp>600)rawbio=rawbio.slice(0,sp); rawbio+='…'; }
+  var films=d.films.map(function(fm){
+    var mine=ourFilmByTitleYear(fm.title,fm.year);
+    var click=mine?' onclick="go(\'film\',\''+mine.id+'\')" style="cursor:pointer" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+mine.id+'\')"':'';
+    var poster='https://image.tmdb.org/t/p/w342'+fm.poster;
+    return '<div class="art-film'+(mine?' linked':'')+'"'+click+'><div class="art-film-poster" style="background-image:url(\''+poster+'\')">'+(mine?'<span class="art-film-tag">On the menu</span>':'')+'</div>'+
+      '<div class="art-film-ttl">'+esc(fm.title)+'</div><div class="art-film-sub">'+esc(fm.year||'')+(fm.ch?' · '+esc(fm.ch):'')+'</div></div>';
+  }).join('');
+  el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
+    '<div class="artist-hero">'+av+'<div class="artist-lead"><h1>'+esc(d.name)+'</h1>'+
+      (meta.length?'<div class="artist-meta">'+meta.join(' &nbsp;·&nbsp; ')+'</div>':'')+
+      (rawbio?'<p class="artist-bio">'+esc(rawbio)+'</p>':'<p class="artist-bio empty-note">No biography on file yet.</p>')+'</div></div>'+
+    (films?'<h3 class="cc-h" style="margin-top:26px">Films</h3><div class="art-films">'+films+'</div>':'');
+  setDocMeta(d.name+' — Well Seasoned','Bio and filmography for '+esc(d.name)+'.','#/artist/'+encodeURIComponent(d.id),
+    d.photo?'https://image.tmdb.org/t/p/w342'+d.photo:null);
+  window.scrollTo({top:0,behavior:'auto'});
 }
 function renderRanked(){
   if(RANK_CAT==='actor'||RANK_CAT==='actress'){ renderPeople(RANK_CAT); return; }
