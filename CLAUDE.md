@@ -25,6 +25,22 @@ Done and verified live:
   identities for voting (`ensureIdentity`).
 - Vote integrity phases 1+2: votes/comments require `user_id = auth.uid()`,
   one vote per identity, forged ids rejected, legacy null rows claimable.
+- Vote integrity phase 3 (2026-07-03): `votes` re-keyed on IDENTITY. It was
+  the last table still keyed on `(film_slug, device_id)` with a tangled
+  two-generation policy set split across `{anon}`/`{public}` roles. Silent
+  anonymous identities run as Postgres role `authenticated`, so the `{anon}`
+  policies never applied to real voters, and the shared device row 403'd every
+  upsert the moment a voter's identity changed (guest→real account, or a
+  rotated anon identity) — the "every vote says can't save" bug. Fix: unique
+  key is now `(film_slug, user_id)`, client upserts
+  `on_conflict=film_slug,user_id` (an upsert only ever touches the caller's
+  OWN row); `device_id` reverted `uuid`→`text` (nullable, metadata only —
+  stops 400s on non-uuid fallback ids); one clean `{public}` policy set
+  mirroring `person_votes`/`excitement_votes` (read-all, insert/update gated
+  on `user_id=auth.uid()`, owner delete). All 105 rows preserved; forge +
+  guest→signin re-vote verified in RLS. NOTE: `person_votes` still carries the
+  same latent device-keyed 403 (harmless so far) — re-key it the same way if
+  it ever surfaces.
 - Invisible CAPTCHA wired client-side (`captchaToken`/`withCaptcha`) and
   enforced server-side (Turnstile site key in `TURNSTILE_KEY`; Supabase
   Attack Protection CAPTCHA ON — tokenless auth = `captcha_failed`).

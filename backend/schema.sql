@@ -24,26 +24,30 @@ grant usage on schema public to anon, authenticated;
 -- VOTES  (The Table)
 -- ========================================================
 create table if not exists public.votes (
-  id         bigint generated always as identity primary key,
   film_slug  text not null,
-  device_id  text not null,
+  device_id  text,                          -- metadata only (client-supplied), NOT the key
   stance     text not null check (stance in ('for','against')),
+  user_id    uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
--- one vote per device per film (also the upsert conflict target the app uses)
+-- ONE VOTE PER IDENTITY PER FILM. The conflict key is (film_slug, user_id), NOT
+-- device, so an upsert only ever touches the caller's own row. Keying on device
+-- used to 403 every write the moment a voter's identity changed (guest -> real
+-- account, or a rotated anonymous identity), because the shared device row was
+-- owned by a prior identity that current auth.uid() couldn't update. Mirrors
+-- person_votes / excitement_votes.
 do $$
 begin
   if not exists (
     select 1 from pg_constraint where conrelid = 'public.votes'::regclass
-      and conname = 'votes_film_device_uniq'
+      and conname = 'votes_film_user_uniq'
   ) then
-    alter table public.votes add constraint votes_film_device_uniq unique (film_slug, device_id);
+    alter table public.votes add constraint votes_film_user_uniq unique (film_slug, user_id);
   end if;
 end $$;
 
-alter table public.votes add column if not exists updated_at timestamptz not null default now();
 create index if not exists votes_film_idx on public.votes (film_slug);
 
 create or replace function public.touch_updated_at()
@@ -56,19 +60,26 @@ create trigger votes_touch before update on public.votes
 
 alter table public.votes enable row level security;
 
--- Anon may read counts, cast a vote, and switch their own device's vote.
--- NOTE: device_id is client-supplied, so this is deliberately permissive.
--- The unique constraint caps one row per (film, device); for stronger
--- integrity later, enable Supabase anonymous auth and swap the policies
--- below for ones keyed on auth.uid() (see the commented block at the end).
+-- Identity-keyed, forge-proof, all roles ({public} covers anon AND the
+-- authenticated role that even silent anonymous identities run as). Anyone
+-- reads tallies; you may only insert/update/delete a row that carries your own
+-- auth.uid(). A forged user_id is rejected by RLS (verified).
 drop policy if exists votes_read   on public.votes;
+drop policy if exists votes_write  on public.votes;   -- legacy {anon} generation
+drop policy if exists votes_change on public.votes;    -- legacy {anon} generation
 drop policy if exists votes_insert on public.votes;
 drop policy if exists votes_update on public.votes;
-create policy votes_read   on public.votes for select using (true);
-create policy votes_insert on public.votes for insert with check (stance in ('for','against'));
-create policy votes_update on public.votes for update using (true) with check (stance in ('for','against'));
+drop policy if exists votes_delete on public.votes;
+create policy votes_read   on public.votes for select to public using (true);
+create policy votes_insert on public.votes for insert to public
+  with check (stance in ('for','against') and user_id = auth.uid());
+create policy votes_update on public.votes for update to public
+  using (user_id = auth.uid())
+  with check (stance in ('for','against') and user_id = auth.uid());
+create policy votes_delete on public.votes for delete to public
+  using (user_id = auth.uid());
 
-grant select, insert, update on public.votes to anon, authenticated;
+grant select, insert, update, delete on public.votes to anon, authenticated;
 
 -- Live aggregate that the app reads to build The Table score.
 create or replace view public.vote_counts as

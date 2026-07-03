@@ -4911,7 +4911,11 @@ function renderVotes(f){
 /* Shared vote math. One vote per film on this device: casting the same side again is a no-op,
    casting the other side switches it. True one-person-per-film comes with accounts in the backend. */
 function wsDevice(){ try{ var d=localStorage.getItem('ws_device'); if(!d){ d=(crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(16).slice(2)); localStorage.setItem('ws_device',d);} return d; }catch(e){ return 'anon'; } }
-/* Upsert this device's vote to Supabase (one row per device per film). No-op if unconfigured. */
+/* Upsert this identity's vote to Supabase (one row per identity per film — the
+   conflict key is (film_slug, user_id), so switching accounts or rotating an
+   anonymous identity never collides with a row owned by a prior identity, which
+   is what used to 403 every write). device_id rides along as metadata only.
+   No-op if unconfigured. */
 function syncVote(slug,side){
   if(!SUPABASE_URL||!SUPABASE_KEY) return;
   ensureIdentityThen(function(){ voteWrite(slug,side,false); });
@@ -4921,7 +4925,7 @@ function syncVote(slug,side){
    it still won't save (so the UI never shows a phantom vote). */
 function voteWrite(slug,side,isRetry){
   try{
-    fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
+    fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,user_id',{
       method:'POST',
       headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
       body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
