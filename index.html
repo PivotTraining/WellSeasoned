@@ -5268,6 +5268,24 @@ function castVote(id,side){
   if(byId('tblCount')) byId('tblCount').textContent=tblCountText(f);
   refreshSeasoning(f);
   saveState();
+  maybeVoteNudge();
+}
+/* After a few guest votes, one gentle (once-ever) nudge to make an account so
+   votes + saves follow them across devices. Honest: it doesn't claim to move
+   past guest votes, just that going forward they won't be stuck on one device. */
+function maybeVoteNudge(){
+  if(app.signedIn||!sbConfigured()) return;
+  var n=0, shown=false;
+  try{ n=(parseInt(localStorage.getItem('ws_guest_votes')||'0',10)||0)+1; localStorage.setItem('ws_guest_votes',String(n)); shown=localStorage.getItem('ws_vote_nudge')==='1'; }catch(e){}
+  if(shown||n<3) return;
+  try{ localStorage.setItem('ws_vote_nudge','1'); }catch(e){}
+  setTimeout(function(){
+    if(app.signedIn) return;
+    showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+      '<h2>Keep your seat at the table</h2>'+
+      '<p class="m-sub">You’re voting as a guest on this device. Create a free account so your votes and My Plate follow you on every device — phone, laptop, all of it.</p>'+
+      '<div class="film-actions" style="margin-top:4px"><button class="btn btn-gold" onclick="openAuth(\'signup\')">Create free account</button><button class="btn btn-ghost" onclick="closeModal()">Maybe later</button></div>');
+  }, 800);
 }
 function renderComments(f){
   ensureComments(f);
@@ -6392,8 +6410,19 @@ function authApply(session){
   }
   saveState(); renderAuthSlot(); if(!app.anon){ loadMyProfile(); loadMyApplication(); }
 }
-function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; saveState(); renderAuthSlot(); }
+function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; _identityPromise=null; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
+/* Turn a raw GoTrue error into something a human can act on. */
+function authErrMsg(d){
+  var raw=((d&&(d.msg||d.error_description||d.error_code||d.error||d.message))||'').toString().toLowerCase();
+  if(raw.indexOf('captcha')>=0) return 'The security check couldn’t run — turn off ad/tracker blockers for this site (or try another browser), then try again.';
+  if(raw.indexOf('invalid login')>=0||raw.indexOf('invalid_grant')>=0||raw.indexOf('invalid_credentials')>=0) return 'That email and password don’t match. Double-check and try again.';
+  if(raw.indexOf('already')>=0&&raw.indexOf('regist')>=0) return 'That email already has an account — switch to Sign in.';
+  if(raw.indexOf('email not confirmed')>=0) return 'Confirm your email first, then sign in.';
+  if(raw.indexOf('rate limit')>=0||raw.indexOf('too many')>=0) return 'Too many tries — wait a minute and try again.';
+  if(raw.indexOf('password')>=0) return 'Password needs at least 8 characters.';
+  return (d&&(d.msg||d.error_description||d.error||d.message))||'Couldn’t complete that. Try again.';
+}
 function doAuth(){
   var signup=!!byId('auName');
   var name=byId('auName')?byId('auName').value.trim():'';
@@ -6418,10 +6447,7 @@ function doAuth(){
     .then(function(res){
       authBusy(false);
       var d=res.d||{};
-      if(!res.ok){
-        toast(d.msg||d.error_description||d.error||d.message||'Could not sign you in. Check your details.');
-        return;
-      }
+      if(!res.ok){ toast(authErrMsg(d)); return; }
       var sess = d.access_token ? d : (d.session&&d.session.access_token ? d.session : null);
       if(sess){ authWelcome(sess); return; }
       // Signup returned no session. Try to sign in immediately — this succeeds the
@@ -6433,9 +6459,10 @@ function doAuth(){
           .then(function(r){ return r.json().then(function(dd){ return {ok:r.ok,d:dd}; }); })
           .then(function(r2){
             if(r2.ok && r2.d && r2.d.access_token){ authWelcome(r2.d); }
+            else if(r2.d && (r2.d.error||r2.d.msg||r2.d.error_code)){ toast(authErrMsg(r2.d)); }   // real failure (e.g. captcha) — keep the form open
             else { closeModal(); toast('Account created — check your email to confirm, then sign in.'); }
           })
-          .catch(function(){ closeModal(); toast('Account created. Try signing in.'); });
+          .catch(function(){ toast('Account created, but sign-in hit a snag. Try Sign in.'); });
         return;
       }
       toast('Something went wrong. Try again.');
