@@ -1100,6 +1100,15 @@ var SHOWTIMES_PROVIDER='';  // e.g. SerpApi key for live showtimes
 var SUPABASE_URL='https://iherwgeuxwpapjreoofq.supabase.co';        // e.g. 'https://xxxx.supabase.co'
 var SUPABASE_KEY='sb_publishable_Owy8s8-j6LzxYhDmpCo53w_7ehrsGuh';        // e.g. 'sb_publishable_...' or the legacy anon key
 var TURNSTILE_KEY='0x4AAAAAADdxQCMcqgc0yXX1';                       // Cloudflare Turnstile site key (public); '' disables captcha
+/* Membership via Stripe Payment Links (no backend, no secret key in the client).
+   Owner: create a Payment Link in the Stripe dashboard for each plan, set its
+   success URL to https://itswellseasoned.com/#/joined, then paste the link URL
+   below and make `price`/`per` match what the link actually charges. Until a
+   url is set, the button falls back to the founding-member waitlist. */
+var STRIPE_MEMBER={
+  monthly:{url:'', price:'$6',  per:'/mo'},
+  founding:{url:'', price:'$54', per:'/yr'}
+};
 
 /* ============ DATA (shape mirrors a real metadata feed) ============ */
 var FILMS=[
@@ -4147,7 +4156,7 @@ function syncExcitement(soonId,stance,remove){
           method:'POST',
           headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
           body:JSON.stringify({soon_id:soonId,device_id:wsDevice(),stance:stance,user_id:myUid()})
-        }).then(function(r){ if(r&&(r.status===403||r.status===429)) toast('Whoa — slow down a sec.'); }).catch(function(){});
+        }).then(function(r){ if(r&&r.status===429) toast('Whoa — slow down a sec.'); }).catch(function(){});
       }
     }catch(e){}
   });
@@ -4314,9 +4323,9 @@ function seededShuffle(arr,seed){
 function renderHome(){
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
     .filter(function(id,i,a){return a.indexOf(id)===i;})
-    .filter(function(id){var f=find(id);return f&&scopeMatch(f)&&f.type!=='tv';});
+    .filter(function(id){var f=find(id);return f&&homeOurs(f)&&f.type!=='tv';});
   if(focus.length<12){
-    var pad=FILMS.filter(function(f){return !f.noart&&f.type!=='tv'&&scopeMatch(f)&&focus.indexOf(f.id)<0;}).map(function(f){return f.id;});
+    var pad=FILMS.filter(function(f){return !f.noart&&f.type!=='tv'&&homeOurs(f)&&focus.indexOf(f.id)<0;}).map(function(f){return f.id;});
     focus=focus.concat(pad);
   }
   if(HOME_SORT==='popular'){
@@ -4345,24 +4354,24 @@ function renderHome(){
     '<span class="tv-item"><span class="tv-lab">Table</span>'+auraRing(93,'certified',54,true)+'</span>';
     animateAura(byId('teachVerdict')); }
   // "New on the stove": sample 8 from the 16 most recent so it stays genuinely new but rotates.
-  var stove=seededShuffle(FILMS.filter(function(f){return !f.noart && scopeMatch(f);}).slice()
+  var stove=seededShuffle(FILMS.filter(function(f){return !f.noart && homeOurs(f);}).slice()
     .sort(function(a,b){return b.year-a.year;}).slice(0,16).map(function(f){return f.id;})).slice(0,8);
   byId('stoveRail').innerHTML=stove.map(cardHTML).join('');
   // Black TV shelf (order-less → rotate the selection)
-  var tv=seededShuffle(FILMS.filter(function(f){return f.type==='tv' && scopeMatch(f);}).map(function(f){return f.id;})).slice(0,8);
+  var tv=seededShuffle(FILMS.filter(function(f){return f.type==='tv' && homeOurs(f);}).map(function(f){return f.id;})).slice(0,8);
   byId('tvSection').style.display = tv.length?'':'none';
   byId('tvRail').innerHTML=tv.map(cardHTML).join('');
   // Free on Tubi shelf (order-less → rotate the selection)
-  var tub=seededShuffle(FILMS.filter(function(f){return !f.noart && scopeMatch(f) && f.where.indexOf('Tubi')>=0;}).map(function(f){return f.id;})).slice(0,18);
+  var tub=seededShuffle(FILMS.filter(function(f){return !f.noart && homeOurs(f) && f.where.indexOf('Tubi')>=0;}).map(function(f){return f.id;})).slice(0,18);
   byId('tubiSection').style.display = tub.length?'':'none';
   byId('tubiRail').innerHTML=tub.map(cardHTML).join('');
   // Stand-up shelf: tagged specials, newest first
-  var su=FILMS.filter(function(f){return f.tags && f.tags.indexOf('Stand-Up')>=0 && scopeMatch(f);})
+  var su=FILMS.filter(function(f){return f.tags && f.tags.indexOf('Stand-Up')>=0 && homeOurs(f);})
     .sort(function(a,b){return b.year-a.year;}).slice(0,12).map(function(f){return f.id;});
   if(byId('standupSection')) byId('standupSection').style.display = su.length?'':'none';
   if(byId('standupRail')) byId('standupRail').innerHTML=su.map(cardHTML).join('');
   // Grandma's Recipes — the respected canon (curated), shown if in the catalog
-  var classic=FILMS.filter(function(f){return f.type!=='tv' && !f.noart && scopeMatch(f) && isClassic(f);});
+  var classic=FILMS.filter(function(f){return f.type!=='tv' && !f.noart && homeOurs(f) && isClassic(f);});
   classic.sort(function(a,b){var ia=WS_CLASSICS.indexOf(a.title.toLowerCase()),ib=WS_CLASSICS.indexOf(b.title.toLowerCase());ia=ia<0?999:ia;ib=ib<0?999:ib;return ia-ib || b.year-a.year;});
   classic=classic.slice(0,24).map(function(f){return f.id;});
   byId('classicSection').style.display = classic.length?'':'none';
@@ -4587,7 +4596,7 @@ function syncVote(slug,side){
         method:'POST',
         headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
         body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
-      }).then(function(r){ if(r&&(r.status===403||r.status===429)){ toast('Whoa — slow down a sec.'); } }).catch(function(){});
+      }).then(function(r){ if(r&&r.status===429){ toast('Whoa — slow down a sec.'); } }).catch(function(){});
     }catch(e){}
   });
 }
@@ -5048,6 +5057,9 @@ function renderCritic(name){
 function isHidden(f){ return app.curation.hidden.indexOf(f.id)>=0; }
 function effScope(f){ return app.curation.scope[f.id]||f.scope; }
 function scopeMatch(f){ return !isHidden(f) && (app.scope==='all' || effScope(f)==='ours'); }
+/* The HOME page is always Black film & TV — the identity of the site. The
+   "All Films" scope only applies to Browse/search, never the home shelves. */
+function homeOurs(f){ return !isHidden(f) && effScope(f)==='ours'; }
 function contentMatch(f){ return FILTERS.type==='all' || f.type===FILTERS.type; }
 function scopeToggleHTML(){
   return '<div class="scope" role="group" aria-label="Catalog scope">'+
@@ -5057,7 +5069,9 @@ function scopeToggleHTML(){
       ? 'Centered on the culture. The Kitchen’s home catalog.'
       : 'Every film, still read by the Kitchen’s critics of the culture.')+'</span>';
 }
-function refreshScopeToggles(){ ['homeScope','browseScope'].forEach(function(id){var el=byId(id);if(el)el.innerHTML=scopeToggleHTML();}); }
+/* Scope toggle lives on Browse only. Home is always Black film & TV, so we
+   clear any home toggle and never let "All Films" change the home shelves. */
+function refreshScopeToggles(){ var hs=byId('homeScope'); if(hs)hs.innerHTML=''; var bs=byId('browseScope'); if(bs)bs.innerHTML=scopeToggleHTML(); }
 function setScope(s){
   if(app.scope===s)return;
   app.scope=s; saveState(); renderHome();
@@ -5326,7 +5340,7 @@ function syncPersonVote(pid,dir,remove){
       } else {
         fetch(SUPABASE_URL+'/rest/v1/person_votes?on_conflict=person_id,device_id',
           {method:'POST',headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
-           body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir,user_id:myUid()})}).then(function(r){ if(r&&(r.status===403||r.status===429)) toast('Whoa — slow down a sec.'); }).catch(function(){});
+           body:JSON.stringify({person_id:pid,device_id:wsDevice(),dir:dir,user_id:myUid()})}).then(function(r){ if(r&&r.status===429) toast('Whoa — slow down a sec.'); }).catch(function(){});
       }
     }catch(e){}
   });
