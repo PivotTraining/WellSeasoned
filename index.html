@@ -465,6 +465,10 @@
   .cast-card.linked .cast-av{transition:transform .18s,box-shadow .18s,border-color .18s}
   .cast-card.linked:hover .cast-av{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--gold)}
   .cast-card.linked:hover .cast-name{color:var(--gold-ink)}
+  .pl-av.linked,.rank-title.linked{cursor:pointer}
+  .rank-title.linked:hover{color:var(--gold-ink)}
+  .pl-av.linked{transition:box-shadow .15s}
+  .pl-av.linked:hover{box-shadow:0 0 0 2px var(--gold)}
   /* ARTIST PAGE */
   .artist-hero{display:flex;gap:22px;align-items:flex-start;margin:18px 0 6px}
   .artist-photo{flex:none;width:150px;height:150px;border-radius:50%;background-size:cover;background-position:center top;background-color:var(--inset);box-shadow:var(--shadow-2);border:3px solid var(--panel)}
@@ -481,6 +485,15 @@
   .art-film-tag{position:absolute;left:8px;bottom:8px;background:var(--gold);color:#241703;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 7px;border-radius:999px}
   .art-film-ttl{font-weight:700;font-size:13px;margin-top:8px;line-height:1.2}
   .art-film-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  /* social share buttons */
+  .sc-soc-lab{text-align:center;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+  .sc-social{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .sc-soc{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;color:#fff;transition:transform .14s,filter .14s;padding:0}
+  .sc-soc svg{width:21px;height:21px}
+  .sc-soc:hover{transform:translateY(-2px)}
+  .sc-soc:active{transform:scale(.94)}
+  .sc-x{background:#000} .sc-facebook{background:#1877F2} .sc-whatsapp{background:#25D366} .sc-threads{background:#000}
+  .sc-copy{background:var(--inset);color:var(--ink);border:1.5px solid var(--line-strong)}
   @media(max-width:900px){ .art-films{grid-template-columns:repeat(4,1fr)} }
   @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,1fr)} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
   @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
@@ -3827,16 +3840,25 @@ function buildShareCard(f,done){
     ctx.fillText(f.title, W/2, 880);
     ctx.fillStyle='rgba(246,236,215,.75)'; ctx.font='600 32px Inter, sans-serif';
     ctx.fillText((f.dir&&f.dir!=='—'?'Dir. '+f.dir+'  ·  ':'')+f.year, W/2, 936);
-    // three rings
+    // verdict block — the three score rings once it has scores, or an
+    // intentional "cast yours" call while it's still awaiting the culture.
     var ts2=tableScore(f), os=overallScore(f), otk=overallTier(f);
-    scRing(ctx, W/2, 1090, 92, os, otk);
-    scRing(ctx, W/2-300, 1090, 64, f.k, tier(f.k));
-    scRing(ctx, W/2+300, 1090, 64, ts2, tier(ts2));
-    ctx.fillStyle='rgba(246,236,215,.8)'; ctx.font='700 26px "DM Mono", monospace';
-    ctx.fillText('THE KITCHEN', W/2-300, 1196);
-    ctx.fillText('THE TABLE', W/2+300, 1196);
-    ctx.fillStyle='#F4B733'; ctx.font='800 34px "Bricolage Grotesque", Inter, sans-serif';
-    ctx.fillText(os==null?'AWAITING VOTES':tierLabelKey(otk).toUpperCase(), W/2, 1222);
+    if(os==null){
+      ctx.fillStyle='#F4B733'; ctx.font='800 50px "Bricolage Grotesque", Inter, sans-serif';
+      ctx.fillText('TWO VERDICTS. CAST YOURS.', W/2, 1104);
+      ctx.fillStyle='rgba(246,236,215,.82)'; ctx.font='600 30px Inter, sans-serif';
+      ctx.fillText('The Kitchen · verified critics of the culture', W/2, 1158);
+      ctx.fillText('The Table · the community that bought the ticket', W/2, 1200);
+    } else {
+      scRing(ctx, W/2, 1090, 92, os, otk);
+      scRing(ctx, W/2-300, 1090, 64, f.k, tier(f.k));
+      scRing(ctx, W/2+300, 1090, 64, ts2, tier(ts2));
+      ctx.fillStyle='rgba(246,236,215,.8)'; ctx.font='700 26px "DM Mono", monospace';
+      ctx.fillText('THE KITCHEN', W/2-300, 1196);
+      ctx.fillText('THE TABLE', W/2+300, 1196);
+      ctx.fillStyle='#F4B733'; ctx.font='800 34px "Bricolage Grotesque", Inter, sans-serif';
+      ctx.fillText(tierLabelKey(otk).toUpperCase(), W/2, 1222);
+    }
     // footer
     ctx.fillStyle='rgba(246,236,215,.6)'; ctx.font='500 28px "DM Mono", monospace';
     ctx.fillText('itswellseasoned.com', W/2, 1306);
@@ -3852,16 +3874,49 @@ function buildShareCard(f,done){
   } else draw(null);
 }
 var _shareCanvas=null;
+/* Crawlable share URL — /f/<id> serves per-film OG tags then bounces humans
+   into the app, so link previews render on X/Facebook/iMessage/etc. */
+function shareUrlFor(id){ return 'https://itswellseasoned.com/f/'+encodeURIComponent(id); }
+function socialShare(platform,id,url,title){
+  var u=encodeURIComponent(url||shareUrlFor(id));
+  var txt=(title||'Rated by the culture')+' — on Well Seasoned';
+  var t=encodeURIComponent(txt), ttl=encodeURIComponent(title||'Well Seasoned');
+  var dest={
+    x:'https://twitter.com/intent/tweet?text='+t+'&url='+u,
+    facebook:'https://www.facebook.com/sharer/sharer.php?u='+u,
+    whatsapp:'https://wa.me/?text='+encodeURIComponent(txt+' '+(url||shareUrlFor(id))),
+    threads:'https://www.threads.net/intent/post?text='+encodeURIComponent(txt+' '+(url||shareUrlFor(id))),
+    reddit:'https://www.reddit.com/submit?url='+u+'&title='+ttl
+  }[platform];
+  if(dest){ track('share_click',{id:id,to:platform}); window.open(dest,'_blank','noopener,noreferrer'); }
+}
+function copyShareLink(id,url){
+  var u=url||shareUrlFor(id);
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(u).then(function(){toast('Link copied — share it.');},function(){toast(u);}); }
+  else toast(u);
+  track('share_click',{id:id,to:'copy'});
+}
+/* a row of one-tap social buttons for the share sheet */
+function socialShareRow(id,url,title){
+  var X='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23 22h-6.8l-5.3-6.9L4.8 22H2l7.8-8.9L1.5 2h6.9l4.8 6.3L18.9 2Zm-1.2 18h1.9L7.1 4H5.1l12.6 16Z"/></svg>';
+  var F='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.8 3.8-3.8 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.5V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>';
+  var W='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4 0 .5l-.4.5-.3.3c-.2.2-.3.4-.1.7.1.2.6 1 1.3 1.6.9.8 1.6 1 1.9 1.1.2.1.4.1.6-.1l.6-.8c.2-.2.4-.2.6-.1l1.7.8c.2.1.4.2.5.3.1.2.1.7-.1 1.3Z"/></svg>';
+  var T='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 11.2c1.2.7 1.9 1.9 1.9 3.5 0 1.6-.6 2.9-1.7 3.9-1.1 1-2.7 1.5-4.7 1.4-2.9 0-5-1-6.4-2.9C4.6 16.8 4 14.6 4 12s.6-4.8 1.8-6.5C7.1 3.6 9.2 2.6 12 2.6c2 0 3.6.5 4.8 1.6 1 .9 1.7 2 2.1 3.4l-2 .6c-.6-2-1.9-3.1-3.9-3.1-1.6 0-2.9.5-3.7 1.6-.9 1.1-1.3 2.8-1.3 4.7s.4 3.6 1.3 4.7c.8 1 2 1.6 3.6 1.6 1.3 0 2.3-.3 2.9-1 .4-.5.7-1 .7-1.7 0-.4-.1-.7-.2-1-.4.7-1.1 1.2-2.3 1.2-1 0-1.8-.3-2.4-.9-.5-.5-.8-1.2-.8-2 0-.9.4-1.6 1.1-2.1.7-.5 1.6-.7 2.7-.7.6 0 1.1.1 1.6.2Zm-2.4 1.5c-1.1 0-1.6.4-1.6 1.1 0 .6.5 1 1.3 1 1.1 0 1.8-.7 1.9-2-.5-.1-1-.1-1.6-.1Z"/></svg>';
+  function btn(pl,lab,svg){ return '<button class="sc-soc sc-'+pl+'" title="Share to '+lab+'" aria-label="Share to '+lab+'" onclick="socialShare(\''+pl+'\',\''+id+'\','+(url?'\''+url+'\'':'null')+','+(title?'\''+String(title).replace(/'/g,"\\'")+'\'':'null')+')">'+svg+'</button>'; }
+  return '<div class="sc-social">'+btn('x','X',X)+btn('facebook','Facebook',F)+btn('whatsapp','WhatsApp',W)+btn('threads','Threads',T)+
+    '<button class="sc-soc sc-copy" title="Copy link" aria-label="Copy link" onclick="copyShareLink(\''+id+'\','+(url?'\''+url+'\'':'null')+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></button></div>';
+}
 function openShareCard(id){
   var f=find(id); if(!f)return;
   _shareCanvas=null; track('share',{film:id});   // a previous film's card must never be saved/shared for this one
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Share the verdict</h2><p class="m-sub">'+esc(f.title)+' — post the card, spread the seasoning.</p>'+
     '<div id="scWrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Cooking up your card…</span></div>'+
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'+
+    '<div class="sc-soc-lab">Post to</div>'+socialShareRow(f.id,null,f.title)+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px">'+
       '<button class="btn btn-gold" onclick="saveShareCard(\''+f.id+'\')">Save image</button>'+
-      (navigator.share?'<button class="btn btn-ink" onclick="nativeShareCard(\''+f.id+'\')">Share</button>':'')+
-      '<button class="btn btn-ghost" onclick="shareFilm(\''+f.id+'\')">Copy link</button></div>');
+      (navigator.share?'<button class="btn btn-ink" onclick="nativeShareCard(\''+f.id+'\')">Share card</button>':'')+
+      '</div>');
   buildShareCard(f,function(c){
     _shareCanvas=c;
     var w=byId('scWrap'); if(!w)return;
@@ -5286,10 +5341,20 @@ function renderArtist(pid){
   if(cache[pid]){ paintArtist(cache[pid]); }
   else el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button><p class="empty-note" style="margin-top:20px">Loading…</p>';
   if(!TMDB_KEY){ if(!cache[pid]) el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Artist details need the TMDB connection.</p>'; return; }
-  Promise.all([
-    fetch('https://api.themoviedb.org/3/person/'+pid+'?api_key='+TMDB_KEY).then(function(r){return r.json();}),
-    fetch('https://api.themoviedb.org/3/person/'+pid+'/movie_credits?api_key='+TMDB_KEY).then(function(r){return r.json();})
-  ]).then(function(res){
+  // Accept either a TMDB person id (from a cast link) or a name (from the
+  // rankings, whose ids are our own serial keys) — resolve names via search.
+  var isId=/^\d+$/.test(String(pid));
+  var resolveId=isId ? Promise.resolve(pid)
+    : fetch('https://api.themoviedb.org/3/search/person?api_key='+TMDB_KEY+'&query='+encodeURIComponent(pid))
+        .then(function(r){return r.json();}).then(function(d){ var h=d&&d.results&&d.results[0]; return h?h.id:null; });
+  resolveId.then(function(rid){
+    if(!rid){ if(!loadPeopleCache()[pid]) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t find this artist.</p>'; return null; }
+    return Promise.all([
+      fetch('https://api.themoviedb.org/3/person/'+rid+'?api_key='+TMDB_KEY).then(function(r){return r.json();}),
+      fetch('https://api.themoviedb.org/3/person/'+rid+'/movie_credits?api_key='+TMDB_KEY).then(function(r){return r.json();})
+    ]);
+  }).then(function(res){
+    if(!res) return;
     var p=res[0]||{}, cr=res[1]||{};
     if(!p.id) return;
     var seen={}, films=[];
@@ -5303,7 +5368,7 @@ function renderArtist(pid){
     films.sort(function(a,b){ return (b.vc-a.vc) || (b.pop-a.pop); });
     var data={id:p.id,name:p.name,bio:p.biography||'',photo:p.profile_path||null,dept:p.known_for_department||'',
       birthday:p.birthday||'',place:p.place_of_birth||'',films:films.slice(0,24)};
-    cache[pid]=data; savePeopleCache(cache);
+    cache[pid]=data; cache[String(p.id)]=data; savePeopleCache(cache);
     if(_artistId===pid) paintArtist(data);
   }).catch(function(){ if(!loadPeopleCache()[pid]) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t load this artist right now.</p>'; });
 }
@@ -5393,12 +5458,14 @@ function renderPeople(cat){
 function personRow(p,rank){
   var mine=app.personVotes[p.id];
   var img=pImg(p.profile_path);
-  var av=img?'<span class="pl-av" style="background-image:url(\''+img+'\')"></span>'
-            :'<span class="pl-av pl-av-init">'+esc(initials(p.name))+'</span>';
+  var jn=String(p.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'");   // JS-safe name for the artist link
+  var go='onclick="go(\'artist\',\''+jn+'\')"';
+  var av=img?'<span class="pl-av linked" '+go+' style="background-image:url(\''+img+'\')"></span>'
+            :'<span class="pl-av pl-av-init linked" '+go+'>'+esc(initials(p.name))+'</span>';
   var netCls=p.net>0?'pos':(p.net<0?'neg':'zero');
   return '<li class="rank-row person-row" data-pid="'+p.id+'">'+
     '<span class="rank-num">'+rank+'</span>'+av+
-    '<span class="rank-main"><span class="rank-title">'+esc(p.name)+'</span>'+
+    '<span class="rank-main"><span class="rank-title linked" '+go+' role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'artist\',\''+jn+'\')">'+esc(p.name)+'</span>'+
       '<span class="pl-net '+netCls+'">'+(p.net>0?'+':'')+fmt(p.net)+' <span class="pl-net-lab">net</span></span></span>'+
     '<span class="pl-vote">'+
       '<button class="pl-arrow up'+(mine==='up'?' on':'')+'" aria-label="Vote up '+esc(p.name)+'" onclick="personVote('+p.id+',\'up\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>'+
