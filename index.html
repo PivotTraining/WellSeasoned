@@ -905,6 +905,8 @@
   .jp-card h3{font-family:var(--display);font-weight:800;font-size:20px;color:var(--ink)}
   .jp-card p{color:var(--ink-2);font-size:14px;line-height:1.5;margin:0 0 6px;flex:1}
   .jp-card .btn{margin-top:2px}
+  .jp-signin{margin-top:16px;font-size:14px;color:var(--ink-2)}
+  .jp-signin a{color:var(--gold-ink);font-weight:700;cursor:pointer}
   @media(max-width:640px){ .jp-lanes{grid-template-columns:1fr} .jp-head h2{font-size:25px} }
   /* Admin: contributor applications inbox */
   .inbox-tools{display:flex;align-items:center;gap:12px;margin:14px 0 16px}
@@ -1319,6 +1321,7 @@
         <button class="btn btn-gold" onclick="openContribute('writer')">Write for The Word</button>
       </div>
     </div>
+    <p class="jp-signin">Already write for us? <a onclick="openAuth('signin')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')openAuth('signin')">Critic &amp; writer sign in</a> to post your reviews and reads.</p>
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
@@ -3975,17 +3978,26 @@ function go(view,arg){
   else { location.hash=h; }                     // else the hashchange listener renders
 }
 function goBack(){ if(history.length>1)history.back(); else go('home'); }
-/* Admin tools (Curate / Connect posters) stay hidden from visitors.
-   Visit #/admin once on your device to reveal them; #/admin-off hides them. */
+/* Admin tools (Curate / Connect posters / Applications) are owner-only: gated
+   behind the owner account login, NOT a device flag. Only a signed-in session
+   whose email matches OWNER_EMAIL sees or reaches them. (Privileged backend
+   actions stay double-locked by the admin passphrase, server-side.) */
+var OWNER_EMAIL='hello@pivottraining.us';
+function isOwner(){ return !!(app.signedIn && app.email && app.email.replace(/^\s+|\s+$/g,'').toLowerCase()===OWNER_EMAIL); }
 function refreshAdminUI(){
   var el=byId('adminLinks'); if(!el)return;
-  var on=false; try{ on=localStorage.getItem('ws_admin')==='1'; }catch(e){}
-  el.hidden=!on;
+  el.hidden=!isOwner();
 }
 function checkAdminHash(){
   var h=location.hash;
-  if(h==='#/admin'){ try{localStorage.setItem('ws_admin','1');}catch(e){} refreshAdminUI(); toast('Admin tools unlocked on this device.'); location.hash='#/curate'; return true; }
-  if(h==='#/admin-off'){ try{localStorage.removeItem('ws_admin');}catch(e){} refreshAdminUI(); toast('Admin tools hidden.'); location.hash='#/'; return true; }
+  if(h==='#/admin'){
+    try{localStorage.removeItem('ws_admin');}catch(e){}   // retire the old device flag
+    refreshAdminUI();
+    if(isOwner()){ location.hash='#/curate'; }
+    else { toast('Admin is owner-only — sign in as '+OWNER_EMAIL+'.'); location.hash='#/'; openAuth('signin'); }
+    return true;
+  }
+  if(h==='#/admin-off'){ try{localStorage.removeItem('ws_admin');}catch(e){} refreshAdminUI(); location.hash='#/'; return true; }
   return false;
 }
 window.addEventListener('hashchange',function(){ if(checkAdminHash())return; var r=parseHash(); render(r.view,r.arg); });
@@ -4728,8 +4740,7 @@ function curMore(){ CUR_SHOWN+=200; renderCurPageList(); }
 function curPageQ(){ var el=byId('curPageSearch'); return el?el.value:''; }
 function renderCuratePage(){
   var w=byId('curPageWrap'); if(!w)return;
-  var on=false; try{ on=localStorage.getItem('ws_admin')==='1'; }catch(e){}
-  if(!on){ w.innerHTML='<div class="browse-head"><h1>Curate</h1><p class="hero-lead" style="margin-top:8px">Admin tools are locked on this device. Visit <b>#/admin</b> to unlock.</p></div>'; return; }
+  if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Curate</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to curate.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
   w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">ADMIN</span><h1>Curate the shelves</h1>'+
     '<p class="hero-lead" style="margin-top:8px;max-width:60ch">Move titles between Our Films and All Films, feature them on home, or hide them. Changes save on this device; <b>Publish to backend</b> pushes them live for everyone.</p></div>'+
     '<div class="curp-tools"><input id="curPageSearch" placeholder="Search '+FILMS.length+' titles\u2026" oninput="CUR_SHOWN=120;renderCurPageList()">'+
@@ -5268,8 +5279,7 @@ function seatCritic(){
    pass — treat them like gold. */
 function renderInbox(){
   var w=byId('inboxWrap'); if(!w)return;
-  var on=false; try{ on=localStorage.getItem('ws_admin')==='1'; }catch(e){}
-  if(!on){ w.innerHTML='<div class="browse-head"><h1>Applications</h1><p class="hero-lead" style="margin-top:8px">Admin only. Visit <b>#/admin</b> to unlock on this device.</p></div>'; return; }
+  if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Applications</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to review applications.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
   w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">ADMIN</span><h1>Contributor applications</h1>'+
     '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Everyone who applied to The Kitchen or The Word — photo, bio, socials, and work. Read them like gold, then seat, shortlist, or pass.</p></div>'+
     '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">↻ Refresh</button><span id="inboxCount" class="inbox-count"></span></div>'+
@@ -6159,8 +6169,7 @@ function renderRead(slug){
 }
 /* Admin: write/edit a Word (passphrase-gated publish_article RPC) */
 function openArticleEditor(slug){
-  var on=false; try{ on=localStorage.getItem('ws_admin')==='1'; }catch(e){}
-  if(!on){ toast('Admin only. Visit #/admin first.'); return; }
+  if(!isOwner()){ toast('Owner only — sign in as '+OWNER_EMAIL+'.'); return; }
   var a=slug?(_articleBySlug[slug]||{}):{};
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>'+(slug?'Edit':'Write')+' a Word</h2><p class="m-sub">Publishes to The Word for everyone. Markdown: <b>## heading</b>, <b>**bold**</b>, <b>*italic*</b>, <b>- list</b>, <b>[text](url)</b>.</p>'+
@@ -7055,6 +7064,7 @@ function renderAuthSlot(){
   byId('authSlot').innerHTML = app.signedIn
     ? '<div class="avatar" role="button" tabindex="0" aria-label="Your account, open You page" onclick="go(\'you\')" onkeydown="if(event.key===\'Enter\')go(\'you\')">'+initials(app.name)+'</div>'
     : '<button class="btn btn-ghost btn-sm" onclick="openAuth(\'signin\')">Sign in</button><button class="btn btn-gold btn-sm" onclick="openAuth(\'signup\')" style="margin-left:8px">Join</button>';
+  refreshAdminUI();   // admin links follow the owner login in/out
 }
 function signOut(){
   if(sbConfigured() && authSession && authSession.access_token){

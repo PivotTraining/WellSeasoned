@@ -93,13 +93,21 @@ Done and verified live:
   one editorial inbox, human review, nothing bought.
 - Admin applications inbox at `#/inbox` (`renderInbox`/`inboxLoad`/
   `inboxCardHTML`/`inboxSetStatus`/`inboxSeat`, footer "Applications" admin
-  link). Gated by the `ws_admin` device flag + the admin passphrase (same
+  link). Owner-only UI + the admin passphrase (same
   `app_secrets.curation_admin` as `verify_critic`). Reads every application via
   SECURITY DEFINER RPC `admin_list_applications(p_secret)` (bypasses the
   own-row RLS only for a verified admin); `admin_set_application_status(
   p_secret,p_id,p_status)` shortlists/passes; critic "Seat" reuses
   `verify_critic` (flips `profiles.is_critic`). Cards show photo/bio/socials/
   work, lane badge, and status.
+- Admin access is OWNER-ONLY (`isOwner()` → `app.signedIn` &&
+  `app.email`==`OWNER_EMAIL` = `hello@pivottraining.us`, case/space-insensitive).
+  The old `#/admin` device-flag unlock is retired; `refreshAdminUI()` (called
+  from `renderAuthSlot`, so it follows login/logout) hides the footer admin
+  links, and `renderCuratePage`/`renderInbox`/`openArticleEditor` refuse unless
+  `isOwner()`. Backend writes stay double-locked by the admin passphrase. To
+  change the owner, edit `OWNER_EMAIL`. Footer contributor portal also has a
+  "Critic & writer sign in" link for already-seated contributors.
 - Seated-critic bylines: `profiles` gained `avatar_url`/`bio` (public via the
   existing `profiles_critics_public` policy). `verify_critic` now copies the
   applicant's photo + bio from their latest `critic_applications` row onto the
