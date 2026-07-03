@@ -99,7 +99,16 @@ Done and verified live:
   `sbUserHeaders`) OR the legacy passphrase — so the owner reviews/seats with
   no passphrase prompt. Applicant `work_url`/`socials` render through
   `linkifyList` (splits on comma, prepends `https://` to bare domains) so a
-  link like `youtube.com/@x` no longer 404s as a relative path. Reads every application via
+  link like `youtube.com/@x` no longer 404s as a relative path.
+- Critic agreement: a 3-step onboarding popup (`openCriticTerms`/
+  `paintCriticTerms`/`ctGo`/`acceptCriticTerms`, `CRITIC_STEPS`, `.ct-*` CSS)
+  covering the job, the ethics they agree to, and what the seat is NOT. Shown
+  automatically to a seated critic who hasn't accepted (`loadMyProfile` reads
+  `profiles.critic_agreed_at`) and gates their first review (`submitCriticReview`).
+  Acceptance recorded via SECURITY DEFINER RPC `accept_critic_terms()`
+  (sets `critic_agreed_at` for the calling critic). Inbox has a **Remove critic**
+  action for seated critics (`inboxRemove` → `verify_critic` with `p_on=false`,
+  clears `is_critic`); writer "Remove" reverts status. Reads every application via
   SECURITY DEFINER RPC `admin_list_applications(p_secret)` (bypasses the
   own-row RLS only for a verified admin); `admin_set_application_status(
   p_secret,p_id,p_status)` shortlists/passes; critic "Seat" reuses

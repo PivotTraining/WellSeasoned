@@ -933,6 +933,26 @@
   .ic-link{color:var(--gold-ink);font-weight:700;text-decoration:none}
   .ic-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
   .ic-actions .btn{flex:0 0 auto}
+  .ic-danger{color:#b3311a !important;border-color:rgba(179,49,26,.4) !important}
+  .ic-danger:hover{background:rgba(179,49,26,.08) !important}
+  /* Critic agreement (3-step onboarding) */
+  .ct-wrap{text-align:center}
+  .ct-steps{display:flex;gap:7px;justify-content:center;margin:2px 0 16px}
+  .ct-dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong);transition:all .2s}
+  .ct-dot.done{background:var(--gold)}
+  .ct-dot.on{background:var(--gold);width:24px;border-radius:5px}
+  .ct-ic{font-size:44px;line-height:1;margin-bottom:6px}
+  .ct-num{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
+  .ct-title{font-family:var(--display);font-weight:800;font-size:26px;margin:6px 0 6px;color:var(--ink)}
+  .ct-lead{color:var(--ink-2);font-size:15px;line-height:1.5;max-width:44ch;margin:0 auto 16px}
+  .ct-list{list-style:none;text-align:left;display:flex;flex-direction:column;gap:11px;margin:0 auto 8px;max-width:460px;padding:0}
+  .ct-list li{display:flex;flex-direction:column;gap:2px;padding-left:24px;position:relative}
+  .ct-list li::before{content:'';position:absolute;left:2px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--gold)}
+  .ct-list li b{font-size:15px;color:var(--ink)}
+  .ct-list li span{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+  .ct-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px}
+  .ct-nav .btn{width:auto;margin-top:0;flex:0 0 auto;min-width:120px}
+  .ct-fine{font-size:12px;color:var(--ink-3);margin-top:12px;line-height:1.5}
   .foot-row .ftag{font-style:italic;font-weight:600;color:var(--ink)}
   .fine{font-size:12px;color:var(--ink-3);margin-top:10px}
 
@@ -5232,17 +5252,21 @@ function loadKitchenReviews(slug){
 function loadMyProfile(){
   if(!sbConfigured()||!app.userId||!(authSession&&authSession.access_token))return;
   try{
-    fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+encodeURIComponent(app.userId)+'&select=is_critic,critic_outlet',{headers:sbUserHeaders()})
+    fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+encodeURIComponent(app.userId)+'&select=is_critic,critic_outlet,critic_agreed_at',{headers:sbUserHeaders()})
       .then(function(r){return r.json();}).then(function(rows){
         var p=rows&&rows[0]; if(!p)return;
         var was=app.isCritic;
         app.isCritic=!!p.is_critic; app.criticOutlet=p.critic_outlet||'';
+        app.criticAgreed=!!p.critic_agreed_at;
         if(app.isCritic!==was){ var r0=parseHash(); if(r0.view==='film')renderFilm(r0.arg); }
+        // Newly seated critic who hasn't accepted the agreement: onboard them.
+        if(app.isCritic && !app.criticAgreed){ setTimeout(function(){ if(app.isCritic&&!app.criticAgreed)openCriticTerms(); },600); }
       }).catch(function(){});
   }catch(e){}
 }
 /* Publish or update this critic's review; RLS verifies critic status server-side. */
 function submitCriticReview(id){
+  if(app.isCritic && !app.criticAgreed){ openCriticTerms(); return; }   // must accept the agreement before the first post
   var s=parseInt(byId('crScore')?byId('crScore').value:'',10);
   if(!(s>=0&&s<=100)){ toast('Score the film 0–100 first.'); if(byId('crScore'))byId('crScore').focus(); return; }
   if(!(authSession&&authSession.access_token)){ toast('Sign in to your critic account first.'); return; }
@@ -5257,6 +5281,67 @@ function submitCriticReview(id){
       else { toast('Only seated critics can post to the Kitchen.'); }
     })
     .catch(function(){ toast('Network error — try again.'); });
+}
+/* ============ CRITIC AGREEMENT (shown to anyone seated at The Kitchen) ============
+   A short, three-step onboarding: the job, what they agree to, and what the
+   seat is NOT. Acceptance is recorded on their profile (critic_agreed_at) via
+   the accept_critic_terms RPC, and gates their first review. */
+var CRITIC_STEPS=[
+  {ic:'🍽️',t:'Your seat at The Kitchen',
+   lead:'You’ve been verified as a critic of the culture. Here’s what that means.',
+   items:[
+     ['You are The Kitchen.','Your 0–100 score moves the official Kitchen number on every film you review — beside your name, photo, and outlet.'],
+     ['You speak with authority.','Readers trust a seated critic to give the informed, culturally-grounded read a film actually deserves.'],
+     ['You set the bar.','The Kitchen is the expert half of the verdict. The Table is the crowd. When you agree, the seal lands.']
+   ]},
+  {ic:'🤝',t:'What you agree to',
+   lead:'The seat runs on trust. By taking it, you commit to this.',
+   items:[
+     ['Watch the whole thing.','Never score a film you didn’t finish.'],
+     ['Nothing bought — ever.','No payment, gifts, or favors for a score. This is the founding rule of the whole site.'],
+     ['Disclose conflicts.','If you worked on it or you’re close to the people, say so or sit it out.'],
+     ['Your words, your own.','No plagiarism, no AI passed off as you.'],
+     ['Critique the work, not the person.','Be honest, even hard — but never cruel, and never bigoted.']
+   ]},
+  {ic:'🚫',t:'What this seat is NOT',
+   lead:'Just as important — the things a seat at The Kitchen is not.',
+   items:[
+     ['Not a hype machine.','You can love the culture and still say “this one missed.” Honesty over stanning.'],
+     ['Not a hit squad.','Criticism isn’t cruelty or clout-chasing.'],
+     ['Not for sale.','No paid placements, no trading scores for access.'],
+     ['Not anonymous.','Your name and outlet ride on every review.'],
+     ['Not guaranteed.','A seat is a trust. Break these and it can be taken back.']
+   ]}
+];
+var _ctStep=0;
+function openCriticTerms(){ _ctStep=0; paintCriticTerms(); }
+function paintCriticTerms(){
+  var n=CRITIC_STEPS.length, s=CRITIC_STEPS[_ctStep], last=(_ctStep===n-1);
+  var dots=''; for(var i=0;i<n;i++){ dots+='<span class="ct-dot'+(i===_ctStep?' on':'')+(i<_ctStep?' done':'')+'"></span>'; }
+  var items=s.items.map(function(it){ return '<li><b>'+esc(it[0])+'</b><span>'+esc(it[1])+'</span></li>'; }).join('');
+  var back=_ctStep>0?'<button class="btn btn-ghost" onclick="ctGo(-1)">Back</button>':'<span></span>';
+  var next=last
+    ? '<button class="btn btn-gold" onclick="acceptCriticTerms()">I agree — take my seat</button>'
+    : '<button class="btn btn-gold" onclick="ctGo(1)">Next</button>';
+  showModal('<div class="ct-wrap">'+
+    '<div class="ct-steps">'+dots+'</div>'+
+    '<div class="ct-ic">'+s.ic+'</div>'+
+    '<div class="ct-num">Step '+(_ctStep+1)+' of '+n+'</div>'+
+    '<h2 class="ct-title">'+esc(s.t)+'</h2>'+
+    '<p class="ct-lead">'+esc(s.lead)+'</p>'+
+    '<ul class="ct-list">'+items+'</ul>'+
+    '<div class="ct-nav">'+back+next+'</div>'+
+    (last?'<p class="ct-fine">By accepting you agree to uphold The Kitchen’s standards. Seats can be reviewed or removed by the editors.</p>':'')+
+  '</div>');
+  var m=byId('modal'); if(m){ m.classList.add('wide'); }
+}
+function ctGo(d){ _ctStep=Math.max(0,Math.min(CRITIC_STEPS.length-1,_ctStep+d)); paintCriticTerms(); }
+function acceptCriticTerms(){
+  if(!sbConfigured()){ app.criticAgreed=true; closeModal(); return; }
+  fetch(SUPABASE_URL+'/rest/v1/rpc/accept_critic_terms',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:'{}'})
+    .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
+    .then(function(){ app.criticAgreed=true; closeModal(); toast('Welcome to The Kitchen. Your seat is live.'); var r0=parseHash(); if(r0.view==='film')renderFilm(r0.arg); })
+    .catch(function(){ toast('Couldn’t save — try again.'); });
 }
 /* Admin: seat (verify) a critic by account email. Gated by the admin passphrase. */
 function seatCritic(){
@@ -5332,9 +5417,20 @@ function inboxCardHTML(a){
   if(a.work_url) lines.push('<span class="ic-line"><b>'+(role==='writer'?'Writing':'Work')+':</b> '+linkifyList(a.work_url)+'</span>');
   var meta=lines.length?'<div class="ic-lines">'+lines.join('')+'</div>':'';
   var eArg=(a.email||'').replace(/'/g,"\\'"), oArg=(a.outlet||'').replace(/'/g,"\\'");
-  var seatBtn=role==='critic'
-    ? '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\')">Seat as critic</button>'
-    : '<button class="btn btn-gold btn-sm" onclick="inboxSetStatus('+a.id+',\'seated\')">Approve</button>';
+  var seated=(status==='seated'), actions;
+  if(role==='critic'){
+    actions = seated
+      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemove('+a.id+',\''+esc(eArg)+'\')">Remove critic</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\')">Seat as critic</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
+  } else {
+    actions = seated
+      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxSetStatus('+a.id+',\'received\')">Remove</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxSetStatus('+a.id+',\'seated\')">Approve</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
+  }
   return '<div class="inbox-card st-'+status+'">'+
     '<div class="ic-top">'+av+
       '<div class="ic-id"><div class="ic-name">'+nm+' <span class="ic-role r-'+role+'">'+lane+'</span></div>'+
@@ -5342,10 +5438,7 @@ function inboxCardHTML(a){
         '<div class="ic-when">Applied '+when+'</div></div>'+
       '<span class="ic-status s-'+status+'">'+status+'</span>'+
     '</div>'+ bio + meta +
-    '<div class="ic-actions">'+seatBtn+
-      '<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'+
-      '<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>'+
-    '</div>'+
+    '<div class="ic-actions">'+actions+'</div>'+
   '</div>';
 }
 function inboxSetStatus(id,status){
@@ -5359,8 +5452,18 @@ function inboxSeat(id,email,outlet){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ toast(ok?'Seated. Their reviews now move the Kitchen.':'They need an account with this email first — then seat again.'); inboxLoad(); })
-    .catch(function(){ toast('Couldn’t seat — check the passphrase.'); });
+    .then(function(ok){ toast(ok?'Seated. They’ll accept the critic agreement, then their scores move the Kitchen.':'They need an account with this email first — then seat again.'); inboxLoad(); })
+    .catch(function(){ toast('Couldn’t seat — make sure you’re signed in as the owner.'); });
+}
+/* Admin: remove a seated critic (un-verify). verify_critic(p_on=false) clears
+   is_critic so their reviews stop moving the Kitchen score. */
+function inboxRemove(id,email){
+  if(!sbConfigured())return;
+  if(!window.confirm('Remove this critic? Their seat is revoked and their reviews stop moving the Kitchen score.'))return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(){ toast('Critic removed. Seat revoked.'); inboxLoad(); })
+    .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* One batched pull of every film's live tally, so The Table score on grid cards
    matches the film page instead of showing stale seeds. */
