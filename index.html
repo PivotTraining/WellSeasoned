@@ -6067,8 +6067,21 @@ function tsLoad(){
   });
   return _tsLoading;
 }
+/* Turnstile throws a benign async "Nothing to reset" during widget teardown —
+   its token-refresh timer races our remove(). The token we captured is fine;
+   swallow only that exact message so it never surfaces as an uncaught error. */
+var _tsErrHooked=false;
+function tsSilenceBenign(){
+  if(_tsErrHooked)return; _tsErrHooked=true;
+  window.addEventListener('error',function(e){
+    if(e&&e.message&&e.message.indexOf('Turnstile')>=0&&e.message.indexOf('Nothing to reset')>=0){
+      e.preventDefault(); if(e.stopImmediatePropagation)e.stopImmediatePropagation(); return true;
+    }
+  }, true);
+}
 function captchaToken(){
   if(!TURNSTILE_KEY) return Promise.resolve(null);
+  tsSilenceBenign();
   return tsLoad().then(function(ok){
     if(!ok||!window.turnstile) return null;
     return new Promise(function(res){
@@ -6078,9 +6091,11 @@ function captchaToken(){
       var done=false, wid=null;
       function finish(t){
         if(done)return; done=true;
-        try{ if(wid!=null)window.turnstile.remove(wid); }catch(e){}
-        if(host.parentNode)host.parentNode.removeChild(host);
-        res(t);
+        res(t);   // hand back the token first; clean up the widget on the next tick
+        setTimeout(function(){
+          try{ if(wid!=null)window.turnstile.remove(wid); }catch(e){}
+          if(host.parentNode)host.parentNode.removeChild(host);
+        },0);
       }
       setTimeout(function(){ finish(null); },12000);   // never hang auth on CF
       try{
