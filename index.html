@@ -330,7 +330,7 @@
   /* real poster image (hydrated via TMDB) sits under the scrim + grain */
   .poster-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
   /* when real art loads, the baked-in title overlay fades out so the poster breathes */
-  .poster.img-ok .p-ttl,.poster.img-ok .m-ttl{opacity:0;transition:opacity .25s}
+  .poster.img-ok .p-ttl,.poster.img-ok .m-ttl,.room-poster.img-ok .p-ttl{opacity:0;transition:opacity .25s}
   .mtile.img-ok .m-ttl{opacity:0;transition:opacity .25s}
   /* hover-to-preview trailer */
   .poster-tr{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1;opacity:0;transition:opacity .3s;animation:trfade .4s ease forwards}
@@ -432,7 +432,11 @@
   .film-room{margin-top:6px}
   .room-backdrop{position:relative;border-radius:var(--r-xl);overflow:hidden;min-height:360px;display:flex;align-items:flex-end;background:var(--jewel);box-shadow:var(--shadow-3)}
   .room-backdrop.noart{background:repeating-linear-gradient(135deg,var(--inset),var(--inset) 12px,var(--deep) 12px,var(--deep) 24px)}
-  .room-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,12,4,.12) 0,rgba(20,12,4,.5) 52%,rgba(12,7,2,.92) 100%),linear-gradient(90deg,rgba(12,7,2,.62) 0,rgba(12,7,2,0) 62%)}
+  .room-bgimg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center 22%}
+  /* no real backdrop → the poster becomes the hero, blurred + dimmed. Over-inset
+     + scale hides the blur's soft edges. */
+  .room-bgimg.blurred{inset:-44px;filter:blur(36px) brightness(.5) saturate(1.15);transform:scale(1.06);background-position:center}
+  .room-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,12,4,.12) 0,rgba(20,12,4,.5) 52%,rgba(12,7,2,.92) 100%),linear-gradient(90deg,rgba(12,7,2,.62) 0,rgba(12,7,2,0) 62%)}
   .room-hero{position:relative;z-index:2;display:flex;gap:26px;align-items:flex-end;padding:30px;width:100%}
   .room-poster{width:158px;flex:none;aspect-ratio:2/3;border-radius:var(--r-lg);overflow:hidden;position:relative;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-3);border:1px solid rgba(0,0,0,.2)}
   .room-poster .fp-play{position:absolute;top:10px;right:10px;z-index:3;width:38px;height:38px;border-radius:50%;background:rgba(20,14,8,.62);border:1px solid rgba(255,255,255,.35);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(3px)}
@@ -3573,6 +3577,17 @@ function roomBg(f){
   if(f.backdrop) return "background-image:url('"+f.backdrop+"');background-size:cover;background-position:center 22%";
   return 'background:'+f.grad;
 }
+/* Rich hero for every film: real TMDB backdrop if we have one, otherwise the
+   film's own poster blurred behind the scrim (never a flat gradient when a
+   poster exists). Paints into the #roomBgImg layer; called on render + hydrate. */
+function applyHeroBg(f){
+  var el=byId('roomBgImg'); if(!el)return;
+  var poster=(typeof servePoster==='function')?servePoster(f):(f.poster||null);
+  var img=f.backdrop?f.backdrop:(!f.noart&&poster?poster:null);
+  var blur=!f.backdrop&&!!img;
+  if(img){ el.style.backgroundImage="url('"+img+"')"; el.className='room-bgimg'+(blur?' blurred':''); el.style.display=''; }
+  else { el.style.backgroundImage=''; el.style.display='none'; }
+}
 function castAvatar(name,photo){
   return photo
     ? '<span class="cast-av" style="background-image:url(\''+photo+'\')"></span>'
@@ -4276,14 +4291,14 @@ function renderSoonDetail(id){
   _activeFilm=id;
   var yr=(c.date||'').slice(0,4);
   var castLine=(c.dir?'Dir. '+esc(c.dir)+' &nbsp;·&nbsp; ':'')+(yr||'TBA')+(c.cast&&c.cast.length?' &nbsp;·&nbsp; '+esc(c.cast.slice(0,4).join(', ')):'');
-  var backStyle=c.backdrop?"background-image:url('"+c.backdrop+"');background-size:cover;background-position:center 22%":'';
   var voteBlock=c.trailer
     ? '<div class="excite-panel"><span class="excite-lab">Seen the trailer? Tell the table:</span>'+excitementButtons(c)+'</div>'
     : '<p class="empty-note" style="margin-top:14px">Trailer coming. Excitement voting opens once there’s a trailer to judge — that’s the fair way.</p>';
   byId('filmContent').innerHTML=
     '<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
     '<div class="film-room">'+
-      '<div class="room-backdrop'+(c.backdrop?'':' noart')+'" id="roomBackdrop" style="'+backStyle+'">'+
+      '<div class="room-backdrop" id="roomBackdrop">'+
+        '<div class="room-bgimg'+(c.backdrop?'':' blurred')+'" style="background-image:url(\''+(c.backdrop||c.poster||'')+'\')"></div>'+
         '<div class="room-scrim"></div>'+
         '<div class="room-hero">'+
           '<div class="room-poster">'+
@@ -4544,7 +4559,8 @@ function renderFilm(id){
   byId('filmContent').innerHTML=
     '<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
     '<div class="film-room">'+
-      '<div class="room-backdrop'+(f.noart?' noart':'')+'" id="roomBackdrop" style="'+roomBg(f)+'">'+
+      '<div class="room-backdrop'+(f.noart?' noart':'')+'" id="roomBackdrop" style="'+(f.noart?'':'background:'+f.grad)+'">'+
+        '<div class="room-bgimg" id="roomBgImg"></div>'+
         '<div class="room-scrim"></div>'+
         '<div class="room-hero">'+
           '<div class="room-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+
@@ -4588,12 +4604,12 @@ function renderFilm(id){
         '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'+
       '</div>'+
     '</div>';
-  renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id);
+  applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id);
   hydrateFilmMedia(f).then(function(changed){
     if(!changed)return;
     var on=document.querySelector('.view.on');
     if(!(on&&on.getAttribute('data-view')==='film'&&_activeFilm===f.id&&byId('roomBackdrop')))return;
-    byId('roomBackdrop').setAttribute('style',roomBg(f));
+    applyHeroBg(f);   // real backdrop just arrived from TMDB — swap it in over the poster blur
     var cs=byId('castSection'); if(cs) cs.outerHTML=castCrewHTML(f);
   });
   setDocMeta(f.title+' ('+f.year+') — Well Seasoned',
