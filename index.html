@@ -224,6 +224,19 @@
   .soon-btn{margin-top:auto;font-family:inherit;font-weight:800;font-size:12.5px;padding:8px 6px;border-radius:9px;border:1.5px solid rgba(0,0,0,.14);background:transparent;color:var(--ink);cursor:pointer}
   .soon-btn.play{background:var(--gold);border-color:var(--gold);color:#241703}
   .soon-btn[disabled]{opacity:.55;cursor:default}
+  /* Excitement vote (Let's Go / Meh) — only shown where there's a trailer */
+  .excite-row{display:flex;gap:8px;margin-top:8px}
+  .excite-btn{flex:1;font-family:inherit;font-weight:800;font-size:12.5px;padding:8px 6px;border-radius:9px;border:1.5px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer;transition:transform .12s,background .15s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+  .excite-btn b{font-variant-numeric:tabular-nums}
+  .excite-btn:active{transform:scale(.96)}
+  .excite-btn.go{border-color:rgba(46,139,87,.55);color:#1C6B41}
+  .excite-btn.go.on{background:#2E8B57;border-color:#2E8B57;color:#fff}
+  .excite-btn.meh{border-color:rgba(190,59,24,.5);color:#9e2f13}
+  .excite-btn.meh.on{background:#BE3B18;border-color:#BE3B18;color:#fff}
+  .excite-panel{margin-top:16px;padding:14px 15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;max-width:420px}
+  .excite-panel .excite-lab{display:block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+  .excite-panel .excite-btn{font-size:14px;padding:11px 8px}
+  .soon-badge{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);background:rgba(23,15,7,.5);border:1px solid rgba(255,196,84,.35);padding:5px 11px;border-radius:999px;margin-bottom:10px}
   /* ============ CURATE PAGE ============ */
   .curp-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:calc(var(--nav-h) + 0px);background:var(--bg);padding:12px 0;z-index:6;border-bottom:1px solid var(--line)}
   .curp-tools input{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;font:inherit;color:var(--ink);outline:none}
@@ -3561,13 +3574,13 @@ function cardPreviewOut(el){
 /* ============ STATE + PERSISTENCE ============ */
 /* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
    app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
     localStorage.setItem(STORE_KEY, JSON.stringify({
       signedIn:app.signedIn, name:app.name, email:app.email, userId:app.userId, plate:app.plate, taughtThis:app.taughtThis,
-      taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, comments:app.comments, personVotes:app.personVotes
+      taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, comments:app.comments, personVotes:app.personVotes, excitement:app.excitement
     }));
   }catch(e){/* storage unavailable — run in-memory */}
 }
@@ -3579,7 +3592,7 @@ function loadState(){
     app.signedIn=!!s.signedIn; app.name=s.name||''; app.email=s.email||''; app.userId=s.userId||''; app.plate=s.plate||[];
     app.taughtThis=!!s.taughtThis; app.taste=s.taste||null;
     app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{}};}
-    app.votes=s.votes||{}; app.tally=s.tally||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{};
+    app.votes=s.votes||{}; app.tally=s.tally||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{}; app.excitement=s.excitement||{};
     // apply saved tallies onto the live film objects
     FILMS.forEach(function(f){ if(app.tally[f.id]){ f.votes.for=app.tally[f.id].for; f.votes.against=app.tally[f.id].against; } });
   }catch(e){/* corrupt — ignore */}
@@ -4034,12 +4047,135 @@ var COMING_SOON=[{"id":"cs-1368337","title":"The Odyssey","date":"2026-07-15","p
 var SOON_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function soonDate(d){ var p=(d||'').split('-'); if(p.length<3)return 'TBA'; return SOON_MONTHS[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
 function soonCard(c,i){
-  return '<div class="soon-card">'+
+  // Whole card opens the detail page; the trailer + excitement controls stop
+  // propagation so they act in place without navigating.
+  return '<div class="soon-card" onclick="go(\'film\',\''+c.id+'\')" style="cursor:pointer">'+
     '<div class="soon-poster" style="background-image:url(\''+c.poster+'\')"><span class="soon-date">'+soonDate(c.date)+'</span></div>'+
     '<div class="soon-meta"><div class="soon-ttl">'+esc(c.title)+'</div>'+
     '<div class="soon-sub">'+(c.dir?'Dir. '+esc(c.dir)+' · ':'')+esc(c.cast.slice(0,3).join(', '))+'</div>'+
-    (c.trailer?'<button class="soon-btn play" onclick="openSoonTrailer('+i+')">▶ Watch trailer</button>':'<button class="soon-btn" disabled>Trailer coming</button>')+
+    (c.trailer?'<button class="soon-btn play" onclick="event.stopPropagation();openSoonTrailer('+i+')">▶ Watch trailer</button>':'<button class="soon-btn" disabled onclick="event.stopPropagation()">Trailer coming</button>')+
+    excitementButtons(c)+
     '</div></div>';
+}
+/* Excitement vote — only where there's a trailer to judge, so it stays fair.
+   Green "Let's Go" / red "Meh"; identity-backed like every other vote. */
+function excitementButtons(c){
+  if(!c.trailer) return '';
+  var mine=app.excitement[c.id]||null, cnt=app.exciteCounts[c.id]||{excited:0,meh:0};
+  return '<div class="excite-row" onclick="event.stopPropagation()">'+
+    '<button class="excite-btn go'+(mine==='excited'?' on':'')+'" onclick="excitementVote(\''+c.id+'\',\'excited\')" aria-pressed="'+(mine==='excited')+'">Let’s Go'+(cnt.excited?' <b>'+fmt(cnt.excited)+'</b>':'')+'</button>'+
+    '<button class="excite-btn meh'+(mine==='meh'?' on':'')+'" onclick="excitementVote(\''+c.id+'\',\'meh\')" aria-pressed="'+(mine==='meh')+'">Meh'+(cnt.meh?' <b>'+fmt(cnt.meh)+'</b>':'')+'</button>'+
+    '</div>';
+}
+function excitementVote(soonId,stance){
+  if(!findSoon(soonId)) return;
+  var cur=app.excitement[soonId]||null;
+  var cnt=app.exciteCounts[soonId]||{excited:0,meh:0}; app.exciteCounts[soonId]=cnt;
+  if(cur===stance){                                  // tap the same side again → undo
+    cnt[stance]=Math.max(0,cnt[stance]-1);
+    delete app.excitement[soonId];
+    syncExcitement(soonId,stance,true);
+  } else {
+    if(cur) cnt[cur]=Math.max(0,cnt[cur]-1);         // switching sides
+    cnt[stance]=(cnt[stance]||0)+1;
+    app.excitement[soonId]=stance;
+    syncExcitement(soonId,stance,false);
+    track('excite',{film:soonId,stance:stance});
+  }
+  saveState();
+  refreshExcitement(soonId);
+}
+/* Persist to Supabase with the same forge-proof path as film/person votes:
+   wait for a real identity, carry the JWT, upsert one row per (soon,device). */
+function syncExcitement(soonId,stance,remove){
+  if(!SUPABASE_URL||!SUPABASE_KEY) return;
+  ensureIdentityThen(function(){
+    try{
+      if(remove){
+        fetch(SUPABASE_URL+'/rest/v1/excitement_votes?soon_id=eq.'+encodeURIComponent(soonId)+'&device_id=eq.'+encodeURIComponent(wsDevice()),
+          {method:'DELETE',headers:sbVoteHeaders()}).catch(function(){});
+      } else {
+        fetch(SUPABASE_URL+'/rest/v1/excitement_votes?on_conflict=soon_id,device_id',{
+          method:'POST',
+          headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body:JSON.stringify({soon_id:soonId,device_id:wsDevice(),stance:stance,user_id:myUid()})
+        }).then(function(r){ if(r&&(r.status===403||r.status===429)) toast('Whoa — slow down a sec.'); }).catch(function(){});
+      }
+    }catch(e){}
+  });
+}
+/* Pull the live excitement tallies and repaint whatever's on screen. */
+function loadAllExcitement(){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/excitement_scores?select=soon_id,excited_count,meh_count',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows))return;
+        rows.forEach(function(c){ app.exciteCounts[c.soon_id]={excited:c.excited_count||0,meh:c.meh_count||0}; });
+        var on=document.querySelector('.view.on'); if(!on)return;
+        var v=on.getAttribute('data-view');
+        if(v==='soon')renderSoon();
+        else if(v==='film'&&_activeFilm&&_activeFilm.indexOf('cs-')===0)renderSoonDetail(_activeFilm);
+      }).catch(function(){});
+  }catch(e){}
+}
+function refreshExcitement(soonId){
+  var on=document.querySelector('.view.on'); if(!on)return;
+  var v=on.getAttribute('data-view');
+  if(v==='soon')renderSoon();
+  else if(v==='film'&&_activeFilm===soonId)renderSoonDetail(soonId);
+}
+function findSoon(id){ for(var i=0;i<COMING_SOON.length;i++){ if(COMING_SOON[i].id===id)return COMING_SOON[i]; } return null; }
+function soonIndex(id){ for(var i=0;i<COMING_SOON.length;i++){ if(COMING_SOON[i].id===id)return i; } return -1; }
+function openSoonTrailerId(id){ var i=soonIndex(id); if(i>=0)openSoonTrailer(i); }
+/* Detail page for an upcoming film — same "room" as released films, minus the
+   released-only bits (no Table/Kitchen vote yet; excitement stands in). */
+function renderSoonDetail(id){
+  var c=findSoon(id); if(!c){go('soon');return;}
+  _activeFilm=id;
+  var yr=(c.date||'').slice(0,4);
+  var castLine=(c.dir?'Dir. '+esc(c.dir)+' &nbsp;·&nbsp; ':'')+(yr||'TBA')+(c.cast&&c.cast.length?' &nbsp;·&nbsp; '+esc(c.cast.slice(0,4).join(', ')):'');
+  var backStyle=c.backdrop?"background-image:url('"+c.backdrop+"');background-size:cover;background-position:center 22%":'';
+  var voteBlock=c.trailer
+    ? '<div class="excite-panel"><span class="excite-lab">Seen the trailer? Tell the table:</span>'+excitementButtons(c)+'</div>'
+    : '<p class="empty-note" style="margin-top:14px">Trailer coming. Excitement voting opens once there’s a trailer to judge — that’s the fair way.</p>';
+  byId('filmContent').innerHTML=
+    '<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
+    '<div class="film-room">'+
+      '<div class="room-backdrop'+(c.backdrop?'':' noart')+'" id="roomBackdrop" style="'+backStyle+'">'+
+        '<div class="room-scrim"></div>'+
+        '<div class="room-hero">'+
+          '<div class="room-poster">'+
+            (c.trailer?'<button class="fp-play" aria-label="Play trailer" onclick="openSoonTrailerId(\''+c.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>':'')+
+            '<img class="poster-img" src="'+c.poster+'" alt="'+esc(c.title)+' poster" loading="lazy" onload="this.parentNode.classList.add(\'img-ok\')" onerror="this.remove()"><div class="p-ttl">'+esc(c.title)+'</div>'+
+          '</div>'+
+          '<div class="room-lead">'+
+            '<span class="soon-badge">Coming '+soonDate(c.date)+'</span>'+
+            '<h1>'+esc(c.title)+'</h1>'+
+            '<div class="room-meta">'+castLine+'</div>'+
+            '<div class="film-actions">'+
+              (c.trailer?'<button class="btn btn-gold" onclick="openSoonTrailerId(\''+c.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+
+              '<button class="btn btn-ghost light" onclick="openShareCardSoon(\''+c.id+'\')">Share</button>'+
+            '</div>'+
+            voteBlock+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<p class="film-syn">'+esc(c.syn||'')+'</p>'+
+      (c.cast&&c.cast.length?'<div class="tag-row">'+c.cast.map(function(n){return '<span class="tag">'+esc(n)+'</span>';}).join('')+'</div>':'')+
+    '</div>';
+  animateAura(byId('filmContent'));
+  setDocMeta(c.title+' ('+(yr||'soon')+') — Well Seasoned',
+    'Coming '+soonDate(c.date)+'. '+(c.syn||'').slice(0,140),
+    '#/film/'+encodeURIComponent(c.id), c.poster||null);
+}
+function openShareCardSoon(id){
+  var c=findSoon(id); if(!c)return;
+  var url='https://itswellseasoned.com/#/film/'+encodeURIComponent(id);
+  var data={title:c.title+' — Well Seasoned', text:'Coming '+soonDate(c.date)+'. On the watchlist.', url:url};
+  if(navigator.share){ navigator.share(data).catch(function(){}); return; }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(function(){toast('Link copied — share it.');},function(){toast(url);}); return; }
+  toast(url);
 }
 function renderSoon(){
   var g=byId('soonGrid'); if(!g)return;
@@ -4239,6 +4375,7 @@ function cardPeppers(f){
 }
 var _activeFilm=null;   // which film the film view currently shows; async loaders must match it
 function renderFilm(id){
+  if(id&&id.indexOf('cs-')===0){ return renderSoonDetail(id); }   // upcoming films get their own room
   var f=find(id); if(!f){go('home');return;}
   _activeFilm=id;
   var ts=tableScore(f), isCert=certified(f), split=Math.abs(f.k-ts);
@@ -5812,7 +5949,7 @@ function ensureIdentity(){
     return fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify(withCaptcha({},t))});
   })
     .then(function(r){ if(r.status===422){ _anonDisabled=true; } return r.ok?r.json():null; })
-    .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); loadAllBackendVotes(); return true; } return false; })
+    .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); loadAllBackendVotes(); loadAllExcitement(); return true; } return false; })
     .catch(function(){ return false; })
     .then(function(v){ _identityPromise=null; return v; });
   return _identityPromise;
@@ -5903,7 +6040,7 @@ renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); ensureIdentity
 /* open whatever the URL points at (deep link / refresh / back button) */
 if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
-loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores();
+loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores(); loadAllExcitement();
 </script>
 <!-- Vercel Web Analytics (cookieless, privacy-friendly). Enable Web Analytics in
      Vercel → Project → Analytics; until then this 404s harmlessly. -->
