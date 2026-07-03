@@ -3978,13 +3978,22 @@ function buildShareCard(f,done){
     ctx.fillText('itswellseasoned.com', W/2, 1306);
     done(c);
   };
-  if(f.poster){
+  var posterUrl=(typeof servePoster==='function'&&servePoster(f))||f.poster;
+  if(posterUrl){
+    posterUrl=posterUrl.replace('/t/p/w342','/t/p/w500');   // sharper on the 430px card slot
+    // The page already showed this poster via a plain (non-CORS) <img>. Reusing
+    // that cached copy for a crossOrigin fetch TAINTS the canvas on Safari/iOS —
+    // the poster then silently drops off the card AND toBlob() returns null, so
+    // the shared/saved image has no movie art (the "no image comes with it" bug).
+    // A distinct cache key forces a clean, CORS-enabled fetch (TMDB returns
+    // access-control-allow-origin:* including on query-string URLs).
+    var corsUrl=posterUrl+(posterUrl.indexOf('?')<0?'?':'&')+'ws=cors';
     var settled=false;
     var finish=function(im){ if(settled)return; settled=true; draw(im); };
     var img=new Image(); img.crossOrigin='anonymous';
     img.onload=function(){finish(img);}; img.onerror=function(){finish(null);};
-    setTimeout(function(){finish(null);},2500);   // slow network: card ships without the poster
-    img.src=f.poster;
+    setTimeout(function(){finish(null);},6000);   // slow phones: give the fetch real time before shipping without art
+    img.src=corsUrl;
   } else draw(null);
 }
 var _shareCanvas=null;
