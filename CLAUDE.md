@@ -108,7 +108,13 @@ Done and verified live:
   Acceptance recorded via SECURITY DEFINER RPC `accept_critic_terms()`
   (sets `critic_agreed_at` for the calling critic). Inbox has a **Remove critic**
   action for seated critics (`inboxRemove` → `verify_critic` with `p_on=false`,
-  clears `is_critic`); writer "Remove" reverts status. Reads every application via
+  clears `is_critic`); writer "Remove" reverts status.
+- Shareable apply links: `#/apply/critic`, `#/apply/writer` (`#/apply` →
+  critic) open the application form over home (`render` special-cases `apply` →
+  `openContribute`). Helpers `applyLink`/`copyApplyLink`/`shareApplyLink`.
+  Footer portal cards have a "Share link ↗" (native share/copy); the admin
+  inbox has a "Recruit beyond the site" row with Copy Kitchen/Word link
+  buttons. So recruiting isn't only internally driven. Reads every application via
   SECURITY DEFINER RPC `admin_list_applications(p_secret)` (bypasses the
   own-row RLS only for a verified admin); `admin_set_application_status(
   p_secret,p_id,p_status)` shortlists/passes; critic "Seat" reuses

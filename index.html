@@ -905,8 +905,12 @@
   .jp-card h3{font-family:var(--display);font-weight:800;font-size:20px;color:var(--ink)}
   .jp-card p{color:var(--ink-2);font-size:14px;line-height:1.5;margin:0 0 6px;flex:1}
   .jp-card .btn{margin-top:2px}
+  .jp-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:2px}
+  .jp-share{font-size:13px;font-weight:700;color:var(--gold-ink);cursor:pointer;white-space:nowrap}
   .jp-signin{margin-top:16px;font-size:14px;color:var(--ink-2)}
   .jp-signin a{color:var(--gold-ink);font-weight:700;cursor:pointer}
+  .inbox-share{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+  .inbox-share .ish-lab{font-size:13.5px;color:var(--ink-2);font-weight:600}
   @media(max-width:640px){ .jp-lanes{grid-template-columns:1fr} .jp-head h2{font-size:25px} }
   /* Admin: contributor applications inbox */
   .inbox-tools{display:flex;align-items:center;gap:12px;margin:14px 0 16px}
@@ -1332,13 +1336,13 @@
         <span class="jp-tag">The Kitchen</span>
         <h3>For critics</h3>
         <p>Verified critics of the culture. Your scores move the official Kitchen number on every film and run beside your byline and outlet — a seat that’s earned, never bought.</p>
-        <button class="btn btn-gold" onclick="openContribute('critic')">Apply to The Kitchen</button>
+        <div class="jp-actions"><button class="btn btn-gold" onclick="openContribute('critic')">Apply to The Kitchen</button><a class="jp-share" onclick="shareApplyLink('critic')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')shareApplyLink('critic')">Share link ↗</a></div>
       </div>
       <div class="jp-card">
         <span class="jp-tag">The Word</span>
         <h3>For writers</h3>
         <p>Essays, features, and reviews in The Word, in front of the whole community. Pitch your beat, keep your voice, own your byline — no follower-count test, no gatekeeping.</p>
-        <button class="btn btn-gold" onclick="openContribute('writer')">Write for The Word</button>
+        <div class="jp-actions"><button class="btn btn-gold" onclick="openContribute('writer')">Write for The Word</button><a class="jp-share" onclick="shareApplyLink('writer')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')shareApplyLink('writer')">Share link ↗</a></div>
       </div>
     </div>
     <p class="jp-signin">Already write for us? <a onclick="openAuth('signin')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')openAuth('signin')">Critic &amp; writer sign in</a> to post your reviews and reads.</p>
@@ -3954,7 +3958,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -3970,6 +3974,15 @@ function parseHash(){
   return {view:view,arg:arg};
 }
 function render(view,arg){
+  if(view==='apply'){
+    // Shareable public apply link (#/apply, #/apply/critic, #/apply/writer):
+    // show home behind and open the application form so an external link lands
+    // straight on the form.
+    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')==='home');});
+    setActiveNav('home'); window.scrollTo({top:0,behavior:'auto'}); renderHome(); applyMetaTags('home');
+    openContribute(arg==='writer'?'writer':'critic');
+    return;
+  }
   document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')===view);});
   setActiveNav(view);
   window.scrollTo({top:0,behavior:'auto'});
@@ -5367,6 +5380,9 @@ function renderInbox(){
   if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Applications</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to review applications.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
   w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">ADMIN</span><h1>Contributor applications</h1>'+
     '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Everyone who applied to The Kitchen or The Word — photo, bio, socials, and work. Read them like gold, then seat, shortlist, or pass.</p></div>'+
+    '<div class="inbox-share"><span class="ish-lab">Recruit beyond the site — share an apply link:</span>'+
+      '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'critic\')">Copy Kitchen link</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'writer\')">Copy Word link</button></div>'+
     '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">↻ Refresh</button><span id="inboxCount" class="inbox-count"></span></div>'+
     '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading…</p></div>';
   inboxLoad();
@@ -5585,6 +5601,19 @@ function openContribute(role){
 }
 function openApplyKitchen(){ openContribute('critic'); }
 function openApplyWriter(){ openContribute('writer'); }
+/* Public, shareable apply links — post them anywhere; they open the form. */
+function applyLink(role){ return 'https://itswellseasoned.com/#/apply/'+((role==='writer')?'writer':'critic'); }
+function copyApplyLink(role){
+  var u=applyLink(role), lane=(role==='writer')?'The Word':'The Kitchen';
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(u).then(function(){ toast(lane+' apply link copied — share it.'); },function(){ toast(u); }); }
+  else toast(u);
+  try{ track('apply_link_copy',{role:role}); }catch(e){}
+}
+function shareApplyLink(role){
+  var u=applyLink(role), lane=(role==='writer')?'The Word':'The Kitchen';
+  if(navigator.share){ navigator.share({title:'Write for Well Seasoned — '+lane, text:'Apply to '+lane+' on Well Seasoned — film criticism by the culture.', url:u}).catch(function(){}); return; }
+  copyApplyLink(role);
+}
 /* Profile photo → Supabase Storage (public bucket, image-only, 5MB). Uploads on
    pick under a fresh identity; the public URL rides along on the application. */
 function contribPickAvatar(input){
