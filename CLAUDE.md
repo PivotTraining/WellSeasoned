@@ -63,6 +63,13 @@ Done and verified live:
   forged user_id + bad stance rejected.
 - Transfer (2025, dir. Paul D. Hannah, TMDB 1557378) added to catalog on
   Tubi with real pinned poster in `WS_POSTERS`; no fake score/votes.
+- July 4 freedom spotlight (`#freedomSection` at the top of home, `isJuly4()`
+  date gate, `FREEDOM_FILMS`/`paintFreedom`, `.freedom` CSS): live only on
+  July 4 (visitor local time, 12am–12am July 5), auto-hides otherwise. Six real
+  catalog films on the fight against injustice / for freedom — Birth of a Nation
+  (2016 Nat Turner rebellion, the only slavery-era title, owner's call), Selma,
+  Judas and the Black Messiah, Malcolm X, 13th, The Hate U Give. To change the
+  picks edit `FREEDOM_FILMS`; recurs every July 4.
 - Featured spotlight carousel on the home page (`FEATURED` array →
   `paintFeatured`/`featSlideHTML`/`featGo`/`featSet`, auto-rotates, pinned
   backdrops for cinematic art, `.feat-car` CSS). Editorial pick of

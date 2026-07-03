@@ -556,6 +556,12 @@
   .br-teaser .brt-ey{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
   .br-teaser .brt-ttl{font-family:var(--display);font-weight:800;font-size:19px;margin-top:2px;color:#fff}
   .br-teaser .brt-cta{flex:none;background:var(--gold);color:#241703;font-weight:800;padding:9px 16px;border-radius:999px;font-size:13.5px}
+  /* July 4 freedom spotlight */
+  .freedom{margin:2px 0 22px;padding:20px 22px;border-radius:var(--r-lg);border:1px solid rgba(196,69,31,.32);background:linear-gradient(135deg,rgba(196,69,31,.12),rgba(228,155,11,.09))}
+  .freedom-ey{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--sumac,#b3311a);font-weight:800}
+  .freedom-h{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.05;margin:6px 0 4px;color:var(--ink)}
+  .freedom-sub{color:var(--ink-2);font-size:14.5px;line-height:1.5;max-width:70ch;margin:0 0 14px}
+  @media(max-width:640px){ .freedom{padding:16px 14px} .freedom-h{font-size:22px} }
   /* Featured spotlight carousel (home) */
   .feat-wrap{margin:0 0 22px}
   .feat-car{position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 30px rgba(0,0,0,.28)}
@@ -1085,6 +1091,12 @@
             <p class="hero-lead">Two verdicts on every film. The Kitchen is verified critics of the culture. The Table is the community that bought the ticket.</p>
           </div>
         </div>
+        <section id="freedomSection" class="freedom" style="display:none">
+          <span class="freedom-ey">July 4 · Independence, reclaimed</span>
+          <h2 class="freedom-h">The real fight for freedom.</h2>
+          <p class="freedom-sub">On a day about independence, six films about ours — the fight against injustice, and the people who refused to wait for it.</p>
+          <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="freedomRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+        </section>
         <div id="featuredBanner" class="feat-wrap" style="display:none"></div>
         <div id="homeScope" class="scope-wrap"></div>
         <div class="teach">
@@ -4730,6 +4742,19 @@ function openShareCardSoon(id){
   toast(url);
 }
 function isoToday(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+/* July 4 freedom spotlight — live only on July 4 (visitor local time), 12:00am
+   to 12:00am July 5. Real Black films on the fight against injustice and for
+   freedom (no slave films, save The Birth of a Nation's Nat Turner rebellion). */
+function isJuly4(){ var d=new Date(); return d.getMonth()===6 && d.getDate()===4; }
+var FREEDOM_FILMS=['the-birth-of-a-nation','selma','judas','malcolm-x','13th','the-hate-u-give'];
+function paintFreedom(){
+  var s=byId('freedomSection'), g=byId('freedomRail'); if(!s||!g)return;
+  if(!isJuly4()){ s.style.display='none'; g.innerHTML=''; return; }
+  var ids=FREEDOM_FILMS.filter(function(id){ return !!find(id); });
+  if(!ids.length){ s.style.display='none'; return; }
+  g.innerHTML=ids.map(cardHTML).join('');
+  s.style.display='';
+}
 function isoDaysAgo(n){ var d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 function soonReleased(c){ return c.date && c.date <= isoToday(); }   // its release date has arrived
 function renderSoon(){
@@ -4883,6 +4908,7 @@ function featPlay(){ featPause(); if(featSlides().length<2)return; _featTimer=se
 function featPause(){ if(_featTimer){ clearInterval(_featTimer); _featTimer=null; } }
 function renderHome(){
   paintFeatured();
+  paintFreedom();
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
     .filter(function(id,i,a){return a.indexOf(id)===i;})
     .filter(function(id){var f=find(id);return f&&homeOurs(f)&&f.type!=='tv';});
