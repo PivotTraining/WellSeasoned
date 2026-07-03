@@ -1100,15 +1100,6 @@ var SHOWTIMES_PROVIDER='';  // e.g. SerpApi key for live showtimes
 var SUPABASE_URL='https://iherwgeuxwpapjreoofq.supabase.co';        // e.g. 'https://xxxx.supabase.co'
 var SUPABASE_KEY='sb_publishable_Owy8s8-j6LzxYhDmpCo53w_7ehrsGuh';        // e.g. 'sb_publishable_...' or the legacy anon key
 var TURNSTILE_KEY='0x4AAAAAADdxQCMcqgc0yXX1';                       // Cloudflare Turnstile site key (public); '' disables captcha
-/* Membership via Stripe Payment Links (no backend, no secret key in the client).
-   Owner: create a Payment Link in the Stripe dashboard for each plan, set its
-   success URL to https://itswellseasoned.com/#/joined, then paste the link URL
-   below and make `price`/`per` match what the link actually charges. Until a
-   url is set, the button falls back to the founding-member waitlist. */
-var STRIPE_MEMBER={
-  monthly:{url:'', price:'$6',  per:'/mo'},
-  founding:{url:'', price:'$54', per:'/yr'}
-};
 
 /* ============ DATA (shape mirrors a real metadata feed) ============ */
 var FILMS=[
