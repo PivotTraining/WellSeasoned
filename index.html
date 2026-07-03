@@ -4822,6 +4822,7 @@ function renderCuratePage(){
     '<button class="btn btn-gold btn-sm" onclick="publishCuration()">Publish to backend</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="seatCritic()">Seat a critic</button>'+
     '<button class="btn btn-gold btn-sm" onclick="openArticleEditor()">✎ Write a Word</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="go(\'inbox\')">📥 Applications</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="openConnect()">Connect posters</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="adminSubs()">Film submissions</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
@@ -5440,13 +5441,11 @@ function seatCritic(){
   if(!sbConfigured()){ toast('Backend not configured.'); return; }
   var email=window.prompt('Critic’s account email (they must join the site first):'); if(!email)return;
   var outlet=window.prompt('Their outlet (optional, e.g. “The Marrow”):')||null;
-  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
-  if(!secret){ secret=window.prompt('Admin passphrase:')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:secret,p_email:email,p_outlet:outlet})})
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet})})
     .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
     .then(function(ok){ toast(ok?'Critic seated. Their reviews now move the Kitchen.':'No member with that email — they need to create an account first.'); })
-    .catch(function(){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){ } toast('Failed — check the passphrase.'); });
+    .catch(function(){ toast('Failed — make sure you’re signed in as the owner.'); });
 }
 /* ============ ADMIN: contributor applications inbox (#/inbox) ============
    Reads every Kitchen/Word application through admin_list_applications (a
@@ -5462,7 +5461,7 @@ function renderInbox(){
     '<div class="inbox-share"><span class="ish-lab">Recruit beyond the site — share an apply link:</span>'+
       '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'critic\')">Copy Kitchen link</button>'+
       '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'writer\')">Copy Word link</button></div>'+
-    '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">↻ Refresh</button><span id="inboxCount" class="inbox-count"></span></div>'+
+    '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">↻ Refresh</button><button class="btn btn-ghost btn-sm" onclick="go(\'curate\')">← Curate</button><span id="inboxCount" class="inbox-count"></span></div>'+
     '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading…</p></div>';
   inboxLoad();
 }
@@ -5854,18 +5853,16 @@ function loadBackendCuration(){
    admin passphrase you set in backend/schema.sql (app_secrets.curation_admin). */
 function publishCuration(){
   if(!sbConfigured()){ toast('Add your Supabase URL + key first.'); return; }
-  var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
-  if(!secret){ secret=window.prompt('Admin passphrase (from backend/schema.sql):')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
   var items=FILMS.map(function(f,i){
     return {slug:f.id, scope:effScope(f), featured:app.curation.featured.indexOf(f.id)>=0, hidden:isHidden(f), classic:isClassic(f),
       sort_order:app.curation.featured.indexOf(f.id), kitchen_score:(f.k==null?null:f.k)};
   }).filter(function(it){ return it.scope!=='ours'||it.featured||it.hidden||it.classic||it.kitchen_score!=null; });
   toast('Publishing '+items.length+' titles…');
-  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_curation',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:secret,p_items:items})})
+  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_curation',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_items:items})})
     .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
     .then(function(n){ toast('Published '+n+' titles to the backend.'); })
-    .catch(function(e){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){}; toast('Publish failed — check the passphrase.'); });
+    .catch(function(e){ toast('Publish failed — make sure you’re signed in as the owner.'); });
 }
 function applyVote(id,side){
   var f=find(id), prev=app.votes[id];
@@ -6467,22 +6464,20 @@ function doPublishArticle(slug){
   var body=(byId('arBody')||{}).value||'';
   if(!title){ toast('Give it a title.'); return; }
   if(!body.replace(/^\s+|\s+$/g,'')){ toast('Write something first.'); return; }
-  var secret=_adminSecret(); if(!secret)return;
   var art={ title:title, dek:(byId('arDek')||{}).value||'', author:(byId('arAuthor')||{}).value||'',
     film_slug:(byId('arFilm')||{}).value||'', hero_image:(byId('arHero')||{}).value||'', body:body, published:true };
   if(slug)art.slug=slug;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:secret,p_article:art})})
-    .then(function(r){ if(!r.ok){ try{localStorage.removeItem('ws_admin_secret');}catch(e){} toast('Failed — check the passphrase.'); return null; } return r.json(); })
+  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_article:art})})
+    .then(function(r){ if(!r.ok){ toast('Failed — make sure you’re signed in as the owner.'); return null; } return r.json(); })
     .then(function(ns){ if(ns==null)return; closeModal(); ARTICLES=null; if(_articleBySlug[ns])delete _articleBySlug[ns]; toast('Published to The Word.'); go('read', ns); })
     .catch(function(){ toast('Network error — try again.'); });
 }
 function doDeleteArticle(slug){
   if(!window.confirm('Delete this piece?'))return;
-  var secret=_adminSecret(); if(!secret)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/delete_article',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:secret,p_slug:slug})})
-    .then(function(r){ if(!r.ok){ toast('Failed — check the passphrase.'); return; } closeModal(); ARTICLES=null; delete _articleBySlug[slug]; toast('Deleted.'); go('word'); })
+  fetch(SUPABASE_URL+'/rest/v1/rpc/delete_article',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_slug:slug})})
+    .then(function(r){ if(!r.ok){ toast('Failed — make sure you’re signed in as the owner.'); return; } closeModal(); ARTICLES=null; delete _articleBySlug[slug]; toast('Deleted.'); go('word'); })
     .catch(function(){ toast('Network error.'); });
 }
 function renderRanked(){

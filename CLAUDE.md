@@ -23,6 +23,16 @@ reviews, or votes, ever.
 Done and verified live:
 - Real auth (email+password, auto-confirm trigger) + silent anonymous
   identities for voting (`ensureIdentity`).
+- Admin is passphrase-free for the owner: `admin_list_applications`,
+  `admin_set_application_status`, `verify_critic`, `verify_writer`,
+  `publish_curation`, `publish_article`, `delete_article` all authorize on
+  EITHER `auth.jwt()->>'email' = hello@pivottraining.us` (sent via
+  `sbUserHeaders`) OR the legacy passphrase. Client uses `_adminSecretQuiet()`
+  (no prompt). Curate ⇄ Applications cross-linked (`📥 Applications` in the
+  curate tools, `← Curate` in the inbox). SECURITY: dropped the broad
+  `contrib_media_read` SELECT policy on `storage.objects` — the public
+  `contributor-media` bucket still serves object URLs but can no longer be
+  listed/enumerated. app_secrets is RLS-locked (0 rows to anon).
 - Vote integrity phases 1+2: votes/comments require `user_id = auth.uid()`,
   one vote per identity, forged ids rejected, legacy null rows claimable.
 - Vote integrity phase 3 (2026-07-03): `votes` re-keyed on IDENTITY. It was
