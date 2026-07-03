@@ -847,6 +847,19 @@
   .modal .btn{width:100%;justify-content:center;margin-top:6px}
   .modal .m-alt{text-align:center;font-size:13px;color:var(--ink-2);margin-top:14px}
   .modal .m-alt a{color:var(--gold-ink);font-weight:700;cursor:pointer}
+  .modal textarea{width:100%;background:var(--paper);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:11px 12px;color:var(--ink);font:inherit;font-size:15px;outline:none;resize:vertical;min-height:74px}
+  /* Contributor profile form (bio + photo upload) */
+  .cprofile{display:flex;gap:16px;align-items:flex-start;margin-bottom:12px}
+  .cprofile-fields{flex:1;min-width:0}
+  .cprofile-fields .field:last-child{margin-bottom:0}
+  .cav-wrap{flex:none;width:96px;display:flex;flex-direction:column;align-items:center;gap:7px}
+  .cav-prev{width:96px;height:96px;border-radius:50%;background:var(--paper) center/cover no-repeat;border:2px dashed var(--line-strong);position:relative}
+  .cav-prev.has{border-style:solid;border-color:var(--gold)}
+  .cav-prev::after{content:'📷';position:absolute;inset:0;display:grid;place-items:center;font-size:24px;opacity:.5}
+  .cav-prev.has::after{content:''}
+  .cav-btn{font-size:12px;font-weight:700;color:var(--gold-ink);cursor:pointer;background:none;border:none}
+  .cav-state{font-size:11px;color:var(--ink-3);text-align:center;min-height:14px;line-height:1.3}
+  @media(max-width:520px){ .cprofile{flex-direction:column;align-items:center} .cprofile-fields{width:100%} }
   .teach-verdict{display:flex;gap:14px;justify-content:center;margin:6px 0 18px}
   .teach-col{text-align:center;flex:1;background:var(--inset);border:1px solid var(--line);border-radius:var(--r);padding:14px 10px}
   .teach-col .tc-num{font-weight:900;font-size:30px;color:var(--gold-ink)}
@@ -878,7 +891,18 @@
   @keyframes toastin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
   footer{border-top:1px solid var(--line);margin-top:20px;padding:34px 0 30px;color:var(--ink-2);font-size:13.5px}
-  .foot-row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+  /* Contributor sign-up portal (footer) */
+  .join-portal{padding:6px 0 30px;margin-bottom:26px;border-bottom:1px solid var(--line)}
+  .jp-head{max-width:680px}
+  .jp-head h2{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05;margin:7px 0 10px;color:var(--ink)}
+  .jp-lead{color:var(--ink-2);font-size:15.5px;line-height:1.55;max-width:648px}
+  .jp-lanes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+  .jp-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px 22px 24px;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+  .jp-tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
+  .jp-card h3{font-family:var(--display);font-weight:800;font-size:20px;color:var(--ink)}
+  .jp-card p{color:var(--ink-2);font-size:14px;line-height:1.5;margin:0 0 6px;flex:1}
+  .jp-card .btn{margin-top:2px}
+  @media(max-width:640px){ .jp-lanes{grid-template-columns:1fr} .jp-head h2{font-size:25px} }
   .foot-row .ftag{font-style:italic;font-weight:600;color:var(--ink)}
   .fine{font-size:12px;color:var(--ink-3);margin-top:10px}
 
@@ -1241,6 +1265,27 @@
 <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
 <footer>
+  <div class="wrap join-portal">
+    <div class="jp-head">
+      <span class="eyebrow">Build this with us</span>
+      <h2>Help write the canon.</h2>
+      <p class="jp-lead">Well Seasoned is built by the culture — and that includes you. If you review film or write about it, there’s a seat at this table: real bylines, human editors, nothing bought. This is where the next generation of Black film criticism gets its platform.</p>
+    </div>
+    <div class="jp-lanes">
+      <div class="jp-card">
+        <span class="jp-tag">The Kitchen</span>
+        <h3>For critics</h3>
+        <p>Verified critics of the culture. Your scores move the official Kitchen number on every film and run beside your byline and outlet — a seat that’s earned, never bought.</p>
+        <button class="btn btn-gold" onclick="openContribute('critic')">Apply to The Kitchen</button>
+      </div>
+      <div class="jp-card">
+        <span class="jp-tag">The Word</span>
+        <h3>For writers</h3>
+        <p>Essays, features, and reviews in The Word, in front of the whole community. Pitch your beat, keep your voice, own your byline — no follower-count test, no gatekeeping.</p>
+        <button class="btn btn-gold" onclick="openContribute('writer')">Write for The Word</button>
+      </div>
+    </div>
+  </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
     <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
@@ -5243,37 +5288,102 @@ function doWaitlist(plan){
   if(submitWaitlist(e,plan)){ closeModal(); toast('You’re on the list. We’ll be in touch at launch.'); }
 }
 /* critic application — a real pipeline with a visible status, not an email into the void */
-function openApplyKitchen(){
+/* Contributor sign-up — two lanes into the same editorial inbox
+   (critic_applications.role). The Kitchen seats verified critics whose scores
+   move the official number; The Word runs writers' bylined pieces. Same human
+   review, same "nothing bought" bar. openApplyKitchen kept as an alias so every
+   existing caller (film page, You page, welcome modal) still works. */
+var CONTRIB={
+  critic:{
+    title:'Apply to The Kitchen',
+    sub:'Verified critics of the culture. Application based, never bought.',
+    outletLab:'Outlet', outletPh:'Where you publish (or “independent”)',
+    workLab:'Your work', workPh:'Link to reviews — site, Substack, YouTube, Letterboxd…',
+    seat:'A “Your Kitchen review” box appears on every film page, and your scores move the official Kitchen number.'
+  },
+  writer:{
+    title:'Write for The Word',
+    sub:'Essays, features, and reviews by the culture — real bylines, no gatekeeping.',
+    outletLab:'What you write about', outletPh:'Your beat — film, TV, culture, a lane of your own',
+    workLab:'Writing samples', workPh:'Link to your work — site, Substack, Medium, socials…',
+    seat:'Your byline runs in The Word in front of the whole community, and you help set what the culture is talking about.'
+  }
+};
+var _contribAvatar=null;   // public URL of the uploaded profile photo, if any
+function openContribute(role){
+  role=(role==='writer')?'writer':'critic'; var C=CONTRIB[role];
+  _contribAvatar=null;
   var accountNote = app.signedIn
-    ? '<p class="m-sub" style="margin-top:2px">Applying as <strong>'+esc(app.name||app.email)+'</strong> — your seat ties to this account.</p>'
-    : '<p class="m-sub" style="margin-top:2px"><strong>Heads up:</strong> a seat ties to an account. <a onclick="app._afterAuth=function(){openApplyKitchen();};openAuth(\'signup\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Create yours first</a> (20 seconds) so we can seat you the moment you’re approved.</p>';
+    ? '<p class="m-sub" style="margin-top:2px">Applying as <strong>'+esc(app.name||app.email)+'</strong> — tied to this account.</p>'
+    : '<p class="m-sub" style="margin-top:2px"><strong>Heads up:</strong> a contributor seat ties to an account. <a onclick="app._afterAuth=function(){openContribute(\''+role+'\');};openAuth(\'signup\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Create yours first</a> (20 seconds) so we can seat you the moment you’re approved.</p>';
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
-    '<h2>Apply to The Kitchen</h2><p class="m-sub">Verified critics of the culture. Application based, never bought.</p>'+accountNote+
-    '<div class="field"><label for="caName">Name</label><input id="caName" value="'+esc(app.name||'')+'" placeholder="Your byline"></div>'+
-    '<div class="field"><label for="caEmail">Email</label><input id="caEmail" type="email" value="'+esc(app.email||'')+'" placeholder="you@email.com"></div>'+
-    '<div class="field"><label for="caOutlet">Outlet</label><input id="caOutlet" placeholder="Where you publish (or “independent”)"></div>'+
-    '<div class="field"><label for="caWork">Your work</label><input id="caWork" type="url" placeholder="Link to reviews — site, Substack, YouTube, Letterboxd…"></div>'+
-    '<button class="btn btn-gold" onclick="doApplyKitchen()">Submit application</button>'+
-    '<p class="m-alt">Reviewed by a human on the editorial team, never an algorithm.</p>');
+    '<h2>'+C.title+'</h2><p class="m-sub">'+C.sub+' Build your contributor profile — this is how the culture will know you.</p>'+accountNote+
+    '<div class="cprofile">'+
+      '<div class="cav-wrap">'+
+        '<div id="caAvatarPrev" class="cav-prev"></div>'+
+        '<label class="cav-btn" for="caAvatarInput">Add photo</label>'+
+        '<input id="caAvatarInput" type="file" accept="image/*" onchange="contribPickAvatar(this)" hidden>'+
+        '<span id="caAvatarState" class="cav-state"></span>'+
+      '</div>'+
+      '<div class="cprofile-fields">'+
+        '<div class="field"><label for="caName">Name / byline</label><input id="caName" value="'+esc(app.name||'')+'" placeholder="How your name should read"></div>'+
+        '<div class="field"><label for="caEmail">Email</label><input id="caEmail" type="email" value="'+esc(app.email||'')+'" placeholder="you@email.com"></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="field"><label for="caBio">Bio</label><textarea id="caBio" rows="3" placeholder="Who you are and what you bring to the culture — a few sentences."></textarea></div>'+
+    '<div class="field"><label for="caOutlet">'+C.outletLab+'</label><input id="caOutlet" placeholder="'+C.outletPh+'"></div>'+
+    '<div class="field"><label for="caSocials">Social media</label><input id="caSocials" placeholder="Instagram, X, TikTok, Letterboxd — handles or links"></div>'+
+    '<div class="field"><label for="caWork">'+C.workLab+'</label><input id="caWork" type="url" placeholder="'+C.workPh+'"></div>'+
+    '<button class="btn btn-gold" onclick="doApply(\''+role+'\')">Submit application</button>'+
+    '<p class="m-alt">Reviewed by a human on the editorial team, never an algorithm. We treat our contributors like gold.</p>');
 }
-function doApplyKitchen(){
+function openApplyKitchen(){ openContribute('critic'); }
+function openApplyWriter(){ openContribute('writer'); }
+/* Profile photo → Supabase Storage (public bucket, image-only, 5MB). Uploads on
+   pick under a fresh identity; the public URL rides along on the application. */
+function contribPickAvatar(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var st=byId('caAvatarState');
+  if((file.type||'').indexOf('image/')!==0){ toast('Please choose an image.'); input.value=''; return; }
+  if(file.size>5*1024*1024){ toast('Image is over 5MB — pick a smaller one.'); input.value=''; return; }
+  var prev=byId('caAvatarPrev');
+  try{ if(prev){ prev.style.backgroundImage="url('"+URL.createObjectURL(file)+"')"; prev.className='cav-prev has'; } }catch(_){}
+  _contribAvatar=null;
+  if(!sbConfigured()){ if(st)st.textContent='Photo selected'; return; }
+  if(st)st.textContent='Uploading…';
+  ensureFreshIdentity().then(function(){
+    var ext=((file.name||'').split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    var path=(app.userId||'anon')+'-'+(new Date().getTime())+'.'+ext;
+    return fetch(SUPABASE_URL+'/storage/v1/object/contributor-media/'+path,{
+      method:'POST', headers:sbUserHeaders({'Content-Type':file.type||'image/jpeg','x-upsert':'true'}), body:file
+    }).then(function(r){
+      if(r.ok){ _contribAvatar=SUPABASE_URL+'/storage/v1/object/public/contributor-media/'+path; if(st)st.textContent='Photo added ✓'; }
+      else { if(st)st.textContent='Upload failed — you can still submit'; }
+    });
+  }).catch(function(){ if(st)st.textContent='Upload failed — you can still submit'; });
+}
+function doApply(role){
+  role=(role==='writer')?'writer':'critic'; var C=CONTRIB[role];
   var name=byId('caName')?byId('caName').value.trim():'';
   var e=byId('caEmail')?byId('caEmail').value.trim():'';
   var outlet=byId('caOutlet')?byId('caOutlet').value.trim():'';
   var work=byId('caWork')?byId('caWork').value.trim():'';
+  var bio=byId('caBio')?byId('caBio').value.trim():'';
+  var socials=byId('caSocials')?byId('caSocials').value.trim():'';
   if(!e||e.indexOf('@')<1){ toast('Enter a valid email.'); return; }
-  var body={name:name||null,email:e,outlet:outlet||null,work_url:work||null,user_id:app.userId||null};
+  var body={name:name||null,email:e,outlet:outlet||null,work_url:work||null,user_id:app.userId||null,role:role,
+    bio:bio||null,socials:socials||null,avatar_url:_contribAvatar||null};
   var finish=function(already){
-    try{ localStorage.setItem('ws_applied_kitchen',e); }catch(_){}
-    if(!already)track('kitchen_apply');
-    app.kitchenApp=already?'received':'received';
+    try{ localStorage.setItem('ws_applied_'+role,e); }catch(_){}
+    if(!already)track('contrib_apply',{role:role});
+    app.kitchenApp='received';
     showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
       '<h2>'+(already?'You’re already in review':'Application received')+'</h2>'+
       '<p class="m-sub">Here’s exactly what happens next:</p>'+
       '<ul class="tier-legend" style="gap:12px;font-size:14px;color:var(--ink-2);list-style:none">'+
       '<li><b>1 · Editorial review.</b> A human reads your work — no algorithm, no follower-count test.</li>'+
       '<li><b>2 · We reach out.</b> You’ll hear back at <strong>'+esc(e)+'</strong> either way.</li>'+
-      '<li><b>3 · You’re seated.</b> A “Your Kitchen review” box appears on every film page, and your scores move the official Kitchen number.</li>'+
+      '<li><b>3 · You’re in.</b> '+C.seat+'</li>'+
       '</ul>'+
       (app.signedIn?'<p class="m-sub">Track your status anytime on your <a onclick="closeModal();go(\'you\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">You page</a>.</p>'
                    :'<p class="m-sub"><strong>One thing left:</strong> <a onclick="app._afterAuth=null;openAuth(\'signup\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">create your account</a> with this same email so we can seat you.</p>')+

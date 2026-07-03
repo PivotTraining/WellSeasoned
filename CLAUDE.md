@@ -81,6 +81,16 @@ Done and verified live:
   overrides the generic provider-search `watchUrl()` when a title has a
   verified direct link (used for Man of War → Apple TV, since TMDB's
   watch/providers feed is empty for day-one VOD releases).
+- Contributor sign-up portal in the footer (`.join-portal`, two lanes → The
+  Kitchen for critics / The Word for writers). Both open a rich profile form
+  (`openContribute(role)` → `doApply(role)`; `openApplyKitchen` kept as an
+  alias): name/byline, email, **profile photo upload**, bio, outlet/beat,
+  social media, work/site link. Photos upload to the public Supabase Storage
+  bucket `contributor-media` (image-only, 5MB cap; insert policy `to
+  authenticated` so silent-anon identities can upload, public read) via
+  `contribPickAvatar`. Applications land in `critic_applications` with a
+  `role` column (`critic`|`writer`) plus `bio`/`avatar_url`/`socials` columns —
+  one editorial inbox, human review, nothing bought.
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already
