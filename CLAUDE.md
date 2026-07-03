@@ -19,20 +19,34 @@ reviews, or votes, ever.
 - Cloudflare Turnstile (invisible) on all GoTrue calls; Supabase Attack
   Protection CAPTCHA is ON — tokenless auth calls fail with `captcha_failed`.
 
-## Launch checklist state (2026-07-02)
+## Launch checklist state (2026-07-03)
 Done and verified live:
 - Real auth (email+password, auto-confirm trigger) + silent anonymous
   identities for voting (`ensureIdentity`).
 - Vote integrity phases 1+2: votes/comments require `user_id = auth.uid()`,
   one vote per identity, forged ids rejected, legacy null rows claimable.
 - Invisible CAPTCHA wired client-side (`captchaToken`/`withCaptcha`) and
-  enforced server-side.
+  enforced server-side (Turnstile site key in `TURNSTILE_KEY`; Supabase
+  Attack Protection CAPTCHA ON — tokenless auth = `captcha_failed`).
 - Privacy Policy + Terms at `#/legal/privacy` / `#/legal/terms`; footer links.
 - `hello@itswellseasoned.com` forwards to owner Gmail via ImprovMX
   (MX/SPF records live on Vercel DNS).
 - Analytics: first-party `events` table via `track()`; film/actor/actress
   leaderboards; showtimes; share cards; critic pipeline
   (`verify_critic` RPC, `kitchen_scores` view).
+- Home shelves rotate per visit (`seededShuffle`/`HOME_SEED`, one seed per
+  page load; sorted/canon shelves keep their order). Browse grid fixed 4-col
+  (`.grid-cards`, steps 4→3→2). Tubi shelf shows 18.
+- Coming Soon (`renderSoon`, `COMING_SOON` array): every upcoming film is
+  clickable to a detail page (`renderSoonDetail`, routed via `cs-*` ids
+  through `renderFilm`). "Let's Go / Meh" excitement vote shows ONLY on
+  films with a trailer. Backed by `excitement_votes` table +
+  `excitement_scores` view — RLS mirrors `person_votes` phase-2 exactly
+  (all-roles read, insert/update require `user_id=auth.uid()`, owner delete);
+  client fns `excitementVote`/`syncExcitement`/`loadAllExcitement`. Verified:
+  forged user_id + bad stance rejected.
+- Transfer (2025, dir. Paul D. Hannah, TMDB 1557378) added to catalog on
+  Tubi with real pinned poster in `WS_POSTERS`; no fake score/votes.
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already
@@ -47,6 +61,19 @@ Open/backlog:
 - Prerender/OG for crawlers (per-film share previews server-side).
 - Data hygiene: a handful of pre-integrity test votes may remain.
 - Vercel Web Analytics dashboard toggle (owner action).
+- More real Tubi Black-culture titles to deepen the shelf (verify each vs
+  TMDB — nothing fake).
+
+## Monetization direction (decided 2026-07-03)
+Owner rule: truest-to-brand, **no non-Black advertising**. That rules out
+ad networks. Pursue, in order: (1) Membership — community-funded, zero ads,
+uses the existing `#/join` page; needs Stripe (NOT authorized in this
+session — hand the owner the key/setup steps). (2) Black-aligned brand
+sponsorships — clearly-labeled "presented by" shelves. (3) Aggregate,
+anonymized audience-sentiment data product for studios/distributors (the
+real moat; privacy-safe, B2B, no consumer ads). Wishlist = My Plate +
+streaming deep-links out; Trakt sync is the only real cross-device path
+(later).
 
 ## Risk tiers for this repo
 Stop and confirm with the owner first:
@@ -65,4 +92,8 @@ docs. Every push deploys production — verify locally (headless Chromium,
 - Match the existing comment voice; comments explain constraints, not diffs.
 - Test-harness gotcha: with Playwright routes, register the catch-all
   `**/rest/v1/**` FIRST and specific routes LAST (last registered wins).
-- Git: develop on `claude/new-session-9aa459` only.
+- Git: develop on `claude/new-session-9aa459` only. The owner also edits
+  from another machine (commits show as "Add files via upload"), so ALWAYS
+  `git fetch origin claude/new-session-9aa459` and check you're not behind
+  BEFORE editing or pushing — otherwise you clobber their work (or hit a
+  non-fast-forward). Re-check right before every push.
