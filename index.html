@@ -4914,15 +4914,29 @@ function wsDevice(){ try{ var d=localStorage.getItem('ws_device'); if(!d){ d=(cr
 /* Upsert this device's vote to Supabase (one row per device per film). No-op if unconfigured. */
 function syncVote(slug,side){
   if(!SUPABASE_URL||!SUPABASE_KEY) return;
-  ensureIdentityThen(function(){
-    try{
-      fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
-        method:'POST',
-        headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
-        body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
-      }).then(function(r){ if(r&&r.status===429){ toast('Whoa — slow down a sec.'); } }).catch(function(){});
-    }catch(e){}
-  });
+  ensureIdentityThen(function(){ voteWrite(slug,side,false); });
+}
+/* The actual write, with one refresh-and-retry so a stale/rotated token can't
+   silently drop the vote, and honest feedback + a re-sync from server truth if
+   it still won't save (so the UI never shows a phantom vote). */
+function voteWrite(slug,side,isRetry){
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/votes?on_conflict=film_slug,device_id',{
+      method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({film_slug:slug,device_id:wsDevice(),stance:side,user_id:myUid()})
+    }).then(function(r){
+      if(!r) return;
+      if(r.ok) return;
+      if(r.status===429){ toast('Whoa — slow down a sec.'); return; }
+      if((r.status===401||r.status===403)&&!isRetry){
+        ensureFreshIdentity().then(function(){ voteWrite(slug,side,true); });   // stale/rotated token → refresh + retry once
+        return;
+      }
+      toast('Couldn’t save your vote — try again in a sec.');
+      loadBackendVotes(slug);   // re-pull server truth so the UI stops showing a vote that didn't land
+    }).catch(function(){ if(isRetry) loadBackendVotes(slug); });
+  }catch(e){}
 }
 /* Pull the live aggregate counts for a film and refresh The Table. No-op if unconfigured. */
 function loadBackendVotes(slug){
@@ -6549,11 +6563,28 @@ function ensureIdentity(){
     .then(function(v){ _identityPromise=null; return v; });
   return _identityPromise;
 }
-/* run fn once we hold a real identity (so the write carries auth.uid()); if
-   anonymous auth is unavailable, run it anyway on the device fallback. */
+/* A token that's actually usable — present AND not expired (30s guard). */
+function sessionFresh(){ return !!(authSession&&authSession.access_token&&(!authSession.expires_at||authSession.expires_at>Date.now()+30000)); }
+/* Guarantee a VALID identity before a write: reuse a fresh session, refresh an
+   expired one, or mint a new anonymous identity. Prevents votes from silently
+   401'ing on a dead JWT (the "my vote didn't stick" bug). */
+function ensureFreshIdentity(){
+  if(!sbConfigured()) return Promise.resolve(false);
+  if(sessionFresh()) return Promise.resolve(true);
+  if(authSession&&authSession.refresh_token){
+    return fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({refresh_token:authSession.refresh_token})})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); return true; } authSession=null; return ensureIdentity(); })
+      .catch(function(){ return ensureIdentity(); });
+  }
+  return ensureIdentity();
+}
+/* run fn once we hold a real, fresh identity (so the write carries auth.uid()
+   with a live token); if anonymous auth is unavailable, run it on the device
+   fallback so voting still works. */
 function ensureIdentityThen(fn){
-  if(haveSession()||!sbConfigured()||_anonDisabled){ fn(); return; }
-  ensureIdentity().then(function(){ fn(); });
+  if(!sbConfigured()||_anonDisabled){ fn(); return; }
+  ensureFreshIdentity().then(function(){ fn(); });
 }
 /* Vote requests must carry the user's JWT when we have one, or RLS rejects the
    user_id as forged. Device-only (no session) keeps working during transition. */
