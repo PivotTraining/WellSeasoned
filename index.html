@@ -5286,12 +5286,14 @@ function renderInbox(){
     '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading…</p></div>';
   inboxLoad();
 }
+/* Admin RPCs authorize on the owner's login (JWT sent via sbUserHeaders) OR the
+   legacy passphrase — so the owner never has to type a passphrase to review. */
+function _adminSecretQuiet(){ try{ return localStorage.getItem('ws_admin_secret')||''; }catch(e){ return ''; } }
 function inboxLoad(){
   var list=byId('inboxList'); if(!list)return;
   if(!sbConfigured()){ list.innerHTML='<p class="hero-lead">Backend not configured.</p>'; return; }
-  var secret=_adminSecret(); if(!secret){ list.innerHTML='<p class="hero-lead">Admin passphrase needed.</p>'; return; }
   list.innerHTML='<p class="hero-lead">Loading…</p>';
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_applications',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:secret})})
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_applications',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(rows){
       rows=rows||[];
@@ -5299,7 +5301,21 @@ function inboxLoad(){
       if(!rows.length){ list.innerHTML='<p class="hero-lead">No applications yet.</p>'; return; }
       list.innerHTML=rows.map(inboxCardHTML).join('');
     })
-    .catch(function(){ try{ localStorage.removeItem('ws_admin_secret'); }catch(_){ } list.innerHTML='<p class="hero-lead">Couldn’t load — check the admin passphrase and <a onclick="inboxLoad()" style="color:var(--gold-ink);cursor:pointer;font-weight:700">try again</a>.</p>'; });
+    .catch(function(){ list.innerHTML='<p class="hero-lead">Couldn’t load. Make sure you’re signed in as the owner, then <a onclick="inboxLoad()" style="color:var(--gold-ink);cursor:pointer;font-weight:700">try again</a>.</p>'; });
+}
+/* Turn a user-entered "site, another-site" / "@handle, url" string into safe,
+   absolute links. Bare domains get https:// prepended so they don't resolve
+   relative to our own host (the "itswellseasoned.com/youtube.com/..." 404).
+   @handles and plain text stay as text. */
+function _extUrl(u){ u=(u||'').replace(/^\s+|\s+$/g,''); if(!u)return ''; return /^https?:\/\//i.test(u)?u:'https://'+u; }
+function _looksUrl(s){ return /^https?:\/\//i.test(s) || /^[\w-]+(\.[\w-]+)+([\/?#].*)?$/.test(s); }
+function linkifyList(str){
+  var parts=String(str||'').split(/[,\n]+/), out=[];
+  for(var i=0;i<parts.length;i++){ var t=parts[i].replace(/^\s+|\s+$/g,''); if(!t)continue;
+    if(_looksUrl(t)) out.push('<a class="ic-link" href="'+esc(_extUrl(t))+'" target="_blank" rel="noopener noreferrer">'+esc(t)+' ↗</a>');
+    else out.push(esc(t));
+  }
+  return out.join(', ');
 }
 function inboxCardHTML(a){
   var role=(a.role==='writer')?'writer':'critic';
@@ -5312,8 +5328,8 @@ function inboxCardHTML(a){
   var bio=a.bio?'<p class="ic-bio">'+esc(a.bio)+'</p>':'';
   var lines=[];
   if(a.outlet) lines.push('<span class="ic-line"><b>'+(role==='writer'?'Beat':'Outlet')+':</b> '+esc(a.outlet)+'</span>');
-  if(a.socials) lines.push('<span class="ic-line"><b>Social:</b> '+esc(a.socials)+'</span>');
-  if(a.work_url) lines.push('<a class="ic-line ic-link" href="'+esc(a.work_url)+'" target="_blank" rel="noopener noreferrer">'+(role==='writer'?'Writing samples':'Their work')+' ↗</a>');
+  if(a.socials) lines.push('<span class="ic-line"><b>Social:</b> '+linkifyList(a.socials)+'</span>');
+  if(a.work_url) lines.push('<span class="ic-line"><b>'+(role==='writer'?'Writing':'Work')+':</b> '+linkifyList(a.work_url)+'</span>');
   var meta=lines.length?'<div class="ic-lines">'+lines.join('')+'</div>':'';
   var eArg=(a.email||'').replace(/'/g,"\\'"), oArg=(a.outlet||'').replace(/'/g,"\\'");
   var seatBtn=role==='critic'
@@ -5333,15 +5349,15 @@ function inboxCardHTML(a){
   '</div>';
 }
 function inboxSetStatus(id,status){
-  if(!sbConfigured())return; var secret=_adminSecret(); if(!secret)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:secret,p_id:id,p_status:status})})
+  if(!sbConfigured())return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_status:status})})
     .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
     .then(function(){ toast('Updated.'); inboxLoad(); })
-    .catch(function(){ toast('Couldn’t update — check the passphrase.'); });
+    .catch(function(){ toast('Couldn’t update — make sure you’re signed in as the owner.'); });
 }
 function inboxSeat(id,email,outlet){
-  if(!sbConfigured())return; var secret=_adminSecret(); if(!secret)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:secret,p_email:email,p_outlet:outlet||null})})
+  if(!sbConfigured())return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(ok){ toast(ok?'Seated. Their reviews now move the Kitchen.':'They need an account with this email first — then seat again.'); inboxLoad(); })
     .catch(function(){ toast('Couldn’t seat — check the passphrase.'); });

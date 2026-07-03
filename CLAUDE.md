@@ -93,8 +93,13 @@ Done and verified live:
   one editorial inbox, human review, nothing bought.
 - Admin applications inbox at `#/inbox` (`renderInbox`/`inboxLoad`/
   `inboxCardHTML`/`inboxSetStatus`/`inboxSeat`, footer "Applications" admin
-  link). Owner-only UI + the admin passphrase (same
-  `app_secrets.curation_admin` as `verify_critic`). Reads every application via
+  link). Owner-only UI. The admin RPCs (`admin_list_applications`,
+  `admin_set_application_status`, `verify_critic`) now authorize on EITHER the
+  owner's login (`auth.jwt()->>'email' = hello@pivottraining.us`, sent via
+  `sbUserHeaders`) OR the legacy passphrase — so the owner reviews/seats with
+  no passphrase prompt. Applicant `work_url`/`socials` render through
+  `linkifyList` (splits on comma, prepends `https://` to bare domains) so a
+  link like `youtube.com/@x` no longer 404s as a relative path. Reads every application via
   SECURITY DEFINER RPC `admin_list_applications(p_secret)` (bypasses the
   own-row RLS only for a verified admin); `admin_set_application_status(
   p_secret,p_id,p_status)` shortlists/passes; critic "Seat" reuses
