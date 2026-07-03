@@ -393,8 +393,12 @@
   .st-field{display:flex;gap:8px;margin:2px 0 14px}
   .st-field input{flex:1;background:var(--paper);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:11px 12px;color:var(--ink);font:inherit;font-size:15px;outline:none}
   .st-theater{border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:10px;background:var(--inset)}
-  .st-theater h4{font-size:15px}
-  .st-theater .st-meta{font-size:12.5px;color:var(--ink-2);margin:2px 0 9px}
+  .st-theater h4{font-size:15.5px;font-weight:800}
+  .st-thead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .st-dir{flex:none;font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--gold-ink);white-space:nowrap}
+  .st-theater .st-meta{font-size:12.5px;color:var(--ink-2);margin:3px 0 9px}
+  .st-head-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .st-day{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--ink-2);text-transform:uppercase}
   .st-times{display:flex;gap:8px;flex-wrap:wrap}
   .st-time{background:var(--panel);border:1px solid var(--line-strong);border-radius:8px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink)}
   .st-time:hover{border-color:var(--gold-ink);color:var(--gold-ink)}
@@ -5188,7 +5192,7 @@ function fetchShowtimes(f,zip){
 function renderRealShowtimes(f,zip,days){
   var d=days[0];
   var fUrl=fandangoUrl(f.title);
-  var head='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
+  var head='<div class="st-head-row"><div class="st-day">'+esc(d.day||'Today')+(d.date?' · '+esc(d.date):'')+' · near '+esc(zip)+'</div>'+
     '<a class="btn btn-gold btn-sm" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">Tickets on Fandango ↗</a></div>';
   var rows=d.theaters.map(function(t){
     var times=[];
@@ -5198,22 +5202,25 @@ function renderRealShowtimes(f,zip,days){
       });
     });
     if(!times.length) return '';
-    return '<div class="st-theater"><h4>'+esc(t.name)+'</h4><div class="st-meta">'+esc(t.distance||'')+(t.distance&&t.address?' · ':'')+esc(t.address||'')+(d.day?' · '+esc(d.day):'')+'</div><div class="st-times">'+times.join('')+'</div></div>';
+    var meta=[]; if(t.distance)meta.push(esc(t.distance)+' away'); if(t.address)meta.push(esc(t.address));
+    var dir=t.address?'<a class="st-dir" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((t.name||'')+' '+(t.address||''))+'" target="_blank" rel="noopener noreferrer">Directions ↗</a>':'';
+    return '<div class="st-theater"><div class="st-thead"><h4>'+esc(t.name||'Theater')+'</h4>'+dir+'</div>'+
+      (meta.length?'<div class="st-meta">'+meta.join(' · ')+'</div>':'')+
+      '<div class="st-times">'+times.join('')+'</div></div>';
   }).join('');
-  return head+rows+'<div class="st-note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Live listings near '+esc(zip)+'. Times link to the theater or Fandango for tickets.</span></div>';
+  return head+rows+'<div class="st-note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Real theaters, addresses, and times pulled live from Google near '+esc(zip)+'. Times open the theater or Fandango for tickets.</span></div>';
 }
+/* Honest fallback — no fabricated theaters (nothing fake). When the live feed
+   has nothing to show, we hand off to the real sources instead of inventing
+   theater names and distances. */
 function sampleShowtimes(f,zip){
-  var chains=[['AMC','1.4 mi'],['Regal','2.2 mi'],['Cinemark','3.1 mi'],['Alamo Drafthouse','4.6 mi']];
-  var slots=['12:40','3:15','5:50','7:20','9:45'];
   var fUrl=fandangoUrl(f.title), gUrl='https://www.google.com/search?q='+encodeURIComponent(f.title+' showtimes '+zip);
-  var real='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
-    '<a class="btn btn-gold btn-sm" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">Tickets on Fandango ↗</a>'+
-    '<a class="btn btn-ghost btn-sm" href="'+gUrl+'" target="_blank" rel="noopener noreferrer">Google showtimes ↗</a></div>';
-  var rows=chains.map(function(c){
-    var t=slots.map(function(s){return '<a class="st-time" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">'+s+'</a>';}).join('');
-    return '<div class="st-theater"><h4>'+c[0]+'</h4><div class="st-meta">'+c[1]+' from '+esc(zip)+' · today</div><div class="st-times">'+t+'</div></div>';
-  }).join('');
-  return real+rows+'<div class="st-note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>The buttons above are live. The theater rows below are sample times until a showtimes provider is connected for exact local listings.</span></div>';
+  return '<div class="empty" style="padding:22px 16px;text-align:left">'+
+    '<h3 style="font-size:18px;margin-bottom:4px">No live showtimes near '+esc(zip)+' right now.</h3>'+
+    '<p style="color:var(--ink-2)">It may be between showings, or not playing in your area today. Check the live sources for exact theaters and times:</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+    '<a class="btn btn-gold btn-sm" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">Fandango ↗</a>'+
+    '<a class="btn btn-ghost btn-sm" href="'+gUrl+'" target="_blank" rel="noopener noreferrer">Google showtimes ↗</a></div></div>';
 }
 
 /* ============ THE VAULT ============ */
@@ -5289,9 +5296,11 @@ function renderArtist(pid){
     (cr.cast||[]).concat((cr.crew||[]).filter(function(c){return c.job==='Director';}))
       .forEach(function(c){
         if(!c.poster_path||seen[c.id])return; seen[c.id]=1;
-        films.push({id:c.id,title:c.title,year:(c.release_date||'').slice(0,4),poster:c.poster_path,pop:c.popularity||0,ch:c.character||(c.job==='Director'?'Director':'')});
+        films.push({id:c.id,title:c.title,year:(c.release_date||'').slice(0,4),poster:c.poster_path,pop:c.popularity||0,vc:c.vote_count||0,ch:c.character||(c.job==='Director'?'Director':'')});
       });
-    films.sort(function(a,b){ return (parseInt(b.year||0,10)-parseInt(a.year||0,10)) || (b.pop-a.pop); });
+    // Lead with their biggest films — most-rated first (signature roles), then
+    // by popularity. Not newest-first, which buried the classics.
+    films.sort(function(a,b){ return (b.vc-a.vc) || (b.pop-a.pop); });
     var data={id:p.id,name:p.name,bio:p.biography||'',photo:p.profile_path||null,dept:p.known_for_department||'',
       birthday:p.birthday||'',place:p.place_of_birth||'',films:films.slice(0,24)};
     cache[pid]=data; savePeopleCache(cache);
