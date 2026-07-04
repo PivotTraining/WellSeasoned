@@ -986,7 +986,16 @@
   .room-card-s{font-size:11px;color:var(--ink-3);margin-top:3px;font-family:var(--mono);letter-spacing:.02em}
   .room-card-m{font-size:12px;color:var(--gold-ink);font-weight:700;margin-top:7px;display:flex;align-items:center;gap:5px}
   /* room page */
-  .room-hero2{position:relative;border-radius:var(--r-lg);background-color:#1a1206;background-size:cover;background-position:center 28%;min-height:172px;display:flex;align-items:flex-end;padding:22px;margin:12px 0 14px;overflow:hidden}
+  /* Each room is wallpapered in the show's art, fixed to fill the viewport;
+     the content column layers on top. The wall lives inside the room view, so
+     it auto-hides when you leave. */
+  .room-wall{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+  .room-wall:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,3,.5) 0,rgba(10,6,3,.34) 26%,rgba(10,6,3,.5) 60%,rgba(10,6,3,.78) 100%)}
+  .room-inner{position:relative;z-index:1}
+  .room-inner .backbtn{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.55)}
+  .room-inner .room-feed-h{color:rgba(255,255,255,.85)}
+  .room-inner .room-feed-h:after{background:rgba(255,255,255,.26)}
+  .room-hero2{position:relative;display:flex;align-items:flex-end;padding:14px 2px 8px;margin:4px 0 14px;min-height:120px}
   .room-hero2-in{position:relative;z-index:1;display:flex;align-items:flex-end;gap:18px;width:100%}
   .room-hero-poster{flex:none;width:78px;aspect-ratio:2/3;object-fit:cover;border-radius:10px;box-shadow:0 6px 20px -6px rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.14)}
   .room-hero2-b{min-width:0}
@@ -4075,11 +4084,11 @@ function sfx(kind){
     var now=ctx.currentTime;
     if(kind==='for'){
       // Seasoned — a bright, upbeat double shake (seasoning going on).
-      _shake(ctx,now,{freq:6400,dur:0.075,gain:0.16,decay:2.0});
-      _shake(ctx,now+0.085,{freq:7300,dur:0.095,gain:0.18,decay:1.7});
+      _shake(ctx,now,{freq:6400,dur:0.11,gain:0.16,decay:1.6});
+      _shake(ctx,now+0.14,{freq:7300,dur:0.14,gain:0.18,decay:1.4});
     } else {
       // Sent it back — a single, softer, lower shake (a light tap of the shaker), no slap.
-      _shake(ctx,now,{freq:3200,dur:0.10,gain:0.13,decay:2.6,q:0.9});
+      _shake(ctx,now,{freq:3200,dur:0.16,gain:0.13,decay:2.0,q:0.9});
     }
   }catch(e){}
 }
@@ -6366,11 +6375,15 @@ function loadRoomCounts(){
 function renderRoom(slug){
   var w=byId('roomContent'), f=find(slug); if(!w)return;
   if(!f){ go('rooms'); return; }
-  var bg=f.backdrop?("background-image:linear-gradient(180deg,rgba(15,10,4,.25),rgba(15,10,4,.82)),url('"+f.backdrop+"')"):('background:'+f.grad);
   var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
+  // Wallpaper the whole page in the show's art (backdrop fills a screen best;
+  // fall back to the poster, then the gradient).
+  var wall=f.backdrop?("background-image:url('"+f.backdrop+"')"):(pos?("background-image:url('"+esc(pos)+"')"):('background:'+f.grad));
   w.innerHTML=
+    '<div class="room-wall" style="'+wall+'"></div>'+
+    '<div class="room-inner">'+
     '<button class="backbtn" onclick="go(\'rooms\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>All chats</button>'+
-    '<div class="room-hero2" style="'+bg+'"><div class="room-hero2-in">'+
+    '<div class="room-hero2"><div class="room-hero2-in">'+
       (pos?'<img class="room-hero-poster" src="'+esc(pos)+'" alt="">':'')+
       '<div class="room-hero2-b">'+
         '<span class="eyebrow" style="color:var(--gold)">The Group Chat'+(f.airing?' <span class="rh-live"><i></i>Live now</span>':'')+'</span>'+
@@ -6391,7 +6404,8 @@ function renderRoom(slug){
         '<button class="btn btn-gold" onclick="postRoom(\''+slug+'\')">Post</button>'+
       '</div>'+
     '</div>'+
-    '<div id="roomFeed" class="room-feed"><p class="hero-lead">Loading the chat…</p></div>';
+    '<div id="roomFeed" class="room-feed"><p class="hero-lead">Loading the chat…</p></div>'+
+    '</div>';
   loadRoomPosts(slug);
 }
 function loadRoomPosts(slug){
