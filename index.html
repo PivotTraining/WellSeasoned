@@ -646,6 +646,9 @@
   .cur-list{max-height:56vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px}
   .cur-row{display:flex;align-items:center;gap:10px;background:var(--inset);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px}
   .cur-row.hid{opacity:.5}
+  .cur-thumb{width:30px;height:45px;flex:none;border-radius:4px;object-fit:cover;background:#241608}
+  .cur-flag{margin-left:auto}
+  .cur-flag.on{color:#b3311a}
   .cur-ttl{flex:1;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cur-ttl em{color:var(--ink-3);font-style:normal;font-family:var(--mono);font-size:11px}
   .cur-seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:99px;overflow:hidden}
@@ -4242,7 +4245,7 @@ function cardPreviewOut(el){
 /* ============ STATE + PERSISTENCE ============ */
 /* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
    app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[]}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
@@ -4259,7 +4262,7 @@ function loadState(){
     var s=JSON.parse(raw);
     app.signedIn=!!s.signedIn; app.name=s.name||''; app.email=s.email||''; app.userId=s.userId||''; app.plate=s.plate||[];
     app.taughtThis=!!s.taughtThis; app.taste=s.taste||null;
-    app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{}};}
+    app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{},flagged:s.curation.flagged||[]};}
     app.votes=s.votes||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{}; app.excitement=s.excitement||{};
     // tallyV:2 marks caches written AFTER the fake seed tallies were purged.
     // Older caches were poisoned by the seeds (e.g. black-panther "5,120") and
@@ -4577,18 +4580,26 @@ function renderCurList(q){
   byId('curList').innerHTML=list.map(curRow).join('')||'<p class="empty-note">No titles match.</p>';
 }
 function curRow(f){
-  var sc=effScope(f), feat=app.curation.featured.indexOf(f.id)>=0, hid=isHidden(f);
+  var sc=effScope(f), feat=app.curation.featured.indexOf(f.id)>=0, hid=isHidden(f), flag=isFlagged(f);
+  var pos=servePoster(f);
   return '<div class="cur-row'+(hid?' hid':'')+'">'+
+    (pos?'<img class="cur-thumb" src="'+esc(pos)+'" alt="" loading="lazy">':'<span class="cur-thumb" style="background:'+f.grad+'"></span>')+
     '<span class="cur-ttl">'+esc(f.title)+' <em>'+f.year+'</em></span>'+
     '<span class="cur-seg"><button class="'+(sc==='ours'?'on':'')+'" onclick="curSetScope(\''+f.id+'\',\'ours\')">Our</button><button class="'+(sc==='all'?'on':'')+'" onclick="curSetScope(\''+f.id+'\',\'all\')">All</button></span>'+
     '<button class="cur-ic'+(feat?' on':'')+'" title="Feature on home" onclick="curToggleFeature(\''+f.id+'\')">★</button>'+
-    '<button class="cur-ic'+(isClassic(f)?' cls':'')+'" title="Grandma\u2019s Recipes / Classic" onclick="curToggleClassic(\''+f.id+'\')">Classic</button>'+
+    '<button class="cur-ic'+(isClassic(f)?' cls':'')+'" title="Grandma’s Recipes / Classic" onclick="curToggleClassic(\''+f.id+'\')">Classic</button>'+
     '<button class="cur-ic hidebtn'+(hid?' on':'')+'" onclick="curToggleHide(\''+f.id+'\')">'+(hid?'Show':'Hide')+'</button>'+
+    '<button class="cur-ic cur-flag'+(flag?' on':'')+'" title="Flag for your own review later — owner-only, not visible to users" onclick="curToggleFlag(\''+f.id+'\')">🚩'+(flag?' Flagged':'')+'</button>'+
   '</div>';
 }
 function curSetScope(id,sc){ app.curation.scope[id]=sc; saveState(); curRefresh(); }
 function curToggleFeature(id){ var a=app.curation.featured,i=a.indexOf(id); if(i>=0)a.splice(i,1); else a.unshift(id); saveState(); curRefresh(); }
 function curToggleHide(id){ var a=app.curation.hidden,i=a.indexOf(id); if(i>=0)a.splice(i,1); else a.push(id); saveState(); curRefresh(); }
+/* Owner-only "needs a second look" marker — e.g. a title sitting in the
+   wrong shelf/genre. Never shown to visitors; purely a note-to-self so you
+   can flag it while browsing curate and come back to a filtered list later. */
+function isFlagged(f){ return app.curation.flagged.indexOf(f.id)>=0; }
+function curToggleFlag(id){ var a=app.curation.flagged,i=a.indexOf(id); if(i>=0)a.splice(i,1); else a.push(id); saveState(); curRefresh(); }
 function exportCuration(){
   var data=JSON.stringify(app.curation,null,2);
   try{ navigator.clipboard.writeText(data); toast('Curation JSON copied to clipboard.'); }
@@ -5101,9 +5112,9 @@ function openSoonTrailer(i){
 /* ============ CURATE PAGE (full catalog management) ============ */
 var CUR_FILTER='all', CUR_SHOWN=120;
 function curFilters(){
-  var tv=0,su=0,feat=app.curation.featured.length,hid=app.curation.hidden.length,ours=0;
+  var tv=0,su=0,feat=app.curation.featured.length,hid=app.curation.hidden.length,ours=0,flag=app.curation.flagged.length;
   FILMS.forEach(function(f){ if(f.type==='tv')tv++; if(f.tags&&f.tags.indexOf('Stand-Up')>=0)su++; if(effScope(f)==='ours')ours++; });
-  return [['all','All',FILMS.length],['ours','Our Films',ours],['tv','Series',tv],['standup','Stand-Up',su],['featured','Featured',feat],['classic','Classics',null],['hidden','Hidden',hid]];
+  return [['all','All',FILMS.length],['ours','Our Films',ours],['tv','Series',tv],['standup','Stand-Up',su],['featured','Featured',feat],['classic','Classics',null],['hidden','Hidden',hid],['flagged','🚩 Flagged',flag]];
 }
 function curPageMatch(f){
   if(CUR_FILTER==='ours')return effScope(f)==='ours';
@@ -5112,6 +5123,7 @@ function curPageMatch(f){
   if(CUR_FILTER==='featured')return app.curation.featured.indexOf(f.id)>=0;
   if(CUR_FILTER==='classic')return isClassic(f);
   if(CUR_FILTER==='hidden')return isHidden(f);
+  if(CUR_FILTER==='flagged')return isFlagged(f);
   return true;
 }
 function curSetFilter(v){ CUR_FILTER=v; CUR_SHOWN=120; renderCurPageList(); }
