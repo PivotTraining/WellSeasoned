@@ -884,10 +884,24 @@
   /* ============ TOAST ============ */
   /* floating expandable legend */
   .legend-dock{position:fixed;right:18px;bottom:20px;z-index:75;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-  .legend-toggle{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--on-dark);border:none;border-radius:999px;padding:9px 15px 9px 10px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;box-shadow:var(--shadow-2)}
+  .legend-toggle{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--on-dark);border:none;border-radius:999px;padding:9px 15px 9px 10px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;box-shadow:var(--shadow-2);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
   .legend-toggle:hover{background:#3a2712}
-  .legend-toggle .lt-ic{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--gold);color:#20160B;font-weight:900;font-size:12px}
-  .legend-panel{width:296px;max-width:calc(100vw - 36px);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:15px 16px 12px;animation:pop .18s ease}
+  .legend-toggle .lt-ic{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--gold);color:#20160B;font-weight:900;font-size:12px;transition:transform .34s cubic-bezier(.34,1.56,.64,1)}
+  .legend-dock.open .legend-toggle{transform:scale(.96)}
+  .legend-dock.open .lt-ic{transform:rotate(315deg)}   /* ? tips toward the swung-open key */
+  /* Key swings open in an arc from the button corner */
+  .legend-panel{width:296px;max-width:calc(100vw - 36px);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:15px 16px 12px;transform-origin:bottom right;animation:keySwing .4s cubic-bezier(.34,1.5,.5,1) both}
+  @keyframes keySwing{
+    0%{opacity:0;transform:translateY(18px) rotate(14deg) scale(.7)}
+    55%{opacity:1;transform:translateY(-5px) rotate(-3deg) scale(1.03)}
+    100%{opacity:1;transform:translateY(0) rotate(0) scale(1)}
+  }
+  .legend-panel .lp-sec{opacity:0;animation:lpRise .3s ease forwards}
+  .legend-panel .lp-sec:nth-child(2){animation-delay:.14s}
+  .legend-panel .lp-sec:nth-child(3){animation-delay:.2s}
+  .legend-panel .lp-sec:nth-child(4){animation-delay:.26s}
+  @keyframes lpRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .legend-panel,.legend-panel .lp-sec{animation:none;opacity:1;transform:none} .lt-ic,.legend-dock.open .legend-toggle{transition:none} }
   .lp-head{display:flex;justify-content:space-between;align-items:center}
   .lp-head b{font-family:var(--display);font-weight:800;font-size:16px}
   .lp-close{background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:16px;line-height:1}
@@ -1378,7 +1392,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="openConnect()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Connect posters</a> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('inbox')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Applications</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('inbox')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Applications</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -4823,7 +4837,6 @@ function renderCuratePage(){
     '<button class="btn btn-ghost btn-sm" onclick="seatCritic()">Seat a critic</button>'+
     '<button class="btn btn-gold btn-sm" onclick="openArticleEditor()">✎ Write a Word</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="go(\'inbox\')">📥 Applications</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="openConnect()">Connect posters</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="adminSubs()">Film submissions</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
     '<div class="curp-chips" id="curpChips"></div><div class="curp-count" id="curpCount"></div>'+
