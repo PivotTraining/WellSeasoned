@@ -177,7 +177,10 @@ Done and verified live:
   auth.uid()` (forged rejected — verified), owner delete. Posting rides
   `ensureIdentityThen`/`sbVoteHeaders` (silent-anon ok). Rooms start empty
   ("be the first") — nothing seeded/fake. To change the lineup edit `ROOMS`.
-  Nav-listed; say the word to unlist for a soft launch.
+  Moderation: `reported bool` on `room_posts`, reads filter `reported=is.false`,
+  a Flag action on others' posts calls `report_room_post(p_id)` (SECURITY
+  DEFINER) — one flag hides the post pending review (mirrors comment reporting);
+  owner deletes own posts. Nav-listed; say the word to unlist for a soft launch.
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already

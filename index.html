@@ -985,6 +985,8 @@
   .rp-top b{font-size:14px;color:var(--ink)}
   .rp-when{font-size:12px;color:var(--ink-3)}
   .rp-del{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:13px;line-height:1}
+  .rp-flag{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:12px;font-weight:600}
+  .rp-flag:hover{color:#b3311a}
   .rp-b p{margin:4px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-break:break-word}
   @media(max-width:640px){ .rooms-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px} .room-hero2-b h1{font-size:24px} }
   .ic-danger{color:#b3311a !important;border-color:rgba(179,49,26,.4) !important}
@@ -6060,7 +6062,7 @@ function renderRoom(slug){
 function loadRoomPosts(slug){
   var feed=byId('roomFeed'); if(!feed)return;
   if(!sbConfigured()){ feed.innerHTML='<p class="hero-lead">The chat needs the backend configured.</p>'; return; }
-  fetch(SUPABASE_URL+'/rest/v1/room_posts?room=eq.'+encodeURIComponent(slug)+'&select=id,name,body,created_at,user_id&order=created_at.desc&limit=100',{headers:sbHeaders()})
+  fetch(SUPABASE_URL+'/rest/v1/room_posts?room=eq.'+encodeURIComponent(slug)+'&reported=is.false&select=id,name,body,created_at,user_id&order=created_at.desc&limit=100',{headers:sbHeaders()})
     .then(function(r){return r.json();}).then(function(rows){
       if(!Array.isArray(rows)){ feed.innerHTML=''; return; }
       if(!rows.length){ feed.innerHTML='<div class="room-empty">No one’s posted yet. <b>Be the first to open the chat.</b></div>'; return; }
@@ -6070,10 +6072,21 @@ function loadRoomPosts(slug){
 function roomPostHTML(p,slug){
   var nm=esc(p.name||'Guest');
   var mine=(myUid()&&p.user_id===myUid());
+  var act=mine
+    ? '<button class="rp-del" onclick="delRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Delete your post">✕</button>'
+    : '<button class="rp-flag" onclick="reportRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Flag this post">Flag</button>';
   return '<div class="room-post"><div class="rp-av">'+esc((p.name||'?').replace(/^\s+/,'').slice(0,1).toUpperCase()||'?')+'</div>'+
-    '<div class="rp-b"><div class="rp-top"><b>'+nm+'</b><span class="rp-when">'+esc(roomAgo(p.created_at))+'</span>'+
-      (mine?'<button class="rp-del" onclick="delRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Delete your post">✕</button>':'')+'</div>'+
+    '<div class="rp-b"><div class="rp-top"><b>'+nm+'</b><span class="rp-when">'+esc(roomAgo(p.created_at))+'</span>'+act+'</div>'+
     '<p>'+esc(p.body)+'</p></div></div>';
+}
+/* Flag a post for review — one flag hides it pending a human look (mirrors the
+   comment report flow). */
+function reportRoomPost(id,slug){
+  if(!window.confirm('Flag this post for review? It’ll be hidden while our team looks.'))return;
+  if(sbConfigured()){
+    try{ fetch(SUPABASE_URL+'/rest/v1/rpc/report_room_post',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_id:id})}).catch(function(){}); }catch(e){}
+  }
+  toast('Thanks — flagged for review.'); loadRoomPosts(slug);
 }
 function postRoom(slug){
   var ta=byId('rmText'), body=ta?ta.value.replace(/^\s+|\s+$/g,''):'';
