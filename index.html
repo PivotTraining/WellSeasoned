@@ -960,6 +960,33 @@
   .ic-link{color:var(--gold-ink);font-weight:700;text-decoration:none}
   .ic-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
   .ic-actions .btn{flex:0 0 auto}
+  /* The Group Chat (community rooms) */
+  .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:18px}
+  .room-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:transform .16s ease,box-shadow .16s ease}
+  .room-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
+  .room-card-img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
+  .room-card-b{padding:10px 12px 12px}
+  .room-card-t{font-weight:800;font-size:15px;line-height:1.15;color:var(--ink)}
+  .room-card-m{font-size:12px;color:var(--gold-ink);font-weight:700;margin-top:3px}
+  .room-hero2{position:relative;border-radius:var(--r-lg);background-color:#1a1206;background-size:cover;background-position:center 30%;min-height:148px;display:flex;align-items:flex-end;padding:20px 22px;margin:12px 0 16px;overflow:hidden}
+  .room-hero2-b{position:relative;z-index:1}
+  .room-hero2-b h1{font-family:var(--display);font-weight:800;font-size:30px;color:#fff;margin:4px 0 2px;text-shadow:0 2px 16px rgba(0,0,0,.6)}
+  .room-hero2-b p{color:rgba(255,255,255,.88);font-size:13.5px}
+  .room-compose{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+  .room-compose textarea{order:1;flex:1 1 100%;background:var(--panel);border:1px solid var(--line-strong);border-radius:12px;padding:11px 13px;font:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;min-height:52px}
+  .room-compose input{order:2;flex:1 1 200px;min-width:150px;background:var(--panel);border:1px solid var(--line-strong);border-radius:999px;padding:10px 14px;font:inherit;color:var(--ink);outline:none}
+  .room-compose .btn{order:3;flex:0 0 auto;align-self:center}
+  .room-feed{display:flex;flex-direction:column;gap:12px}
+  .room-empty{padding:24px;text-align:center;color:var(--ink-2);background:var(--panel);border:1px dashed var(--line-strong);border-radius:var(--r-lg)}
+  .room-post{display:flex;gap:11px;align-items:flex-start}
+  .rp-av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--gold-ink);background:var(--gold-wash,rgba(228,155,11,.16))}
+  .rp-b{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+  .rp-top{display:flex;align-items:center;gap:8px}
+  .rp-top b{font-size:14px;color:var(--ink)}
+  .rp-when{font-size:12px;color:var(--ink-3)}
+  .rp-del{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:13px;line-height:1}
+  .rp-b p{margin:4px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+  @media(max-width:640px){ .rooms-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px} .room-hero2-b h1{font-size:24px} }
   .ic-danger{color:#b3311a !important;border-color:rgba(179,49,26,.4) !important}
   .ic-danger:hover{background:rgba(179,49,26,.08) !important}
   /* Critic agreement (3-step onboarding) */
@@ -1080,7 +1107,7 @@
       <a data-nav="browse" onclick="go('browse')" tabindex="0">Browse</a>
       <a data-nav="ranked" onclick="go('ranked')" tabindex="0">Rankings</a>
       <a data-nav="theaters" onclick="go('theaters')" tabindex="0">In Theaters</a><a data-nav="soon" onclick="go('soon')" tabindex="0">Coming Soon</a>
-      <a data-nav="word" onclick="go('word')" tabindex="0">The Word</a><a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a>
+      <a data-nav="word" onclick="go('word')" tabindex="0">The Word</a><a data-nav="rooms" onclick="go('rooms')" tabindex="0">Group Chat</a><a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a>
       
     </nav>
     <div class="right">
@@ -1280,6 +1307,14 @@
   </section>
   <section class="view" data-view="read" aria-label="Article">
     <div class="wrap" id="readContent"></div>
+  </section>
+
+  <!-- ============ THE GROUP CHAT (community rooms) ============ -->
+  <section class="view" data-view="rooms" aria-label="The Group Chat">
+    <div class="wrap" id="roomsContent"></div>
+  </section>
+  <section class="view" data-view="room" aria-label="Show group chat">
+    <div class="wrap" id="roomContent"></div>
   </section>
 
   <!-- ============ THE BRACKET ============ -->
@@ -4001,7 +4036,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,rooms:1,room:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -4043,6 +4078,8 @@ function render(view,arg){
   else if(view==='legal')renderLegal(arg);
   else if(view==='curate')renderCuratePage();
   else if(view==='inbox')renderInbox();
+  else if(view==='rooms')renderRooms();
+  else if(view==='room')renderRoom(arg);
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   if(view!=='film'&&view!=='legal')applyMetaTags(view);
@@ -5970,6 +6007,97 @@ function postComment(id){
   app.comments[id].unshift(c); f._comments.unshift(c);
   syncComment(id,c); track('comment',{film:id,stance:c.stance});
   byId('cText').value='';byId('cName').value='';renderComments(f);saveState();toast('Posted to The Table.');
+}
+
+/* ============ THE GROUP CHAT (community rooms) ============
+   One board per cult show. Real posts via Supabase room_posts (read-all,
+   insert-as-yourself, owner-delete). A prototype of the "communities for shows
+   with cult followings" idea — zero new cost, rides on the existing backend. */
+var ROOMS=['snowfall','pvalley','the-boondocks','insecure','atlanta','all-the-queens-men','queen-sugar','pose','imdy','queens','survival-of-the-thickest'];
+function roomAgo(ts){ try{ var d=new Date(ts), s=(new Date().getTime()-d.getTime())/1000; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; if(s<604800)return Math.floor(s/86400)+'d ago'; return d.toLocaleDateString(); }catch(e){ return ''; } }
+function renderRooms(){
+  var w=byId('roomsContent'); if(!w)return;
+  var ids=ROOMS.filter(function(id){ return !!find(id); });
+  w.innerHTML='<div class="browse-head"><span class="eyebrow">The Group Chat</span><h1>Find your people.</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every cult show has a group chat. Pull up on the ones you stayed up for — talk your talk, catch the reads, see who else gets it.</p></div>'+
+    '<div class="rooms-grid">'+ids.map(roomCardHTML).join('')+'</div>';
+  loadRoomCounts();
+}
+function roomCardHTML(id){
+  var f=find(id); var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
+  return '<div class="room-card" onclick="go(\'room\',\''+id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'room\',\''+id+'\')">'+
+    (pos?'<img class="room-card-img" src="'+esc(pos)+'" alt="" loading="lazy">':'<div class="room-card-img" style="background:'+f.grad+'"></div>')+
+    '<div class="room-card-b"><div class="room-card-t">'+esc(f.title)+'</div><div class="room-card-m" id="rc-'+id+'">Open the chat →</div></div>'+
+  '</div>';
+}
+function loadRoomCounts(){
+  if(!sbConfigured())return;
+  fetch(SUPABASE_URL+'/rest/v1/room_counts?select=room,posts',{headers:sbHeaders()})
+    .then(function(r){return r.json();}).then(function(rows){
+      if(!Array.isArray(rows))return;
+      rows.forEach(function(r){ var el=byId('rc-'+r.room); if(el&&r.posts) el.textContent=r.posts+' post'+(r.posts===1?'':'s')+' · jump in'; });
+    }).catch(function(){});
+}
+function renderRoom(slug){
+  var w=byId('roomContent'), f=find(slug); if(!w)return;
+  if(!f){ go('rooms'); return; }
+  var bg=f.backdrop?("background-image:linear-gradient(180deg,rgba(15,10,4,.25),rgba(15,10,4,.82)),url('"+f.backdrop+"')"):('background:'+f.grad);
+  w.innerHTML=
+    '<button class="backbtn" onclick="go(\'rooms\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>All chats</button>'+
+    '<div class="room-hero2" style="'+bg+'"><div class="room-hero2-b">'+
+      '<span class="eyebrow" style="color:var(--gold)">The Group Chat</span>'+
+      '<h1>'+esc(f.title)+'</h1>'+
+      '<p>'+(f.type==='tv'?'Series':'Film')+(f.dir&&f.dir!=='—'?' · '+esc(f.dir):'')+' · '+f.year+' &nbsp;·&nbsp; <a onclick="go(\'film\',\''+slug+'\')" style="color:#fff;text-decoration:underline;cursor:pointer">film page ↗</a></p>'+
+    '</div></div>'+
+    '<div class="room-compose">'+
+      '<input id="rmName" placeholder="Your name (optional)" value="'+esc(app.name||'')+'" aria-label="Your name">'+
+      '<textarea id="rmText" rows="2" placeholder="Say something about '+esc(f.title)+'…" aria-label="Your message"></textarea>'+
+      '<button class="btn btn-gold" onclick="postRoom(\''+slug+'\')">Post</button>'+
+    '</div>'+
+    '<div id="roomFeed" class="room-feed"><p class="hero-lead">Loading the chat…</p></div>';
+  loadRoomPosts(slug);
+}
+function loadRoomPosts(slug){
+  var feed=byId('roomFeed'); if(!feed)return;
+  if(!sbConfigured()){ feed.innerHTML='<p class="hero-lead">The chat needs the backend configured.</p>'; return; }
+  fetch(SUPABASE_URL+'/rest/v1/room_posts?room=eq.'+encodeURIComponent(slug)+'&select=id,name,body,created_at,user_id&order=created_at.desc&limit=100',{headers:sbHeaders()})
+    .then(function(r){return r.json();}).then(function(rows){
+      if(!Array.isArray(rows)){ feed.innerHTML=''; return; }
+      if(!rows.length){ feed.innerHTML='<div class="room-empty">No one’s posted yet. <b>Be the first to open the chat.</b></div>'; return; }
+      feed.innerHTML=rows.map(function(p){ return roomPostHTML(p,slug); }).join('');
+    }).catch(function(){ feed.innerHTML='<p class="hero-lead">Couldn’t load the chat — <a onclick="loadRoomPosts(\''+slug+'\')" style="color:var(--gold-ink);cursor:pointer;font-weight:700">try again</a>.</p>'; });
+}
+function roomPostHTML(p,slug){
+  var nm=esc(p.name||'Guest');
+  var mine=(myUid()&&p.user_id===myUid());
+  return '<div class="room-post"><div class="rp-av">'+esc((p.name||'?').replace(/^\s+/,'').slice(0,1).toUpperCase()||'?')+'</div>'+
+    '<div class="rp-b"><div class="rp-top"><b>'+nm+'</b><span class="rp-when">'+esc(roomAgo(p.created_at))+'</span>'+
+      (mine?'<button class="rp-del" onclick="delRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Delete your post">✕</button>':'')+'</div>'+
+    '<p>'+esc(p.body)+'</p></div></div>';
+}
+function postRoom(slug){
+  var ta=byId('rmText'), body=ta?ta.value.replace(/^\s+|\s+$/g,''):'';
+  if(!body){ toast('Type something first.'); if(ta)ta.focus(); return; }
+  if(body.length>2000){ toast('Keep it under 2000 characters.'); return; }
+  if(!sbConfigured()){ toast('Backend not configured.'); return; }
+  var name=(byId('rmName')&&byId('rmName').value.replace(/^\s+|\s+$/g,''))||app.name||'Guest';
+  ensureIdentityThen(function(){
+    fetch(SUPABASE_URL+'/rest/v1/room_posts',{method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify({room:slug,name:name,body:body,user_id:myUid()})})
+      .then(function(r){
+        if(!r) return;
+        if(r.ok){ if(ta)ta.value=''; track('room_post',{room:slug}); loadRoomPosts(slug); return; }
+        if(r.status===429){ toast('Whoa — slow down a sec.'); return; }
+        toast('Could not post — try again.');
+      }).catch(function(){ toast('Network error — try again.'); });
+  });
+}
+function delRoomPost(id,slug){
+  if(!window.confirm('Delete your post?'))return;
+  fetch(SUPABASE_URL+'/rest/v1/room_posts?id=eq.'+encodeURIComponent(id),{method:'DELETE',
+    headers:sbVoteHeaders({'Prefer':'return=minimal'})})
+    .then(function(){ loadRoomPosts(slug); }).catch(function(){ toast('Couldn’t delete — try again.'); });
 }
 
 /* ============ TRUST / REPORT ============ */

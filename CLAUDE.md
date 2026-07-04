@@ -168,6 +168,17 @@ Done and verified live:
   renders the photo (initial-letter fallback) + bio as a real byline. No fake
   data — only shows once a real critic is seated and posts.
 
+- The Group Chat (community rooms) — PROTOTYPE. Per-show discussion boards for
+  cult titles. Views `#/rooms` (index) + `#/room/<slug>` (`renderRooms`/
+  `roomCardHTML`/`renderRoom`/`loadRoomPosts`/`roomPostHTML`/`postRoom`/
+  `delRoomPost`, `ROOMS` list, `.room-*` CSS). Nav link "Group Chat". Backed by
+  `room_posts` (Supabase, free tier — no new cost) + `room_counts` view. Same
+  integrity model as votes/comments: read-all, insert only as `user_id =
+  auth.uid()` (forged rejected — verified), owner delete. Posting rides
+  `ensureIdentityThen`/`sbVoteHeaders` (silent-anon ok). Rooms start empty
+  ("be the first") — nothing seeded/fake. To change the lineup edit `ROOMS`.
+  Nav-listed; say the word to unlist for a soft launch.
+
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already
   built (`forgotPassword` → `/recover` → `checkRecoveryHash`). Waiting on
