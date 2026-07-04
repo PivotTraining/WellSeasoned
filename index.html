@@ -883,14 +883,14 @@
 
   /* ============ TOAST ============ */
   /* floating expandable legend */
-  .legend-dock{position:fixed;right:18px;bottom:20px;z-index:75;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .legend-dock{position:fixed;right:18px;bottom:20px;z-index:90;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
   .legend-toggle{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--on-dark);border:none;border-radius:999px;padding:9px 15px 9px 10px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;box-shadow:var(--shadow-2);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
   .legend-toggle:hover{background:#3a2712}
   .legend-toggle .lt-ic{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--gold);color:#20160B;font-weight:900;font-size:12px;transition:transform .34s cubic-bezier(.34,1.56,.64,1)}
   .legend-dock.open .legend-toggle{transform:scale(.96)}
   .legend-dock.open .lt-ic{transform:rotate(315deg)}   /* ? tips toward the swung-open key */
   /* Key swings open in an arc from the button corner */
-  .legend-panel{width:296px;max-width:calc(100vw - 36px);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:15px 16px 12px;transform-origin:bottom right;animation:keySwing .4s cubic-bezier(.34,1.5,.5,1) both}
+  .legend-panel{width:296px;max-width:calc(100vw - 36px);max-height:calc(100vh - 92px);max-height:calc(100dvh - 92px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:15px 16px 12px;transform-origin:bottom right;animation:keySwing .4s cubic-bezier(.34,1.5,.5,1) both}
   @keyframes keySwing{
     0%{opacity:0;transform:translateY(18px) rotate(14deg) scale(.7)}
     55%{opacity:1;transform:translateY(-5px) rotate(-3deg) scale(1.03)}
@@ -902,7 +902,7 @@
   .legend-panel .lp-sec:nth-child(4){animation-delay:.26s}
   @keyframes lpRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){ .legend-panel,.legend-panel .lp-sec{animation:none;opacity:1;transform:none} .lt-ic,.legend-dock.open .legend-toggle{transition:none} }
-  .lp-head{display:flex;justify-content:space-between;align-items:center}
+  .lp-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-15px;margin:-15px -16px 0;padding:15px 16px 8px;background:var(--panel);z-index:2}
   .lp-head b{font-family:var(--display);font-weight:800;font-size:16px}
   .lp-close{background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:16px;line-height:1}
   .lp-sec{margin-top:12px}
@@ -1036,6 +1036,8 @@
     main{padding-bottom:calc(var(--tab-h) + 30px)}
     .toast-wrap{bottom:calc(var(--tab-h) + 16px)}
     .legend-dock{bottom:calc(var(--tab-h) + 14px);right:14px}
+    /* dock rides above the mobile tab bar, so reserve that too or the key's top clips off-screen */
+    .legend-panel{max-height:calc(100vh - var(--tab-h) - 76px);max-height:calc(100dvh - var(--tab-h) - 76px)}
     .mosaic{grid-template-columns:repeat(4,1fr);gap:12px}
     .film-hero{grid-template-columns:1fr;gap:18px}
     .film-poster{max-width:220px}
