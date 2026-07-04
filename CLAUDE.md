@@ -226,6 +226,18 @@ docs. Every push deploys production — verify locally (headless Chromium,
   `node scripts/build-films-json.cjs` (zero-dep; adds missing films to
   `api/films.json` + backfills posters, so every title has a `/f/<id>` preview).
 - ES5 only in `index.html` (no arrow functions, template literals, let/const).
+- Catalog identity is **title+year**, never title alone — remakes/series
+  legitimately coexist (Shaft ’71/’00/’19, Roots ’77/’16, Color Purple
+  ’85/’23, She’s Gotta Have It film/series). A title-only dedup once deleted
+  seven real films and blanked The Vault via a dangling id in `VAULT`. Before
+  removing any FILMS entry, grep the whole file for its quoted id — shelf
+  arrays (VAULT/FEATURED/ROOMS/WATCH_250/FREEDOM_FILMS), debates, WS_POSTERS,
+  WS_TRAILERS, and the ratings map all reference ids by string.
+- Vote tallies are NEVER baked into FILMS (`votes:{for:0,against:0}` always).
+  The server is the only source of truth: `loadAllBackendVotes` resets every
+  film not present in `vote_counts` (a film absent from the view has zero
+  votes), and persisted `app.tally` caches carry `tallyV:2` — older caches
+  were poisoned by the fake-seed era and are dropped on load.
 - Match the existing comment voice; comments explain constraints, not diffs.
 - Test-harness gotcha: with Playwright routes, register the catch-all
   `**/rest/v1/**` FIRST and specific routes LAST (last registered wins).
