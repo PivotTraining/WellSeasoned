@@ -4054,23 +4054,32 @@ function animateAura(root){
 
 /* ============ VOTE FEEDBACK (sprinkle + sound) ============ */
 var _actx=null;
+/* One shake of the spice shaker: a burst of filtered noise with a fast attack
+   and quick rattly decay. Chain a couple for a "cha-cha" shake. On brand — you
+   season a plate by shaking it, so casting a vote sounds like exactly that. */
+function _shake(ctx,t,o){
+  var dur=o.dur||0.08, len=Math.floor(ctx.sampleRate*dur), buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+  var dec=o.decay||2.2, atk=Math.floor(len*0.06);
+  for(var i=0;i<len;i++){ var env=(i<atk?i/atk:Math.pow(1-(i-atk)/(len-atk),dec)); d[i]=(Math.random()*2-1)*env; }
+  var src=ctx.createBufferSource(); src.buffer=buf;
+  var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=o.freq||6200; bp.Q.value=o.q||1.1;
+  var hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=(o.freq||6200)*0.45;
+  var g=ctx.createGain(); g.gain.value=o.gain||0.15;
+  src.connect(bp); bp.connect(hp); hp.connect(g); g.connect(ctx.destination); src.start(t);
+}
 function sfx(kind){
   if(app.sound===false)return;
   try{
     if(!_actx)_actx=new (window.AudioContext||window.webkitAudioContext)();
-    var ctx=_actx, now=ctx.currentTime;
+    var ctx=_actx; if(ctx.state==='suspended'&&ctx.resume)ctx.resume();
+    var now=ctx.currentTime;
     if(kind==='for'){
-      var len=Math.floor(ctx.sampleRate*0.19), buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
-      for(var i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.7); }
-      var src=ctx.createBufferSource(); src.buffer=buf;
-      var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=3400; bp.Q.value=0.7;
-      var g=ctx.createGain(); g.gain.value=0.16;
-      src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start();
+      // Seasoned — a bright, upbeat double shake (seasoning going on).
+      _shake(ctx,now,{freq:6400,dur:0.075,gain:0.16,decay:2.0});
+      _shake(ctx,now+0.085,{freq:7300,dur:0.095,gain:0.18,decay:1.7});
     } else {
-      var o=ctx.createOscillator(), g2=ctx.createGain();
-      o.type='sine'; o.frequency.setValueAtTime(190,now); o.frequency.exponentialRampToValueAtTime(72,now+0.18);
-      g2.gain.setValueAtTime(0.0001,now); g2.gain.exponentialRampToValueAtTime(0.22,now+0.02); g2.gain.exponentialRampToValueAtTime(0.0001,now+0.22);
-      o.connect(g2); g2.connect(ctx.destination); o.start(now); o.stop(now+0.24);
+      // Sent it back — a single, softer, lower shake (a light tap of the shaker), no slap.
+      _shake(ctx,now,{freq:3200,dur:0.10,gain:0.13,decay:2.6,q:0.9});
     }
   }catch(e){}
 }
