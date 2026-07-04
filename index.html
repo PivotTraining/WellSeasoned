@@ -961,35 +961,63 @@
   .ic-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
   .ic-actions .btn{flex:0 0 auto}
   /* The Group Chat (community rooms) */
-  .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:18px}
+  .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:18px;margin-top:20px}
   .rooms-empty{margin-top:22px;color:var(--ink-2);font-size:14.5px}
-  .room-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:transform .16s ease,box-shadow .16s ease}
-  .room-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
-  .room-card-img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
-  .room-card-b{padding:10px 12px 12px}
-  .room-card-t{font-weight:800;font-size:15px;line-height:1.15;color:var(--ink)}
-  .room-card-m{font-size:12px;color:var(--gold-ink);font-weight:700;margin-top:3px}
-  .room-hero2{position:relative;border-radius:var(--r-lg);background-color:#1a1206;background-size:cover;background-position:center 30%;min-height:148px;display:flex;align-items:flex-end;padding:20px 22px;margin:12px 0 16px;overflow:hidden}
-  .room-hero2-b{position:relative;z-index:1}
-  .room-hero2-b h1{font-family:var(--display);font-weight:800;font-size:30px;color:#fff;margin:4px 0 2px;text-shadow:0 2px 16px rgba(0,0,0,.6)}
-  .room-hero2-b p{color:rgba(255,255,255,.88);font-size:13.5px}
-  .room-compose{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
-  .room-compose textarea{order:1;flex:1 1 100%;background:var(--panel);border:1px solid var(--line-strong);border-radius:12px;padding:11px 13px;font:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;min-height:52px}
-  .room-compose input{order:2;flex:1 1 200px;min-width:150px;background:var(--panel);border:1px solid var(--line-strong);border-radius:999px;padding:10px 14px;font:inherit;color:var(--ink);outline:none}
-  .room-compose .btn{order:3;flex:0 0 auto;align-self:center}
-  .room-feed{display:flex;flex-direction:column;gap:12px}
-  .room-empty{padding:24px;text-align:center;color:var(--ink-2);background:var(--panel);border:1px dashed var(--line-strong);border-radius:var(--r-lg)}
+  .room-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:transform .18s cubic-bezier(.34,1.4,.6,1),box-shadow .18s ease,border-color .18s ease}
+  .room-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3);border-color:var(--line-strong)}
+  .room-card-ph{position:relative;overflow:hidden}
+  .room-card-img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;transition:transform .4s ease}
+  .room-card:hover .room-card-img{transform:scale(1.045)}
+  .room-card-ph:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,2,0) 55%,rgba(10,6,2,.42));pointer-events:none}
+  .room-live{position:absolute;top:9px;left:9px;z-index:2;background:rgba(18,10,6,.66);backdrop-filter:blur(5px);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px 4px 7px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+  .room-live i{width:6px;height:6px;border-radius:50%;background:#ff4b4b;animation:livePulse 1.7s infinite}
+  @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(255,75,75,.65)}70%{box-shadow:0 0 0 6px rgba(255,75,75,0)}100%{box-shadow:0 0 0 0 rgba(255,75,75,0)}}
+  .room-card-b{padding:11px 13px 13px}
+  .room-card-t{font-weight:800;font-size:15px;line-height:1.16;color:var(--ink)}
+  .room-card-s{font-size:11px;color:var(--ink-3);margin-top:3px;font-family:var(--mono);letter-spacing:.02em}
+  .room-card-m{font-size:12px;color:var(--gold-ink);font-weight:700;margin-top:7px;display:flex;align-items:center;gap:5px}
+  /* room page */
+  .room-hero2{position:relative;border-radius:var(--r-lg);background-color:#1a1206;background-size:cover;background-position:center 28%;min-height:172px;display:flex;align-items:flex-end;padding:22px;margin:12px 0 14px;overflow:hidden}
+  .room-hero2-in{position:relative;z-index:1;display:flex;align-items:flex-end;gap:18px;width:100%}
+  .room-hero-poster{flex:none;width:78px;aspect-ratio:2/3;object-fit:cover;border-radius:10px;box-shadow:0 6px 20px -6px rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.14)}
+  .room-hero2-b{min-width:0}
+  .room-hero2-b .eyebrow{display:inline-flex;align-items:center;gap:8px}
+  .rh-live{display:inline-flex;align-items:center;gap:5px;color:#ff8a8a;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em}
+  .rh-live i{width:6px;height:6px;border-radius:50%;background:#ff4b4b;animation:livePulse 1.7s infinite}
+  .room-hero2-b h1{font-family:var(--display);font-weight:800;font-size:30px;color:#fff;margin:5px 0 3px;text-shadow:0 2px 16px rgba(0,0,0,.6);line-height:1.05}
+  .room-hero2-b p{color:rgba(255,255,255,.9);font-size:13px}
+  .room-hero2-b p a{color:#fff;text-decoration:underline;cursor:pointer}
+  /* house rules strip — sets the culture, gives the room structure */
+  .room-rules{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+  .room-rules span{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-2)}
+  /* compose */
+  .room-compose{background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--r-lg);padding:12px;margin-bottom:22px;box-shadow:var(--shadow-1,0 1px 2px rgba(40,22,6,.05))}
+  .room-compose textarea{display:block;width:100%;background:transparent;border:none;padding:4px 4px 2px;font:inherit;font-size:15.5px;color:var(--ink);outline:none;resize:vertical;min-height:48px;line-height:1.5}
+  .rc-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
+  .rc-foot input{flex:1 1 160px;min-width:130px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-size:13.5px;color:var(--ink);outline:none}
+  .rc-foot input:focus{border-color:var(--gold)}
+  .rc-hint{font-size:11.5px;color:var(--ink-3);flex:1 1 auto}
+  .rc-foot .btn{flex:0 0 auto;padding:9px 22px}
+  /* feed */
+  .room-feed-h{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 2px 12px;display:flex;align-items:center;gap:8px}
+  .room-feed-h:after{content:"";flex:1;height:1px;background:var(--line)}
+  .room-feed{display:flex;flex-direction:column;gap:14px}
+  .room-empty{padding:30px 24px;text-align:center;color:var(--ink-2);background:var(--panel);border:1px dashed var(--line-strong);border-radius:var(--r-lg);font-size:15px}
   .room-post{display:flex;gap:11px;align-items:flex-start}
-  .rp-av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--gold-ink);background:var(--gold-wash,rgba(228,155,11,.16))}
-  .rp-b{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+  .rp-av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .rp-b{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:11px 14px;transition:border-color .16s ease}
+  .rp-b:hover{border-color:var(--line-strong)}
+  .room-post.rp-mine .rp-b{background:var(--gold-wash,rgba(228,155,11,.1));border-color:rgba(228,155,11,.34)}
   .rp-top{display:flex;align-items:center;gap:8px}
   .rp-top b{font-size:14px;color:var(--ink)}
+  .rp-you{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);background:rgba(228,155,11,.16);padding:2px 6px;border-radius:999px}
   .rp-when{font-size:12px;color:var(--ink-3)}
-  .rp-del{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:13px;line-height:1}
+  .rp-del{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;border-radius:6px}
+  .rp-del:hover{color:#b3311a;background:rgba(179,49,26,.08)}
   .rp-flag{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:12px;font-weight:600}
   .rp-flag:hover{color:#b3311a}
-  .rp-b p{margin:4px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-break:break-word}
-  @media(max-width:640px){ .rooms-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px} .room-hero2-b h1{font-size:24px} }
+  .rp-b p{margin:4px 0 0;font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+  @media(max-width:640px){ .rooms-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:13px} .room-hero2-b h1{font-size:23px} .room-hero-poster{width:60px} .rc-hint{display:none} }
   .ic-danger{color:#b3311a !important;border-color:rgba(179,49,26,.4) !important}
   .ic-danger:hover{background:rgba(179,49,26,.08) !important}
   /* Critic agreement (3-step onboarding) */
@@ -6050,9 +6078,15 @@ function renderRooms(){
 }
 function roomCardHTML(id){
   var f=find(id); var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
-  return '<div class="room-card" onclick="go(\'room\',\''+id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'room\',\''+id+'\')">'+
-    (pos?'<img class="room-card-img" src="'+esc(pos)+'" alt="" loading="lazy">':'<div class="room-card-img" style="background:'+f.grad+'"></div>')+
-    '<div class="room-card-b"><div class="room-card-t">'+esc(f.title)+'</div><div class="room-card-m" id="rc-'+id+'">Open the chat →</div></div>'+
+  var sub=[(f.where&&f.where[0])?f.where[0]:'', f.rt].filter(function(x){return !!x;}).join(' · ');
+  return '<div class="room-card'+(f.airing?' live':'')+'" onclick="go(\'room\',\''+id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'room\',\''+id+'\')">'+
+    '<div class="room-card-ph">'+
+      (pos?'<img class="room-card-img" src="'+esc(pos)+'" alt="" loading="lazy">':'<div class="room-card-img" style="background:'+f.grad+'"></div>')+
+      (f.airing?'<span class="room-live"><i></i>Live</span>':'')+
+    '</div>'+
+    '<div class="room-card-b"><div class="room-card-t">'+esc(f.title)+'</div>'+
+      (sub?'<div class="room-card-s">'+esc(sub)+'</div>':'')+
+      '<div class="room-card-m" id="rc-'+id+'">Open the chat →</div></div>'+
   '</div>';
 }
 function loadRoomCounts(){
@@ -6078,17 +6112,29 @@ function renderRoom(slug){
   var w=byId('roomContent'), f=find(slug); if(!w)return;
   if(!f){ go('rooms'); return; }
   var bg=f.backdrop?("background-image:linear-gradient(180deg,rgba(15,10,4,.25),rgba(15,10,4,.82)),url('"+f.backdrop+"')"):('background:'+f.grad);
+  var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
   w.innerHTML=
     '<button class="backbtn" onclick="go(\'rooms\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>All chats</button>'+
-    '<div class="room-hero2" style="'+bg+'"><div class="room-hero2-b">'+
-      '<span class="eyebrow" style="color:var(--gold)">The Group Chat</span>'+
-      '<h1>'+esc(f.title)+'</h1>'+
-      '<p>'+(f.type==='tv'?'Series':'Film')+(f.dir&&f.dir!=='—'?' · '+esc(f.dir):'')+' · '+f.year+' &nbsp;·&nbsp; <a onclick="go(\'film\',\''+slug+'\')" style="color:#fff;text-decoration:underline;cursor:pointer">film page ↗</a></p>'+
+    '<div class="room-hero2" style="'+bg+'"><div class="room-hero2-in">'+
+      (pos?'<img class="room-hero-poster" src="'+esc(pos)+'" alt="">':'')+
+      '<div class="room-hero2-b">'+
+        '<span class="eyebrow" style="color:var(--gold)">The Group Chat'+(f.airing?' <span class="rh-live"><i></i>Live now</span>':'')+'</span>'+
+        '<h1>'+esc(f.title)+'</h1>'+
+        '<p>'+(f.type==='tv'?'Series':'Film')+(f.dir&&f.dir!=='—'?' · '+esc(f.dir):'')+' · '+f.year+' &nbsp;·&nbsp; <a onclick="go(\'film\',\''+slug+'\')">film page ↗</a></p>'+
+      '</div>'+
     '</div></div>'+
+    '<div class="room-rules">'+
+      '<span>💬 Talk your talk</span>'+
+      '<span>🔇 Spoilers? Tag ’em</span>'+
+      '<span>🛡️ No hate — flagged posts get pulled</span>'+
+    '</div>'+
     '<div class="room-compose">'+
-      '<input id="rmName" placeholder="Your name (optional)" value="'+esc(app.name||'')+'" aria-label="Your name">'+
       '<textarea id="rmText" rows="2" placeholder="Say something about '+esc(f.title)+'…" aria-label="Your message"></textarea>'+
-      '<button class="btn btn-gold" onclick="postRoom(\''+slug+'\')">Post</button>'+
+      '<div class="rc-foot">'+
+        '<input id="rmName" placeholder="Your name (optional)" value="'+esc(app.name||'')+'" aria-label="Your name">'+
+        '<span class="rc-hint">Be real. Be kind. This is the culture.</span>'+
+        '<button class="btn btn-gold" onclick="postRoom(\''+slug+'\')">Post</button>'+
+      '</div>'+
     '</div>'+
     '<div id="roomFeed" class="room-feed"><p class="hero-lead">Loading the chat…</p></div>';
   loadRoomPosts(slug);
@@ -6100,17 +6146,21 @@ function loadRoomPosts(slug){
     .then(function(r){return r.json();}).then(function(rows){
       if(!Array.isArray(rows)){ feed.innerHTML=''; return; }
       if(!rows.length){ feed.innerHTML='<div class="room-empty">No one’s posted yet. <b>Be the first to open the chat.</b></div>'; return; }
-      feed.innerHTML=rows.map(function(p){ return roomPostHTML(p,slug); }).join('');
+      feed.innerHTML='<div class="room-feed-h">'+rows.length+' post'+(rows.length===1?'':'s')+'</div>'+rows.map(function(p){ return roomPostHTML(p,slug); }).join('');
     }).catch(function(){ feed.innerHTML='<p class="hero-lead">Couldn’t load the chat — <a onclick="loadRoomPosts(\''+slug+'\')" style="color:var(--gold-ink);cursor:pointer;font-weight:700">try again</a>.</p>'; });
 }
+/* Deterministic avatar color from the poster's name — so the same person
+   keeps the same color and the feed reads as distinct voices. */
+function roomAvColor(s){ var pal=['#C6462E','#B8842A','#2E7D5B','#3A6EA5','#8A4FA3','#B03060','#5A6B2E','#A0532A']; var h=0,i; s=s||'?'; for(i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return pal[h%pal.length]; }
 function roomPostHTML(p,slug){
   var nm=esc(p.name||'Guest');
   var mine=(myUid()&&p.user_id===myUid());
+  var init=esc((p.name||'?').replace(/^\s+/,'').slice(0,1).toUpperCase()||'?');
   var act=mine
     ? '<button class="rp-del" onclick="delRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Delete your post">✕</button>'
     : '<button class="rp-flag" onclick="reportRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Flag this post">Flag</button>';
-  return '<div class="room-post"><div class="rp-av">'+esc((p.name||'?').replace(/^\s+/,'').slice(0,1).toUpperCase()||'?')+'</div>'+
-    '<div class="rp-b"><div class="rp-top"><b>'+nm+'</b><span class="rp-when">'+esc(roomAgo(p.created_at))+'</span>'+act+'</div>'+
+  return '<div class="room-post'+(mine?' rp-mine':'')+'"><div class="rp-av" style="background:'+roomAvColor(p.name||'Guest')+'">'+init+'</div>'+
+    '<div class="rp-b"><div class="rp-top"><b>'+nm+'</b>'+(mine?'<span class="rp-you">You</span>':'')+'<span class="rp-when">'+esc(roomAgo(p.created_at))+'</span>'+act+'</div>'+
     '<p>'+esc(p.body)+'</p></div></div>';
 }
 /* Flag a post for review — one flag hides it pending a human look (mirrors the
