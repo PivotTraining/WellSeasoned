@@ -312,3 +312,32 @@ begin
 end $$;
 revoke all on function public.verify_critic(text, text, text, boolean) from public;
 grant execute on function public.verify_critic(text, text, text, boolean) to anon, authenticated;
+
+-- ============================================================
+-- BACKEND HARDENING (2026-07-04) — applied live as migrations
+-- harden_debate_votes_phase2, room_posts_hide_reported_server_side,
+-- pin_touch_vote_search_path; kept here for parity.
+-- ============================================================
+-- debate_votes joins the phase-2 model: writes only as yourself (the
+-- legacy "user_id IS NULL" allowance was never used — zero null rows),
+-- and one vote per identity per matchup is enforced server-side (the
+-- client's localStorage guard clears too easily).
+drop policy if exists debate_votes_insert on public.debate_votes;
+drop policy if exists debate_votes_update_own on public.debate_votes;
+create policy debate_votes_insert on public.debate_votes
+  for insert to public with check (user_id = auth.uid());
+create policy debate_votes_update_own on public.debate_votes
+  for update to public using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy debate_votes_delete_own on public.debate_votes
+  for delete to public using (user_id = auth.uid());
+create unique index if not exists debate_votes_one_per_identity
+  on public.debate_votes (debate_id, user_id);
+
+-- Flagged room posts are hidden at the policy layer, not just by the
+-- client filter (mirrors comments_read).
+drop policy if exists room_read on public.room_posts;
+create policy room_read on public.room_posts
+  for select to public using (reported = false);
+
+-- Pin the trigger function's search_path (linter 0011).
+alter function public.touch_vote() set search_path = public;
