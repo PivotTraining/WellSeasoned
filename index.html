@@ -649,6 +649,8 @@
   .cur-thumb{width:30px;height:45px;flex:none;border-radius:4px;object-fit:cover;background:#241608}
   .cur-flag{margin-left:auto}
   .cur-flag.on{color:#b3311a}
+  .cur-genre{flex:none;max-width:140px;background:var(--paper);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:5px 8px;font:inherit;font-size:12px;color:var(--ink-2);outline:none}
+  .cur-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 12px}
   .cur-ttl{flex:1;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cur-ttl em{color:var(--ink-3);font-style:normal;font-family:var(--mono);font-size:11px}
   .cur-seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:99px;overflow:hidden}
@@ -1424,12 +1426,6 @@
     </div>
   </section>
 
-  <section class="view" data-view="inbox" aria-label="Contributor applications">
-    <div class="wrap" style="padding-top:26px">
-      <div id="inboxWrap"></div>
-    </div>
-  </section>
-
   <section class="view" data-view="legal" aria-label="Legal">
     <div class="wrap" id="legalContent"></div>
   </section>
@@ -1504,7 +1500,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('inbox')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Applications</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -4245,7 +4241,7 @@ function cardPreviewOut(el){
 /* ============ STATE + PERSISTENCE ============ */
 /* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
    app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[]}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
@@ -4262,7 +4258,7 @@ function loadState(){
     var s=JSON.parse(raw);
     app.signedIn=!!s.signedIn; app.name=s.name||''; app.email=s.email||''; app.userId=s.userId||''; app.plate=s.plate||[];
     app.taughtThis=!!s.taughtThis; app.taste=s.taste||null;
-    app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{},flagged:s.curation.flagged||[]};}
+    app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{},flagged:s.curation.flagged||[],genre:s.curation.genre||{}};}
     app.votes=s.votes||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{}; app.excitement=s.excitement||{};
     // tallyV:2 marks caches written AFTER the fake seed tallies were purged.
     // Older caches were poisoned by the seeds (e.g. black-panther "5,120") and
@@ -4322,8 +4318,8 @@ function render(view,arg){
   else if(view==='theaters')renderTheaters();
   else if(view==='you')renderYou();
   else if(view==='legal')renderLegal(arg);
-  else if(view==='curate')renderCuratePage();
-  else if(view==='inbox')renderInbox();
+  else if(view==='curate')renderCuratePage(arg);
+  else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
   else if(view==='rooms')renderRooms();
   else if(view==='room')renderRoom(arg);
   else if(view==='submit')renderSubmit();
@@ -4579,12 +4575,32 @@ function renderCurList(q){
   list = q? list.slice(0,80) : list.slice(0,40);
   byId('curList').innerHTML=list.map(curRow).join('')||'<p class="empty-note">No titles match.</p>';
 }
+function curGenreOptions(current){
+  var list=allGenres(), has=false, i;
+  var opts='';
+  for(i=0;i<list.length;i++){
+    if(list[i]===current)has=true;
+    opts+='<option value="'+esc(list[i])+'"'+(list[i]===current?' selected':'')+'>'+esc(list[i])+'</option>';
+  }
+  if(!has) opts='<option value="'+esc(current)+'" selected>'+esc(current)+'</option>'+opts;
+  opts+='<option value="__new__">+ New genre\u2026</option>';
+  return opts;
+}
+function curSetGenre(id,val){
+  if(val==='__new__'){
+    var g=window.prompt('New genre name:'); if(!g)return;
+    g=g.replace(/^\s+|\s+$/g,''); if(!g)return;
+    val=g;
+  }
+  app.curation.genre[id]=val; saveState(); curRefresh();
+}
 function curRow(f){
   var sc=effScope(f), feat=app.curation.featured.indexOf(f.id)>=0, hid=isHidden(f), flag=isFlagged(f);
   var pos=servePoster(f);
   return '<div class="cur-row'+(hid?' hid':'')+'">'+
     (pos?'<img class="cur-thumb" src="'+esc(pos)+'" alt="" loading="lazy">':'<span class="cur-thumb" style="background:'+f.grad+'"></span>')+
     '<span class="cur-ttl">'+esc(f.title)+' <em>'+f.year+'</em></span>'+
+    '<select class="cur-genre" title="Move to a different genre" onchange="curSetGenre(\''+f.id+'\',this.value)">'+curGenreOptions(effGenre(f))+'</select>'+
     '<span class="cur-seg"><button class="'+(sc==='ours'?'on':'')+'" onclick="curSetScope(\''+f.id+'\',\'ours\')">Our</button><button class="'+(sc==='all'?'on':'')+'" onclick="curSetScope(\''+f.id+'\',\'all\')">All</button></span>'+
     '<button class="cur-ic'+(feat?' on':'')+'" title="Feature on home" onclick="curToggleFeature(\''+f.id+'\')">★</button>'+
     '<button class="cur-ic'+(isClassic(f)?' cls':'')+'" title="Grandma’s Recipes / Classic" onclick="curToggleClassic(\''+f.id+'\')">Classic</button>'+
@@ -4645,6 +4661,8 @@ function submitFilm(){
 }
 /* Admin: review the submission queue (passphrase-gated RPC) */
 function adminSubs(){
+  var w=byId('curSubsList'); if(!w)return;
+  w.innerHTML='<p class="hero-lead">Loading\u2026</p>';
   var secret=''; try{ secret=localStorage.getItem('ws_admin_secret')||''; }catch(e){}
   if(!secret){ secret=window.prompt('Admin passphrase:')||''; if(!secret)return; try{ localStorage.setItem('ws_admin_secret',secret); }catch(e){} }
   fetch(SUPABASE_URL+'/rest/v1/rpc/list_film_submissions',{method:'POST',
@@ -4652,9 +4670,8 @@ function adminSubs(){
   .then(function(r){ if(!r.ok){ try{localStorage.removeItem('ws_admin_secret');}catch(e){} toast('Failed \u2014 check the passphrase.'); return null; } return r.json(); })
   .then(function(rows){
     if(!rows)return;
-    var w=byId('curPageList'); if(!w)return;
-    byId('curpChips').innerHTML=''; byId('curpCount').textContent=rows.length+' film submission'+(rows.length===1?'':'s');
-    byId('curpMore').style.display='none';
+    var w=byId('curSubsList'); if(!w)return;
+    var cnt=byId('curSubsCount'); if(cnt) cnt.textContent=rows.length+' film submission'+(rows.length===1?'':'s');
     w.innerHTML=rows.map(function(x){
       return '<div class="cur-row" style="flex-wrap:wrap"><span class="cur-ttl">'+esc(x.title)+' <em>'+esc(x.filmmaker)+'</em><br><span style="font-size:12px;color:var(--ink-3)">'+esc(x.email)+(x.runtime?' \u00b7 '+esc(x.runtime):'')+' \u00b7 '+esc(x.status)+'</span>'+(x.logline?'<br><span style="font-size:12.5px">'+esc(x.logline)+'</span>':'')+'</span>'+
         (x.link?'<a class="btn btn-ghost btn-sm" href="'+esc(x.link)+'" target="_blank" rel="noopener">Screen</a>':'')+
@@ -4711,7 +4728,7 @@ function serveResult(mood){
     '<div class="serve-result">'+
       '<div class="serve-poster" style="background-image:url(\''+servePoster(f)+'\')"></div>'+
       '<div class="serve-info"><h3>'+esc(f.title)+'</h3>'+
-      '<div class="c-sub" style="white-space:normal">'+(f.dir&&f.dir!=='\u2014'?(f.type==='tv'?'By ':'Dir. ')+esc(f.dir)+' \u00b7 ':'')+f.year+' \u00b7 '+esc(f.genre)+'</div>'+
+      '<div class="c-sub" style="white-space:normal">'+(f.dir&&f.dir!=='\u2014'?(f.type==='tv'?'By ':'Dir. ')+esc(f.dir)+' \u00b7 ':'')+f.year+' \u00b7 '+esc(effGenre(f))+'</div>'+
       '<div style="margin-top:8px">'+auraRing(os,otk,44)+'</div>'+
       '<div class="serve-where">'+(f.where||[]).map(function(w){return '<span>'+esc(w)+'</span>';}).join('')+'</div>'+
       '<div class="serve-acts">'+
@@ -5129,21 +5146,55 @@ function curPageMatch(f){
 function curSetFilter(v){ CUR_FILTER=v; CUR_SHOWN=120; renderCurPageList(); }
 function curMore(){ CUR_SHOWN+=200; renderCurPageList(); }
 function curPageQ(){ var el=byId('curPageSearch'); return el?el.value:''; }
-function renderCuratePage(){
+var CUR_TAB='catalog';
+var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['subs','Film submissions']];
+function renderCuratePage(tab){
   var w=byId('curPageWrap'); if(!w)return;
   if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Curate</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to curate.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
+  if(tab)CUR_TAB=tab;
   w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">ADMIN</span><h1>Curate the shelves</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:60ch">Move titles between Our Films and All Films, feature them on home, or hide them. Changes save on this device; <b>Publish to backend</b> pushes them live for everyone.</p></div>'+
-    '<div class="curp-tools"><input id="curPageSearch" placeholder="Search '+FILMS.length+' titles\u2026" oninput="CUR_SHOWN=120;renderCurPageList()">'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:60ch">Everything admin lives here now \u2014 the catalog, contributor applications, and film submissions, all in one place. Changes to the catalog save on this device; <b>Publish to backend</b> pushes them live for everyone.</p></div>'+
+    '<div class="curp-tools">'+
     '<button class="btn btn-gold btn-sm" onclick="publishCuration()">Publish to backend</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="seatCritic()">Seat a critic</button>'+
-    '<button class="btn btn-gold btn-sm" onclick="openArticleEditor()">✎ Write a Word</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="go(\'inbox\')">📥 Applications</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="adminSubs()">Film submissions</button>'+
+    '<button class="btn btn-gold btn-sm" onclick="openArticleEditor()">\u270e Write a Word</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
-    '<div class="curp-chips" id="curpChips"></div><div class="curp-count" id="curpCount"></div>'+
-    '<div class="curp-list cur-list" id="curPageList"></div><button class="curp-more" id="curpMore" onclick="curMore()">Load more</button>';
-  renderCurPageList();
+    '<div class="cur-tabs" id="curTabs"></div>'+
+    '<div id="curTabCatalog">'+
+      '<div class="curp-tools"><input id="curPageSearch" placeholder="Search '+FILMS.length+' titles\u2026" oninput="CUR_SHOWN=120;renderCurPageList()"></div>'+
+      '<div class="curp-chips" id="curpChips"></div><div class="curp-count" id="curpCount"></div>'+
+      '<div class="curp-list cur-list" id="curPageList"></div><button class="curp-more" id="curpMore" onclick="curMore()">Load more</button>'+
+    '</div>'+
+    '<div id="curTabApps" style="display:none">'+
+      '<div class="inbox-share"><span class="ish-lab">Recruit beyond the site \u2014 share an apply link:</span>'+
+        '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'critic\')">Copy Kitchen link</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'writer\')">Copy Word link</button></div>'+
+      '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">\u21bb Refresh</button><span id="inboxCount" class="inbox-count"></span></div>'+
+      '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading\u2026</p></div>'+
+    '</div>'+
+    '<div id="curTabSubs" style="display:none">'+
+      '<div class="curp-count" id="curSubsCount"></div>'+
+      '<div class="cur-list" id="curSubsList"></div>'+
+    '</div>';
+  byId('curTabs').innerHTML=CUR_TABS.map(function(t){
+    return '<button class="chip'+(CUR_TAB===t[0]?' on':'')+'" onclick="curSetTab(\''+t[0]+'\')">'+t[1]+'</button>';
+  }).join('');
+  curShowTab(CUR_TAB);
+}
+function curShowTab(tab){
+  byId('curTabCatalog').style.display=(tab==='catalog')?'':'none';
+  byId('curTabApps').style.display=(tab==='apps')?'':'none';
+  byId('curTabSubs').style.display=(tab==='subs')?'':'none';
+  if(tab==='catalog')renderCurPageList();
+  else if(tab==='apps')inboxLoad();
+  else if(tab==='subs')adminSubs();
+}
+function curSetTab(tab){
+  CUR_TAB=tab;
+  byId('curTabs').innerHTML=CUR_TABS.map(function(t){
+    return '<button class="chip'+(CUR_TAB===t[0]?' on':'')+'" onclick="curSetTab(\''+t[0]+'\')">'+t[1]+'</button>';
+  }).join('');
+  curShowTab(tab);
 }
 function renderCurPageList(){
   var el=byId('curPageList'); if(!el)return;
@@ -5192,7 +5243,7 @@ function featSlides(){ var out=[]; for(var i=0;i<FEATURED.length;i++){ var f=fin
 function featSlideHTML(f,ey){
   var bg=f.backdrop||'', poster=(typeof servePoster==='function'?servePoster(f):null)||f.poster||'';
   var open="go('film','"+f.id+"')";
-  var meta=f.year+' · '+esc(f.genre)+' · '+esc(f.rt)+(f.type==='tv'?' · Series':((f.dir&&f.dir!=='—')?' · Dir. '+esc(f.dir):''));
+  var meta=f.year+' · '+esc(effGenre(f))+' · '+esc(f.rt)+(f.type==='tv'?' · Series':((f.dir&&f.dir!=='—')?' · Dir. '+esc(f.dir):''));
   return '<div class="feat"'+(bg?' style="background-image:linear-gradient(90deg,rgba(9,6,3,.95),rgba(9,6,3,.6) 55%,rgba(9,6,3,.25)),url(\''+bg+'\')"':'')+
     ' role="button" tabindex="0" onclick="'+open+'" onkeydown="if(event.key===\'Enter\')'+open+'">'+
     '<div class="feat-body">'+
@@ -5431,7 +5482,7 @@ function renderFilm(id){
             posterInner(f,'p-ttl')+'</div>'+
           '<div class="room-lead">'+
             '<h1>'+esc(f.title)+'</h1>'+
-            '<div class="room-meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+f.genre+(f.type==='tv'?' &nbsp;·&nbsp; <strong>Series</strong>':'')+'</div>'+
+            '<div class="room-meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+effGenre(f)+(f.type==='tv'?' &nbsp;·&nbsp; <strong>Series</strong>':'')+'</div>'+
             '<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
               '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
               (f.type!=='tv'?'<button class="svc svc-show" onclick="openShowtimes(\''+f.id+'\')">Showtimes</button>':'')+'</div>'+
@@ -5787,18 +5838,6 @@ function seatCritic(){
    own-row RLS on critic_applications is bypassed only for a verified admin).
    Seat a critic (flips profiles.is_critic via verify_critic), shortlist, or
    pass — treat them like gold. */
-function renderInbox(){
-  var w=byId('inboxWrap'); if(!w)return;
-  if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Applications</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to review applications.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
-  w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">ADMIN</span><h1>Contributor applications</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Everyone who applied to The Kitchen or The Word — photo, bio, socials, and work. Read them like gold, then seat, shortlist, or pass.</p></div>'+
-    '<div class="inbox-share"><span class="ish-lab">Recruit beyond the site — share an apply link:</span>'+
-      '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'critic\')">Copy Kitchen link</button>'+
-      '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'writer\')">Copy Word link</button></div>'+
-    '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">↻ Refresh</button><button class="btn btn-ghost btn-sm" onclick="go(\'curate\')">← Curate</button><span id="inboxCount" class="inbox-count"></span></div>'+
-    '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading…</p></div>';
-  inboxLoad();
-}
 /* Admin RPCs authorize on the owner's login (JWT sent via sbUserHeaders) OR the
    legacy passphrase — so the owner never has to type a passphrase to review. */
 function _adminSecretQuiet(){ try{ return localStorage.getItem('ws_admin_secret')||''; }catch(e){ return ''; } }
@@ -6474,7 +6513,7 @@ var FILTERS={type:'all',mood:'All',era:'All',where:'All',q:'',sort:'kitchen'};
 function matchQuery(f,q){
   q=q.toLowerCase();
   if(f.title.toLowerCase().indexOf(q)>=0)return true;
-  if(f.genre.toLowerCase().indexOf(q)>=0)return true;
+  if(effGenre(f).toLowerCase().indexOf(q)>=0)return true;
   if(f.dir && f.dir.toLowerCase().indexOf(q)>=0)return true;
   if(f.cast && f.cast.some(function(c){return c.toLowerCase().indexOf(q)>=0;}))return true;
   if(f.tags && f.tags.some(function(t){return t.toLowerCase().indexOf(q)>=0;}))return true;
@@ -6611,6 +6650,16 @@ function renderCritic(name){
 /* ============ CATALOG SCOPE (Our Films / All Films) ============ */
 function isHidden(f){ return app.curation.hidden.indexOf(f.id)>=0; }
 function effScope(f){ return app.curation.scope[f.id]||f.scope; }
+/* Owner override for a film's genre — same client-side pattern as scope/
+   featured/hidden/classic, exported alongside them to seed the backend.
+   Lets a miscategorized title get moved to the right section from Curate. */
+function effGenre(f){ return app.curation.genre[f.id]||f.genre; }
+/* Every genre currently in play, so the Curate dropdown always matches
+   reality (plus the one under review, in case it's brand new). */
+function allGenres(){
+  var set={}; FILMS.forEach(function(f){ set[effGenre(f)]=true; });
+  return Object.keys(set).sort();
+}
 function scopeMatch(f){ return !isHidden(f) && (app.scope==='all' || effScope(f)==='ours'); }
 /* The HOME page is always Black film & TV — the identity of the site. The
    "All Films" scope only applies to Browse/search, never the home shelves. */
@@ -6619,7 +6668,7 @@ function homeOurs(f){ return !isHidden(f) && effScope(f)==='ours'; }
 function rtMinutes(f){ var s=f.rt||''; var h=/(\d+)\s*h/.exec(s), m=/(\d+)\s*m/.exec(s); return (h?parseInt(h[1],10)*60:0)+(m?parseInt(m[1],10):0); }
 /* Format categories — derived so existing titles qualify without editing them.
    A doc is anything genre/tagged Documentary; a short is a film 40 min or under. */
-function isDoc(f){ return f.fmt==='doc' || f.genre==='Documentary' || (f.tags&&f.tags.indexOf('Documentary')>=0); }
+function isDoc(f){ return f.fmt==='doc' || effGenre(f)==='Documentary' || (f.tags&&f.tags.indexOf('Documentary')>=0); }
 function isShort(f){ if(f.type==='tv')return false; if(f.fmt==='short')return true; var mins=rtMinutes(f); return mins>0 && mins<=40; }
 function isSport(f){ return f.tags&&f.tags.indexOf('Sports')>=0; }
 function contentMatch(f){
@@ -6807,7 +6856,7 @@ function rankRow(f,rank){
     '<span class="rank-num">'+rank+'</span>'+
     '<span class="rank-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+(f.poster?'<img src="'+f.poster+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</span>'+
     '<span class="rank-main"><span class="rank-title">'+esc(f.title)+'</span>'+
-      '<span class="rank-sub">'+f.year+' &middot; '+esc(f.genre)+(votes?' &middot; '+fmt(votes)+' voted':'')+'</span>'+
+      '<span class="rank-sub">'+f.year+' &middot; '+esc(effGenre(f))+(votes?' &middot; '+fmt(votes)+' voted':'')+'</span>'+
       tierChip(rankValue(f))+'</span>'+
     '<span class="rank-marks">'+
       '<span class="cs cs-season"><span class="cs-lab">Season</span>'+auraRing(os,otk,30)+'</span>'+
@@ -7210,7 +7259,7 @@ function recommend(t){
   return FILMS.filter(function(f){return !f.noart && scopeMatch(f);}).map(function(f){
     var s=((f.k||0)+(tableScore(f)||0))/100; // quality nudge
     if(t.mood && f.moods.indexOf(t.mood)>=0)s+=3;
-    if(t.genre && t.genre!=='any' && f.genre===t.genre)s+=2;
+    if(t.genre && t.genre!=='any' && effGenre(f)===t.genre)s+=2;
     if(eraOK(f))s+=1; else s-=2;
     return {f:f,s:s};
   }).sort(function(a,b){return b.s-a.s;}).map(function(o){return o.f;});
@@ -7232,7 +7281,7 @@ function plateBlock(plateFilms){
   var cards=plateFilms.map(function(f){
     return '<div class="card"><div onclick="go(\'film\',\''+f.id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
       '<div class="poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+posterInner(f,'p-ttl')+'</div>'+
-      '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div>'+cardScores(f)+'<div class="c-sub">'+f.year+' · '+f.genre+'</div></div></div>'+
+      '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div>'+cardScores(f)+'<div class="c-sub">'+f.year+' · '+effGenre(f)+'</div></div></div>'+
       '<div class="plate-actions"><a class="plate-watch" href="'+(f.where&&f.where.length?watchUrl(f.where[0],f.title):justWatchUrl(f.title))+'" target="_blank" rel="noopener noreferrer" onclick="track(\'plate_watch\',{film:\''+f.id+'\'})">Watch ↗</a>'+
       '<button class="plate-remove" onclick="removePlate(\''+f.id+'\')">Remove</button></div></div>';
   }).join('');
@@ -7445,7 +7494,7 @@ function quizResults(){
   var cards=picks.map(function(f){
     return '<div class="quiz-pick" onclick="closeModal();go(\'film\',\''+f.id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){closeModal();go(\'film\',\''+f.id+'\')}">'+
       '<div class="qp-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'"><div class="qp-ttl">'+esc(f.title)+'</div></div>'+
-      '<div class="qp-meta">'+f.year+' · '+f.genre+'</div></div>';
+      '<div class="qp-meta">'+f.year+' · '+effGenre(f)+'</div></div>';
   }).join('');
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Your table is set</h2><p class="m-sub">'+tasteSummary(app.taste)+'</p>'+
