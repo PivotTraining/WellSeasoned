@@ -962,6 +962,7 @@
   .ic-actions .btn{flex:0 0 auto}
   /* The Group Chat (community rooms) */
   .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:18px}
+  .rooms-empty{margin-top:22px;color:var(--ink-2);font-size:14.5px}
   .room-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:transform .16s ease,box-shadow .16s ease}
   .room-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
   .room-card-img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
@@ -1776,12 +1777,12 @@ var FILMS=[
    dir:'Christian Keyes',cast:['Eva Marcille','Skyh Alvester Black','Candace Maxwell','Racquel Palmer'],moods:['Intense'],era:'2020s',where:['BET+','Paramount+'],
    syn:'Marilyn "Madam" DeVille sits atop Atlanta’s nightclub empire, ruling a crew of male dancers and letting nothing and no one stand in her way. Season 5 just dropped.',
    tags:['Drama','Atlanta','Power'],votes:{for:0,against:0},reviews:[]},
-  {id:'the-chi',title:'The Chi',year:2018,rt:'8 seasons',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#b5641e,#241206)',
+  {id:'the-chi',title:'The Chi',year:2018,rt:'8 seasons',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',airing:true,grad:'linear-gradient(160deg,#b5641e,#241206)',
    backdrop:'https://image.tmdb.org/t/p/w1280/ulXewCeBreYuw1fpjpibYQ66RRv.jpg',
    dir:'Lena Waithe',cast:['Jacob Latimore','Yolonda Ross','Alex R. Hibbert','Michael Epps','Birgundi Baker','Curtiss Cook'],moods:['Contemplative'],era:'2010s',where:['Paramount+','Showtime'],
    syn:'Lena Waithe’s South Side saga — a half-dozen lives braided together across Chicago, where ambition, loss, and loyalty keep colliding. Season 8, its last, is airing now.',
    tags:['Drama','Chicago','Coming of age'],votes:{for:0,against:0},reviews:[]},
-  {id:'raising-kanan',title:'Power Book III: Raising Kanan',year:2021,rt:'5 seasons',genre:'Crime',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#7a1420,#1a0709)',
+  {id:'raising-kanan',title:'Power Book III: Raising Kanan',year:2021,rt:'5 seasons',genre:'Crime',k:null,t:null,scope:'ours',type:'tv',airing:true,grad:'linear-gradient(160deg,#7a1420,#1a0709)',
    backdrop:'https://image.tmdb.org/t/p/w1280/qiDq1iCK0Ie9uwxJu2gDeVxDvI1.jpg',
    dir:'Sascha Penn',cast:['Mekai Curtis','Patina Miller','Hailey Kilgore','London Brown','Malcolm M. Mays'],moods:['Intense'],era:'2020s',where:['Starz'],
    syn:'1991, South Jamaica, Queens: the Power prequel traces how a sharp young Kanan Stark gets pulled into his mother Raq’s drug empire and hardens into the man Power fans already know. Season 5, the final chapter, is airing now.',
@@ -6027,17 +6028,24 @@ function postComment(id){
    One board per cult show. Real posts via Supabase room_posts (read-all,
    insert-as-yourself, owner-delete). A prototype of the "communities for shows
    with cult followings" idea — zero new cost, rides on the existing backend. */
-/* Lead with shows still dropping episodes (live weekly chatter), then the
-   still-loved legacy rooms. Filtered by find(id), so a show only appears once
-   it's in the catalog above. */
+/* No dead rooms. A room only shows in the index if the show is AIRING right
+   now (live weekly discussion — flagged airing:true in the catalog) OR the
+   room already has posts (people are still talking). Everything else stays
+   hidden until it earns its way in, so the grid is never a tumbleweed. Rooms
+   stay reachable by direct link regardless; this only governs what we surface.
+   To feature a show, set airing:true on its catalog entry. */
 var ROOMS=['raising-kanan','the-chi','all-the-queens-men','survival-of-the-thickest','pvalley','snowfall','insecure','atlanta','queen-sugar','the-boondocks','pose','imdy','queens'];
+var _roomQuiet=[]; // in-catalog rooms not currently airing — surface only if they have posts
 function roomAgo(ts){ try{ var d=new Date(ts), s=(new Date().getTime()-d.getTime())/1000; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; if(s<604800)return Math.floor(s/86400)+'d ago'; return d.toLocaleDateString(); }catch(e){ return ''; } }
 function renderRooms(){
   var w=byId('roomsContent'); if(!w)return;
   var ids=ROOMS.filter(function(id){ return !!find(id); });
+  var live=ids.filter(function(id){ return !!find(id).airing; });
+  _roomQuiet=ids.filter(function(id){ return !find(id).airing; });
   w.innerHTML='<div class="browse-head"><span class="eyebrow">The Group Chat</span><h1>Find your people.</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every cult show has a group chat. Pull up on the ones you stayed up for — talk your talk, catch the reads, see who else gets it.</p></div>'+
-    '<div class="rooms-grid">'+ids.map(roomCardHTML).join('')+'</div>';
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every show worth staying up for has a group chat. These are the ones popping right now — pull up, talk your talk, catch the reads.</p></div>'+
+    '<div class="rooms-grid" id="roomsGrid">'+live.map(roomCardHTML).join('')+'</div>'+
+    '<p class="rooms-empty" id="roomsEmpty"'+(live.length?' style="display:none"':'')+'>No rooms are popping right now. Check back when your show’s in season.</p>';
   loadRoomCounts();
 }
 function roomCardHTML(id){
@@ -6052,7 +6060,18 @@ function loadRoomCounts(){
   fetch(SUPABASE_URL+'/rest/v1/room_counts?select=room,posts',{headers:sbHeaders()})
     .then(function(r){return r.json();}).then(function(rows){
       if(!Array.isArray(rows))return;
-      rows.forEach(function(r){ var el=byId('rc-'+r.room); if(el&&r.posts) el.textContent=r.posts+' post'+(r.posts===1?'':'s')+' · jump in'; });
+      var grid=byId('roomsGrid'); if(!grid)return;
+      rows.forEach(function(r){
+        if(!r.posts)return;
+        var el=byId('rc-'+r.room);
+        // A quiet (not-airing) room that has real talk in it — surface it now.
+        if(!el && _roomQuiet.indexOf(r.room)>-1 && find(r.room)){
+          grid.insertAdjacentHTML('beforeend', roomCardHTML(r.room));
+          var empty=byId('roomsEmpty'); if(empty) empty.style.display='none';
+          el=byId('rc-'+r.room);
+        }
+        if(el) el.textContent=r.posts+' post'+(r.posts===1?'':'s')+' · jump in';
+      });
     }).catch(function(){});
 }
 function renderRoom(slug){
