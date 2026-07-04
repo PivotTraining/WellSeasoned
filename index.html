@@ -173,6 +173,7 @@
   .sug-noimg{background:linear-gradient(160deg,#5a3a18,#241608)}
   .sug-txt{display:flex;flex-direction:column;min-width:0;flex:1}
   .sug-ttl{font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sug-kind{display:inline-block;margin-left:7px;padding:1.5px 6px;border-radius:999px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);background:var(--gold-wash,rgba(228,155,11,.16));vertical-align:1px}
   .sug-meta{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sug-go{color:var(--ink-3);flex:none;opacity:0;transition:opacity .15s}
   .sug-row.on .sug-go{opacity:1;color:var(--gold-ink,var(--gold))}
@@ -6942,26 +6943,34 @@ function searchSuggest(q){
   var box=byId('searchSuggest'), inp=byId('searchInput'); if(!box)return;
   q=(q||'').trim().toLowerCase();
   if(q.length<2){ hideSuggest(); return; }
-  var starts=[], contains=[], people=[];
+  // Title matches rank first (starts-with, then contains); then actor/actress
+  // matches (starts-with on a cast name, then contains) — so typing a star's
+  // name surfaces the films/shows they're in, same as spelling out a title.
+  var starts=[], contains=[], castStarts=[], castContains=[];
   for(var i=0;i<FILMS.length;i++){
     var f=FILMS[i]; if(f.noart&&!f.poster) continue;   // skip art-less stubs
     var t=f.title.toLowerCase();
-    if(t.indexOf(q)===0) starts.push(f);
-    else if(t.indexOf(q)>=0) contains.push(f);
-    else {
-      var hay=((f.dir||'')+' '+((f.cast||[]).join(' '))).toLowerCase();
-      if(hay.indexOf(q)>=0) people.push(f);
+    if(t.indexOf(q)===0){ starts.push({f:f}); continue; }
+    if(t.indexOf(q)>=0){ contains.push({f:f}); continue; }
+    var cast=f.cast||[], hit=null, hitStarts=false;
+    for(var j=0;j<cast.length;j++){
+      var cl=cast[j].toLowerCase();
+      if(cl.indexOf(q)===0){ hit=cast[j]; hitStarts=true; break; }
+      if(!hit && cl.indexOf(q)>=0){ hit=cast[j]; }
     }
+    if(hit){ (hitStarts?castStarts:castContains).push({f:f,who:hit}); }
   }
-  var list=starts.concat(contains).concat(people).slice(0,7);
-  _sug=list; _sugIdx=-1;
+  var list=starts.concat(contains).concat(castStarts).concat(castContains).slice(0,7);
+  _sug=list.map(function(x){return x.f;}); _sugIdx=-1;
   if(!list.length){ hideSuggest(); return; }
-  box.innerHTML=list.map(function(f,i){
+  box.innerHTML=list.map(function(x,i){
+    var f=x.f;
     var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
-    var meta=f.year+(f.type==='tv'?' · Series':'')+(f.dir&&f.dir!=='—'?' · '+esc(f.dir):'');
+    var kind=f.type==='tv'?'TV':'Film';
+    var meta=x.who ? ('Cast: '+esc(x.who)+' · '+f.year) : (f.year+(f.dir&&f.dir!=='—'?' · '+esc(f.dir):''));
     return '<div class="sug-row" role="option" id="sug'+i+'" data-i="'+i+'" onmousedown="pickSuggest('+i+')" onmouseenter="_sugIdx='+i+';paintSugSel()">'+
       (pos?'<img class="sug-thumb" src="'+pos+'" alt="" loading="lazy">':'<span class="sug-thumb sug-noimg" aria-hidden="true"></span>')+
-      '<span class="sug-txt"><span class="sug-ttl">'+esc(f.title)+'</span><span class="sug-meta">'+meta+'</span></span>'+
+      '<span class="sug-txt"><span class="sug-ttl">'+esc(f.title)+'<span class="sug-kind">'+kind+'</span></span><span class="sug-meta">'+meta+'</span></span>'+
       '<svg class="sug-go" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>'+
     '</div>';
   }).join('');
