@@ -7791,6 +7791,7 @@ function doResetPassword(){
    site still works offline / before the backend is wired. */
 var AUTH_KEY='ws_auth_v1';
 var authSession=null;
+var _plateSynced=false;   // My Plate backend merge runs once per sign-in event, not every render
 function authStore(s){ try{ if(s)localStorage.setItem(AUTH_KEY,JSON.stringify(s)); else localStorage.removeItem(AUTH_KEY); }catch(e){} }
 function authLoad(){ try{ return JSON.parse(localStorage.getItem(AUTH_KEY)||'null'); }catch(e){ return null; } }
 function normalizeSession(d){
@@ -7812,9 +7813,10 @@ function authApply(session){
       app.email=session.user.email||'';
     }
   }
-  saveState(); renderAuthSlot(); if(!app.anon){ loadMyProfile(); loadMyApplication(); }
+  saveState(); renderAuthSlot();
+  if(!app.anon){ loadMyProfile(); loadMyApplication(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
 }
-function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; _identityPromise=null; saveState(); renderAuthSlot(); }
+function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; _identityPromise=null; _plateSynced=false; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
 /* Turn a raw GoTrue error into something a human can act on. */
 function authErrMsg(d){
@@ -7911,7 +7913,8 @@ function authRestore(){
     var anon=!!(s.user&&s.user.is_anonymous);
     app.anon=anon; app.userId=(s.user&&s.user.id)||'';
     if(!anon){ app.signedIn=true; if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; } }
-    renderAuthSlot(); if(!anon){ loadMyProfile(); loadMyApplication(); }
+    renderAuthSlot();
+    if(!anon){ loadMyProfile(); loadMyApplication(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
   }
 }
 /* Give every visitor a silent, real identity so votes tie to auth.uid() (forge-proof,
@@ -8053,13 +8056,51 @@ function signOut(){
 }
 
 /* ============ MY PLATE (funnel gate) ============ */
+/* Local array (app.plate) is always the source of truth for rendering — works
+   offline/signed-out exactly as before. For a real signed-in account (never a
+   silent anon identity — savePlate only runs past the app.signedIn gate below)
+   we additionally persist to plate_items so the list follows the user across
+   devices. Backend calls are additive/best-effort: a failed fetch never blocks
+   the local save/remove, and network errors are swallowed (offline stays fine). */
+function plateBackendAdd(id){
+  if(!sbConfigured()||!haveSession())return;
+  var uid=myUid(); if(!uid)return;
+  fetch(SUPABASE_URL+'/rest/v1/plate_items',{method:'POST',
+    headers:sbUserHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+    body:JSON.stringify({user_id:uid, film_slug:id})}).catch(function(){});
+}
+function plateBackendRemove(id){
+  if(!sbConfigured()||!haveSession())return;
+  var uid=myUid(); if(!uid)return;
+  fetch(SUPABASE_URL+'/rest/v1/plate_items?user_id=eq.'+uid+'&film_slug=eq.'+id,
+    {method:'DELETE', headers:sbUserHeaders()}).catch(function(){});
+}
+/* Pull the signed-in user's synced plate once per sign-in event: union remote
+   ids into the local array, and push any local-only ids (saved before login,
+   or from an earlier device) up to the backend so nothing is lost either way. */
+function syncPlateFromBackend(){
+  if(!sbConfigured()||!haveSession())return;
+  var uid=myUid(); if(!uid)return;
+  fetch(SUPABASE_URL+'/rest/v1/plate_items?user_id=eq.'+uid+'&select=film_slug',{headers:sbUserHeaders()})
+    .then(function(r){ return r.ok?r.json():[]; })
+    .then(function(rows){
+      var remote=(rows||[]).map(function(r){return r.film_slug;});
+      var local=app.plate||[];
+      var toPush=local.filter(function(id){ return remote.indexOf(id)<0; });
+      var merged=local.slice();
+      remote.forEach(function(id){ if(merged.indexOf(id)<0)merged.push(id); });
+      app.plate=merged; saveState(); renderYou();
+      toPush.forEach(function(id){ plateBackendAdd(id); });
+    })
+    .catch(function(){});
+}
 function savePlate(id){
   if(!app.signedIn){app._afterAuth=function(){savePlate(id);};openAuth('signup');toast('Create a free account to save to My Plate.');return;}
-  if(app.plate.indexOf(id)<0){app.plate.push(id);saveState();toast('Saved to My Plate.');}
+  if(app.plate.indexOf(id)<0){app.plate.push(id);saveState();toast('Saved to My Plate.');plateBackendAdd(id);}
   else toast('Already on My Plate.');
 }
 function removePlate(id){
-  var i=app.plate.indexOf(id); if(i>=0){app.plate.splice(i,1);saveState();renderYou();toast('Removed from My Plate.');}
+  var i=app.plate.indexOf(id); if(i>=0){app.plate.splice(i,1);saveState();renderYou();toast('Removed from My Plate.');plateBackendRemove(id);}
 }
 
 /* ============ TOAST ============ */

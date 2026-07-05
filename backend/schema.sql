@@ -361,3 +361,38 @@ create policy room_read on public.room_posts
 
 -- Pin the trigger function's search_path (linter 0011).
 alter function public.touch_vote() set search_path = public;
+
+-- ========================================================
+-- PLATE ITEMS  (My Plate — synced per signed-in account)
+-- applied live as migration create_plate_items (2026-07-05)
+-- ========================================================
+-- PRIVATE per-user data, unlike votes/comments/room_posts (public tallies
+-- readable by all). Only the owning identity may read/insert/delete its own
+-- rows, granted to `authenticated` only — no `anon` grant, since a wishlist
+-- has no legitimate anon-role read/write (unlike a public vote tally).
+-- localStorage (app.plate) stays the always-available local cache/source of
+-- truth for rendering; this table is additive persistence so a real account
+-- can pick the list back up on another device. Verified live: identity A can
+-- insert/select/delete only its own rows; identity B cannot see or delete A's
+-- row, and a forged insert (B inserting with A's user_id) is rejected by RLS.
+create table if not exists public.plate_items (
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  film_slug  text not null,
+  created_at timestamptz not null default now(),
+  primary key (user_id, film_slug)
+);
+
+alter table public.plate_items enable row level security;
+
+drop policy if exists plate_items_select on public.plate_items;
+drop policy if exists plate_items_insert on public.plate_items;
+drop policy if exists plate_items_delete on public.plate_items;
+
+create policy plate_items_select on public.plate_items for select
+  to authenticated using (user_id = auth.uid());
+create policy plate_items_insert on public.plate_items for insert
+  to authenticated with check (user_id = auth.uid());
+create policy plate_items_delete on public.plate_items for delete
+  to authenticated using (user_id = auth.uid());
+
+grant select, insert, delete on public.plate_items to authenticated;
