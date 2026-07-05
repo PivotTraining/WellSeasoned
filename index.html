@@ -1348,7 +1348,8 @@
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Personalized picks and early lists</li>
             <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Ad-free, plus showtimes and tickets</li>
           </ul>
-          <button class="btn btn-gold" onclick="openWaitlist('The Regular')">Join the waitlist</button>
+          <button class="btn btn-gold" onclick="startMembershipCheckout()">Become a member</button>
+          <button class="btn btn-ghost" onclick="openWaitlist('The Regular')">Join the waitlist</button>
         </div>
         <div class="plan">
           <h3>The Kitchen</h3><div class="p-price">Earned</div>
@@ -6087,6 +6088,20 @@ function openWaitlist(plan){
 function doWaitlist(plan){
   var e=byId('wlEmail')?byId('wlEmail').value.trim():'';
   if(submitWaitlist(e,plan)){ closeModal(); toast('You’re on the list. We’ll be in touch at launch.'); }
+}
+/* Stripe membership checkout — config-gated server-side (api/checkout.js).
+   Until the owner pastes real STRIPE_SECRET_KEY/STRIPE_PRICE_ID into Vercel,
+   the endpoint answers 503 and we show a friendly "almost here" toast rather
+   than a dead or broken-looking button. */
+function startMembershipCheckout(){
+  track('membership_checkout_click',{});
+  fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:'The Regular'})})
+    .then(function(r){ return r.json().then(function(data){ return {ok:r.ok,data:data}; }); })
+    .then(function(res){
+      if(res.ok && res.data && res.data.url){ window.location.href=res.data.url; return; }
+      toast((res.data&&res.data.error)||'Membership is almost here — check back soon.');
+    })
+    .catch(function(){ toast('Membership is almost here — check back soon.'); });
 }
 /* critic application — a real pipeline with a visible status, not an email into the void */
 /* Contributor sign-up — two lanes into the same editorial inbox

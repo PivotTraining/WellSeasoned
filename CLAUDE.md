@@ -249,3 +249,29 @@ docs. Every push deploys production — verify locally (headless Chromium,
   `git fetch origin claude/new-session-9aa459` and check you're not behind
   BEFORE editing or pushing — otherwise you clobber their work (or hit a
   non-fast-forward). Re-check right before every push.
+
+## Stripe membership (scaffolded, not live)
+Built 2026-07-05: `api/checkout.js` (zero-dep, matches the `api/showtimes.js`
+config-gated pattern — POST, reads `STRIPE_SECRET_KEY`/`STRIPE_PRICE_ID` from
+env, calls Stripe's REST API directly over `fetch` with HTTP Basic auth
+instead of adding the `stripe` npm package, since this repo has no
+`package.json`/deps). Creates a **subscription**-mode Checkout Session
+(assumption — "The Regular" is priced `/mo` in the UI; the owner may want
+one-time billing instead, flagged in a code comment). Client: the "Become a
+member" button on `#/join` (`startMembershipCheckout()`) POSTs to
+`/api/checkout` and redirects to the returned Stripe URL on success. Without
+real keys it 503s and the client shows "Membership is almost here — check
+back soon" instead of a dead/broken button — verified in this sandboxed
+headless run (no real Stripe account exists here).
+
+Waiting on owner to go live:
+1. Create a Stripe account (stripe.com).
+2. In the Stripe dashboard, create a Product + a recurring Price for
+   membership (confirm subscription vs. one-time pricing model first —
+   see the assumption above).
+3. Copy the secret key (`sk_live_...` or `sk_test_...` to start) and the
+   Price id (`price_...`).
+4. Set `STRIPE_SECRET_KEY` and `STRIPE_PRICE_ID` in Vercel → Settings →
+   Environment Variables.
+5. Redeploy, then click "Become a member" on `#/join` end-to-end to confirm
+   a real Checkout Session opens and completes.
