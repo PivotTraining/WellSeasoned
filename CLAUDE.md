@@ -201,8 +201,11 @@ Open/backlog:
 ## Monetization direction (decided 2026-07-03)
 Owner rule: truest-to-brand, **no non-Black advertising**. That rules out
 ad networks. Pursue, in order: (1) Membership — community-funded, zero ads,
-uses the existing `#/join` page; needs Stripe (NOT authorized in this
-session — hand the owner the key/setup steps). (2) Black-aligned brand
+uses the existing `#/join` page; needs Stripe — owner explicitly authorized
+building this on 2026-07-05. No real Stripe account/keys exist yet, so the
+checkout path is built as a config-gated scaffold (safely returns "not
+configured yet" until real `STRIPE_SECRET_KEY`/`STRIPE_PRICE_ID` are set in
+Vercel) — see the dedicated Stripe section below once built. (2) Black-aligned brand
 sponsorships — clearly-labeled "presented by" shelves. (3) Aggregate,
 anonymized audience-sentiment data product for studios/distributors (the
 real moat; privacy-safe, B2B, no consumer ads). Wishlist = My Plate +
