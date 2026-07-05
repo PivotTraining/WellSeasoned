@@ -15,6 +15,7 @@
 --   film_curation  move titles between shelves, feature/hide,
 --                  mark classics, set a Kitchen score  ← "move things around"
 --   waitlist       membership sign-ups
+--   signups        lightweight email capture (footer + post-vote nudge)
 --   RPCs           publish_curation() (admin), report_comment()
 -- ============================================================
 
@@ -227,6 +228,25 @@ drop policy if exists waitlist_insert on public.waitlist;
 create policy waitlist_insert on public.waitlist for insert
   with check (position('@' in email) > 1);
 grant insert on public.waitlist to anon, authenticated;
+
+-- ========================================================
+-- SIGNUPS  (lightweight "just take my email" capture — separate from real
+-- account signup via auth/v1/signup. Footer form + a once-ever post-first-vote
+-- nudge write here. No SELECT policy at all, so anon/authenticated can never
+-- read the list back — insert-only, only postgres/service_role can read.
+-- Applied live as a migration 2026-07-05.)
+-- ========================================================
+create table if not exists public.signups (
+  email      text primary key,
+  source     text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.signups enable row level security;
+drop policy if exists signups_insert on public.signups;
+create policy signups_insert on public.signups for insert
+  with check (position('@' in email) > 1);
+grant insert on public.signups to anon, authenticated;
 
 -- identity columns need sequence usage for anon inserts via PostgREST
 grant usage, select on all sequences in schema public to anon, authenticated;
