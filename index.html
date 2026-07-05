@@ -166,6 +166,8 @@
   .search input::placeholder{color:var(--ink-3)}
   /* Search typeahead dropdown */
   .search-sug{position:absolute;top:calc(100% + 8px);left:0;right:0;min-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:6px;z-index:80;max-height:min(70vh,440px);overflow-y:auto;animation:sugIn .16s ease}
+  .mobile-search-btn{display:none;background:none;border:none;cursor:pointer;color:var(--ink);padding:8px;border-radius:999px;align-items:center;justify-content:center}
+  .mobile-search-btn:hover{background:var(--panel)}
   @keyframes sugIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
   .sug-row{display:flex;align-items:center;gap:11px;padding:7px 9px;border-radius:10px;cursor:pointer}
   .sug-row.on{background:var(--gold-wash,rgba(228,155,11,.14))}
@@ -1082,7 +1084,11 @@
 
   /* ============ RESPONSIVE ============ */
   @media (max-width:820px){
-    .topnav nav,.search{display:none}
+    .topnav nav{display:none}
+    .mobile-search-btn{display:inline-flex}
+    .search{display:none;min-width:0;max-width:none}
+    .search.mob-on{display:flex;position:fixed;top:var(--nav-h);left:12px;right:12px;z-index:90;box-shadow:var(--shadow-3);animation:sugIn .16s ease}
+    .search.mob-on .search-sug{min-width:0}
     .rail .card{flex:0 0 46%}
     .rail-btn{display:none}
     .tabbar{display:block}
@@ -1168,7 +1174,10 @@
       
     </nav>
     <div class="right">
-      <div class="search" role="search">
+      <button type="button" id="mobileSearchBtn" class="mobile-search-btn" onclick="toggleMobileSearch()" aria-label="Search films &amp; shows" aria-expanded="false" aria-controls="searchInput">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      </button>
+      <div class="search" id="searchWrap" role="search">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#231708" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
         <input id="searchInput" placeholder="Search films &amp; shows" aria-label="Search films" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchSuggest"
           oninput="searchSuggest(this.value)" onkeydown="searchKey(event)" onblur="setTimeout(hideSuggest,160)" onfocus="searchSuggest(this.value)">
@@ -6640,14 +6649,36 @@ function paintSugSel(){
   for(var i=0;i<rows.length;i++){ rows[i].className='sug-row'+(i===_sugIdx?' on':''); }
   var inp=byId('searchInput'); if(inp) inp.setAttribute('aria-activedescendant',_sugIdx>=0?'sug'+_sugIdx:'');
 }
-function pickSuggest(i){ var f=_sug[i]; if(!f)return; var inp=byId('searchInput'); if(inp)inp.value=''; hideSuggest(); go('film',f.id); }
+function pickSuggest(i){ var f=_sug[i]; if(!f)return; var inp=byId('searchInput'); if(inp)inp.value=''; hideSuggest(); closeMobileSearch(); go('film',f.id); }
 function hideSuggest(){ var box=byId('searchSuggest'); if(box){ box.style.display='none'; box.innerHTML=''; } var inp=byId('searchInput'); if(inp)inp.setAttribute('aria-expanded','false'); _sug=[]; _sugIdx=-1; }
 function searchKey(e){
   var box=byId('searchSuggest'); var open=box&&box.style.display!=='none'&&_sug.length;
   if(e.key==='ArrowDown'&&open){ e.preventDefault(); _sugIdx=(_sugIdx+1)%_sug.length; paintSugSel(); }
   else if(e.key==='ArrowUp'&&open){ e.preventDefault(); _sugIdx=(_sugIdx<=0?_sug.length:_sugIdx)-1; paintSugSel(); }
-  else if(e.key==='Enter'){ if(open&&_sugIdx>=0){ e.preventDefault(); pickSuggest(_sugIdx); } else { doSearch(); } }
-  else if(e.key==='Escape'){ hideSuggest(); }
+  else if(e.key==='Enter'){ if(open&&_sugIdx>=0){ e.preventDefault(); pickSuggest(_sugIdx); } else { doSearch(); closeMobileSearch(); } }
+  else if(e.key==='Escape'){ if(open){ hideSuggest(); } else { closeMobileSearch(); } }
+}
+/* ---- Mobile search toggle ----------------------------------------------
+   On narrow viewports the desktop nav + search bar are hidden (replaced by
+   .tabbar); a magnifying-glass button in the header reveals the SAME
+   #searchInput as a full-width overlay instead of duplicating any search
+   logic. Toggle again, pick a result, run a search, or hit Escape to close. */
+function toggleMobileSearch(){
+  var w=byId('searchWrap'); if(!w)return;
+  if(w.classList.contains('mob-on')) closeMobileSearch();
+  else openMobileSearch();
+}
+function openMobileSearch(){
+  var w=byId('searchWrap'), btn=byId('mobileSearchBtn'); if(!w)return;
+  w.classList.add('mob-on');
+  if(btn) btn.setAttribute('aria-expanded','true');
+  var inp=byId('searchInput'); if(inp) inp.focus();
+}
+function closeMobileSearch(){
+  var w=byId('searchWrap'), btn=byId('mobileSearchBtn'); if(!w)return;
+  w.classList.remove('mob-on');
+  if(btn) btn.setAttribute('aria-expanded','false');
+  hideSuggest();
 }
 
 /* ============ CRITIC ============ */
