@@ -168,6 +168,21 @@
   .search-sug{position:absolute;top:calc(100% + 8px);left:0;right:0;min-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:6px;z-index:80;max-height:min(70vh,440px);overflow-y:auto;animation:sugIn .16s ease}
   .mobile-search-btn{display:none;background:none;border:none;cursor:pointer;color:var(--ink);padding:8px;border-radius:999px;align-items:center;justify-content:center}
   .mobile-search-btn:hover{background:var(--panel)}
+  .notif-wrap{position:relative}
+  .notif-bell{position:relative;background:none;border:none;cursor:pointer;color:var(--ink);padding:8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
+  .notif-bell:hover{background:var(--panel)}
+  .notif-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 3px;border-radius:999px;background:#b3311a;color:#fff;font-family:var(--mono);font-size:9.5px;font-weight:700;line-height:16px;text-align:center}
+  .notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:320px;max-width:calc(100vw - 24px);max-height:min(70vh,440px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:6px;z-index:95;animation:sugIn .16s ease}
+  .notif-head{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .notif-head b{font-size:13.5px}
+  .notif-head button{background:none;border:none;color:var(--gold-ink);font-size:12px;font-weight:700;cursor:pointer;padding:2px}
+  .notif-row{display:flex;flex-direction:column;gap:2px;padding:9px 8px;border-radius:10px;cursor:default}
+  .notif-row.unread{background:var(--gold-wash,rgba(228,155,11,.1))}
+  .notif-row a{color:inherit;text-decoration:none;display:block}
+  .notif-row a:hover .notif-body{text-decoration:underline}
+  .notif-body{font-size:13px;color:var(--ink);line-height:1.4}
+  .notif-when{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+  .notif-empty{padding:22px 10px;text-align:center;color:var(--ink-3);font-size:13px}
   @keyframes sugIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
   .sug-row{display:flex;align-items:center;gap:11px;padding:7px 9px;border-radius:10px;cursor:pointer}
   .sug-row.on{background:var(--gold-wash,rgba(228,155,11,.14))}
@@ -1215,6 +1230,13 @@
         <input id="searchInput" placeholder="Search films &amp; shows" aria-label="Search films" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchSuggest"
           oninput="searchSuggest(this.value)" onkeydown="searchKey(event)" onblur="setTimeout(hideSuggest,160)" onfocus="searchSuggest(this.value)">
         <div id="searchSuggest" class="search-sug" role="listbox" aria-label="Suggestions" style="display:none"></div>
+      </div>
+      <div class="notif-wrap" id="notifWrap" style="display:none">
+        <button type="button" id="notifBell" class="notif-bell" onclick="toggleNotifDropdown()" aria-label="Notifications" aria-expanded="false" aria-controls="notifPanel">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        </button>
+        <div class="notif-panel" id="notifPanel" style="display:none" role="region" aria-label="Notifications"></div>
       </div>
       <span id="authSlot"></span>
     </div>
@@ -5958,17 +5980,18 @@ function inboxCardHTML(a){
   if(a.work_url) lines.push('<span class="ic-line"><b>'+(role==='writer'?'Writing':'Work')+':</b> '+linkifyList(a.work_url)+'</span>');
   var meta=lines.length?'<div class="ic-lines">'+lines.join('')+'</div>':'';
   var eArg=(a.email||'').replace(/'/g,"\\'"), oArg=(a.outlet||'').replace(/'/g,"\\'"), nArg=(a.name||'').replace(/'/g,"\\'");
+  var uArg=a.user_id||'';
   var seated=(status==='seated'), actions;
   if(role==='critic'){
     actions = seated
-      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemove('+a.id+',\''+esc(eArg)+'\')">Remove critic</button>'
-      : '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\',\''+esc(nArg)+'\')">Seat as critic</button>'
+      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemove('+a.id+',\''+esc(eArg)+'\',\''+uArg+'\')">Remove critic</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxSeat('+a.id+',\''+esc(eArg)+'\',\''+esc(oArg)+'\',\''+esc(nArg)+'\',\''+uArg+'\')">Seat as critic</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
   } else {
     actions = seated
-      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemoveWriter('+a.id+',\''+esc(eArg)+'\')">Remove writer</button>'
-      : '<button class="btn btn-gold btn-sm" onclick="inboxApproveWriter('+a.id+',\''+esc(eArg)+'\',\''+esc(nArg)+'\')">Approve</button>'
+      ? '<button class="btn btn-ghost btn-sm ic-danger" onclick="inboxRemoveWriter('+a.id+',\''+esc(eArg)+'\',\''+uArg+'\')">Remove writer</button>'
+      : '<button class="btn btn-gold btn-sm" onclick="inboxApproveWriter('+a.id+',\''+esc(eArg)+'\',\''+esc(nArg)+'\',\''+uArg+'\')">Approve</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'review\')">Shortlist</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="inboxSetStatus('+a.id+',\'declined\')">Pass</button>';
   }
@@ -5989,12 +6012,24 @@ function inboxSetStatus(id,status){
     .then(function(){ toast('Updated.'); inboxLoad(); })
     .catch(function(){ toast('Couldn’t update — make sure you’re signed in as the owner.'); });
 }
-function inboxSeat(id,email,outlet,name){
+function inboxSeat(id,email,outlet,name,uid){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('critic',email,name); } else { toast('They need an account with this email first — then seat again.'); } })
+    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('critic',email,name); notifyApplicant(uid,'You’re seated as a verified critic in The Kitchen — your reviews now move the official score.'); } else { toast('They need an account with this email first — then seat again.'); } })
     .catch(function(){ toast('Couldn’t seat — make sure you’re signed in as the owner.'); });
+}
+/* Best-effort in-app notification alongside the existing manual "email them"
+   flow — never blocks or replaces it. notify_user() is SECURITY DEFINER, so
+   the owner's client can write into the applicant's feed but nowhere else. */
+function notifyApplicant(uid,body){
+  if(!uid||!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/rpc/notify_user',{method:'POST',
+      headers:sbUserHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify({p_user_id:uid,p_kind:'application_status',p_body:body})}
+    ).catch(function(){});
+  }catch(e){}
 }
 /* After seating/approving: confirm to the owner (immediate feedback) and offer
    to notify the contributor. Automated email needs Resend SMTP (owner setup);
@@ -6027,28 +6062,28 @@ function notifyContributor(kind,email,name){
 }
 /* Admin: remove a seated critic (un-verify). verify_critic(p_on=false) clears
    is_critic so their reviews stop moving the Kitchen score. */
-function inboxRemove(id,email){
+function inboxRemove(id,email,uid){
   if(!sbConfigured())return;
   if(!window.confirm('Remove this critic? Their seat is revoked and their reviews stop moving the Kitchen score.'))return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(){ toast('Critic removed. Seat revoked.'); inboxLoad(); })
+    .then(function(){ toast('Critic removed. Seat revoked.'); inboxLoad(); notifyApplicant(uid,'Your critic seat in The Kitchen has been removed.'); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* Admin: approve / remove a writer for The Word (mirrors critic seating). */
-function inboxApproveWriter(id,email,name){
+function inboxApproveWriter(id,email,name,uid){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:true})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('writer',email,name); } else { toast('They need an account with this email first — then approve again.'); } })
+    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('writer',email,name); notifyApplicant(uid,'You’re approved to write for The Word — you’ve got a real byline now.'); } else { toast('They need an account with this email first — then approve again.'); } })
     .catch(function(){ toast('Couldn’t approve — make sure you’re signed in as the owner.'); });
 }
-function inboxRemoveWriter(id,email){
+function inboxRemoveWriter(id,email,uid){
   if(!sbConfigured())return;
   if(!window.confirm('Remove this writer? Their byline in The Word is revoked.'))return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(){ toast('Writer removed. Byline revoked.'); inboxLoad(); })
+    .then(function(){ toast('Writer removed. Byline revoked.'); inboxLoad(); notifyApplicant(uid,'Your writer byline in The Word has been removed.'); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* One batched pull of every film's live tally, so The Table score on grid cards
@@ -6080,11 +6115,11 @@ function loadAllBackendVotes(){
 function loadBackendComments(slug){
   if(!sbConfigured())return;
   try{
-    fetch(SUPABASE_URL+'/rest/v1/comments?film_slug=eq.'+encodeURIComponent(slug)+'&reported=is.false&select=id,name,stance,body,created_at&order=created_at.desc&limit=100',{headers:sbHeaders()})
+    fetch(SUPABASE_URL+'/rest/v1/comments?film_slug=eq.'+encodeURIComponent(slug)+'&reported=is.false&select=id,name,stance,body,created_at,user_id&order=created_at.desc&limit=100',{headers:sbHeaders()})
       .then(function(r){return r.json();}).then(function(rows){
         if(!Array.isArray(rows))return;
         var f=find(slug); if(!f)return;
-        var backend=rows.map(function(r){ return {id:r.id,name:r.name||'Guest',stance:r.stance||'for',text:r.body,reported:false,backend:true}; });
+        var backend=rows.map(function(r){ return {id:r.id,name:r.name||'Guest',stance:r.stance||'for',text:r.body,reported:false,backend:true,user_id:r.user_id}; });
         f._comments=(app.comments[slug]||[]).slice().concat(backend);
         var on=document.querySelector('.view.on');
         if(on&&on.getAttribute('data-view')==='film'&&_activeFilm===slug)renderComments(f);
@@ -6477,7 +6512,27 @@ function postComment(id){
   if(!app.comments[id])app.comments[id]=[];
   app.comments[id].unshift(c); f._comments.unshift(c);
   syncComment(id,c); track('comment',{film:id,stance:c.stance});
+  notifyPriorCommenter(id, f, name||app.name||'Someone');
   byId('cText').value='';byId('cName').value='';renderComments(f);saveState();toast('Posted to The Table.');
+}
+/* Best-effort: let a prior commenter on this film know someone replied. Never
+   blocks the poster's own comment if this fails — notify_user() is a
+   SECURITY DEFINER RPC, so a caller can only ever write into someone ELSE's
+   notification feed, never their own or an arbitrary row directly. */
+function notifyPriorCommenter(slug,f,posterName){
+  try{
+    var me=myUid(), prior=null, i;
+    for(i=0;i<f._comments.length;i++){
+      var uid=f._comments[i].user_id;
+      if(uid && uid!==me){ prior=uid; break; }
+    }
+    if(!prior || !sbConfigured()) return;
+    fetch(SUPABASE_URL+'/rest/v1/rpc/notify_user',{method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify({p_user_id:prior,p_kind:'comment_reply',
+        p_body:esc(posterName)+' also weighed in on '+esc(f.title)+'.',p_film_slug:slug})}
+    ).catch(function(){});
+  }catch(e){}
 }
 
 /* ============ THE GROUP CHAT (community rooms) ============
@@ -8062,7 +8117,74 @@ function renderAuthSlot(){
     ? '<div class="avatar" role="button" tabindex="0" aria-label="Your account, open You page" onclick="go(\'you\')" onkeydown="if(event.key===\'Enter\')go(\'you\')">'+initials(app.name)+'</div>'
     : '<button class="btn btn-ghost btn-sm" onclick="openAuth(\'signin\')">Sign in</button><button class="btn btn-gold btn-sm" onclick="openAuth(\'signup\')" style="margin-left:8px">Join</button>';
   refreshAdminUI();   // admin links follow the owner login in/out
+  renderNotifBell();  // bell follows sign-in state too
 }
+/* ============ NOTIFICATIONS (bell) ============
+   Minimal in-app notifications — a reply on a film you commented on, or your
+   critic/writer application status changing. Fetch-on-open, no realtime.
+   Writes only ever happen via the notify_user() RPC (SECURITY DEFINER), so a
+   client can never insert into anyone's feed directly, including its own. */
+var _notifOpen=false;
+function renderNotifBell(){
+  var w=byId('notifWrap'); if(!w)return;
+  if(!app.signedIn || !haveSession()){ w.style.display='none'; closeNotifDropdown(); return; }
+  w.style.display='';
+  loadNotifCount();
+}
+function loadNotifCount(){
+  if(!sbConfigured()||!haveSession())return;
+  fetch(SUPABASE_URL+'/rest/v1/notifications?read=is.false&select=id',{headers:sbUserHeaders({'Prefer':'count=exact'})})
+    .then(function(r){ return r.json().then(function(rows){ return {n:Array.isArray(rows)?rows.length:0}; }); })
+    .then(function(o){
+      var b=byId('notifBadge'); if(!b)return;
+      if(o.n>0){ b.style.display=''; b.textContent=o.n>99?'99+':String(o.n); }
+      else b.style.display='none';
+    }).catch(function(){});
+}
+function toggleNotifDropdown(){ if(_notifOpen) closeNotifDropdown(); else openNotifDropdown(); }
+function openNotifDropdown(){
+  _notifOpen=true;
+  var p=byId('notifPanel'); if(!p)return;
+  p.style.display='block';
+  byId('notifBell').setAttribute('aria-expanded','true');
+  p.innerHTML='<div class="notif-empty">Loading…</div>';
+  loadNotifList();
+}
+function closeNotifDropdown(){
+  _notifOpen=false;
+  var p=byId('notifPanel'); if(p)p.style.display='none';
+  var b=byId('notifBell'); if(b)b.setAttribute('aria-expanded','false');
+}
+function loadNotifList(){
+  if(!sbConfigured()||!haveSession())return;
+  fetch(SUPABASE_URL+'/rest/v1/notifications?select=id,kind,body,film_slug,read,created_at&order=created_at.desc&limit=20',{headers:sbUserHeaders()})
+    .then(function(r){return r.json();}).then(function(rows){
+      var p=byId('notifPanel'); if(!p)return;
+      if(!Array.isArray(rows)){ p.innerHTML='<div class="notif-empty">Couldn’t load notifications.</div>'; return; }
+      var head='<div class="notif-head"><b>Notifications</b>'+(rows.length?'<button onclick="markAllNotifsRead()">Mark all read</button>':'')+'</div>';
+      if(!rows.length){ p.innerHTML=head+'<div class="notif-empty">Nothing yet.</div>'; return; }
+      p.innerHTML=head+rows.map(notifRowHTML).join('');
+    }).catch(function(){ var p=byId('notifPanel'); if(p)p.innerHTML='<div class="notif-empty">Couldn’t load notifications.</div>'; });
+}
+function notifRowHTML(n){
+  var body=esc(n.body||'');
+  var inner='<span class="notif-body">'+body+'</span><span class="notif-when">'+esc(roomAgo(n.created_at))+'</span>';
+  return '<div class="notif-row'+(n.read?'':' unread')+'">'+
+    (n.film_slug?'<a onclick="closeNotifDropdown();go(\'film\',\''+esc(n.film_slug)+'\')" role="button">'+inner+'</a>':inner)+
+  '</div>';
+}
+function markAllNotifsRead(){
+  if(!sbConfigured()||!haveSession())return;
+  fetch(SUPABASE_URL+'/rest/v1/notifications?read=is.false',{method:'PATCH',
+    headers:sbUserHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+    body:JSON.stringify({read:true})})
+    .then(function(){ loadNotifCount(); loadNotifList(); }).catch(function(){});
+}
+document.addEventListener('click',function(ev){
+  if(!_notifOpen)return;
+  var w=byId('notifWrap');
+  if(w && !w.contains(ev.target)) closeNotifDropdown();
+});
 function signOut(){
   if(sbConfigured() && authSession && authSession.access_token){
     fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Authorization':'Bearer '+authSession.access_token})}).catch(function(){});

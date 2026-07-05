@@ -443,3 +443,47 @@ create policy my_watch_delete on public.my_watch for delete
   to authenticated using (user_id = auth.uid());
 
 grant select, insert, update, delete on public.my_watch to authenticated;
+
+-- ========================================================
+-- NOTIFICATIONS  (in-app bell — replies + application status)
+-- applied live as migration create_notifications (2026-07-06)
+-- ========================================================
+-- No insert policy exists for anon/authenticated at all — every row is
+-- written through notify_user(), a SECURITY DEFINER RPC, so a client can
+-- write a notification into someone ELSE's feed (e.g. "your critic seat was
+-- removed") but can never insert directly, including into its own feed.
+-- Only the owning identity may select/update (mark-read) its own rows.
+-- Verified live: notify_user(A -> B) lands exactly one row visible only to
+-- B; a direct client INSERT is rejected by RLS (no policy permits it); A's
+-- SELECT/UPDATE against B's row sees/affects zero rows; B's own SELECT and
+-- mark-read UPDATE both succeed.
+create table if not exists public.notifications (
+  id         bigint generated always as identity primary key,
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  kind       text not null,
+  body       text,
+  film_slug  text,
+  read       boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.notifications enable row level security;
+
+drop policy if exists notifications_select on public.notifications;
+drop policy if exists notifications_update on public.notifications;
+
+create policy notifications_select on public.notifications for select
+  to authenticated using (user_id = auth.uid());
+create policy notifications_update on public.notifications for update
+  to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+grant select, update on public.notifications to authenticated;
+
+create or replace function public.notify_user(p_user_id uuid, p_kind text, p_body text, p_film_slug text default null)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.notifications(user_id, kind, body, film_slug)
+  values (p_user_id, p_kind, p_body, p_film_slug);
+end $$;
+revoke all on function public.notify_user(uuid, text, text, text) from public;
+grant execute on function public.notify_user(uuid, text, text, text) to authenticated;
