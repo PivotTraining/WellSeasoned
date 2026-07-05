@@ -396,3 +396,50 @@ create policy plate_items_delete on public.plate_items for delete
   to authenticated using (user_id = auth.uid());
 
 grant select, insert, delete on public.plate_items to authenticated;
+
+-- ========================================================
+-- MY WATCH  (private "seen it" toggle + personal 1-5 star rating)
+-- applied live as migration create_my_watch (2026-07-05)
+-- ========================================================
+-- STRICTLY PRIVATE per-user history — Letterboxd-style, NOT a new public
+-- score. Never read by tableScore()/kitchen_scores/votes and must never
+-- influence them ("nothing fake" — public Kitchen/Table numbers stay
+-- editorially clean). Only the owning identity may read/insert/update/delete
+-- its own rows, granted to `authenticated` only. touch_updated_at() is the
+-- same shared trigger function used elsewhere in this schema. Verified live:
+-- identity A can insert/select/update/delete only its own rows; identity B
+-- sees zero of A's rows and an update targeting A's row affects zero rows;
+-- a forged insert (B inserting with A's user_id) is rejected by RLS; upserting
+-- the same (user_id, film_slug) twice updates the single row in place (the
+-- primary key guarantees no duplicate).
+create table if not exists public.my_watch (
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  film_slug  text not null,
+  seen       boolean not null default true,
+  rating     int check (rating is null or rating between 1 and 5),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, film_slug)
+);
+
+alter table public.my_watch enable row level security;
+
+drop trigger if exists my_watch_touch on public.my_watch;
+create trigger my_watch_touch before update on public.my_watch
+  for each row execute function public.touch_updated_at();
+
+drop policy if exists my_watch_select on public.my_watch;
+drop policy if exists my_watch_insert on public.my_watch;
+drop policy if exists my_watch_update on public.my_watch;
+drop policy if exists my_watch_delete on public.my_watch;
+
+create policy my_watch_select on public.my_watch for select
+  to authenticated using (user_id = auth.uid());
+create policy my_watch_insert on public.my_watch for insert
+  to authenticated with check (user_id = auth.uid());
+create policy my_watch_update on public.my_watch for update
+  to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy my_watch_delete on public.my_watch for delete
+  to authenticated using (user_id = auth.uid());
+
+grant select, insert, update, delete on public.my_watch to authenticated;

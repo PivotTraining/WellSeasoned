@@ -836,6 +836,20 @@
   .plate-remove:hover{border-color:var(--paprika);color:var(--paprika)}
   .card .plate-remove{margin-top:8px}
 
+  /* ============ MY WATCH (private seen-it + rating) ============ */
+  .my-watch-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .mw-prompt{font-size:13px;color:var(--ink-2)}
+  .mw-stars{display:inline-flex;gap:3px}
+  .mw-star{cursor:pointer;font-size:19px;line-height:1;color:var(--line-strong);user-select:none}
+  .mw-star:hover{color:var(--gold)}
+  .mw-star.on{color:var(--gold-ink)}
+  .seen-list{display:flex;flex-direction:column;gap:9px}
+  .seen-row{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 13px;cursor:pointer}
+  .seen-row:hover{border-color:var(--gold-ink)}
+  .seen-row .sr-ttl{font-weight:700;font-size:14.5px}
+  .seen-row .sr-yr{font-size:12.5px;color:var(--ink-2)}
+  .seen-row .sr-stars{font-size:13px;color:var(--gold-ink);letter-spacing:1px}
+
   /* ============ QUIZ ============ */
   .quiz-prog{display:flex;gap:6px;margin-bottom:16px}
   .quiz-prog span{flex:1;height:5px;border-radius:99px;background:var(--inset)}
@@ -4300,7 +4314,7 @@ function cardPreviewOut(el){
 /* ============ STATE + PERSISTENCE ============ */
 /* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
    app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}, myWatch:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
@@ -5546,6 +5560,7 @@ function renderFilm(id){
               '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
               (f.type!=='tv'?'<button class="svc svc-show" onclick="openShowtimes(\''+f.id+'\')">Showtimes</button>':'')+'</div>'+
             '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="openShareCard(\''+f.id+'\')">Share</button></div>'+
+            myWatchWidgetHTML(f)+
           '</div>'+
         '</div>'+
       '</div>'+
@@ -5577,7 +5592,7 @@ function renderFilm(id){
         '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'+
       '</div>'+
     '</div>';
-  applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id);
+  applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id); loadMyWatch(f.id);
   hydrateFilmMedia(f).then(function(changed){
     if(!changed)return;
     var on=document.querySelector('.view.on');
@@ -7459,7 +7474,7 @@ function renderYou(){
   }
   el.innerHTML='<div class="you-hero">'+av+'<div><h1>'+esc(app.name||'Your table')+'</h1><p class="you-sub">Signed in on this device. <a onclick="signOut()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Sign out</a></p></div></div>'+
     '<div class="you-stats"><div class="ys"><b>'+plateFilms.length+'</b><span>On My Plate</span></div><div class="ys"><b>'+voteIds.length+'</b><span>Films voted</span></div><div class="ys"><b>'+reads+'</b><span>Reads posted</span></div></div>'+
-    kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds);
+    kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+seenBlock()+voteBlock(voteIds);
 }
 
 /* ================= LEGAL: Privacy Policy + Terms ================= */
@@ -8102,6 +8117,113 @@ function savePlate(id){
 function removePlate(id){
   var i=app.plate.indexOf(id); if(i>=0){app.plate.splice(i,1);saveState();renderYou();toast('Removed from My Plate.');plateBackendRemove(id);}
 }
+
+/* ============ MY WATCH (private "seen it" + personal 1-5 star rating) ============
+   Strictly private per-user history — never feeds tableScore()/kitchen_scores/votes
+   or any public number. Real signed-in accounts only (app.signedIn); silent-anon
+   visitors get a sign-in prompt instead. Cache lives in memory only (app.myWatch,
+   keyed by film_slug) and is refetched from Supabase as needed — nothing persisted
+   to localStorage, so it always reflects the signed-in account's real rows. */
+function myWatchWidgetHTML(f){
+  if(!app.signedIn){
+    return '<div class="my-watch-row" id="myWatchRow"><span class="mw-prompt">Sign in to track what you’ve seen</span></div>';
+  }
+  var st=app.myWatch&&app.myWatch[f.id];
+  return '<div class="my-watch-row" id="myWatchRow">'+
+    '<button class="btn btn-sm '+(st&&st.seen?'btn-gold':'btn-ghost light')+'" id="seenBtn" onclick="toggleSeenIt(\''+f.id+'\')">'+(st&&st.seen?'✓ Seen it':'Seen it?')+'</button>'+
+    '<span class="mw-stars" id="mwStars">'+mwStarsHTML(f.id, st&&st.rating)+'</span>'+
+  '</div>';
+}
+function mwStarsHTML(id, rating){
+  var out=''; for(var i=1;i<=5;i++){
+    out+='<span class="mw-star'+(rating&&i<=rating?' on':'')+'" onclick="setMyRating(\''+id+'\','+i+')" role="button" tabindex="0" aria-label="Rate '+i+' star'+(i===1?'':'s')+'" onkeydown="if(event.key===\'Enter\')setMyRating(\''+id+'\','+i+')">★</span>';
+  }
+  return out;
+}
+/* refresh just the widget in place (film page may have navigated away by the
+   time an async fetch/write resolves — always check we're still on this film) */
+function refreshMyWatchWidget(id){
+  var row=byId('myWatchRow'); if(!row)return;
+  if(_activeFilm!==id)return;
+  row.outerHTML=myWatchWidgetHTML(find(id));
+}
+function toggleSeenIt(id){
+  if(!app.signedIn){app._afterAuth=function(){toggleSeenIt(id);};openAuth('signup');toast('Create a free account to track what you’ve seen.');return;}
+  var st=(app.myWatch&&app.myWatch[id])||{seen:false,rating:null};
+  var nowSeen=!st.seen;
+  app.myWatch=app.myWatch||{}; app.myWatch[id]={seen:nowSeen, rating:st.rating, updated_at:new Date().toISOString()};
+  refreshMyWatchWidget(id);
+  myWatchUpsert(id, {seen:nowSeen, rating:st.rating});
+  toast(nowSeen?'Marked as seen.':'Unmarked.');
+}
+function setMyRating(id, n){
+  if(!app.signedIn){app._afterAuth=function(){setMyRating(id,n);};openAuth('signup');toast('Create a free account to rate what you’ve seen.');return;}
+  var st=(app.myWatch&&app.myWatch[id])||{seen:false,rating:null};
+  var nextRating=(st.rating===n)?null:n;   // clicking the same star again clears it
+  app.myWatch=app.myWatch||{}; app.myWatch[id]={seen:true, rating:nextRating, updated_at:new Date().toISOString()};
+  refreshMyWatchWidget(id);
+  myWatchUpsert(id, {seen:true, rating:nextRating});
+}
+/* Upsert this account's row for one film. seen implies rated-or-not; a rating
+   always implies seen. Best-effort like plateBackendAdd — never blocks the UI. */
+function myWatchUpsert(id, patch){
+  if(!sbConfigured()||!haveSession())return;
+  var uid=myUid(); if(!uid)return;
+  fetch(SUPABASE_URL+'/rest/v1/my_watch?on_conflict=user_id,film_slug',{method:'POST',
+    headers:sbUserHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+    body:JSON.stringify({user_id:uid, film_slug:id, seen:patch.seen, rating:patch.rating})}).catch(function(){});
+}
+/* Pull this one film's row (source of truth) so the widget reflects the real
+   backend state even after a sign-in on a fresh device. */
+function loadMyWatch(id){
+  if(!sbConfigured()||!haveSession())return;
+  var uid=myUid(); if(!uid)return;
+  fetch(SUPABASE_URL+'/rest/v1/my_watch?user_id=eq.'+uid+'&film_slug=eq.'+id+'&select=seen,rating,updated_at',{headers:sbUserHeaders()})
+    .then(function(r){ return r.ok?r.json():[]; })
+    .then(function(rows){
+      var row=(rows&&rows[0])||null;
+      app.myWatch=app.myWatch||{};
+      if(row){ app.myWatch[id]={seen:!!row.seen, rating:row.rating, updated_at:row.updated_at}; }
+      refreshMyWatchWidget(id);
+    })
+    .catch(function(){});
+}
+/* Everything the signed-in account has logged, most recently updated first —
+   backs the "What I've Seen" section on the You page. */
+function loadMyWatchAll(cb){
+  // always resolve async (even the early-out paths) so a caller that builds
+  // HTML then wires up a callback (like seenBlock) can rely on its own markup
+  // already being in the DOM by the time cb runs.
+  if(!sbConfigured()||!haveSession()){ setTimeout(function(){ cb&&cb([]); },0); return; }
+  var uid=myUid(); if(!uid){ setTimeout(function(){ cb&&cb([]); },0); return; }
+  fetch(SUPABASE_URL+'/rest/v1/my_watch?user_id=eq.'+uid+'&select=film_slug,seen,rating,updated_at&order=updated_at.desc',{headers:sbUserHeaders()})
+    .then(function(r){ return r.ok?r.json():[]; })
+    .then(function(rows){
+      rows=rows||[];
+      app.myWatch=app.myWatch||{};
+      rows.forEach(function(row){ app.myWatch[row.film_slug]={seen:!!row.seen, rating:row.rating, updated_at:row.updated_at}; });
+      cb&&cb(rows);
+    })
+    .catch(function(){ cb&&cb([]); });
+}
+/* "What I've Seen" block for the You page — empty state matches the site's voice. */
+function seenBlock(){
+  if(!app.signedIn)return '';
+  var el='<div class="you-sec" id="seenSection"><h2>What I’ve Seen</h2><div class="seen-list" id="seenList"><div class="empty" style="padding:24px 12px"><p>Loading…</p></div></div></div>';
+  loadMyWatchAll(function(rows){
+    var list=byId('seenList'); if(!list)return;
+    var seenRows=rows.filter(function(r){return r.seen;});
+    if(!seenRows.length){ list.innerHTML='<div class="empty" style="padding:40px 20px"><h3 style="font-size:19px">Nothing logged yet.</h3><p>Mark a few films as seen from their pages.</p><button class="btn btn-gold" onclick="go(\'browse\')">Browse films</button></div>'; return; }
+    list.innerHTML=seenRows.map(function(r){
+      var f=find(r.film_slug); if(!f)return '';
+      var stars=r.rating?('<span class="sr-stars">'+repeatStr('★',r.rating)+repeatStr('☆',5-r.rating)+'</span>'):'';
+      return '<div class="seen-row" onclick="go(\'film\',\''+f.id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
+        '<span class="sr-ttl">'+esc(f.title)+'</span><span class="sr-yr">'+f.year+'</span><span style="flex:1"></span>'+stars+'</div>';
+    }).join('');
+  });
+  return el;
+}
+function repeatStr(s,n){ var out=''; for(var i=0;i<n;i++)out+=s; return out; }
 
 /* ============ TOAST ============ */
 function toast(msg){
