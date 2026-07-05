@@ -949,9 +949,27 @@
   .jp-share{font-size:13px;font-weight:700;color:var(--gold-ink);cursor:pointer;white-space:nowrap}
   .jp-signin{margin-top:16px;font-size:14px;color:var(--ink-2)}
   .jp-signin a{color:var(--gold-ink);font-weight:700;cursor:pointer}
+  .jp-signup{margin-top:20px;padding-top:18px;border-top:1px dashed var(--line);max-width:420px}
+  .jp-signup p{color:var(--ink-2);font-size:13.5px;line-height:1.5;margin:6px 0 0}
+  .jp-signup .cbox{margin-top:12px}
   .inbox-share{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
   .inbox-share .ish-lab{font-size:13.5px;color:var(--ink-2);font-weight:600}
   @media(max-width:640px){ .jp-lanes{grid-template-columns:1fr} .jp-head h2{font-size:25px} }
+  /* Post-vote email-capture nudge: a light, dismissible bottom banner (NOT a
+     blocking modal) — no overlay, page stays fully interactive behind it. */
+  .email-nudge{position:fixed;left:0;right:0;bottom:0;z-index:110;background:var(--panel);
+    border-top:1px solid var(--line-strong);box-shadow:var(--shadow-3);padding:14px 16px;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;
+    align-items:center;gap:12px;animation:nudgeUp .28s ease}
+  @keyframes nudgeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .en-copy{flex:1 1 220px;min-width:180px}
+  .en-copy b{display:block;font-size:14px;color:var(--ink)}
+  .en-copy span{font-size:12.5px;color:var(--ink-2)}
+  .en-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .en-form input{background:var(--bg);border:1px solid var(--line-strong);border-radius:var(--r-sm);
+    padding:9px 11px;color:var(--ink);font:inherit;font-size:13.5px;outline:none;width:200px;max-width:60vw}
+  .en-close{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:18px;padding:2px 4px}
+  @media(max-width:640px){ .email-nudge{flex-direction:column;align-items:stretch} .en-form{width:100%} .en-form input{width:auto;flex:1;max-width:none} }
   /* Admin: contributor applications inbox */
   .inbox-tools{display:flex;align-items:center;gap:12px;margin:14px 0 16px}
   .inbox-count{font-size:13px;color:var(--ink-3)}
@@ -1095,6 +1113,7 @@
     main{padding-bottom:calc(var(--tab-h) + 30px)}
     .toast-wrap{bottom:calc(var(--tab-h) + 16px)}
     .legend-dock{bottom:calc(var(--tab-h) + 14px);right:14px}
+    .email-nudge{bottom:var(--tab-h)}
     /* dock rides above the mobile tab bar, so reserve that too or the key's top clips off-screen */
     .legend-panel{max-height:calc(100vh - var(--tab-h) - 76px);max-height:calc(100dvh - var(--tab-h) - 76px)}
     .mosaic{grid-template-columns:repeat(4,1fr);gap:12px}
@@ -1507,6 +1526,14 @@
       </div>
     </div>
     <p class="jp-signin">Already write for us? <a onclick="openAuth('signin')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')openAuth('signin')">Critic &amp; writer sign in</a> to post your reviews and reads.</p>
+    <div class="jp-signup">
+      <span class="eyebrow">Not ready for an account?</span>
+      <p>Get the occasional email about new drops and features — no account needed.</p>
+      <div class="cbox">
+        <input id="footerSignupEmail" type="email" placeholder="you@email.com" aria-label="Email for updates" onkeydown="if(event.key==='Enter')doFooterSignup()">
+        <div class="cbox-row"><span class="cbox-hint">We keep it rare — nothing sold, nothing spammy.</span><button class="btn btn-gold btn-sm" onclick="doFooterSignup()">Notify me</button></div>
+      </div>
+    </div>
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
@@ -6066,6 +6093,28 @@ function reportBackend(id){
       body:JSON.stringify({p_id:id})}).catch(function(){});
   }catch(e){}
 }
+/* Lightweight email capture (public.signups) — separate from real account
+   signup (auth/v1/signup). Insert-only from the client: no SELECT policy, so
+   nobody but the backend can ever read the list back. cb(true/false) reports
+   whether the address is on the list (whether just now or already). */
+function submitSignup(email,source,cb){
+  if(!email||email.indexOf('@')<1){ toast('Enter a valid email.'); if(cb)cb(false); return; }
+  if(!sbConfigured()){ toast('Signups aren’t configured yet.'); if(cb)cb(false); return; }
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/signups',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify({email:email,source:source||null})})
+      .then(function(r){
+        if(r.status===409){ toast('You’re already on the list.'); if(cb)cb(true); return; }
+        if(r.ok){ toast('You’re on the list — we’ll be in touch.'); if(cb)cb(true); return; }
+        toast('Something went wrong. Try again in a bit.'); if(cb)cb(false);
+      })
+      .catch(function(){ toast('Something went wrong. Try again in a bit.'); if(cb)cb(false); });
+  }catch(e){ toast('Something went wrong. Try again in a bit.'); if(cb)cb(false); }
+}
+function doFooterSignup(){
+  var e=byId('footerSignupEmail')?byId('footerSignupEmail').value.trim():'';
+  submitSignup(e,'footer',function(ok){ if(ok&&byId('footerSignupEmail'))byId('footerSignupEmail').value=''; });
+}
 function submitWaitlist(email,plan){
   if(!email||email.indexOf('@')<1){ toast('Enter a valid email.'); return false; }
   if(sbConfigured()){
@@ -6303,7 +6352,7 @@ function applyVote(id,side){
   if(prev==='for')f.votes.for=Math.max(0,f.votes.for-1); if(prev==='against')f.votes.against=Math.max(0,f.votes.against-1);
   app.votes[id]=side; if(side==='for')f.votes.for++; else f.votes.against++;
   app.tally[id]={for:f.votes.for,against:f.votes.against};
-  saveState(); syncVote(id,side); return true;
+  saveState(); syncVote(id,side); maybeEmailNudge(); return true;
 }
 /* One-tap voting from any card. Same applyVote -> syncVote path as the film
    page, but none of the film-room DOM; the card re-renders itself in place so
@@ -6362,6 +6411,32 @@ function maybeVoteNudge(){
       '<p class="m-sub">You’re voting as a guest on this device. Create a free account so your votes and My Plate follow you on every device — phone, laptop, all of it.</p>'+
       '<div class="film-actions" style="margin-top:4px"><button class="btn btn-gold" onclick="openAuth(\'signup\')">Create free account</button><button class="btn btn-ghost" onclick="closeModal()">Maybe later</button></div>');
   }, 800);
+}
+/* After a visitor's FIRST vote ever on any film, one gentle once-ever nudge to
+   leave an email — a light bottom banner, not a blocking modal, page stays
+   fully usable behind it. Skipped entirely for real signed-in accounts (their
+   email is already captured) and shown at most once per browser. */
+function maybeEmailNudge(){
+  if(app.signedIn||!sbConfigured()) return;
+  var shown=false; try{ shown=localStorage.getItem('ws_email_nudge')==='1'; }catch(e){}
+  if(shown) return;
+  try{ localStorage.setItem('ws_email_nudge','1'); }catch(e){}
+  setTimeout(function(){ if(!app.signedIn) showEmailNudge(); }, 1200);
+}
+function showEmailNudge(){
+  if(byId('emailNudge')) return;
+  var el=document.createElement('div');
+  el.className='email-nudge'; el.id='emailNudge';
+  el.innerHTML='<div class="en-copy"><b>Want the occasional update?</b><span>New drops, features, launches — no account needed.</span></div>'+
+    '<div class="en-form"><input id="enEmail" type="email" placeholder="you@email.com" aria-label="Email" onkeydown="if(event.key===\'Enter\')doEmailNudge()">'+
+    '<button class="btn btn-gold btn-sm" onclick="doEmailNudge()">Notify me</button></div>'+
+    '<button class="en-close" aria-label="Dismiss" onclick="closeEmailNudge()">✕</button>';
+  document.body.appendChild(el);
+}
+function closeEmailNudge(){ var el=byId('emailNudge'); if(el)el.remove(); }
+function doEmailNudge(){
+  var e=byId('enEmail')?byId('enEmail').value.trim():'';
+  submitSignup(e,'post_vote',function(ok){ if(ok)closeEmailNudge(); });
 }
 function renderComments(f){
   ensureComments(f);
