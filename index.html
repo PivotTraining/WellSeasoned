@@ -150,7 +150,7 @@
   .topnav{position:sticky;top:0;z-index:80;height:var(--nav-h);background:rgba(239,226,198,.82);backdrop-filter:blur(16px) saturate(1.2);border-bottom:1px solid rgba(122,82,6,.20);box-shadow:0 1px 0 rgba(255,246,224,.5) inset,0 6px 20px -18px rgba(40,22,6,.6)}
   .topnav .row{display:flex;align-items:center;gap:22px;height:100%}
   .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-  .brand-badge{width:38px;height:38px;border-radius:11px;background:var(--ink);display:grid;place-items:center;flex:none;box-shadow:0 3px 10px -3px rgba(70,46,18,.5);border:1.5px solid var(--gold)}
+  .brand-badge{display:grid;place-items:center;flex:none;filter:drop-shadow(0 2px 5px rgba(70,46,18,.35))}
   .brand-type{display:flex;flex-direction:column;line-height:1}
   .brand-word{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--ink);line-height:.9;white-space:nowrap}
   .brand-tag{font-size:8px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-ink);margin-top:3px}
@@ -1220,16 +1220,21 @@
 <header class="topnav">
   <div class="wrap row">
     <div class="brand" onclick="go('home')" tabindex="0" role="button" aria-label="Well Seasoned home">
-      <span class="brand-badge" aria-hidden="true"><svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
-  <path d="M21 22 a11 11 0 0 1 22 0 v3 h-22 z" fill="#BE8418"></path>
+      <span class="brand-badge" aria-hidden="true"><svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+  <defs>
+    <linearGradient id="wsHatGradNav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D7A233"/><stop offset="1" stop-color="#A6740F"/></linearGradient>
+    <linearGradient id="wsBodyGradNav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2C158"/><stop offset=".55" stop-color="#E5A72E"/><stop offset="1" stop-color="#B87E14"/></linearGradient>
+  </defs>
+  <path d="M21 22 a11 11 0 0 1 22 0 v3 h-22 z" fill="url(#wsHatGradNav)" stroke="#2A1B10" stroke-width="0.6"></path>
   <circle cx="32" cy="14.8" r="2.3" fill="#F7EFDC"></circle>
   <circle cx="26.5" cy="15.5" r="1.8" fill="#F7EFDC"></circle>
   <circle cx="37.5" cy="15.5" r="1.8" fill="#F7EFDC"></circle>
   <circle cx="28" cy="20.7" r="1.8" fill="#F7EFDC"></circle>
   <circle cx="36" cy="20.7" r="1.8" fill="#F7EFDC"></circle>
-  <rect x="19" y="25" width="26" height="5" rx="2.5" fill="#F7EFDC"></rect>
-  <path d="M21.5 32 h21 l2.5 19.5 a6.5 6.5 0 0 1 -6.5 7 h-13 a6.5 6.5 0 0 1 -6.5 -7 z" fill="#E5A72E"></path>
-  <path transform="translate(32 45)" d="M0,-6.5 L1.95,-2.05 L6.5,-2.05 L2.8,0.95 L4,5.4 L0,2.6 L-4,5.4 L-2.8,0.95 L-6.5,-2.05 L-1.95,-2.05 Z" fill="#2A1B10"></path>
+  <rect x="19" y="25" width="26" height="5" rx="2.5" fill="#F7EFDC" stroke="#D8C7A0" stroke-width="0.4"></rect>
+  <path d="M21.5 32 h21 l2.5 19.5 a6.5 6.5 0 0 1 -6.5 7 h-13 a6.5 6.5 0 0 1 -6.5 -7 z" fill="url(#wsBodyGradNav)" stroke="#2A1B10" stroke-width="0.6"></path>
+  <path d="M24.5 34.5 q-1.4 12 .8 19.5" stroke="#FCE7B8" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".55"></path>
+  <path transform="translate(32 45)" d="M0,-6.5 L1.95,-2.05 L6.5,-2.05 L2.8,0.95 L4,5.4 L0,2.6 L-4,5.4 L-2.8,0.95 L-6.5,-2.05 L-1.95,-2.05 Z" fill="#2A1B10" stroke="#2A1B10" stroke-width="0.5"></path>
 </svg></span>
       <span class="brand-type"><span class="brand-word">Well Seasoned</span><span class="brand-tag">Rated by the culture</span></span>
     </div>
@@ -1525,15 +1530,20 @@
   <div id="wsIntro" class="ws-intro" hidden>
   <div class="in">
     <svg class="seal-anim" viewBox="0 0 64 64" aria-hidden="true">
-  <path d="M21 22 a11 11 0 0 1 22 0 v3 h-22 z" fill="#BE8418"></path>
+  <defs>
+    <linearGradient id="wsHatGradIntro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D7A233"/><stop offset="1" stop-color="#A6740F"/></linearGradient>
+    <linearGradient id="wsBodyGradIntro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2C158"/><stop offset=".55" stop-color="#E5A72E"/><stop offset="1" stop-color="#B87E14"/></linearGradient>
+  </defs>
+  <path d="M21 22 a11 11 0 0 1 22 0 v3 h-22 z" fill="url(#wsHatGradIntro)" stroke="#2A1B10" stroke-width="0.6"></path>
   <circle cx="32" cy="14.8" r="2.3" fill="#F7EFDC"></circle>
   <circle cx="26.5" cy="15.5" r="1.8" fill="#F7EFDC"></circle>
   <circle cx="37.5" cy="15.5" r="1.8" fill="#F7EFDC"></circle>
   <circle cx="28" cy="20.7" r="1.8" fill="#F7EFDC"></circle>
   <circle cx="36" cy="20.7" r="1.8" fill="#F7EFDC"></circle>
-  <rect x="19" y="25" width="26" height="5" rx="2.5" fill="#F7EFDC"></rect>
-  <path d="M21.5 32 h21 l2.5 19.5 a6.5 6.5 0 0 1 -6.5 7 h-13 a6.5 6.5 0 0 1 -6.5 -7 z" fill="#E5A72E"></path>
-  <path transform="translate(32 45)" d="M0,-6.5 L1.95,-2.05 L6.5,-2.05 L2.8,0.95 L4,5.4 L0,2.6 L-4,5.4 L-2.8,0.95 L-6.5,-2.05 L-1.95,-2.05 Z" fill="#2A1B10"></path>
+  <rect x="19" y="25" width="26" height="5" rx="2.5" fill="#F7EFDC" stroke="#D8C7A0" stroke-width="0.4"></rect>
+  <path d="M21.5 32 h21 l2.5 19.5 a6.5 6.5 0 0 1 -6.5 7 h-13 a6.5 6.5 0 0 1 -6.5 -7 z" fill="url(#wsBodyGradIntro)" stroke="#2A1B10" stroke-width="0.6"></path>
+  <path d="M24.5 34.5 q-1.4 12 .8 19.5" stroke="#FCE7B8" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".55"></path>
+  <path transform="translate(32 45)" d="M0,-6.5 L1.95,-2.05 L6.5,-2.05 L2.8,0.95 L4,5.4 L0,2.6 L-4,5.4 L-2.8,0.95 L-6.5,-2.05 L-1.95,-2.05 Z" fill="#2A1B10" stroke="#2A1B10" stroke-width="0.5"></path>
 </svg>
     <h2>Two verdicts on every film.</h2>
     <p>The Kitchen is verified critics of the culture. The Table is the community that bought the ticket. When they agree, the seal lands.</p>
