@@ -7970,14 +7970,46 @@ function openWelcome(){
     '<button class="btn btn-ghost" onclick="closeModal();go(\'ranked\')">See the rankings</button></div>'+
     '<p class="m-alt">Write about film? <a onclick="openApplyKitchen()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Apply to The Kitchen</a>.</p>');
 }
+/* Single in-flight refresh_token grant shared by every caller (page-load
+   restore, pre-write freshness check, background keep-alive) so concurrent
+   callers never fire duplicate refresh requests that race Supabase's token
+   rotation and get each other's still-good session rejected as "already
+   used" -> forced logout. One retry (short backoff) on a non-ok response
+   absorbs a transient hiccup (5xx, brief network blip) instead of treating
+   it as proof the session is dead. */
+var _tokenRefreshPromise=null;
+function doTokenRefresh(refreshToken){
+  if(_tokenRefreshPromise) return _tokenRefreshPromise;
+  function attempt(retried){
+    return fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({refresh_token:refreshToken})})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(d){
+        if(d&&d.access_token) return d;
+        if(!retried) return new Promise(function(res){ setTimeout(res,1200); }).then(function(){ return attempt(true); });
+        return null;
+      })
+      .catch(function(){
+        if(!retried) return new Promise(function(res){ setTimeout(res,1200); }).then(function(){ return attempt(true); });
+        return null;
+      });
+  }
+  _tokenRefreshPromise=attempt(false).then(function(d){ _tokenRefreshPromise=null; return d; });
+  return _tokenRefreshPromise;
+}
 /* Restore a saved session on load; refresh it if it's expired. */
 function authRestore(){
   var s=authLoad(); if(!s){ return; }
   if(s.expires_at && s.expires_at < Date.now()+60000 && sbConfigured() && s.refresh_token){
-    fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({refresh_token:s.refresh_token})})
-      .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){ if(d&&d.access_token)authApply(normalizeSession(d)); else authClearLocal(); })
-      .catch(function(){ authSession=s; app.signedIn=true; renderAuthSlot(); });
+    /* show the cached session right away (no logged-out flash) while the
+       refresh happens in the background; only clear it if the refresh
+       (with its retry) definitively fails */
+    authSession=s;
+    var anon0=!!(s.user&&s.user.is_anonymous);
+    app.anon=anon0; app.userId=(s.user&&s.user.id)||'';
+    if(!anon0){ app.signedIn=true; if(s.user){ var m0=s.user.user_metadata||{}; app.name=app.name||m0.name||''; app.email=s.user.email||''; } }
+    renderAuthSlot();
+    doTokenRefresh(s.refresh_token).then(function(d){ if(d)authApply(normalizeSession(d)); else authClearLocal(); });
+    if(!anon0){ loadMyProfile(); loadMyApplication(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
   } else {
     authSession=s;
     var anon=!!(s.user&&s.user.is_anonymous);
@@ -8076,10 +8108,12 @@ function ensureFreshIdentity(){
   if(!sbConfigured()) return Promise.resolve(false);
   if(sessionFresh()) return Promise.resolve(true);
   if(authSession&&authSession.refresh_token){
-    return fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({refresh_token:authSession.refresh_token})})
-      .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){ if(d&&d.access_token){ authApply(normalizeSession(d)); return true; } authSession=null; return ensureIdentity(); })
-      .catch(function(){ return ensureIdentity(); });
+    var wasReal=!app.anon; // never silently swap a real signed-in user into a brand-new anon identity just because one refresh attempt failed
+    return doTokenRefresh(authSession.refresh_token).then(function(d){
+      if(d){ authApply(normalizeSession(d)); return true; }
+      if(wasReal){ return false; }
+      authSession=null; return ensureIdentity();
+    });
   }
   return ensureIdentity();
 }
@@ -8380,6 +8414,9 @@ function forgetTmdbKey(){
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
 renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); ensureIdentity(); refreshAdminUI(); maybeIntro();
+/* Keep a long-open tab's session fresh in the background, so it doesn't rely on
+   an exactly-in-time refresh the moment a user finally clicks something. */
+setInterval(function(){ if(haveSession()&&!sessionFresh())ensureFreshIdentity(); },240000);
 /* open whatever the URL points at (deep link / refresh / back button) */
 if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
