@@ -167,7 +167,18 @@ Done and verified live:
   `profiles(name,critic_outlet,avatar_url,bio)`; the film-page review card
   renders the photo (initial-letter fallback) + bio as a real byline. No fake
   data — only shows once a real critic is seated and posts.
-
+- Featured Table reads (2026-07-06): owner-curated standout comments, surfaced
+  as a pull-quote on the film page (`#featQuoteBlock`, between the verdict
+  scores and the synopsis) and pinned/badged first in the comment list
+  (`.cmt.featured`, `.feat-tag`), plus a home shelf pulling featured reads
+  across films ("What the culture's saying", `culTalkSection`/`loadCulTalk`/
+  `culTalkCardHTML`). `comments` gained a `featured boolean` column (purely
+  additive, no existing policy touched); toggled only via the owner-gated
+  SECURITY DEFINER RPC `set_comment_featured` (owner login OR passphrase,
+  same pattern as `verify_critic`), called from `toggleCommentFeatured()`.
+  The ☆/★ toggle button in the comment list only renders for `isOwner()`;
+  everyone else just sees the read-only "★ Featured" badge. Nothing
+  auto-picked — a human chooses it, same bar as every other curation flag.
 - The Group Chat (community rooms) — PROTOTYPE. Per-show discussion boards for
   cult titles. Views `#/rooms` (index) + `#/room/<slug>` (`renderRooms`/
   `roomCardHTML`/`renderRoom`/`loadRoomPosts`/`roomPostHTML`/`postRoom`/

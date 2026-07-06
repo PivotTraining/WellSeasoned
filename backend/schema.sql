@@ -487,3 +487,35 @@ begin
 end $$;
 revoke all on function public.notify_user(uuid, text, text, text) from public;
 grant execute on function public.notify_user(uuid, text, text, text) to authenticated;
+
+-- ========================================================
+-- FEATURED TABLE READS  (owner-curated standout comments)
+-- applied live as migration comments_featured (2026-07-06)
+-- ========================================================
+-- Purely additive: a new column on the existing comments table plus a new
+-- SECURITY DEFINER RPC to flip it. No existing comments policy changes —
+-- comments_read/comments_insert above are untouched. Featured reads surface
+-- as a pull-quote on the film page and in the "What the culture's saying"
+-- home shelf. Nothing auto-picked; the owner chooses, same bar as every
+-- other curation override (flag/genre/scope). Verified live: a non-owner
+-- caller (wrong secret + non-owner JWT email) is rejected with
+-- "unauthorized"; the owner's login (auth.jwt()->>'email' =
+-- hello@pivottraining.us) succeeds even with a wrong/blank passphrase.
+alter table public.comments add column if not exists featured boolean not null default false;
+create index if not exists comments_featured_idx on public.comments (featured, created_at desc) where featured = true;
+
+create or replace function public.set_comment_featured(p_secret text, p_id bigint, p_on boolean)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare expected text; n int;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  update public.comments set featured = p_on where id = p_id and reported = false;
+  get diagnostics n = row_count;
+  return n > 0;
+end $$;
+revoke all on function public.set_comment_featured(text, bigint, boolean) from public;
+grant execute on function public.set_comment_featured(text, bigint, boolean) to anon, authenticated;
