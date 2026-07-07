@@ -60,8 +60,12 @@ Done and verified live:
 - Analytics: first-party `events` table via `track()`; film/actor/actress
   leaderboards; showtimes; share cards; critic pipeline
   (`verify_critic` RPC, `kitchen_scores` view).
-- Home shelves rotate per visit (`seededShuffle`/`HOME_SEED`, one seed per
-  page load; sorted/canon shelves keep their order). Browse grid fixed 4-col
+- Home shelves rotate weekly, not per page load (2026-07-07: `HOME_SEED` was
+  pure-random per load, meaning a reload mid-session could reshuffle under a
+  returning visitor and different visitors saw different sets at the same
+  moment; now derived from the ISO-ish week number so the pick holds steady
+  for everyone all week, then rotates the following week). `seededShuffle`
+  unchanged; sorted/canon shelves keep their order. Browse grid fixed 4-col
   (`.grid-cards`, steps 4→3→2). Tubi shelf shows 18.
 - Coming Soon (`renderSoon`, `COMING_SOON` array): every upcoming film is
   clickable to a detail page (`renderSoonDetail`, routed via `cs-*` ids

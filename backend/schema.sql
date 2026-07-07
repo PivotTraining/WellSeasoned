@@ -519,3 +519,67 @@ begin
 end $$;
 revoke all on function public.set_comment_featured(text, bigint, boolean) from public;
 grant execute on function public.set_comment_featured(text, bigint, boolean) to anon, authenticated;
+
+-- ========================================================
+-- THE WORD  (editorial articles) — was live but missing from this file;
+-- backfilled 2026-07-07 for parity, including the hero_pos column added the
+-- same day (migration articles_hero_position).
+-- ========================================================
+-- Public read of published pieces only. All writes go through the owner-
+-- gated SECURITY DEFINER RPCs below (same auth pattern as verify_critic/
+-- set_comment_featured) — no direct insert/update/delete grant to anon or
+-- authenticated, so a forged client call can't publish or alter a piece.
+create table if not exists public.articles (
+  id         bigint generated always as identity primary key,
+  slug       text not null unique,
+  title      text not null,
+  dek        text,
+  body       text not null,
+  author     text,
+  film_slug  text,
+  hero_image text,
+  hero_pos   text,   -- 'top' | 'center' | 'bottom' — vertical crop anchor for hero_image
+  published  boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.articles enable row level security;
+drop policy if exists articles_read on public.articles;
+create policy articles_read on public.articles for select using (published = true);
+
+create or replace function public.publish_article(p_secret text, p_article jsonb)
+returns text language plpgsql security definer set search_path = public as $$
+declare expected text; s text;
+begin
+  select value into expected from public.app_secrets where key='curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then raise exception 'unauthorized'; end if;
+  s := coalesce(nullif(p_article->>'slug',''), lower(regexp_replace(coalesce(p_article->>'title',''),'[^a-zA-Z0-9]+','-','g')));
+  s := trim(both '-' from s);
+  if s = '' then raise exception 'missing slug/title'; end if;
+  insert into public.articles as a (slug,title,dek,body,author,film_slug,hero_image,hero_pos,published,updated_at)
+  values (s, p_article->>'title', nullif(p_article->>'dek',''), coalesce(p_article->>'body',''),
+          nullif(p_article->>'author',''), nullif(p_article->>'film_slug',''), nullif(p_article->>'hero_image',''),
+          nullif(p_article->>'hero_pos',''),
+          coalesce((p_article->>'published')::boolean, true), now())
+  on conflict (slug) do update set
+    title=excluded.title, dek=excluded.dek, body=excluded.body, author=excluded.author,
+    film_slug=excluded.film_slug, hero_image=excluded.hero_image, hero_pos=excluded.hero_pos,
+    published=excluded.published, updated_at=now();
+  return s;
+end $$;
+revoke all on function public.publish_article(text, jsonb) from public;
+grant execute on function public.publish_article(text, jsonb) to anon, authenticated;
+
+create or replace function public.delete_article(p_secret text, p_slug text)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare expected text; n int;
+begin
+  select value into expected from public.app_secrets where key='curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then raise exception 'unauthorized'; end if;
+  delete from public.articles where slug=p_slug; get diagnostics n=row_count; return n>0;
+end $$;
+revoke all on function public.delete_article(text, text) from public;
+grant execute on function public.delete_article(text, text) to anon, authenticated;

@@ -534,7 +534,9 @@
   .sc-copy{background:var(--inset);color:var(--ink);border:1.5px solid var(--line-strong)}
   /* THE WORD (editorial) */
   .word-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
-  .word-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-2);cursor:pointer;transition:transform .16s,box-shadow .16s;color:inherit}
+  .word-card{position:relative;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-2);cursor:pointer;transition:transform .16s,box-shadow .16s;color:inherit}
+  .wc-edit{position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;border-radius:50%;border:none;background:rgba(20,13,5,.65);color:var(--gold);font-size:13px;cursor:pointer;display:grid;place-items:center}
+  .wc-edit:hover{background:rgba(20,13,5,.85)}
   .word-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
   .wc-hero{aspect-ratio:16/9;background-size:cover;background-position:center;background-color:var(--inset)}
   .wc-hero-none{display:grid;place-items:center;background:linear-gradient(135deg,#3a1e0a,#120a03)}
@@ -5344,12 +5346,19 @@ function curRefresh(){
 /* ============ HOME RENDER ============ */
 var HOME_SORT='new';   // curated | popular | new — default 'new' so the top rows open on the newest titles
 function setHomeSort(v){ HOME_SORT=v; renderHome(); }
-/* Rotate the shelves so home doesn't look identical every visit. One seed per
-   page load: stable across in-session re-renders (scope toggles, nav-back) so
-   nothing jumps under the user, but fresh each new visit/reload. Order-less
+/* Rotate the shelves on a weekly cadence, not a fresh shuffle on every single
+   page load/reload — the seed is derived from the ISO-ish week number, so the
+   same picks hold steady for everyone all week (consistent to share/return
+   to), then the pool rotates to a new set the following week. Order-less
    shelves get shuffled; dated/sorted shelves (Newest, Most voted, canon) keep
    their meaning — we only widen the pool and sample. */
-var HOME_SEED=(function(){ try{ return (Math.floor(Math.random()*2147483647))||1; }catch(e){ return 20260702; } })();
+var HOME_SEED=(function(){
+  try{
+    var d=new Date(), jan1=new Date(d.getFullYear(),0,1);
+    var week=Math.ceil((((d-jan1)/86400000)+jan1.getDay()+1)/7);
+    return (d.getFullYear()*100+week)||20260702;
+  }catch(e){ return 20260702; }
+})();
 function seededShuffle(arr,seed){
   var a=arr.slice(), s=(seed||HOME_SEED)>>>0;
   for(var i=a.length-1;i>0;i--){
@@ -7244,7 +7253,7 @@ function paintArtist(d){
 var ARTICLES=null, _articleBySlug={};
 function loadArticles(cb){
   if(!sbConfigured()){ if(cb)cb([]); return; }
-  fetch(SUPABASE_URL+'/rest/v1/articles?published=eq.true&select=slug,title,dek,author,film_slug,hero_image,created_at&order=created_at.desc&limit=50',{headers:sbHeaders()})
+  fetch(SUPABASE_URL+'/rest/v1/articles?published=eq.true&select=slug,title,dek,author,film_slug,hero_image,hero_pos,created_at&order=created_at.desc&limit=50',{headers:sbHeaders()})
     .then(function(r){return r.json();}).then(function(rows){
       ARTICLES=Array.isArray(rows)?rows:[];
       ARTICLES.forEach(function(a){ if(!_articleBySlug[a.slug]) _articleBySlug[a.slug]=a; });
@@ -7253,8 +7262,9 @@ function loadArticles(cb){
 }
 function artDate(s){ if(!s)return ''; var p=String(s).slice(0,10).split('-'); if(p.length<3)return ''; var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
 function articleCard(a){
-  var img=a.hero_image?'<div class="wc-hero" style="background-image:url(\''+esc(a.hero_image)+'\')"></div>':'<div class="wc-hero wc-hero-none"><span>The Word</span></div>';
-  return '<a class="word-card" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+img+
+  var img=a.hero_image?'<div class="wc-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"></div>':'<div class="wc-hero wc-hero-none"><span>The Word</span></div>';
+  var edit=isOwner()?'<button class="wc-edit" title="Edit this piece" onclick="event.stopPropagation();event.preventDefault();openArticleEditor(\''+esc(a.slug)+'\')">✎</button>':'';
+  return '<a class="word-card" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+edit+img+
     '<div class="wc-body"><div class="wc-ttl">'+esc(a.title)+'</div>'+
     (a.dek?'<div class="wc-dek">'+esc(a.dek)+'</div>':'')+
     '<div class="wc-meta">'+(a.author?esc(a.author)+' · ':'')+artDate(a.created_at)+'</div></div></a>';
@@ -7288,12 +7298,12 @@ function renderRead(slug){
   var el=byId('readContent');
   function paint(a){
     var f=a.film_slug?find(a.film_slug):null;
-    var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\')"><div class="read-hero-scrim"></div></div>':'';
+    var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div></div>':'';
     el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
       hero+
       '<article class="read-body"><span class="eyebrow">The Word</span><h1 class="read-ttl">'+esc(a.title)+'</h1>'+
       (a.dek?'<p class="read-dek">'+esc(a.dek)+'</p>':'')+
-      '<div class="read-meta">'+(a.author?'By '+esc(a.author)+' · ':'')+artDate(a.created_at)+'</div>'+
+      '<div class="read-meta">'+(a.author?'By '+esc(a.author)+' · ':'')+artDate(a.created_at)+(isOwner()?' · <a onclick="openArticleEditor(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">✎ Edit</a>':'')+'</div>'+
       (f?'<a class="read-filmlink" onclick="go(\'film\',\''+esc(f.id)+'\')">On the film: '+esc(f.title)+' →</a>':'')+
       '<div class="read-copy">'+mdToHtml(a.body)+'</div></article>';
     setDocMeta(a.title+' — Well Seasoned', a.dek||'A read from Well Seasoned.', '#/read/'+encodeURIComponent(a.slug), a.hero_image||(f&&f.poster)||null);
@@ -7303,23 +7313,41 @@ function renderRead(slug){
   if(cached && cached.body!=null){ paint(cached); return; }
   el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Loading…</p>';
   if(!sbConfigured()){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Reads need the backend connection.</p>'; return; }
-  fetch(SUPABASE_URL+'/rest/v1/articles?slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&select=slug,title,dek,author,film_slug,hero_image,body,created_at',{headers:sbHeaders()})
+  fetch(SUPABASE_URL+'/rest/v1/articles?slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&select=slug,title,dek,author,film_slug,hero_image,hero_pos,body,created_at',{headers:sbHeaders()})
     .then(function(r){return r.json();}).then(function(rows){
       var a=rows&&rows[0]; if(!a){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">That piece isn’t here. It may have moved.</p>'; return; }
       _articleBySlug[slug]=a; paint(a);
     }).catch(function(){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t load this read right now.</p>'; });
 }
-/* Admin: write/edit a Word (passphrase-gated publish_article RPC) */
+/* Admin: write/edit a Word (passphrase-gated publish_article RPC). Fetches
+   the full row (with body) first if only the list-shape copy is cached —
+   editing straight from a card/list previously risked publishing over the
+   body with blank text since that cache never carried it. */
 function openArticleEditor(slug){
   if(!isOwner()){ toast('Owner only — sign in as '+OWNER_EMAIL+'.'); return; }
+  if(slug && (!_articleBySlug[slug] || _articleBySlug[slug].body==null)){
+    if(!sbConfigured()){ toast('Backend not connected.'); return; }
+    fetch(SUPABASE_URL+'/rest/v1/articles?slug=eq.'+encodeURIComponent(slug)+'&select=slug,title,dek,author,film_slug,hero_image,hero_pos,body,created_at',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        var a=rows&&rows[0]; if(!a){ toast('Couldn’t load that piece.'); return; }
+        _articleBySlug[slug]=a; paintArticleEditor(slug);
+      }).catch(function(){ toast('Network error.'); });
+    return;
+  }
+  paintArticleEditor(slug);
+}
+function paintArticleEditor(slug){
   var a=slug?(_articleBySlug[slug]||{}):{};
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>'+(slug?'Edit':'Write')+' a Word</h2><p class="m-sub">Publishes to The Word for everyone. Markdown: <b>## heading</b>, <b>**bold**</b>, <b>*italic*</b>, <b>- list</b>, <b>[text](url)</b>.</p>'+
     '<div class="field"><label for="arTitle">Title</label><input id="arTitle" value="'+esc(a.title||'')+'" placeholder="Headline"></div>'+
     '<div class="field"><label for="arDek">Dek (subtitle)</label><input id="arDek" value="'+esc(a.dek||'')+'" placeholder="One line under the headline"></div>'+
-    '<div class="field"><label for="arAuthor">Author</label><input id="arAuthor" value="'+esc(a.author||app.name||'')+'" placeholder="Byline"></div>'+
+    '<div class="field"><label for="arAuthor">Author</label><input id="arAuthor" value="'+esc(a.author||'The Founder')+'" placeholder="Byline"></div>'+
     '<div class="field"><label for="arFilm">Film id (optional)</label><input id="arFilm" value="'+esc(a.film_slug||'')+'" placeholder="e.g. sinners — links the piece to a film"></div>'+
     '<div class="field"><label for="arHero">Hero image URL (optional)</label><input id="arHero" value="'+esc(a.hero_image||'')+'" placeholder="https://…"></div>'+
+    '<div class="field"><label for="arHeroPos">Hero image focus</label><select id="arHeroPos">'+
+      ['top','center','bottom'].map(function(p){ return '<option value="'+p+'"'+((a.hero_pos||'center')===p?' selected':'')+'>'+p.charAt(0).toUpperCase()+p.slice(1)+'</option>'; }).join('')+
+      '</select><span class="cbox-hint" style="display:block;margin-top:4px">If a face gets cropped on the banner, switch this to Top.</span></div>'+
     '<div class="field"><label for="arBody">Body</label><textarea id="arBody" rows="12" style="min-height:220px" placeholder="Write it. Leave a blank line between paragraphs.">'+esc(a.body||'')+'</textarea></div>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
       '<button class="btn btn-gold" onclick="doPublishArticle('+(slug?'\''+esc(slug)+'\'':'null')+')">Publish</button>'+
@@ -7338,7 +7366,8 @@ function doPublishArticle(slug){
   if(!title){ toast('Give it a title.'); return; }
   if(!body.replace(/^\s+|\s+$/g,'')){ toast('Write something first.'); return; }
   var art={ title:title, dek:(byId('arDek')||{}).value||'', author:(byId('arAuthor')||{}).value||'',
-    film_slug:(byId('arFilm')||{}).value||'', hero_image:(byId('arHero')||{}).value||'', body:body, published:true };
+    film_slug:(byId('arFilm')||{}).value||'', hero_image:(byId('arHero')||{}).value||'',
+    hero_pos:(byId('arHeroPos')||{}).value||'center', body:body, published:true };
   if(slug)art.slug=slug;
   fetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
     body:JSON.stringify({p_secret:_adminSecretQuiet(),p_article:art})})
