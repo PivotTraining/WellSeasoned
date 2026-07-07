@@ -7286,6 +7286,18 @@ function loadArticles(cb){
     }).catch(function(){ ARTICLES=ARTICLES||[]; if(cb)cb(ARTICLES); });
 }
 function artDate(s){ if(!s)return ''; var p=String(s).slice(0,10).split('-'); if(p.length<3)return ''; var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
+/* The pretty, server-rendered form — /read/<slug> (api/read.js) — carries the
+   piece's OWN title/image in the link preview. The raw #/read/<slug> hash
+   never reaches a server, so a share/copy from the address bar always falls
+   back to the generic homepage card; this is the form to hand out instead. */
+function readShareUrl(slug){ return 'https://itswellseasoned.com/read/'+encodeURIComponent(slug); }
+function shareRead(slug){
+  var u=readShareUrl(slug), a=_articleBySlug[slug], title=(a&&a.title)||'Well Seasoned';
+  if(navigator.share){ navigator.share({title:title,text:title+' — Well Seasoned',url:u}).catch(function(){}); return; }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(u).then(function(){ toast('Link copied — share it.'); },function(){ toast(u); }); }
+  else toast(u);
+  try{ track('article_share',{slug:slug}); }catch(e){}
+}
 function articleCard(a){
   var img=a.hero_image?'<div class="wc-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"></div>':'<div class="wc-hero wc-hero-none"><span>The Word</span></div>';
   var edit=isOwner()?'<button class="wc-edit" title="Edit this piece" onclick="event.stopPropagation();event.preventDefault();openArticleEditor(\''+esc(a.slug)+'\')">✎</button>':'';
@@ -7328,7 +7340,9 @@ function renderRead(slug){
       hero+
       '<article class="read-body"><span class="eyebrow">The Word</span><h1 class="read-ttl">'+esc(a.title)+'</h1>'+
       (a.dek?'<p class="read-dek">'+esc(a.dek)+'</p>':'')+
-      '<div class="read-meta">'+(a.author?'By '+esc(a.author)+' · ':'')+artDate(a.created_at)+(isOwner()?' · <a onclick="openArticleEditor(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">✎ Edit</a>':'')+'</div>'+
+      '<div class="read-meta">'+(a.author?'By '+esc(a.author)+' · ':'')+artDate(a.created_at)+
+        ' · <a onclick="shareRead(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Share ↗</a>'+
+        (isOwner()?' · <a onclick="openArticleEditor(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">✎ Edit</a>':'')+'</div>'+
       (f?'<a class="read-filmlink" onclick="go(\'film\',\''+esc(f.id)+'\')">On the film: '+esc(f.title)+' →</a>':'')+
       '<div class="read-copy">'+mdToHtml(a.body)+'</div></article>';
     setDocMeta(a.title+' — Well Seasoned', a.dek||'A read from Well Seasoned.', '#/read/'+encodeURIComponent(a.slug), a.hero_image||(f&&f.poster)||null);
