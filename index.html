@@ -4371,8 +4371,11 @@ function cardPreviewOut(el){
 }
 
 /* ============ STATE + PERSISTENCE ============ */
-/* app.votes[id]='for'|'against' (this device's pick). app.tally[id]={for,against} overrides seed.
-   app.comments[id]=[...] are reads added on this device, prepended to the seeds. */
+/* app.votes[id]='for'|'against' (this identity's pick — device-local until a
+   signed-in session reconciles it against the backend via loadMyVotes(), so
+   the same account reads the same stance on every device). app.tally[id]=
+   {for,against} overrides seed. app.comments[id]=[...] are reads added on
+   this device, prepended to the seeds. */
 var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}, myWatch:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
@@ -6178,6 +6181,28 @@ function loadAllBackendVotes(){
         });
         saveState();
         rerenderActive();
+      }).catch(function(){});
+  }catch(e){}
+}
+/* Pull THIS signed-in identity's own recorded stance per film, so a real
+   account reads the same votes on every device instead of each device only
+   ever knowing about the votes it personally cast. Without this, app.votes
+   was purely local-device memory: signing into the same account on a second
+   device showed no vote at all there, and tapping a stance again read as a
+   brand-new vote (applyVote's `prev` came back undefined), which both
+   phantom-inflated that device's local tally until the next full refresh
+   AND could silently flip your recorded stance without you ever seeing what
+   it previously was. Only overwrites slugs the server actually has a row
+   for — never wipes a not-yet-synced local vote. */
+function loadMyVotes(){
+  if(!sbConfigured())return;
+  var uid=myUid(); if(!uid)return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/votes?user_id=eq.'+encodeURIComponent(uid)+'&select=film_slug,stance',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows)||!rows.length)return;
+        rows.forEach(function(r){ if(r.stance==='for'||r.stance==='against') app.votes[r.film_slug]=r.stance; });
+        saveState(); rerenderActive();
       }).catch(function(){});
   }catch(e){}
 }
@@ -8004,7 +8029,7 @@ function authApply(session){
     }
   }
   saveState(); renderAuthSlot();
-  if(!app.anon){ loadMyProfile(); loadMyApplication(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
+  if(!app.anon){ loadMyProfile(); loadMyApplication(); loadMyVotes(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
 }
 function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; _identityPromise=null; _plateSynced=false; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
@@ -8129,14 +8154,14 @@ function authRestore(){
     if(!anon0){ app.signedIn=true; if(s.user){ var m0=s.user.user_metadata||{}; app.name=app.name||m0.name||''; app.email=s.user.email||''; } }
     renderAuthSlot();
     doTokenRefresh(s.refresh_token).then(function(d){ if(d)authApply(normalizeSession(d)); else authClearLocal(); });
-    if(!anon0){ loadMyProfile(); loadMyApplication(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
+    if(!anon0){ loadMyProfile(); loadMyApplication(); loadMyVotes(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
   } else {
     authSession=s;
     var anon=!!(s.user&&s.user.is_anonymous);
     app.anon=anon; app.userId=(s.user&&s.user.id)||'';
     if(!anon){ app.signedIn=true; if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; } }
     renderAuthSlot();
-    if(!anon){ loadMyProfile(); loadMyApplication(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
+    if(!anon){ loadMyProfile(); loadMyApplication(); loadMyVotes(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
   }
 }
 /* Give every visitor a silent, real identity so votes tie to auth.uid() (forge-proof,
