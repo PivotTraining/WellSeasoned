@@ -315,3 +315,71 @@ Waiting on owner to go live:
    Environment Variables.
 5. Redeploy, then click "Become a member" on `#/join` end-to-end to confirm
    a real Checkout Session opens and completes.
+
+## Fandango ticket unit (scaffolded, CJ_PID not set)
+Built 2026-07-08: a persistent "Get tickets" block (`ticketBlockHTML(f)`,
+index.html) now attaches directly to a film page's content — not just the
+existing small "Showtimes" chip in the Where-to-watch row — for any title
+currently in its theatrical window (`!f.noart && f.type!=='tv' &&
+f.year>=<currentYear>`, same test `renderTheaters()` already uses). Never
+shows on back-catalog or TV titles — a ticket CTA implying a nonexistent
+theatrical run would violate "nothing fake." Label is deliberately its own
+attribution line ("Powered by Fandango"), never blended into the button
+copy, synopsis, or review voice — owner's explicit direction was to build
+volume/relationship with Fandango honestly now, toward negotiating direct
+terms (or owning ticketing outright) later, not to disguise it as editorial
+content. Clicking "Get tickets" opens the existing `openShowtimes()` modal
+unchanged (ZIP/city search → `/api/showtimes`, SerpApi-backed, honest empty
+state when unconfigured).
+
+`CJ_PID` (index.html, near `fandangoUrl`) is the CJ Affiliate publisher ID
+that turns every outbound Fandango link into a commission-tracked deep link.
+Unlike Stripe/SerpApi, this is NOT a secret — a CJ PID rides in the visible
+outbound URL by design — so there's no server-side config-gating needed.
+Waiting on owner:
+1. Apply to / get approved for the CJ Affiliate program (Fandango's network).
+2. Get the publisher ID (PID) from the CJ dashboard.
+3. Paste it into `CJ_PID` in index.html.
+4. Redeploy — every "Get tickets"/"Tickets on Fandango ↗" link site-wide
+   becomes commission-tracked automatically, no other code changes.
+
+## Advertise / rate card + media kit
+Built 2026-07-08: `#/advertise` (`renderAdvertise()`, `ADVERTISE_TIERS`,
+index.html) — a live rate-card page for prospective sponsors, footer-linked
+only (not main nav, to stay non-ad-forward for the other 99% of visitors).
+States the brand rule plainly ("We only work with Black-owned media and
+brands. No exceptions, no ad networks, no cross-site tracking") — this in no
+way contradicts the Privacy Policy's "no third-party advertising or
+cross-site tracking cookies" line, since sponsorships here are
+placement-based/relationship-based (a labeled "Presented by" tag, a tagged
+carousel slot), never a third-party ad network or tracker. Pricing is
+placement-based ($/week or $/month per shelf/slot), not CPM — the site
+doesn't have big public traffic numbers yet, and the honest-metrics strip on
+the page deliberately shows qualitative positioning (catalog size via live
+`FILMS.length`, zero-ad-network stance) rather than inventing traffic
+figures, matching the same "never bake in a number that isn't real" rule
+already applied to vote tallies.
+
+Four tiers (`ADVERTISE_TIERS`): Shelf Sponsor ("Presented By"), Featured
+Carousel Slot (tags into the existing home `FEATURED` array — sponsored
+slides must stay visually tagged and human-reviewed, never blended into
+editorial voice), Newsletter Mention (marked "Coming soon" — no active
+outbound send capability yet, don't sell what doesn't exist), and a bespoke
+Custom/Data Partnership tier pointing at the long-term aggregate
+audience-sentiment data product from the monetization plan above. Each tier
+has two CTAs: "Request the media kit" (reuses the existing `signups` table
+via `submitSignup(email,'advertise',cb)` — zero schema change) and a direct
+`mailto:` inquiry (same no-backend-spam-surface pattern as
+`notifyContributor`).
+
+Downloadable one-pager: no separate document/PDF generator — a
+"Download media kit ↓" button calls `window.print()` (native Save-as-PDF).
+`@media print` CSS (scoped to `.advertise-print`) hides nav/tabbar/footer
+and print-only chrome (`.adprint-hide`) so the printed output is just the
+rate card. Single content source (`ADVERTISE_TIERS`) means the live page and
+the printable version can never drift apart.
+
+Shareable link: `/advertise` (`api/advertise.js`, mirrors `api/apply.js`)
+serves its own OG/Twitter preview so a link the owner DMs to a prospective
+sponsor doesn't show the generic homepage card, then bounces humans to
+`#/advertise`.

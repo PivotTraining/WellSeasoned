@@ -485,6 +485,9 @@
   .room-where .where-lab{color:rgba(246,236,215,.72)}
   .room-where .svc-all,.room-where .svc-show{cursor:pointer;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.12);color:#fff}
   .room-where .svc-all:hover,.room-where .svc-show:hover{background:rgba(255,255,255,.2)}
+  .ticket-block{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;padding:10px 14px;background:rgba(228,155,11,.14);border:1px solid rgba(228,155,11,.4);border-radius:var(--r)}
+  .ticket-ey{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-soft)}
+  .ticket-via{font-size:12px;color:rgba(246,236,215,.7)}
   .film-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
   .btn-ghost.light{border-color:rgba(255,255,255,.42);color:#fff;background:rgba(255,255,255,.08)}
   .btn-ghost.light:hover{border-color:var(--gold-soft);color:var(--gold-soft)}
@@ -802,6 +805,21 @@
   .plan li{font-size:14px;display:flex;gap:8px;align-items:flex-start}
   .plan li svg{flex:none;margin-top:3px}
   .plan .btn{margin-top:auto}
+  .plan .btn+.btn{margin-top:8px}
+
+  /* ============ ADVERTISE ============ */
+  .ad-metrics{display:flex;flex-wrap:wrap;gap:22px;margin:20px 0 6px;padding:18px 20px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg)}
+  .ad-metric{display:flex;flex-direction:column;gap:2px}
+  .ad-metric b{font-family:var(--display);font-size:26px;font-weight:800;color:var(--gold-ink)}
+  .ad-metric span{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+  .ad-rule{font-size:13px;color:var(--ink-2);margin:22px 0 18px;text-align:center}
+  @media print{
+    .topnav,.tabbar,footer,.legend-dock,.toast-wrap{display:none!important}
+    .advertise-print{color:#111;background:#fff}
+    .advertise-print .adprint-hide{display:none!important}
+    .advertise-print .plan{break-inside:avoid;border-color:#999;box-shadow:none}
+    .advertise-print .ad-metrics{border-color:#999}
+  }
 
   /* ============ RANKINGS ============ */
   .rank-toggle{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 18px}
@@ -1456,6 +1474,11 @@
     </div>
   </section>
 
+  <!-- ============ ADVERTISE (rate card / media kit) ============ -->
+  <section class="view" data-view="advertise" aria-label="Advertise">
+    <div class="wrap" id="advertiseContent"></div>
+  </section>
+
   <!-- ============ THE VAULT ============ -->
   <section class="view" data-view="vault" aria-label="The Vault">
     <div class="wrap" id="vaultContent"></div>
@@ -1614,7 +1637,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -4585,7 +4608,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,rooms:1,room:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,rooms:1,room:1,advertise:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -4631,6 +4654,7 @@ function render(view,arg){
   else if(view==='room')renderRoom(arg);
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
+  else if(view==='advertise')renderAdvertise();
   if(view!=='film'&&view!=='legal')applyMetaTags(view);
   track('view',{view:view});
 }
@@ -5832,6 +5856,7 @@ function renderFilm(id){
             '<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
               '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
               (f.type!=='tv'?'<button class="svc svc-show" onclick="openShowtimes(\''+f.id+'\')">Showtimes</button>':'')+'</div>'+
+            ticketBlockHTML(f)+
             '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="openShareCard(\''+f.id+'\')">Share</button></div>'+
             myWatchWidgetHTML(f)+
           '</div>'+
@@ -7260,6 +7285,22 @@ function fandangoUrl(title){
   return CJ_PID ? 'https://www.anrdoezrs.net/links/'+CJ_PID+'/type/dlg/'+dest : dest;
 }
 
+/* Persistent "Get tickets" block on the film page — attaches the Fandango
+   affiliate flow directly to the content, not just a button buried in the
+   Where-to-watch row. Only for films actually in their theatrical window
+   (same test renderTheaters() uses) — a ticket CTA on a back-catalog or
+   streaming-only title would imply a theatrical run that doesn't exist.
+   Label is deliberately its own attribution line, never blended into the
+   button copy or synopsis, so it never reads as editorial content. */
+function ticketBlockHTML(f){
+  var now=new Date().getFullYear();
+  if(f.noart||f.type==='tv'||f.year<now) return '';
+  return '<div class="ticket-block">'+
+    '<span class="ticket-ey">🎟 In theaters now</span>'+
+    '<button class="btn btn-gold btn-sm" onclick="openShowtimes(\''+f.id+'\')">Get tickets</button>'+
+    '<span class="ticket-via">Powered by Fandango</span>'+
+  '</div>';
+}
 /* SHOWTIMES_PROVIDER is set in the CONFIG block at the top. Empty = sample fallback. */
 function openShowtimes(id){
   var f=find(id);
@@ -7868,6 +7909,77 @@ function renderYou(){
   el.innerHTML='<div class="you-hero">'+av+'<div><h1>'+esc(app.name||'Your table')+'</h1><p class="you-sub">Signed in on this device. <a onclick="signOut()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Sign out</a></p></div></div>'+
     '<div class="you-stats"><div class="ys"><b>'+plateFilms.length+'</b><span>On My Plate</span></div><div class="ys"><b>'+voteIds.length+'</b><span>Films voted</span></div><div class="ys"><b>'+reads+'</b><span>Reads posted</span></div></div>'+
     kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+seenBlock()+voteBlock(voteIds);
+}
+
+/* ================= ADVERTISE: rate card / media kit ================= */
+/* Placement-based pricing, not fabricated CPM/traffic numbers — the site
+   doesn't have big public traffic figures yet, and inventing them would
+   break the "nothing fake" rule same as a fake vote count would. This data
+   object is the single source of truth for both the live page and the
+   print/PDF one-pager (see .advertise-print CSS) so they can never drift. */
+var ADVERTISE_TIERS=[
+  {name:'Shelf Sponsor', tag:'Presented By', price:'$/week or $/month', feature:false,
+   note:'A clearly-labeled "Presented by [Brand]" tag on one themed shelf (a Vault collection, a genre rail) for a defined run.',
+   items:['One shelf, one sponsor at a time — never stacked','Swappable weekly or monthly','Logo + brand name + link, badge styled to match the site']},
+  {name:'Featured Carousel Slot', tag:'Most visible', price:'$/month', feature:true,
+   note:'One slide in the home page spotlight carousel, alongside genuinely-editorial picks — clearly tagged "Sponsored," never blended into the editorial voice.',
+   items:['Limited to keep the carousel genuinely editorial-first','Human-reviewed before it goes live, same bar as every other placement','Black-owned media/brands only']},
+  {name:'Newsletter Mention', tag:'Coming soon', price:'—', feature:false,
+   note:'A mention in the Well Seasoned email newsletter, once regular sends are live.',
+   items:['Not yet available — email infrastructure is in progress','Reach out to be first in line']},
+  {name:'Custom / Data Partnership', tag:'Bespoke', price:'Let’s talk', feature:false,
+   note:'Building something bigger — a research or licensing partnership around aggregate, anonymized audience sentiment? Let’s talk specifics.',
+   items:['Privacy-safe, aggregate data only — never individual user data','Built for studios, distributors, and researchers']}
+];
+function advertiseMetricsHTML(){
+  return '<div class="ad-metrics">'+
+    '<div class="ad-metric"><b>'+fmt(FILMS.length)+'</b><span>Verified titles in the catalog</span></div>'+
+    '<div class="ad-metric"><b>0</b><span>Non-Black advertisers, ever</span></div>'+
+    '<div class="ad-metric"><b>0</b><span>Third-party trackers or ad networks</span></div>'+
+  '</div>';
+}
+function advertiseTierHTML(t){
+  return '<div class="plan'+(t.feature?' feature':'')+'">'+
+    (t.tag?'<span class="p-tag">'+esc(t.tag)+'</span>':'')+
+    '<h3>'+esc(t.name)+'</h3><div class="p-price">'+esc(t.price)+'</div>'+
+    '<p class="p-note">'+esc(t.note)+'</p>'+
+    '<ul>'+t.items.map(function(li){
+      return '<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>'+esc(li)+'</li>';
+    }).join('')+'</ul>'+
+    '<button class="btn btn-gold btn-sm" onclick="openAdvertiseInquiry('+JSON.stringify(t.name)+')">Request the media kit</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="emailAdvertiseInquiry('+JSON.stringify(t.name)+')">Email us directly</button>'+
+  '</div>';
+}
+function renderAdvertise(){
+  var el=byId('advertiseContent'); if(!el)return;
+  el.innerHTML='<div class="advertise-print">'+
+    '<div class="browse-head"><span class="eyebrow">For Black-owned media &amp; brands</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Reach the culture that shows up.</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Well Seasoned is where Black film and TV get scored honestly — by verified critics and the community, together. No non-Black advertising, ever. If that’s your brand too, let’s talk.</p></div>'+
+    advertiseMetricsHTML()+
+    '<div class="plans">'+ADVERTISE_TIERS.map(advertiseTierHTML).join('')+'</div>'+
+    '<p class="ad-rule">We only work with Black-owned media and brands. No exceptions, no ad networks, no cross-site tracking.</p>'+
+    '<button class="btn btn-ghost adprint-hide" onclick="window.print()">Download media kit ↓</button>'+
+    '<p class="cbox-hint adprint-hide">Opens your browser’s print dialog — choose “Save as PDF.”</p>'+
+  '</div>';
+}
+/* Lead capture reuses the existing signups table (source column already
+   exists, zero schema change) — same as the footer/waitlist email capture. */
+function openAdvertiseInquiry(tier){
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Request the media kit</h2><p class="m-sub">'+(tier?esc(tier)+' — ':'')+'we’ll follow up with pricing and specs.</p>'+
+    '<div class="cbox"><input id="adEmail" type="email" placeholder="you@brand.com" aria-label="Email">'+
+    '<div class="cbox-row"><span class="cbox-hint">Human-reviewed, no spam.</span><button class="btn btn-gold btn-sm" onclick="doAdvertiseInquiry()">Send</button></div></div>');
+}
+function doAdvertiseInquiry(){
+  var e=byId('adEmail')?byId('adEmail').value.trim():'';
+  submitSignup(e,'advertise',function(ok){ if(ok)closeModal(); });
+}
+/* No backend at all — same "no spam surface" pattern as notifyContributor. */
+function emailAdvertiseInquiry(tier){
+  var subj='Advertise on Well Seasoned — '+tier;
+  var body='Hi,\n\nI’m interested in the "'+tier+'" placement on Well Seasoned. A bit about us:\n\nCompany:\nBrand/outlet:\nBudget range:\n\nLooking forward to talking.';
+  window.location.href='mailto:hello@itswellseasoned.com?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
 
 /* ================= LEGAL: Privacy Policy + Terms ================= */

@@ -6,6 +6,7 @@
     { "source": "/f/:id", "destination": "/api/f?id=:id" },
     { "source": "/apply/:role", "destination": "/api/apply?role=:role" },
     { "source": "/apply", "destination": "/api/apply?role=critic" },
-    { "source": "/read/:slug", "destination": "/api/read?slug=:slug" }
+    { "source": "/read/:slug", "destination": "/api/read?slug=:slug" },
+    { "source": "/advertise", "destination": "/api/advertise" }
   ]
 }
