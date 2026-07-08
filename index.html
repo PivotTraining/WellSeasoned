@@ -291,6 +291,9 @@
   .hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:14px}
   .hero-top h1{font-size:clamp(28px,4vw,44px)}
   .hero-top .hero-lead{color:var(--ink-2);font-size:16.5px;margin-top:10px;max-width:52ch;line-height:1.5}
+  .catalog-count{display:inline-flex;align-items:baseline;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .catalog-count b{font-family:var(--display);font-size:23px;font-weight:800;color:var(--gold-ink);letter-spacing:-.01em}
+  .catalog-count span{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
   /* teaching strip */
   .teach{display:flex;align-items:center;gap:18px;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid rgba(40,26,10,.10);border-left:4px solid var(--gold);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:22px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,251,240,.8);flex-wrap:wrap}
   .hero-top .hero-lead{padding-right:8px}
@@ -1281,6 +1284,7 @@
             <span class="eyebrow">Focus this week</span>
             <h1>What the culture is watching now.</h1>
             <p class="hero-lead">Two verdicts on every film. The Kitchen is verified critics of the culture. The Table is the community that bought the ticket.</p>
+            <div class="catalog-count" id="catalogCount"></div>
           </div>
         </div>
         <section id="freedomSection" class="freedom" style="display:none">
@@ -5589,7 +5593,14 @@ function featSet(i){ var n=featSlides().length; if(!n)return; _featIdx=((i%n)+n)
 function featGo(d){ featSet(_featIdx+d); }
 function featPlay(){ featPause(); if(featSlides().length<2)return; _featTimer=setInterval(function(){ featGo(1); },6500); }
 function featPause(){ if(_featTimer){ clearInterval(_featTimer); _featTimer=null; } }
+/* Small, honest catalog-size counter on the home hero — just FILMS.length,
+   never a separate hand-maintained number that can drift out of sync. */
+function paintCatalogCount(){
+  var el=byId('catalogCount'); if(!el)return;
+  el.innerHTML='<b>'+fmt(FILMS.length)+'</b><span>Films &amp; shows, and counting</span>';
+}
 function renderHome(){
+  paintCatalogCount();
   paintFeatured();
   paintFreedom();
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
