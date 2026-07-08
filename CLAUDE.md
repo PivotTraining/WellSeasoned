@@ -183,19 +183,26 @@ Done and verified live:
   The ☆/★ toggle button in the comment list only renders for `isOwner()`;
   everyone else just sees the read-only "★ Featured" badge. Nothing
   auto-picked — a human chooses it, same bar as every other curation flag.
-- The Group Chat (community rooms) — PROTOTYPE. Per-show discussion boards for
-  cult titles. Views `#/rooms` (index) + `#/room/<slug>` (`renderRooms`/
-  `roomCardHTML`/`renderRoom`/`loadRoomPosts`/`roomPostHTML`/`postRoom`/
-  `delRoomPost`, `ROOMS` list, `.room-*` CSS). Nav link "Group Chat". Backed by
-  `room_posts` (Supabase, free tier — no new cost) + `room_counts` view. Same
-  integrity model as votes/comments: read-all, insert only as `user_id =
-  auth.uid()` (forged rejected — verified), owner delete. Posting rides
-  `ensureIdentityThen`/`sbVoteHeaders` (silent-anon ok). Rooms start empty
-  ("be the first") — nothing seeded/fake. To change the lineup edit `ROOMS`.
-  Moderation: `reported bool` on `room_posts`, reads filter `reported=is.false`,
-  a Flag action on others' posts calls `report_room_post(p_id)` (SECURITY
-  DEFINER) — one flag hides the post pending review (mirrors comment reporting);
-  owner deletes own posts. Nav-listed; say the word to unlist for a soft launch.
+- The Group Chat (community rooms) — REMOVED from the site 2026-07-08 (owner
+  request, swapped for "On The Couch"). Was per-show discussion boards for
+  cult titles at `#/rooms`/`#/room/<slug>`; all client-side routing, markup,
+  CSS, and JS (`renderRooms`/`roomCardHTML`/`renderRoom`/`loadRoomPosts`/
+  `roomPostHTML`/`postRoom`/`delRoomPost`, `ROOMS` list, `.room-*` CSS) were
+  deleted. `roomAgo()` survived the cut — it's also the notifications
+  dropdown's relative-time formatter. The Supabase backend (`room_posts`
+  table, `room_counts` view, `report_room_post` RPC, its RLS policies) was
+  deliberately left alone — dropping a live table is a separate, much more
+  destructive call than removing a nav tab, and nobody asked for that; it's
+  just inert now. Old `#/rooms`/`#/room/<slug>` links fall back to home via
+  `parseHash()`'s unknown-view handling — no broken page, just a redirect.
+  To revive: the backend is still there, only the client half needs rebuilding.
+- **On The Couch** (`#/couch`, `renderCouch()`) — replaced Group Chat in the
+  nav. Every Black-led TV series in the catalog (`type==='tv' && homeOurs(f)`)
+  in one shelf, with a platform filter chip row (`COUCH_WHERE`/
+  `setCouchWhere`) built dynamically from whatever `where` values actually
+  appear among the catalog's shows — never a hardcoded platform list that
+  could drift from reality. Reuses `cardHTML`/`.grid-cards`/`.filters`/`.chip`
+  — no new visual language, same as every other browse-style page.
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already

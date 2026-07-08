@@ -1099,73 +1099,6 @@
   .ic-link{color:var(--gold-ink);font-weight:700;text-decoration:none}
   .ic-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
   .ic-actions .btn{flex:0 0 auto}
-  /* The Group Chat (community rooms) */
-  .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:18px;margin-top:20px}
-  .rooms-empty{margin-top:22px;color:var(--ink-2);font-size:14.5px}
-  .room-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);transition:transform .18s cubic-bezier(.34,1.4,.6,1),box-shadow .18s ease,border-color .18s ease}
-  .room-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3);border-color:var(--line-strong)}
-  .room-card-ph{position:relative;overflow:hidden}
-  .room-card-img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;transition:transform .4s ease}
-  .room-card:hover .room-card-img{transform:scale(1.045)}
-  .room-card-ph:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,2,0) 55%,rgba(10,6,2,.42));pointer-events:none}
-  .room-live{position:absolute;top:9px;left:9px;z-index:2;background:rgba(18,10,6,.66);backdrop-filter:blur(5px);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px 4px 7px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
-  .room-live i{width:6px;height:6px;border-radius:50%;background:#ff4b4b;animation:livePulse 1.7s infinite}
-  @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(255,75,75,.65)}70%{box-shadow:0 0 0 6px rgba(255,75,75,0)}100%{box-shadow:0 0 0 0 rgba(255,75,75,0)}}
-  .room-card-b{padding:11px 13px 13px}
-  .room-card-t{font-weight:800;font-size:15px;line-height:1.16;color:var(--ink)}
-  .room-card-s{font-size:11px;color:var(--ink-3);margin-top:3px;font-family:var(--mono);letter-spacing:.02em}
-  .room-card-m{font-size:12px;color:var(--gold-ink);font-weight:700;margin-top:7px;display:flex;align-items:center;gap:5px}
-  /* room page */
-  /* Each room is wallpapered in the show's art, fixed to fill the viewport;
-     the content column layers on top. The wall lives inside the room view, so
-     it auto-hides when you leave. */
-  .room-wall{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center;background-repeat:no-repeat}
-  .room-wall:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,3,.5) 0,rgba(10,6,3,.34) 26%,rgba(10,6,3,.5) 60%,rgba(10,6,3,.78) 100%)}
-  .room-inner{position:relative;z-index:1}
-  .room-inner .backbtn{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.55)}
-  .room-inner .room-feed-h{color:rgba(255,255,255,.85)}
-  .room-inner .room-feed-h:after{background:rgba(255,255,255,.26)}
-  .room-hero2{position:relative;display:flex;align-items:flex-end;padding:14px 2px 8px;margin:4px 0 14px;min-height:120px}
-  .room-hero2-in{position:relative;z-index:1;display:flex;align-items:flex-end;gap:18px;width:100%}
-  .room-hero-poster{flex:none;width:78px;aspect-ratio:2/3;object-fit:cover;border-radius:10px;box-shadow:0 6px 20px -6px rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.14)}
-  .room-hero2-b{min-width:0}
-  .room-hero2-b .eyebrow{display:inline-flex;align-items:center;gap:8px}
-  .rh-live{display:inline-flex;align-items:center;gap:5px;color:#ff8a8a;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em}
-  .rh-live i{width:6px;height:6px;border-radius:50%;background:#ff4b4b;animation:livePulse 1.7s infinite}
-  .room-hero2-b h1{font-family:var(--display);font-weight:800;font-size:30px;color:#fff;margin:5px 0 3px;text-shadow:0 2px 16px rgba(0,0,0,.6);line-height:1.05}
-  .room-hero2-b p{color:rgba(255,255,255,.9);font-size:13px}
-  .room-hero2-b p a{color:#fff;text-decoration:underline;cursor:pointer}
-  /* house rules strip — sets the culture, gives the room structure */
-  .room-rules{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
-  .room-rules span{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-2)}
-  /* compose */
-  .room-compose{background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--r-lg);padding:12px;margin-bottom:22px;box-shadow:var(--shadow-1,0 1px 2px rgba(40,22,6,.05))}
-  .room-compose textarea{display:block;width:100%;background:transparent;border:none;padding:4px 4px 2px;font:inherit;font-size:15.5px;color:var(--ink);outline:none;resize:vertical;min-height:48px;line-height:1.5}
-  .rc-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
-  .rc-foot input{flex:1 1 160px;min-width:130px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-size:13.5px;color:var(--ink);outline:none}
-  .rc-foot input:focus{border-color:var(--gold)}
-  .rc-hint{font-size:11.5px;color:var(--ink-3);flex:1 1 auto}
-  .rc-foot .btn{flex:0 0 auto;padding:9px 22px}
-  /* feed */
-  .room-feed-h{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 2px 12px;display:flex;align-items:center;gap:8px}
-  .room-feed-h:after{content:"";flex:1;height:1px;background:var(--line)}
-  .room-feed{display:flex;flex-direction:column;gap:14px}
-  .room-empty{padding:30px 24px;text-align:center;color:var(--ink-2);background:var(--panel);border:1px dashed var(--line-strong);border-radius:var(--r-lg);font-size:15px}
-  .room-post{display:flex;gap:11px;align-items:flex-start}
-  .rp-av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-  .rp-b{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:11px 14px;transition:border-color .16s ease}
-  .rp-b:hover{border-color:var(--line-strong)}
-  .room-post.rp-mine .rp-b{background:var(--gold-wash,rgba(228,155,11,.1));border-color:rgba(228,155,11,.34)}
-  .rp-top{display:flex;align-items:center;gap:8px}
-  .rp-top b{font-size:14px;color:var(--ink)}
-  .rp-you{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);background:rgba(228,155,11,.16);padding:2px 6px;border-radius:999px}
-  .rp-when{font-size:12px;color:var(--ink-3)}
-  .rp-del{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;border-radius:6px}
-  .rp-del:hover{color:#b3311a;background:rgba(179,49,26,.08)}
-  .rp-flag{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:12px;font-weight:600}
-  .rp-flag:hover{color:#b3311a}
-  .rp-b p{margin:4px 0 0;font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-break:break-word}
-  @media(max-width:640px){ .rooms-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:13px} .room-hero2-b h1{font-size:23px} .room-hero-poster{width:60px} .rc-hint{display:none} }
   .ic-danger{color:#b3311a !important;border-color:rgba(179,49,26,.4) !important}
   .ic-danger:hover{background:rgba(179,49,26,.08) !important}
   /* Critic agreement (3-step onboarding) */
@@ -1298,7 +1231,7 @@
       <a data-nav="browse" onclick="go('browse')" tabindex="0">Browse</a>
       <a data-nav="ranked" onclick="go('ranked')" tabindex="0">Rankings</a>
       <a data-nav="theaters" onclick="go('theaters')" tabindex="0">In Theaters</a><a data-nav="soon" onclick="go('soon')" tabindex="0">Coming Soon</a>
-      <a data-nav="word" onclick="go('word')" tabindex="0">The Word</a><a data-nav="rooms" onclick="go('rooms')" tabindex="0">Group Chat</a><a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a><a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
+      <a data-nav="word" onclick="go('word')" tabindex="0">The Word</a><a data-nav="couch" onclick="go('couch')" tabindex="0">On The Couch</a><a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a><a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
 
     </nav>
     <div class="right">
@@ -1550,12 +1483,9 @@
     <div class="wrap" id="readContent"></div>
   </section>
 
-  <!-- ============ THE GROUP CHAT (community rooms) ============ -->
-  <section class="view" data-view="rooms" aria-label="The Group Chat">
-    <div class="wrap" id="roomsContent"></div>
-  </section>
-  <section class="view" data-view="room" aria-label="Show group chat">
-    <div class="wrap" id="roomContent"></div>
+  <!-- ============ ON THE COUCH (Black TV, every platform) ============ -->
+  <section class="view" data-view="couch" aria-label="On The Couch">
+    <div class="wrap" id="couchContent"></div>
   </section>
 
   <!-- ============ THE BRACKET ============ -->
@@ -4648,7 +4578,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,rooms:1,room:1,advertise:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -4690,8 +4620,7 @@ function render(view,arg){
   else if(view==='legal')renderLegal(arg);
   else if(view==='curate')renderCuratePage(arg);
   else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
-  else if(view==='rooms')renderRooms();
-  else if(view==='room')renderRoom(arg);
+  else if(view==='couch')renderCouch();
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
@@ -6961,156 +6890,10 @@ function notifyPriorCommenter(slug,f,posterName){
   }catch(e){}
 }
 
-/* ============ THE GROUP CHAT (community rooms) ============
-   One board per cult show. Real posts via Supabase room_posts (read-all,
-   insert-as-yourself, owner-delete). A prototype of the "communities for shows
-   with cult followings" idea — zero new cost, rides on the existing backend. */
-/* No dead rooms. A room only shows in the index if the show is AIRING right
-   now (live weekly discussion — flagged airing:true in the catalog) OR the
-   room already has posts (people are still talking). Everything else stays
-   hidden until it earns its way in, so the grid is never a tumbleweed. Rooms
-   stay reachable by direct link regardless; this only governs what we surface.
-   To feature a show, set airing:true on its catalog entry. */
-var ROOMS=['raising-kanan','the-chi','all-the-queens-men','survival-of-the-thickest','pvalley','snowfall','insecure','atlanta','queen-sugar','the-boondocks','pose','imdy','queens'];
-var _roomQuiet=[]; // in-catalog rooms not currently airing — surface only if they have posts
+/* Shared relative-time formatter (originally built for Group Chat, now also
+   used by the notifications dropdown) — kept even though the room feature
+   that introduced it is gone. */
 function roomAgo(ts){ try{ var d=new Date(ts), s=(new Date().getTime()-d.getTime())/1000; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; if(s<604800)return Math.floor(s/86400)+'d ago'; return d.toLocaleDateString(); }catch(e){ return ''; } }
-function renderRooms(){
-  var w=byId('roomsContent'); if(!w)return;
-  var ids=ROOMS.filter(function(id){ return !!find(id); });
-  var live=ids.filter(function(id){ return !!find(id).airing; });
-  _roomQuiet=ids.filter(function(id){ return !find(id).airing; });
-  w.innerHTML='<div class="browse-head"><span class="eyebrow">The Group Chat</span><h1>Find your people.</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every show worth staying up for has a group chat. These are the ones popping right now — pull up, talk your talk, catch the reads.</p></div>'+
-    '<div class="rooms-grid" id="roomsGrid">'+live.map(roomCardHTML).join('')+'</div>'+
-    '<p class="rooms-empty" id="roomsEmpty"'+(live.length?' style="display:none"':'')+'>No rooms are popping right now. Check back when your show’s in season.</p>';
-  loadRoomCounts();
-}
-function roomCardHTML(id){
-  var f=find(id); var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
-  var sub=[(f.where&&f.where[0])?f.where[0]:'', f.rt].filter(function(x){return !!x;}).join(' · ');
-  return '<div class="room-card'+(f.airing?' live':'')+'" onclick="go(\'room\',\''+id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'room\',\''+id+'\')">'+
-    '<div class="room-card-ph">'+
-      (pos?'<img class="room-card-img" src="'+esc(pos)+'" alt="" loading="lazy">':'<div class="room-card-img" style="background:'+f.grad+'"></div>')+
-      (f.airing?'<span class="room-live"><i></i>Live</span>':'')+
-    '</div>'+
-    '<div class="room-card-b"><div class="room-card-t">'+esc(f.title)+'</div>'+
-      (sub?'<div class="room-card-s">'+esc(sub)+'</div>':'')+
-      '<div class="room-card-m" id="rc-'+id+'">Open the chat →</div></div>'+
-  '</div>';
-}
-function loadRoomCounts(){
-  if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/room_counts?select=room,posts',{headers:sbHeaders()})
-    .then(function(r){return r.json();}).then(function(rows){
-      if(!Array.isArray(rows))return;
-      var grid=byId('roomsGrid'); if(!grid)return;
-      rows.forEach(function(r){
-        if(!r.posts)return;
-        var el=byId('rc-'+r.room);
-        // A quiet (not-airing) room that has real talk in it — surface it now.
-        if(!el && _roomQuiet.indexOf(r.room)>-1 && find(r.room)){
-          grid.insertAdjacentHTML('beforeend', roomCardHTML(r.room));
-          var empty=byId('roomsEmpty'); if(empty) empty.style.display='none';
-          el=byId('rc-'+r.room);
-        }
-        if(el) el.textContent=r.posts+' post'+(r.posts===1?'':'s')+' · jump in';
-      });
-    }).catch(function(){});
-}
-function renderRoom(slug){
-  var w=byId('roomContent'), f=find(slug); if(!w)return;
-  if(!f){ go('rooms'); return; }
-  var pos=(typeof servePoster==='function'?servePoster(f):null)||f.poster;
-  // Wallpaper the whole page in the show's art (backdrop fills a screen best;
-  // fall back to the poster, then the gradient).
-  var wall=f.backdrop?("background-image:url('"+f.backdrop+"')"):(pos?("background-image:url('"+esc(pos)+"')"):('background:'+f.grad));
-  w.innerHTML=
-    '<div class="room-wall" style="'+wall+'"></div>'+
-    '<div class="room-inner">'+
-    '<button class="backbtn" onclick="go(\'rooms\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>All chats</button>'+
-    '<div class="room-hero2"><div class="room-hero2-in">'+
-      (pos?'<img class="room-hero-poster" src="'+esc(pos)+'" alt="">':'')+
-      '<div class="room-hero2-b">'+
-        '<span class="eyebrow" style="color:var(--gold)">The Group Chat'+(f.airing?' <span class="rh-live"><i></i>Live now</span>':'')+'</span>'+
-        '<h1>'+esc(f.title)+'</h1>'+
-        '<p>'+(f.type==='tv'?'Series':'Film')+(f.dir&&f.dir!=='—'?' · '+esc(f.dir):'')+' · '+f.year+' &nbsp;·&nbsp; <a onclick="go(\'film\',\''+slug+'\')">film page ↗</a></p>'+
-      '</div>'+
-    '</div></div>'+
-    '<div class="room-rules">'+
-      '<span>💬 Talk your talk</span>'+
-      '<span>🔇 Spoilers? Tag ’em</span>'+
-      '<span>🛡️ No hate — flagged posts get pulled</span>'+
-    '</div>'+
-    '<div class="room-compose">'+
-      '<textarea id="rmText" rows="2" placeholder="Say something about '+esc(f.title)+'…" aria-label="Your message"></textarea>'+
-      '<div class="rc-foot">'+
-        '<input id="rmName" placeholder="Your name (optional)" value="'+esc(app.name||'')+'" aria-label="Your name">'+
-        '<span class="rc-hint">Be real. Be kind. This is the culture.</span>'+
-        '<button class="btn btn-gold" onclick="postRoom(\''+slug+'\')">Post</button>'+
-      '</div>'+
-    '</div>'+
-    '<div id="roomFeed" class="room-feed"><p class="hero-lead">Loading the chat…</p></div>'+
-    '</div>';
-  loadRoomPosts(slug);
-}
-function loadRoomPosts(slug){
-  var feed=byId('roomFeed'); if(!feed)return;
-  if(!sbConfigured()){ feed.innerHTML='<p class="hero-lead">The chat needs the backend configured.</p>'; return; }
-  fetch(SUPABASE_URL+'/rest/v1/room_posts?room=eq.'+encodeURIComponent(slug)+'&reported=is.false&select=id,name,body,created_at,user_id&order=created_at.desc&limit=100',{headers:sbHeaders()})
-    .then(function(r){return r.json();}).then(function(rows){
-      if(!Array.isArray(rows)){ feed.innerHTML=''; return; }
-      if(!rows.length){ feed.innerHTML='<div class="room-empty">No one’s posted yet. <b>Be the first to open the chat.</b></div>'; return; }
-      feed.innerHTML='<div class="room-feed-h">'+rows.length+' post'+(rows.length===1?'':'s')+'</div>'+rows.map(function(p){ return roomPostHTML(p,slug); }).join('');
-    }).catch(function(){ feed.innerHTML='<p class="hero-lead">Couldn’t load the chat — <a onclick="loadRoomPosts(\''+slug+'\')" style="color:var(--gold-ink);cursor:pointer;font-weight:700">try again</a>.</p>'; });
-}
-/* Deterministic avatar color from the poster's name — so the same person
-   keeps the same color and the feed reads as distinct voices. */
-function roomAvColor(s){ var pal=['#C6462E','#B8842A','#2E7D5B','#3A6EA5','#8A4FA3','#B03060','#5A6B2E','#A0532A']; var h=0,i; s=s||'?'; for(i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return pal[h%pal.length]; }
-function roomPostHTML(p,slug){
-  var nm=esc(p.name||'Guest');
-  var mine=(myUid()&&p.user_id===myUid());
-  var init=esc((p.name||'?').replace(/^\s+/,'').slice(0,1).toUpperCase()||'?');
-  var act=mine
-    ? '<button class="rp-del" onclick="delRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Delete your post">✕</button>'
-    : '<button class="rp-flag" onclick="reportRoomPost('+p.id+',\''+esc(slug)+'\')" aria-label="Flag this post">Flag</button>';
-  return '<div class="room-post'+(mine?' rp-mine':'')+'"><div class="rp-av" style="background:'+roomAvColor(p.name||'Guest')+'">'+init+'</div>'+
-    '<div class="rp-b"><div class="rp-top"><b>'+nm+'</b>'+(mine?'<span class="rp-you">You</span>':'')+'<span class="rp-when">'+esc(roomAgo(p.created_at))+'</span>'+act+'</div>'+
-    '<p>'+esc(p.body)+'</p></div></div>';
-}
-/* Flag a post for review — one flag hides it pending a human look (mirrors the
-   comment report flow). */
-function reportRoomPost(id,slug){
-  if(!window.confirm('Flag this post for review? It’ll be hidden while our team looks.'))return;
-  if(sbConfigured()){
-    try{ fetch(SUPABASE_URL+'/rest/v1/rpc/report_room_post',{method:'POST',headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_id:id})}).catch(function(){}); }catch(e){}
-  }
-  toast('Thanks — flagged for review.'); loadRoomPosts(slug);
-}
-function postRoom(slug){
-  var ta=byId('rmText'), body=ta?ta.value.replace(/^\s+|\s+$/g,''):'';
-  if(!body){ toast('Type something first.'); if(ta)ta.focus(); return; }
-  if(body.length>2000){ toast('Keep it under 2000 characters.'); return; }
-  if(!sbConfigured()){ toast('Backend not configured.'); return; }
-  var name=(byId('rmName')&&byId('rmName').value.replace(/^\s+|\s+$/g,''))||app.name||'Guest';
-  ensureIdentityThen(function(){
-    fetch(SUPABASE_URL+'/rest/v1/room_posts',{method:'POST',
-      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-      body:JSON.stringify({room:slug,name:name,body:body,user_id:myUid()})})
-      .then(function(r){
-        if(!r) return;
-        if(r.ok){ if(ta)ta.value=''; track('room_post',{room:slug}); loadRoomPosts(slug); return; }
-        if(r.status===429){ toast('Whoa — slow down a sec.'); return; }
-        toast('Could not post — try again.');
-      }).catch(function(){ toast('Network error — try again.'); });
-  });
-}
-function delRoomPost(id,slug){
-  if(!window.confirm('Delete your post?'))return;
-  fetch(SUPABASE_URL+'/rest/v1/room_posts?id=eq.'+encodeURIComponent(id),{method:'DELETE',
-    headers:sbVoteHeaders({'Prefer':'return=minimal'})})
-    .then(function(){ loadRoomPosts(slug); }).catch(function(){ toast('Couldn’t delete — try again.'); });
-}
-
 /* ============ TRUST / REPORT ============ */
 function openReport(i,fid){
   var opts=['Spam or fake','Harassment','Off-topic','Spoiler, no warning'];
@@ -7145,6 +6928,30 @@ function sortList(list){
     if(s==='az')return a.title.localeCompare(b.title);
     return b.k-a.k; // kitchen (default)
   });
+}
+/* ============ ON THE COUCH (Black TV, every platform) ============ */
+var COUCH_WHERE='All';
+function setCouchWhere(w){ COUCH_WHERE=w; renderCouch(); }
+function renderCouch(){
+  var el=byId('couchContent'); if(!el)return;
+  var shows=FILMS.filter(function(f){ return f.type==='tv' && homeOurs(f); });
+  var wheres=['All'].concat(shows.reduce(function(acc,f){
+    (f.where||[]).forEach(function(w){ if(acc.indexOf(w)<0)acc.push(w); });
+    return acc;
+  },[]).sort());
+  var list=shows.filter(function(f){ return COUCH_WHERE==='All' || f.where.indexOf(COUCH_WHERE)>=0; })
+    .sort(function(a,b){ return b.year-a.year || a.title.localeCompare(b.title); });
+  el.innerHTML='<div class="browse-head"><span class="eyebrow">Black TV · every platform</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">On The Couch.</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every Black-led series in the catalog, wherever it streams — one shelf instead of ten apps.</p></div>'+
+    '<div class="filters" role="group" aria-label="Filter by platform">'+
+      '<span class="flabel">Where</span>'+wheres.map(function(w){
+        return '<button class="chip'+(COUCH_WHERE===w?' on':'')+'" onclick="setCouchWhere(\''+esc(w)+'\')">'+esc(w)+'</button>';
+      }).join('')+
+    '</div>'+
+    '<p class="browse-count" style="margin:14px 0">'+fmt(list.length)+' show'+(list.length===1?'':'s')+'</p>'+
+    (list.length?'<div class="grid-cards">'+list.map(cardHTML).join('')+'</div>'
+      :'<div class="empty"><h3>Nothing on this shelf yet.</h3><p>Try a different platform.</p></div>');
 }
 function setSort(v){FILTERS.sort=v;renderBrowse();}
 function renderBrowse(){
