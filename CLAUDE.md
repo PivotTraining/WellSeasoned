@@ -383,3 +383,24 @@ Shareable link: `/advertise` (`api/advertise.js`, mirrors `api/apply.js`)
 serves its own OG/Twitter preview so a link the owner DMs to a prospective
 sponsor doesn't show the generic homepage card, then bounces humans to
 `#/advertise`.
+
+## 2026 Emmy nominations banner (2026-07-08)
+`EMMY_NOMS_2026`/`EMMY_SHOWS_2026` (index.html, `paintEmmyBanner()`) — a
+prominent banner at the very top of the home page (above the hero copy)
+listing every Black actor/director/writer nominated for the 78th Primetime
+Emmy Awards (nominations announced 2026-07-08), plus the two Black-led
+nominated series (Abbott Elementary — Outstanding Comedy Series; Paradise —
+Outstanding Drama Series). Every nominee/category/show fact was
+independently verified against the official Television Academy nominee
+pages (televisionacademy.com), not just press aggregators, before
+publishing — a second research pass specifically cross-checked all 11
+original claims plus searched for anything missed (found 6 more: Zendaya,
+Chase Infiniti, and 4 directing/writing nominees). Nominee names link to
+`#/artist` (resolves via TMDB person search, same as cast links elsewhere);
+show names link to a real catalog entry only where one exists (`abbott`,
+`paradise`) — never a fake/dead link. `paradise` (Sterling K. Brown's Hulu
+series, Black-led via its star/EP though creator Dan Fogelman is not Black
+— same "closer bar" case as `lioness`) was added to the catalog specifically
+so the banner could link to it. Manually maintained, no auto-expiry (same
+convention as `FEATURED`) — remove the array once the news cycle passes or
+after the Sept 14, 2026 ceremony.

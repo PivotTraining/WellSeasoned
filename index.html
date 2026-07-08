@@ -597,6 +597,22 @@
   .br-teaser .brt-ey{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
   .br-teaser .brt-ttl{font-family:var(--display);font-weight:800;font-size:19px;margin-top:2px;color:#fff}
   .br-teaser .brt-cta{flex:none;background:var(--gold);color:#241703;font-weight:800;padding:9px 16px;border-radius:999px;font-size:13.5px}
+  /* 2026 Emmy nominations banner — top of home, manually maintained */
+  .emmy-banner{margin:0 0 20px;padding:20px 22px;border-radius:var(--r-lg);border:1px solid rgba(228,155,11,.4);background:linear-gradient(135deg,rgba(228,155,11,.14),var(--panel) 60%)}
+  .emmy-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .emmy-ey{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+  .emmy-h{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:800}
+  .emmy-sub{color:var(--ink-2);font-size:14px;margin-top:6px;max-width:70ch}
+  .emmy-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px 20px;margin-top:14px}
+  .emmy-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .emmy-name{font-weight:700;cursor:pointer;color:var(--ink)}
+  .emmy-name:hover{color:var(--gold-ink)}
+  .emmy-cat{color:var(--ink-3);font-size:12.5px}
+  .emmy-show{color:var(--ink-2);font-size:12.5px}
+  .emmy-show a{cursor:pointer;color:var(--gold-ink);font-weight:700}
+  .emmy-shows{font-size:13px;color:var(--ink-2);margin-top:14px}
+  .emmy-shows a{cursor:pointer;color:var(--gold-ink);font-weight:700}
+  .emmy-shows-lab{font-weight:700;color:var(--ink)}
   /* July 4 freedom spotlight — African-American flag (red/black/green) accent */
   .freedom{margin:2px 0 22px;padding:20px 22px;border-radius:var(--r-lg);border:1px solid rgba(10,122,51,.34);background:linear-gradient(135deg,rgba(206,17,38,.10),rgba(20,20,20,.06) 46%,rgba(10,122,51,.12))}
   .freedom-top{display:flex;align-items:center;gap:14px}
@@ -1297,6 +1313,12 @@
   <section class="view on" data-view="home" aria-label="Home">
     <div class="wrap">
       <div class="hero">
+        <section id="emmyBanner" class="emmy-banner" style="display:none">
+          <div class="emmy-top"><span class="emmy-ey">🏆 2026 Emmy Nominations</span><h2 class="emmy-h">Black excellence, nominated.</h2></div>
+          <p class="emmy-sub">The Television Academy announced its 2026 nominations today — every Black actor, director, and writer from the culture who made the list.</p>
+          <div id="emmyList" class="emmy-list"></div>
+          <p id="emmyShows" class="emmy-shows" style="display:none"></p>
+        </section>
         <div class="hero-top">
           <div>
             <span class="eyebrow">Focus this week</span>
@@ -4151,6 +4173,8 @@ var FILMS=[
   {id:'the-best-of-enemies',title:'The Best of Enemies',year:2019,rt:'2h 13m',genre:'Drama',k:null,t:null,scope:'ours',type:'movie',grad:'linear-gradient(160deg,#7a2e14,#2a0f06)', dir:'Robin Bissell',cast:['Taraji P. Henson','Sam Rockwell','Babou Ceesay','Anne Heche'],moods:['Contemplative'],era:'2010s',where:['Netflix'], syn:'Based on a true story: civil rights activist Ann Atwater and a KKK leader are forced to co-chair a fraught 1971 summit on school desegregation in Durham, North Carolina.', tags:['Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'cross',title:'Cross',year:2024,rt:'2 seasons',genre:'Crime',k:null,t:null,scope:'ours',type:'tv',airing:true,grad:'linear-gradient(160deg,#8a6d2a,#2e2109)', dir:'Ben Watkins',cast:['Aldis Hodge','Isaiah Mustafa','Juanita Jennings'],moods:['Contemplative'],era:'2020s',where:['Prime Video'], syn:'DC forensic psychologist and homicide detective Alex Cross hunts serial killers while fighting to protect his own family, adapted from James Patterson\'s novels.', tags:['Crime'],votes:{for:0,against:0},reviews:[]},
   {id:'lioness',title:'Lioness',year:2023,rt:'2 seasons',genre:'Thriller',k:null,t:null,scope:'ours',type:'tv',airing:true,grad:'linear-gradient(160deg,#7a1420,#1a0709)', dir:'Taylor Sheridan',cast:['Zoe Saldaña','Nicole Kidman','Morgan Freeman','LaMonica Garrett'],moods:['Contemplative'],era:'2020s',where:['Paramount+'], syn:'A CIA task force recruits and trains undercover female operatives — \'Lionesses\' — to infiltrate terror networks from the inside, led by veteran officer Joe McNamara.', tags:['Thriller'],votes:{for:0,against:0},reviews:[]}
+,
+  {id:'paradise',title:'Paradise',year:2025,rt:'2 seasons',genre:'Political Thriller',k:null,t:null,scope:'ours',type:'tv',airing:true,grad:'linear-gradient(160deg,#3a4a8f,#0e1330)', dir:'Dan Fogelman',cast:['Sterling K. Brown','Julianne Nicholson','James Marsden','Sarah Shahi'],moods:['Intense'],era:'2020s',where:['Hulu'], syn:'Three years after a doomsday event, Secret Service agent Xavier Collins investigates the murder of the U.S. president inside a city-sized underground bunker, uncovering a conspiracy that puts him at odds with the bunker\'s powerful leader.', tags:['Thriller','Political'],votes:{for:0,against:0},reviews:[]}
 ];
 
 var CRITICS={
@@ -5435,6 +5459,54 @@ function paintFreedom(){
     else wl.style.display='none';
   }
 }
+/* 2026 Emmy nominations (78th Primetime Emmy Awards, announced 2026-07-08) —
+   every Black nominee, verified against the official Television Academy
+   nominee pages (not just press aggregators) before publishing. filmId links
+   to a real catalog entry where one exists; otherwise the name/show render as
+   plain text rather than a fake/dead link. No fabricated data — real
+   categories, real shows, real people. Manually maintained (no auto-expiry,
+   same convention as FEATURED) — remove this array once the news cycle passes
+   or the ceremony (Sept 14, 2026) airs. */
+var EMMY_NOMS_2026=[
+  {name:'Sterling K. Brown',cat:'Lead Actor, Drama',show:'Paradise',filmId:'paradise'},
+  {name:'Zendaya',cat:'Lead Actress, Drama',show:'Euphoria'},
+  {name:'Chase Infiniti',cat:'Lead Actress, Drama',show:'The Testaments'},
+  {name:'Quinta Brunson',cat:'Lead Actress, Comedy',show:'Abbott Elementary',filmId:'abbott'},
+  {name:'Ayo Edebiri',cat:'Lead Actress, Comedy',show:'The Bear'},
+  {name:'Yahya Abdul-Mateen II',cat:'Lead Actor, Comedy',show:'Wonder Man'},
+  {name:'Janelle James',cat:'Supporting Actress, Comedy',show:'Abbott Elementary',filmId:'abbott'},
+  {name:'Tyler James Williams',cat:'Supporting Actor, Comedy',show:'Abbott Elementary',filmId:'abbott'},
+  {name:'Colman Domingo',cat:'Supporting Actor, Comedy',show:'The Four Seasons'},
+  {name:'Colman Domingo',cat:'Guest Actor, Drama',show:'Euphoria'},
+  {name:'Ernest Harden Jr.',cat:'Guest Actor, Drama',show:'The Pitt'},
+  {name:'Joy Sunday',cat:'Supporting Actress, Limited Series',show:'DTF St. Louis'},
+  {name:'Quinta Brunson',cat:'Writing, Comedy',show:'Abbott Elementary',filmId:'abbott'},
+  {name:'Hanelle M. Culpepper',cat:'Directing, Drama',show:'Paradise',filmId:'paradise'},
+  {name:'Salli Richardson-Whitfield',cat:'Directing, Drama',show:'The Gilded Age'},
+  {name:'Salli Richardson-Whitfield',cat:'Directing, Drama',show:'Task'},
+  {name:'Hiro Murai',cat:'Directing, Comedy',show:'Widow’s Bay'}
+];
+var EMMY_SHOWS_2026=[
+  {filmId:'abbott',cat:'Outstanding Comedy Series'},
+  {filmId:'paradise',cat:'Outstanding Drama Series'}
+];
+function emmyNomRow(n){
+  var showLink=n.filmId?'<a onclick="go(\'film\',\''+n.filmId+'\')">'+esc(n.show)+'</a>':esc(n.show);
+  return '<div class="emmy-row"><a class="emmy-name" onclick="go(\'artist\',\''+esc(n.name)+'\')">'+esc(n.name)+'</a>'+
+    '<span class="emmy-cat">'+esc(n.cat)+'</span><span class="emmy-show">'+showLink+'</span></div>';
+}
+function paintEmmyBanner(){
+  var s=byId('emmyBanner'), g=byId('emmyList'); if(!s||!g)return;
+  if(!EMMY_NOMS_2026.length){ s.style.display='none'; return; }
+  var shows=EMMY_SHOWS_2026.filter(function(x){ return !!find(x.filmId); });
+  var showsLine=shows.length?shows.map(function(x){ var f=find(x.filmId);
+    return '<a onclick="go(\'film\',\''+x.filmId+'\')">'+esc(f.title)+'</a> ('+esc(x.cat)+')';
+  }).join(' &nbsp;·&nbsp; '):'';
+  g.innerHTML=EMMY_NOMS_2026.map(emmyNomRow).join('');
+  var showsEl=byId('emmyShows');
+  if(showsEl){ showsEl.innerHTML=showsLine?'<span class="emmy-shows-lab">Nominated series:</span> '+showsLine:''; showsEl.style.display=showsLine?'':'none'; }
+  s.style.display='';
+}
 function isoDaysAgo(n){ var d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 function soonReleased(c){ return c.date && c.date <= isoToday(); }   // its release date has arrived
 function renderSoon(){
@@ -5636,6 +5708,7 @@ function paintCatalogCount(){
 }
 function renderHome(){
   paintCatalogCount();
+  paintEmmyBanner();
   paintFeatured();
   paintFreedom();
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
