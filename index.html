@@ -6934,7 +6934,7 @@ var COUCH_WHERE='All';
 function setCouchWhere(w){ COUCH_WHERE=w; renderCouch(); }
 function renderCouch(){
   var el=byId('couchContent'); if(!el)return;
-  var shows=FILMS.filter(function(f){ return f.type==='tv' && homeOurs(f); });
+  var shows=FILMS.filter(function(f){ return f.type==='tv' && scopeMatch(f); });
   var wheres=['All'].concat(shows.reduce(function(acc,f){
     (f.where||[]).forEach(function(w){ if(acc.indexOf(w)<0)acc.push(w); });
     return acc;
@@ -6944,6 +6944,7 @@ function renderCouch(){
   el.innerHTML='<div class="browse-head"><span class="eyebrow">Black TV · every platform</span>'+
     '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">On The Couch.</h1>'+
     '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every Black-led series in the catalog, wherever it streams — one shelf instead of ten apps.</p></div>'+
+    '<div id="couchScope" style="margin-top:14px">'+scopeToggleHTML('Our Shows','All Shows','Black-led series, curated by the Kitchen.','Every series in the catalog, including wider picks.')+'</div>'+
     '<div class="filters" role="group" aria-label="Filter by platform">'+
       '<span class="flabel">Where</span>'+wheres.map(function(w){
         return '<button class="chip'+(COUCH_WHERE===w?' on':'')+'" onclick="setCouchWhere(\''+esc(w)+'\')">'+esc(w)+'</button>';
@@ -7125,23 +7126,26 @@ function contentMatch(f){
   if(t==='sport') return isSport(f);
   return f.type===t;
 }
-function scopeToggleHTML(){
+function scopeToggleHTML(labelOurs,labelAll,noteOurs,noteAll){
+  labelOurs=labelOurs||'Our Films'; labelAll=labelAll||'All Films';
   return '<div class="scope" role="group" aria-label="Catalog scope">'+
-    '<button class="'+(app.scope==='ours'?'on':'')+'" aria-pressed="'+(app.scope==='ours')+'" onclick="setScope(\'ours\')">Our Films</button>'+
-    '<button class="'+(app.scope==='all'?'on':'')+'" aria-pressed="'+(app.scope==='all')+'" onclick="setScope(\'all\')">All Films</button></div>'+
-    '<span class="scope-note">'+(app.scope==='ours'
-      ? 'Centered on the culture. The Kitchen’s home catalog.'
-      : 'Every film, still read by the Kitchen’s critics of the culture.')+'</span>';
+    '<button class="'+(app.scope==='ours'?'on':'')+'" aria-pressed="'+(app.scope==='ours')+'" onclick="setScope(\'ours\')">'+esc(labelOurs)+'</button>'+
+    '<button class="'+(app.scope==='all'?'on':'')+'" aria-pressed="'+(app.scope==='all')+'" onclick="setScope(\'all\')">'+esc(labelAll)+'</button></div>'+
+    '<span class="scope-note">'+esc(app.scope==='ours'
+      ? (noteOurs||'Centered on the culture. The Kitchen’s home catalog.')
+      : (noteAll||'Every film, still read by the Kitchen’s critics of the culture.'))+'</span>';
 }
-/* Scope toggle lives on Browse only. Home is always Black film & TV, so we
-   clear any home toggle and never let "All Films" change the home shelves. */
-function refreshScopeToggles(){ var hs=byId('homeScope'); if(hs)hs.innerHTML=''; var bs=byId('browseScope'); if(bs)bs.innerHTML=scopeToggleHTML(); }
+/* Scope toggle lives on Browse, Couch, and Rankings — one shared app.scope
+   preference across all three. Home is always Black film & TV regardless, so
+   we clear any home toggle and never let "All Films" change the home shelves. */
+function refreshScopeToggles(){ var hs=byId('homeScope'); if(hs)hs.innerHTML=''; var bs=byId('browseScope'); if(bs)bs.innerHTML=scopeToggleHTML(); var cs=byId('couchScope'); if(cs)cs.innerHTML=scopeToggleHTML('Our Shows','All Shows','Black-led series, curated by the Kitchen.','Every series in the catalog, including wider picks.'); }
 function setScope(s){
   if(app.scope===s)return;
   app.scope=s; saveState(); renderHome();
   var cur=document.querySelector('.view.on'); var v=cur?cur.getAttribute('data-view'):'home';
   if(v==='browse')renderBrowse();
   if(v==='ranked')renderRanked();
+  if(v==='couch')renderCouch();
   refreshScopeToggles();
   toast(s==='ours'?'Showing Our Films.':'Showing All Films.');
 }
@@ -7870,8 +7874,8 @@ function advertiseTierHTML(t){
     '<ul>'+t.items.map(function(li){
       return '<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>'+esc(li)+'</li>';
     }).join('')+'</ul>'+
-    '<button class="btn btn-gold btn-sm" onclick="openAdvertiseInquiry('+JSON.stringify(t.name)+')">Request the media kit</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="emailAdvertiseInquiry('+JSON.stringify(t.name)+')">Email us directly</button>'+
+    '<button class="btn btn-gold btn-sm" onclick="openAdvertiseInquiry(\''+esc(t.name)+'\')">Request the media kit</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="emailAdvertiseInquiry(\''+esc(t.name)+'\')">Email us directly</button>'+
   '</div>';
 }
 var ADVERTISE_STEPS=[

@@ -197,12 +197,30 @@ Done and verified live:
   `parseHash()`'s unknown-view handling — no broken page, just a redirect.
   To revive: the backend is still there, only the client half needs rebuilding.
 - **On The Couch** (`#/couch`, `renderCouch()`) — replaced Group Chat in the
-  nav. Every Black-led TV series in the catalog (`type==='tv' && homeOurs(f)`)
-  in one shelf, with a platform filter chip row (`COUCH_WHERE`/
-  `setCouchWhere`) built dynamically from whatever `where` values actually
-  appear among the catalog's shows — never a hardcoded platform list that
-  could drift from reality. Reuses `cardHTML`/`.grid-cards`/`.filters`/`.chip`
-  — no new visual language, same as every other browse-style page.
+  nav. Every Black-led TV series in the catalog (`type==='tv' &&
+  scopeMatch(f)`) in one shelf, with a platform filter chip row
+  (`COUCH_WHERE`/`setCouchWhere`) built dynamically from whatever `where`
+  values actually appear among the catalog's shows — never a hardcoded
+  platform list that could drift from reality. Reuses `cardHTML`/
+  `.grid-cards`/`.filters`/`.chip` — no new visual language, same as every
+  other browse-style page. Defaults to "our" shows first (2026-07-08): uses
+  the existing global `app.scope` toggle (already proven on Browse/Rankings,
+  defaults to `'ours'`) rather than a page-local one, so it's one shared
+  preference site-wide. `scopeToggleHTML()` now takes optional label/note
+  params so Couch reads "Our Shows"/"All Shows" instead of Browse's "Our
+  Films"/"All Films"; `setScope()` re-renders Couch when it's the active
+  view. Right now every TV title in the catalog is tagged `scope:'ours'`, so
+  the two buttons show the same count until a non-"ours" show is added — the
+  toggle itself is live and verified (headless Chromium: `app.scope`
+  actually filters `scopeMatch`, button `.on` state updates on click).
+  Also fixed while verifying: the `#/advertise` page's "Request the media
+  kit"/"Email us directly" buttons were silently dead — their `onclick`
+  attributes were built with `JSON.stringify(t.name)`, which emits
+  double-quoted strings inside an already-double-quoted `onclick="..."`
+  attribute, truncating the attribute at the first embedded `"` and throwing
+  a `SyntaxError` on click. Fixed by switching to the same escaped-single-
+  quote convention used everywhere else in the file (`onclick="fn(\''+
+  esc(x)+'\')"`, e.g. `setCouchWhere`).
 
 In progress:
 - **Resend SMTP** for password-reset delivery. Client reset flow is already
