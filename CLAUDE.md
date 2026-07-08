@@ -240,6 +240,16 @@ docs. Every push deploys production — verify locally (headless Chromium,
 `/opt/pw-browsers/chromium`) before pushing.
 
 ## Conventions
+- Catalog at 1053 titles (2026-07-08): +10 more via a direct owner list — Good
+  Burger, Good Burger 2, Don't Be a Menace to South Central While Drinking
+  Your Juice in the Hood, Booty Call, The Brothers, Mr. Church, Pride (2007,
+  the Jim Ellis swim-team film — not the 2014 UK LGBT film of the same name),
+  The Best of Enemies, Cross, and Lioness. `Tyler Perry's Zatima` (the actual
+  show behind the owner's "Fatima, also on Paramount") turned out to already
+  be in the catalog, so it was skipped rather than duplicated. Note on
+  `lioness`: Zoe Saldaña-led but not Black-directed/created (Taylor
+  Sheridan/Paramount+) — included on the owner's explicit call, flagged as a
+  closer-than-usual bar case same as `Ride or Die`.
 - Catalog grown from 887 to 1043 titles (2026-07-08): 156 real, individually
   verified additions across dramas/thrillers, comedies/romance, TV series,
   documentaries, international/Nollywood/UK/Caribbean/African cinema (+ a
