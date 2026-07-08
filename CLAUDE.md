@@ -401,6 +401,33 @@ show names link to a real catalog entry only where one exists (`abbott`,
 `paradise`) — never a fake/dead link. `paradise` (Sterling K. Brown's Hulu
 series, Black-led via its star/EP though creator Dan Fogelman is not Black
 — same "closer bar" case as `lioness`) was added to the catalog specifically
-so the banner could link to it. Manually maintained, no auto-expiry (same
-convention as `FEATURED`) — remove the array once the news cycle passes or
-after the Sept 14, 2026 ceremony.
+so the banner could link to it. Auto-expires via `EMMY_EXPIRES` (owner asked
+for ~36h up, then pivot) instead of requiring a manual takedown.
+
+## UX fixes (2026-07-08, owner-reported)
+- **Showtimes ZIP input collapsed to a ~26px "blank box."** Root cause,
+  present since initial deploy: `.modal input,.modal select{width:100%}`
+  (added for stacked single-column form fields) and `.st-field input{flex:1}`
+  have equal specificity, so source order decided the winner — the
+  `.st-field` row (ZIP input + Find button, side by side) got its layout
+  clobbered anywhere it rendered inside a `.modal`. Fixed with a scoped
+  override (`.modal .st-field input{width:auto}` / `.modal .st-field
+  .btn{width:auto}`) rather than touching the generic rule other modals rely
+  on.
+- **Showtimes felt slow/nonfunctional.** `/api/showtimes?debug=1` revealed
+  SerpApi's `engine=google` isn't returning a `showtimes` panel at all for
+  this account/query shape — confirmed empty even for genuinely wide,
+  currently-playing releases (Superman, F1), not just obscure titles. Until
+  that's fixed at the provider level, `fetchShowtimes()` now paints the
+  honest fallback (real Fandango + Google-search links, no fabricated
+  theaters) INSTANTLY instead of waiting 2-3s for the live call to fail
+  first, then silently upgrades in place if a real response ever lands.
+  `_stGen` guards against a stale response overwriting a newer search.
+- **Fandango ticket unit ("I don't see it")**: it was live, but its gating
+  (`f.year>=currentYear`) was both too broad (flagged 2026-dated stand-up
+  specials and straight-to-streaming titles that never had a theatrical run
+  — a "nothing fake" violation by implication) and not the actual bug the
+  owner hit. Now gated on the same verified TMDB now-playing check
+  (`_npTitles`/`loadNowPlaying`) the Theaters page uses, with an async
+  upgrade (`#ticketBlockWrap`) once that data arrives — mirrors the existing
+  backdrop/cast hydration pattern on the film page.

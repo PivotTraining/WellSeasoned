@@ -962,6 +962,13 @@
   .modal label{display:block;font-size:12.5px;font-weight:700;margin-bottom:5px;color:var(--ink-2)}
   .modal input,.modal select{width:100%;background:var(--paper);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:11px 12px;color:var(--ink);font:inherit;font-size:15px;outline:none}
   .modal .btn{width:100%;justify-content:center;margin-top:6px}
+  /* .st-field (ZIP/city + Find, used by Showtimes) is a side-by-side row, not
+     the stacked full-width fields the two rules above are for — the generic
+     .modal input/.btn width:100% rules were collapsing the input to ~0 and
+     stretching the button to fill the row (a bug present since initial
+     deploy). Restore the flex layout explicitly, scoped to this row only. */
+  .modal .st-field input{width:auto}
+  .modal .st-field .btn{width:auto;margin-top:0}
   .modal .m-alt{text-align:center;font-size:13px;color:var(--ink-2);margin-top:14px}
   .modal .m-alt a{color:var(--gold-ink);font-weight:700;cursor:pointer}
   .modal textarea{width:100%;background:var(--paper);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:11px 12px;color:var(--ink);font:inherit;font-size:15px;outline:none;resize:vertical;min-height:74px}
@@ -5495,9 +5502,12 @@ function emmyNomRow(n){
   return '<div class="emmy-row"><a class="emmy-name" onclick="go(\'artist\',\''+esc(n.name)+'\')">'+esc(n.name)+'</a>'+
     '<span class="emmy-cat">'+esc(n.cat)+'</span><span class="emmy-show">'+showLink+'</span></div>';
 }
+/* Owner asked to keep this up ~36 hours from publish (2026-07-08 ~22:47 UTC),
+   then pivot — rather than requiring a manual takedown, it just auto-expires. */
+var EMMY_EXPIRES='2026-07-10T11:00:00Z';
 function paintEmmyBanner(){
   var s=byId('emmyBanner'), g=byId('emmyList'); if(!s||!g)return;
-  if(!EMMY_NOMS_2026.length){ s.style.display='none'; return; }
+  if(!EMMY_NOMS_2026.length || Date.now()>Date.parse(EMMY_EXPIRES)){ s.style.display='none'; return; }
   var shows=EMMY_SHOWS_2026.filter(function(x){ return !!find(x.filmId); });
   var showsLine=shows.length?shows.map(function(x){ var f=find(x.filmId);
     return '<a onclick="go(\'film\',\''+x.filmId+'\')">'+esc(f.title)+'</a> ('+esc(x.cat)+')';
@@ -5929,7 +5939,7 @@ function renderFilm(id){
             '<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
               '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
               (f.type!=='tv'?'<button class="svc svc-show" onclick="openShowtimes(\''+f.id+'\')">Showtimes</button>':'')+'</div>'+
-            ticketBlockHTML(f)+
+            '<div id="ticketBlockWrap">'+ticketBlockHTML(f)+'</div>'+
             '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="openShareCard(\''+f.id+'\')">Share</button></div>'+
             myWatchWidgetHTML(f)+
           '</div>'+
@@ -5971,6 +5981,11 @@ function renderFilm(id){
     if(!(on&&on.getAttribute('data-view')==='film'&&_activeFilm===f.id&&byId('roomBackdrop')))return;
     applyHeroBg(f);   // real backdrop just arrived from TMDB — swap it in over the poster blur
     var cs=byId('castSection'); if(cs) cs.outerHTML=castCrewHTML(f);
+  });
+  loadNowPlaying(function(){   // verified now-playing list may still be loading on first visit
+    var on=document.querySelector('.view.on');
+    if(!(on&&on.getAttribute('data-view')==='film'&&_activeFilm===f.id))return;
+    var tb=byId('ticketBlockWrap'); if(tb) tb.innerHTML=ticketBlockHTML(f);
   });
   setDocMeta(f.title+' ('+f.year+') — Well Seasoned',
     'The Kitchen and The Table weigh in on '+f.title+'. '+(f.syn||'').slice(0,140),
@@ -7366,8 +7381,16 @@ function fandangoUrl(title){
    Label is deliberately its own attribution line, never blended into the
    button copy or synopsis, so it never reads as editorial content. */
 function ticketBlockHTML(f){
-  var now=new Date().getFullYear();
-  if(f.noart||f.type==='tv'||f.year<now) return '';
+  // f.year>=now alone is too broad — it also flags stand-up specials and
+  // straight-to-streaming 2026 titles that never had a theatrical run, which
+  // is dishonest by implication. Only show once verified against the same
+  // live TMDB now-playing check the Theaters page uses (_npTitles, populated
+  // by loadNowPlaying — see renderTheaters). _npTitles may still be null on
+  // a first visit (async, not loaded yet) — renderFilm() kicks it off and
+  // upgrades this block in place once it resolves, same pattern as the
+  // backdrop/cast hydration below.
+  if(f.noart||f.type==='tv') return '';
+  if(!_npTitles||_npTitles.indexOf(f.title.toLowerCase())<0) return '';
   return '<div class="ticket-block">'+
     '<span class="ticket-ey">🎟 In theaters now</span>'+
     '<button class="btn btn-gold btn-sm" onclick="openShowtimes(\''+f.id+'\')">Get tickets</button>'+
@@ -7375,8 +7398,10 @@ function ticketBlockHTML(f){
   '</div>';
 }
 /* SHOWTIMES_PROVIDER is set in the CONFIG block at the top. Empty = sample fallback. */
+var _stGen=0;
 function openShowtimes(id){
   var f=find(id);
+  _stGen++;
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Showtimes</h2><p class="m-sub">'+esc(f.title)+' · in theaters near you.</p>'+
     '<div class="st-field"><input id="stZip" placeholder="ZIP or city" aria-label="Location" value="'+esc(app.zip||'')+'" onkeydown="if(event.key===\'Enter\')runShowtimes(\''+f.id+'\')"><button class="btn btn-gold" onclick="runShowtimes(\''+f.id+'\')">Find</button></div>'+
@@ -7386,30 +7411,36 @@ function openShowtimes(id){
 function runShowtimes(id){
   var f=find(id), el=byId('stZip'), zip=el?el.value.trim():app.zip;
   if(!zip){toast('Enter a ZIP or city first.');if(el)el.focus();return;}
-  app.zip=zip; saveState(); track('showtimes',{film:id});
-  // Always try the live proxy first; it fails fast (501) when no provider key
-  // is configured on Vercel and we fall back to sample rows + real links.
+  app.zip=zip; saveState(); track('showtimes',{film:id}); _stGen++;
   fetchShowtimes(f,zip);
 }
 /* Live showtimes via our own /api/showtimes proxy (SerpApi key lives in a
-   Vercel env var, never in the page). Falls back to sample rows + live
-   Fandango/Google links when the proxy isn't configured or errors. */
+   Vercel env var, never in the page). Show the honest, useful fallback
+   (real Fandango/Google links) INSTANTLY rather than making the user wait
+   through a multi-second round trip before seeing anything — the live proxy
+   only pays off with real theaters/times when it actually has them, so
+   there's no downside to painting the fallback first and upgrading in place
+   if better data arrives. _stGen guards against a stale response landing
+   after the user has closed the modal or searched a different film/zip. */
 function fetchShowtimes(f,zip){
-  byId('stResults').innerHTML='<div class="st-note">Checking theaters near '+esc(zip)+'…</div>';
+  var el=byId('stResults'); if(!el)return;
+  var gen=_stGen;
+  el.innerHTML=sampleShowtimes(f,zip);
   fetch('/api/showtimes?q='+encodeURIComponent(f.title)+'&location='+encodeURIComponent(zip))
     .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(d){
-      var el=byId('stResults'); if(!el)return;
+      if(gen!==_stGen)return;
+      var el2=byId('stResults'); if(!el2)return;
       var liveDays=(d&&d.days||[]).filter(function(x){return x.theaters&&x.theaters.length;});
-      if(liveDays.length){ el.innerHTML=renderRealShowtimes(f,zip,liveDays); }
+      if(liveDays.length){ el2.innerHTML=renderRealShowtimes(f,zip,liveDays); }
       else if(d&&d.not_in_theaters){
-        el.innerHTML='<div class="empty" style="padding:26px 16px"><h3 style="font-size:19px">This one has left theaters.</h3>'+
+        el2.innerHTML='<div class="empty" style="padding:26px 16px"><h3 style="font-size:19px">This one has left theaters.</h3>'+
           '<p>No showtimes near '+esc(zip)+' — but you can stream it tonight.</p>'+
           '<a class="btn btn-gold" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">Where to stream it ↗</a></div>';
       }
-      else el.innerHTML=sampleShowtimes(f,zip);
+      // else: keep the fallback already shown — nothing better to upgrade to
     })
-    .catch(function(){ var el=byId('stResults'); if(el) el.innerHTML=sampleShowtimes(f,zip); });
+    .catch(function(){});   // fallback is already showing; nothing to do
 }
 function renderRealShowtimes(f,zip,days){
   var d=days[0];
