@@ -240,6 +240,21 @@ docs. Every push deploys production — verify locally (headless Chromium,
 `/opt/pw-browsers/chromium`) before pushing.
 
 ## Conventions
+- Catalog grown from 887 to 1043 titles (2026-07-08): 156 real, individually
+  verified additions across dramas/thrillers, comedies/romance, TV series,
+  documentaries, international/Nollywood/UK/Caribbean/African cinema (+ a
+  couple of shorts), and sports films/docs + stand-up specials — sourced via
+  parallel research agents (each cross-checked against the existing catalog
+  and a real web source before inclusion), then deduped programmatically
+  against the full existing title+year list before insertion (zero
+  collisions). No fake data: `k`/`t` null, `votes:{for:0,against:0}`,
+  `reviews:[]` on every new entry, same as always. `where` is a best-guess
+  streaming home per title (falls back to `'Rent'` when unconfirmed — the
+  generic provider-search chip, not a false claim of a specific service).
+  Posters/backdrops are NOT baked in for these — they resolve the same way
+  every other title does, via the live TMDB title+year lookup at render
+  time (`hydrateFilmMedia`); only pin `WS_POSTERS` if the auto-match is ever
+  wrong for one of them.
 - After changing the FILMS catalog, regenerate crawler share data:
   `node scripts/build-films-json.cjs` (zero-dep; adds missing films to
   `api/films.json` + backfills posters, so every title has a `/f/<id>` preview).
