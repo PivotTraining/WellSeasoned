@@ -828,7 +828,16 @@
   .ad-metric{display:flex;flex-direction:column;gap:2px}
   .ad-metric b{font-family:var(--display);font-size:26px;font-weight:800;color:var(--gold-ink)}
   .ad-metric span{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+  .ad-how{margin-top:34px}
+  .ad-how-h{font-family:var(--display);font-size:22px;font-weight:800;margin-bottom:16px}
+  .ad-how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .ad-how-step{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px}
+  .ad-how-n{font-family:var(--display);font-size:20px;font-weight:800;color:var(--gold-ink);display:block;margin-bottom:4px}
+  .ad-how-step b{display:block;font-size:15px;margin-bottom:4px}
+  .ad-how-step p{font-size:12.5px;color:var(--ink-2);line-height:1.45}
   .ad-rule{font-size:13px;color:var(--ink-2);margin:22px 0 18px;text-align:center}
+  @media(max-width:820px){ .ad-how-grid{grid-template-columns:1fr 1fr} }
+  @media(max-width:520px){ .ad-how-grid{grid-template-columns:1fr} }
   @media print{
     .topnav,.tabbar,footer,.legend-dock,.toast-wrap{display:none!important}
     .advertise-print{color:#111;background:#fff}
@@ -8021,19 +8030,23 @@ function renderYou(){
    break the "nothing fake" rule same as a fake vote count would. This data
    object is the single source of truth for both the live page and the
    print/PDF one-pager (see .advertise-print CSS) so they can never drift. */
+/* Founding-partner rates — early-stage pricing while the audience is still
+   building, honestly framed as such rather than backed into fake traffic
+   numbers. Meant as a real starting point the owner negotiates from, not a
+   rigid self-serve price. */
 var ADVERTISE_TIERS=[
-  {name:'Shelf Sponsor', tag:'Presented By', price:'$/week or $/month', feature:false,
-   note:'A clearly-labeled "Presented by [Brand]" tag on one themed shelf (a Vault collection, a genre rail) for a defined run.',
-   items:['One shelf, one sponsor at a time — never stacked','Swappable weekly or monthly','Logo + brand name + link, badge styled to match the site']},
-  {name:'Featured Carousel Slot', tag:'Most visible', price:'$/month', feature:true,
-   note:'One slide in the home page spotlight carousel, alongside genuinely-editorial picks — clearly tagged "Sponsored," never blended into the editorial voice.',
-   items:['Limited to keep the carousel genuinely editorial-first','Human-reviewed before it goes live, same bar as every other placement','Black-owned media/brands only']},
+  {name:'Shelf Sponsor', tag:'Presented By', price:'$250/wk · $800/mo', feature:false,
+   note:'A clearly-labeled "Presented by [Brand]" tag on one themed shelf (a Vault collection, a genre rail, or a Browse category) for a defined run.',
+   items:['One shelf, one sponsor at a time — never stacked','1-week minimum, discounted at the monthly rate','Logo (SVG/PNG, ~200×60) + a one-line tagline (60 char max) + your link','Swap the shelf or creative once per run at no charge','Goes live within 2 business days of asset approval']},
+  {name:'Featured Carousel Slot', tag:'Most visible', price:'$1,200/mo', feature:true,
+   note:'One slide in the home page spotlight carousel — the first thing visitors see — alongside genuinely-editorial picks. Clearly tagged "Sponsored," never blended into the editorial voice.',
+   items:['Limited to 1 of the rotating slots, to keep the carousel genuinely editorial-first','Backdrop image (1280×720) + headline (60 char) + dek (140 char) + your CTA link','Human-reviewed before it goes live, same bar as every editorial placement','Black-owned media/brands only — no exceptions','Monthly commitment, billed in advance']},
   {name:'Newsletter Mention', tag:'Coming soon', price:'—', feature:false,
    note:'A mention in the Well Seasoned email newsletter, once regular sends are live.',
-   items:['Not yet available — email infrastructure is in progress','Reach out to be first in line']},
+   items:['Not yet available — email infrastructure is in progress','Reach out to be first in line and lock in founding-partner pricing']},
   {name:'Custom / Data Partnership', tag:'Bespoke', price:'Let’s talk', feature:false,
    note:'Building something bigger — a research or licensing partnership around aggregate, anonymized audience sentiment? Let’s talk specifics.',
-   items:['Privacy-safe, aggregate data only — never individual user data','Built for studios, distributors, and researchers']}
+   items:['Privacy-safe, aggregate data only — never individual user data','Built for studios, distributors, and researchers','Scoped and priced per engagement']}
 ];
 function advertiseMetricsHTML(){
   return '<div class="ad-metrics">'+
@@ -8054,6 +8067,19 @@ function advertiseTierHTML(t){
     '<button class="btn btn-ghost btn-sm" onclick="emailAdvertiseInquiry('+JSON.stringify(t.name)+')">Email us directly</button>'+
   '</div>';
 }
+var ADVERTISE_STEPS=[
+  {n:'1',t:'Reach out',d:'Request the media kit or email us directly with the tier and rough timing you have in mind.'},
+  {n:'2',t:'We review',d:'A human checks the fit — Black-owned media/brand, on-brand for the culture. No self-serve ad-buy, no exceptions.'},
+  {n:'3',t:'You send assets',d:'Logo, image, and copy per the specs on your tier. We’ll flag anything that needs adjusting before it goes live.'},
+  {n:'4',t:'It goes live',d:'Tagged and dated on the site, never blended into editorial voice. You get a link to see it live.'}
+];
+function advertiseHowHTML(){
+  return '<div class="ad-how"><h2 class="ad-how-h">How it works</h2><div class="ad-how-grid">'+
+    ADVERTISE_STEPS.map(function(s){
+      return '<div class="ad-how-step"><span class="ad-how-n">'+s.n+'</span><b>'+esc(s.t)+'</b><p>'+esc(s.d)+'</p></div>';
+    }).join('')+
+  '</div></div>';
+}
 function renderAdvertise(){
   var el=byId('advertiseContent'); if(!el)return;
   el.innerHTML='<div class="advertise-print">'+
@@ -8062,6 +8088,7 @@ function renderAdvertise(){
     '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Well Seasoned is where Black film and TV get scored honestly — by verified critics and the community, together. No non-Black advertising, ever. If that’s your brand too, let’s talk.</p></div>'+
     advertiseMetricsHTML()+
     '<div class="plans">'+ADVERTISE_TIERS.map(advertiseTierHTML).join('')+'</div>'+
+    advertiseHowHTML()+
     '<p class="ad-rule">We only work with Black-owned media and brands. No exceptions, no ad networks, no cross-site tracking.</p>'+
     '<button class="btn btn-ghost adprint-hide" onclick="window.print()">Download media kit ↓</button>'+
     '<p class="cbox-hint adprint-hide">Opens your browser’s print dialog — choose “Save as PDF.”</p>'+
