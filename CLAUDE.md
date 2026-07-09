@@ -590,6 +590,40 @@ in headless Chromium (full-page screenshot) — zero console errors, all
 existing `railBy()`/scroll-arrow behavior untouched since only the
 container classes changed, not the rail mechanics.
 
+**Richer band colors** (2026-07-09, owner: "the colors aren't rich enough
+hard to see") — the first pass kept `.shelf-band` opacities very low
+(.08–.14) specifically to avoid needing a text-contrast override; that made
+them read as barely-there. Boosted background opacity ~2-3x (e.g. Tubi
+`.14→.30`, Stand-up `.12→.28`, Grandma's `.14→.32`), deepened border-color
+opacity, and added a solid 6px color accent bar down the left edge of every
+`.shelf-band` (`::before`, gradient of the section's own theme color —
+teal→purple for Tubi, `--paprika`→`--sumac` for Stand-up, `--gold`→
+`--gold-deep` for Grandma's, neutral `--line-strong` for the plain band) so
+each themed shelf reads as a clear, colorful zone at a glance instead of a
+faint tint. Card text still needs no override — the panel backgrounds stay
+light enough for the default dark ink at these opacities (checked visually,
+not just numerically).
+
+**Emmy carousel backdrops** (2026-07-09, owner: "put some rich backdrop
+behind the emmy nominated winners") — `emmyCarSlideHTML()` now sets a real
+photographic backdrop behind each slide (dark scrim + `background-image`,
+same technique `featSlideHTML` already uses), tied to the nominee's actual
+project: a show slide uses its own `f.backdrop`; a person slide uses their
+first credited nomination's show backdrop (`it.cats[0].filmId`). Nothing
+invented — a nominee whose show isn't in the catalog (no `filmId`, e.g.
+Zendaya/Euphoria) just keeps the plain dark stage background, no placeholder
+image faked in. New `hydrateEmmyBackdropsOnce()` proactively calls the
+existing `hydrateFilmMedia()` for every unique film the carousel references
+— backdrops normally only resolve when a visitor opens that film's own
+page, so without this the nominees tied to `abbott`/`paradise` would likely
+never get a backdrop in a typical session. Same guarded-repaint pattern as
+`hydrateEmmyPhotosOnce` (only re-fetches films still missing a backdrop, so
+it can't loop). Verified in headless Chromium with mocked TMDB responses:
+`hydrateFilmMedia` fires, `f.backdrop` populates, the resolved slides carry
+the correct inline `background-image` — the fake test image itself renders
+as a blank tile since it's a 1px stub, which is a test-fixture limitation,
+not a code issue (production TMDB backdrops are real 1280px photos).
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical

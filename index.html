@@ -333,11 +333,15 @@
      own zone (tinted panel, same gradient-wash pattern as .freedom, so card
      text never needs a contrast override) or their own density, instead of
      every section looking identical. */
-  .shelf-band{background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 26px 14px;margin:8px 0}
-  .shelf-band-tubi{background:linear-gradient(135deg,rgba(40,170,170,.14),rgba(120,60,200,.08) 55%,var(--panel));border-color:rgba(40,170,170,.3)}
-  .shelf-band-stage{background:linear-gradient(135deg,rgba(190,59,24,.12),rgba(20,20,20,.05) 46%,rgba(228,155,11,.10));border-color:rgba(190,59,24,.28)}
-  .shelf-band-vintage{background:linear-gradient(135deg,rgba(228,155,11,.14),rgba(94,62,4,.06) 55%,var(--panel));border-color:rgba(94,62,4,.24)}
-  @media (max-width:640px){ .shelf-band{padding:18px 16px 8px;border-radius:var(--r-lg)} }
+  .shelf-band{position:relative;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 26px 14px 32px;margin:8px 0}
+  .shelf-band::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:var(--r-xl) 0 0 var(--r-xl);background:var(--line-strong)}
+  .shelf-band-tubi{background:linear-gradient(135deg,rgba(20,175,175,.30),rgba(130,50,215,.16) 55%,var(--panel) 88%);border-color:rgba(15,140,140,.55)}
+  .shelf-band-tubi::before{background:linear-gradient(180deg,#12ADAD,#6A2FBE)}
+  .shelf-band-stage{background:linear-gradient(135deg,rgba(190,59,24,.28),rgba(20,20,20,.10) 46%,rgba(228,155,11,.22) 100%);border-color:rgba(190,59,24,.55)}
+  .shelf-band-stage::before{background:linear-gradient(180deg,var(--paprika),var(--sumac))}
+  .shelf-band-vintage{background:linear-gradient(135deg,rgba(228,155,11,.32),rgba(94,62,4,.14) 55%,var(--panel) 88%);border-color:rgba(94,62,4,.5)}
+  .shelf-band-vintage::before{background:linear-gradient(180deg,var(--gold),var(--gold-deep))}
+  @media (max-width:640px){ .shelf-band{padding:18px 16px 8px 22px;border-radius:var(--r-lg)} .shelf-band::before{width:5px} }
   /* rail-lg: fewer, bigger cards — a "this matters more" shelf right after
      the mosaic. rail-sm: more, smaller cards — a quick-scan density shelf. */
   .rail.rail-lg .card{flex:0 0 calc((100% - 26px)/3)}
@@ -647,7 +651,7 @@
   @keyframes emmySegFill{from{width:0}to{width:100%}}
   .emmy-car-stage{position:relative;z-index:1;overflow:hidden}
   .emmy-car-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
-  .emmy-car-slide{position:relative;flex:0 0 100%;width:100%;cursor:pointer;text-align:center;padding:34px 24px 34px}
+  .emmy-car-slide{position:relative;flex:0 0 100%;width:100%;cursor:pointer;text-align:center;padding:34px 24px 34px;background-size:cover;background-position:center 30%}
   .emmy-car-ribbon{display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
     background:linear-gradient(90deg,#a9720b,#f9dd8b,#a9720b);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
     animation:emmyShine 3s linear infinite}
@@ -5558,12 +5562,24 @@ function emmyCarouselItems(){
   return items;
 }
 var _emmyCarIdx=0,_emmyCarTimer=null,_emmyPhotosLoading=false;
+/* Real backdrop behind each slide, tied to the actual nominated project —
+   never a stock/generic image. Shows use their own backdrop; a person uses
+   their first credited nomination's show backdrop. Backdrops only exist
+   once hydrateFilmMedia() has resolved them for that title (same live TMDB
+   data the film page itself uses) — if none is cached yet, the slide just
+   keeps its plain dark stage background, no placeholder faked in. */
+function emmyCarBackdrop(it){
+  var f=it.type==='show' ? find(it.filmId) : (it.cats&&it.cats[0]&&it.cats[0].filmId ? find(it.cats[0].filmId) : null);
+  return (f&&f.backdrop) || '';
+}
 function emmyCarSlideHTML(it,photos){
+  var bg=emmyCarBackdrop(it);
+  var bgAttr=bg?' style="background-image:linear-gradient(180deg,rgba(12,6,2,.5),rgba(12,6,2,.86) 68%),url(\''+bg+'\')"':'';
   if(it.type==='show'){
     var f=find(it.filmId);
     var img=f?((typeof servePoster==='function'?servePoster(f):null)||f.poster||''):'';
     var open="go('film','"+it.filmId+"')";
-    return '<div class="emmy-car-slide" role="button" tabindex="0" onclick="'+open+'" onkeydown="if(event.key===\'Enter\')'+open+'">'+
+    return '<div class="emmy-car-slide"'+bgAttr+' role="button" tabindex="0" onclick="'+open+'" onkeydown="if(event.key===\'Enter\')'+open+'">'+
       '<span class="emmy-car-ribbon">Nominated series</span>'+
       '<div class="emmy-car-frame"><span class="emmy-car-badge" aria-hidden="true">📺</span>'+
       (img?'<img src="'+img+'" alt="'+esc(f.title)+'" loading="lazy">':'<div class="emmy-car-noimg" aria-hidden="true">📺</div>')+
@@ -5574,7 +5590,7 @@ function emmyCarSlideHTML(it,photos){
   var path=photos[it.name];
   var img=path?'https://image.tmdb.org/t/p/w300'+path:'';
   var capText=it.cats.map(function(c){ return c.cat+(c.show?' · '+c.show:''); }).join(' & ');
-  return '<div class="emmy-car-slide" role="button" tabindex="0" onclick="go(\'artist\',\''+esc(it.name)+'\')" onkeydown="if(event.key===\'Enter\')go(\'artist\',\''+esc(it.name)+'\')">'+
+  return '<div class="emmy-car-slide"'+bgAttr+' role="button" tabindex="0" onclick="go(\'artist\',\''+esc(it.name)+'\')" onkeydown="if(event.key===\'Enter\')go(\'artist\',\''+esc(it.name)+'\')">'+
     '<span class="emmy-car-ribbon">Nominee</span>'+
     '<div class="emmy-car-frame"><span class="emmy-car-badge" aria-hidden="true">🏆</span>'+
     (img?'<img src="'+img+'" alt="'+esc(it.name)+'" loading="lazy">':'<div class="emmy-car-noimg" aria-hidden="true">🏆</div>')+
@@ -5609,6 +5625,23 @@ function paintEmmyCarousel(){
   emmyCarApply();
   if(!single) emmyCarPlay();
   hydrateEmmyPhotosOnce(items);
+  hydrateEmmyBackdropsOnce(items);
+}
+var _emmyBackdropsLoading=false;
+function hydrateEmmyBackdropsOnce(items){
+  if(_emmyBackdropsLoading||typeof hydrateFilmMedia!=='function')return;
+  var ids={};
+  items.forEach(function(it){
+    var fid=it.type==='show' ? it.filmId : (it.cats&&it.cats[0]&&it.cats[0].filmId);
+    if(fid) ids[fid]=1;
+  });
+  var need=Object.keys(ids).map(find).filter(function(f){ return f&&!f.backdrop; });
+  if(!need.length)return;
+  _emmyBackdropsLoading=true;
+  Promise.all(need.map(function(f){ return hydrateFilmMedia(f); })).then(function(){
+    _emmyBackdropsLoading=false;
+    paintEmmyCarousel();
+  });
 }
 function emmyCarApply(){
   var el=byId('emmyCar'); if(!el)return;
