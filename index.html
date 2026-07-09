@@ -598,7 +598,7 @@
   .br-teaser .brt-ttl{font-family:var(--display);font-weight:800;font-size:19px;margin-top:2px;color:#fff}
   .br-teaser .brt-cta{flex:none;background:var(--gold);color:#241703;font-weight:800;padding:9px 16px;border-radius:999px;font-size:13.5px}
   /* 2026 Emmy nominations banner — top of home, manually maintained */
-  .emmy-banner{margin:0 0 20px;padding:20px 22px;border-radius:var(--r-lg);border:1px solid rgba(228,155,11,.4);background:linear-gradient(135deg,rgba(228,155,11,.14),var(--panel) 60%)}
+  .emmy-banner{margin:0 0 20px;padding:4px 2px 0;background:none;border:0}
   .emmy-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
   .emmy-ey{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
   .emmy-h{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:800}
@@ -625,14 +625,14 @@
   @keyframes emmySegFill{from{width:0}to{width:100%}}
   .emmy-car-stage{position:relative;z-index:1;overflow:hidden}
   .emmy-car-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
-  .emmy-car-slide{position:relative;flex:0 0 100%;width:100%;cursor:pointer;text-align:center;padding:26px 24px 26px}
+  .emmy-car-slide{position:relative;flex:0 0 100%;width:100%;cursor:pointer;text-align:center;padding:34px 24px 34px}
   .emmy-car-ribbon{display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
     background:linear-gradient(90deg,#a9720b,#f9dd8b,#a9720b);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
     animation:emmyShine 3s linear infinite}
   @keyframes emmyShine{to{background-position:200% center}}
-  .emmy-car-slide::before{content:'';position:absolute;left:50%;bottom:58px;transform:translateX(-50%);width:70%;max-width:280px;height:26px;
+  .emmy-car-slide::before{content:'';position:absolute;left:50%;bottom:66px;transform:translateX(-50%);width:70%;max-width:280px;height:26px;
     background:radial-gradient(ellipse at center,rgba(244,197,66,.4),transparent 72%);filter:blur(4px);z-index:0}
-  .emmy-car-frame{position:relative;z-index:1;width:clamp(200px,32vw,290px);height:clamp(200px,32vw,290px);margin:16px auto 0;border-radius:20px;padding:4px;
+  .emmy-car-frame{position:relative;z-index:1;width:clamp(190px,28vw,270px);height:clamp(270px,42vw,380px);margin:18px auto 0;border-radius:20px;padding:4px;
     background:linear-gradient(135deg,#f9dd8b,#a9720b,#f9dd8b);animation:emmyGlow 2.6s ease-in-out infinite}
   @keyframes emmyGlow{0%,100%{box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 rgba(244,197,66,0)}50%{box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 40px rgba(244,197,66,.5)}}
   .emmy-car-frame img,.emmy-car-frame .emmy-car-noimg{width:100%;height:100%;border-radius:17px;object-fit:cover;display:block}
@@ -5474,8 +5474,7 @@ var EMMY_NOMS_2026=[
   {name:'Quinta Brunson',cat:'Writing, Comedy',show:'Abbott Elementary',filmId:'abbott'},
   {name:'Hanelle M. Culpepper',cat:'Directing, Drama',show:'Paradise',filmId:'paradise'},
   {name:'Salli Richardson-Whitfield',cat:'Directing, Drama',show:'The Gilded Age'},
-  {name:'Salli Richardson-Whitfield',cat:'Directing, Drama',show:'Task'},
-  {name:'Hiro Murai',cat:'Directing, Comedy',show:'Widow’s Bay'}
+  {name:'Salli Richardson-Whitfield',cat:'Directing, Drama',show:'Task'}
 ];
 var EMMY_SHOWS_2026=[
   {filmId:'abbott',cat:'Outstanding Comedy Series'},
