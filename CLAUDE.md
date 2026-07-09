@@ -482,6 +482,14 @@ slide padding — per "elongate the nominee box." Also dropped Hiro Murai from
 `EMMY_NOMS_2026` per owner request (now 15 carousel slides: 13 unique people
 + 2 shows).
 
+Header simplified again (2026-07-09, owner: "keep 'The 2026 Emmy
+Nominations' and remove Black excellence... make that font larger"): the
+two-line eyebrow + headline (`.emmy-ey` "2026 Emmy Nominations" small-caps
+tag + `.emmy-h` "Black excellence, nominated." headline) collapsed into one
+line — `.emmy-h` now reads "🏆 The 2026 Emmy Nominations" directly, sized way
+up (`clamp(30px,4.4vw,44px)`, was `clamp(20px,2.6vw,26px)`). `.emmy-ey` CSS
+removed as dead (no longer referenced anywhere).
+
 **Bug found and fixed while building this**: the catalog-wide poster
 hydrator (`hydrateFromTMDB()`, used for every TV/film card without a baked
 poster) was querying TMDB's **movie** search for every title regardless of
