@@ -328,6 +328,22 @@
   .rail-btn.prev{left:-14px} .rail-btn.next{right:-14px}
   .rail-btn svg{width:17px;height:17px}
   .rail::-webkit-scrollbar{height:7px}.rail::-webkit-scrollbar-thumb{background:var(--deep);border-radius:99px}
+  /* Home page rhythm-breakers — the same shelf/rail unit repeated 8-9x in a
+     row read as one monotonous scroll. These give a handful of shelves their
+     own zone (tinted panel, same gradient-wash pattern as .freedom, so card
+     text never needs a contrast override) or their own density, instead of
+     every section looking identical. */
+  .shelf-band{background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 26px 14px;margin:8px 0}
+  .shelf-band-tubi{background:linear-gradient(135deg,rgba(40,170,170,.14),rgba(120,60,200,.08) 55%,var(--panel));border-color:rgba(40,170,170,.3)}
+  .shelf-band-stage{background:linear-gradient(135deg,rgba(190,59,24,.12),rgba(20,20,20,.05) 46%,rgba(228,155,11,.10));border-color:rgba(190,59,24,.28)}
+  .shelf-band-vintage{background:linear-gradient(135deg,rgba(228,155,11,.14),rgba(94,62,4,.06) 55%,var(--panel));border-color:rgba(94,62,4,.24)}
+  @media (max-width:640px){ .shelf-band{padding:18px 16px 8px;border-radius:var(--r-lg)} }
+  /* rail-lg: fewer, bigger cards — a "this matters more" shelf right after
+     the mosaic. rail-sm: more, smaller cards — a quick-scan density shelf. */
+  .rail.rail-lg .card{flex:0 0 calc((100% - 26px)/3)}
+  .rail.rail-sm .card{flex:0 0 calc((100% - 65px)/6)}
+  @media (max-width:900px){ .rail.rail-lg .card{flex:0 0 calc((100% - 13px)/2)} .rail.rail-sm .card{flex:0 0 calc((100% - 39px)/4)} }
+  @media (max-width:640px){ .rail.rail-lg .card{flex:0 0 68%} .rail.rail-sm .card{flex:0 0 calc((100% - 26px)/3)} }
 
   .card{flex:0 0 136px;scroll-snap-align:start;cursor:pointer;min-width:0}
   /* grid items must be allowed to shrink below their content (the score row),
@@ -1407,20 +1423,20 @@
 
       <section class="shelf">
         <div class="shelf-head"><h2>New on the stove</h2><button class="see" onclick="go('browse')">See all</button></div>
-        <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="stoveRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+        <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="stoveRail" class="rail rail-lg"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
-      <section class="shelf" id="tvSection">
+      <section class="shelf shelf-band" id="tvSection">
         <div class="shelf-head"><h2>On the small screen</h2><button class="see" onclick="setFilter('type','tv');go('browse')">See all series</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="tvRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
-      <section class="shelf" id="tubiSection">
+      <section class="shelf shelf-band shelf-band-tubi" id="tubiSection">
         <div class="shelf-head"><h2>Free on Tubi</h2><button class="see" onclick="setFilter('where','Tubi');go('browse')">See all</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="tubiRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
-      <section class="shelf" id="standupSection">
+      <section class="shelf shelf-band shelf-band-stage" id="standupSection">
         <div class="shelf-head"><h2>Stand-up · Straight from the stage</h2><button class="see" onclick="go('browse')">See all</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="standupRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
@@ -1432,7 +1448,7 @@
 
       <section class="shelf" id="shortSection">
         <div class="shelf-head"><h2>Short films · Big stories, quick</h2><button class="see" onclick="setFilter('type','short');go('browse')">See all shorts</button></div>
-        <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="shortRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+        <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="shortRail" class="rail rail-sm"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
       <section class="shelf" id="sportSection">
@@ -1450,7 +1466,7 @@
         <div id="culTalkGrid" class="cul-talk-grid"></div>
       </section>
 
-      <section class="shelf" id="classicSection">
+      <section class="shelf shelf-band shelf-band-vintage" id="classicSection">
         <div class="shelf-head"><h2>Grandma’s Recipes · Classic films</h2><button class="see" onclick="setFilter('era','1990s');go('browse')">See all</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="classicRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>

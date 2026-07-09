@@ -564,6 +564,32 @@ beyond just the Emmy carousel:
   claim on hover — consistent with "nothing fake": no claiming a verdict
   that hasn't been earned yet.
 
+**Home page layout rhythm** (2026-07-09, owner: "the layout of the site
+feels boring" → chose "break the rhythm"). `renderHome()` paints 8-9 shelves
+back to back, each identically structured (`shelf-head` + `.rail` of
+136px-wide cards) — same visual unit repeated with only the heading text
+changing, so the page read as one undifferentiated scroll no matter how
+much color/motion the individual cards had. Fixed purely with markup
+modifier classes + CSS (no change to `renderHome()`'s data logic — it still
+just fills the same rail `id`s):
+- `.shelf-band` — a tinted panel (same gradient-wash technique as
+  `.freedom`, so card text never needs a contrast override) applied to 4
+  shelves for a "different zone" landmark: `.shelf-band` plain cream (On
+  the Small Screen), `.shelf-band-tubi` teal/purple (Free on Tubi),
+  `.shelf-band-stage` warm paprika (Stand-up), `.shelf-band-vintage` warm
+  sepia (Grandma's Recipes/Classics). The other shelves (Documentaries,
+  Sports) stay plain — the point is alternation, not banding everything.
+- `.rail-lg` (3 big cards instead of 4) on "New on the Stove" — right after
+  the mosaic, a "this matters more" moment instead of the same card size
+  as everything else.
+- `.rail-sm` (6 small cards instead of 4) on "Short films" — a denser,
+  quick-scan shelf that matches the content (shorts = quick).
+Result, top to bottom: plain grid → big-tile rail → cream band → teal band
+→ warm band → plain rail → dense rail → plain rail → sepia band. Verified
+in headless Chromium (full-page screenshot) — zero console errors, all
+existing `railBy()`/scroll-arrow behavior untouched since only the
+container classes changed, not the rail mechanics.
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical
