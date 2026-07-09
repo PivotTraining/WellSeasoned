@@ -699,7 +699,14 @@ dropped to 600 so the `.active` item (700, gold) actually stands out, more
 generous padding (10px) with a 1px gap between rows, and a small triangle
 pointer (`::before`) connecting the panel visually to the "More" button.
 
-## Little House on the Prairie (2026, Netflix) added (2026-07-09)
+## Little House on the Prairie (2026, Netflix) — added then removed (2026-07-09)
+Taken back down same-day per owner request, no reason given. Removed all
+three references (`FILMS` entry, `WS_POSTERS` pin, `FEATURED` carousel
+slide) and deleted it from `api/films.json` directly (the build script only
+adds/backfills, it doesn't prune stale entries, so a plain re-run wouldn't
+have caught this). If it comes back, the original entry + real TMDB
+data/reasoning (the Dr. George Tann "closer than usual bar" case) is
+preserved in git history on this same date.
 Owner asked to add it to the catalog and the `FEATURED` home carousel. Flagged
 first: the core Ingalls-family cast and credited EPs (Rebecca Sonnenshine and
 others) aren't Black, so on its face this doesn't clear the site's usual
