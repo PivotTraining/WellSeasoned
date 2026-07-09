@@ -799,6 +799,18 @@ Real data throughout, "nothing fake" held all the way through:
   headless Chromium here) — a test-environment limit, not a code issue;
   the embed URL is a verified-real video id.
 
+**Follow-up polish** (2026-07-09, owner: share button on the clip, center
++ enlarge the cast): `.mf-share` — a small circular icon button overlaid
+top-right of `.mf-trailer`, reuses the existing `openShareCardSoon(id)`
+(native share sheet, clipboard-copy fallback) rather than a new share path.
+`.mf-cast` switched from a left-aligned horizontal-scroll rail to a
+centered, wrapping flex row (`justify-content:center;flex-wrap:wrap`) —
+reads better as a "feature" than a scrollable strip. Avatars enlarged
+68px→86px on the base/desktop rule (the `max-width:640px` mobile override
+still drops them to 58px, untouched). `.excite-row` and `.mf-more` both
+centered under the cast row via `margin:auto` (they're block-level flex/
+inline-flex elements, so `text-align` alone wouldn't center them).
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical
