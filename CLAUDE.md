@@ -719,6 +719,66 @@ an incidental detail. Added to `FEATURED` as the 4th carousel slide
 (`ey:'New series · Streaming today'` — it aired the same day as this
 addition). Ran `node scripts/build-films-json.cjs` after, per convention.
 
+Owner separately asked to use a specific Netflix/Jocko-Sims-Instagram
+character-poster image for Dr. Tann. Flagged the tradeoff (Netflix's own
+marketing art, not TMDB-licensed like everything else the site shows) and
+hit a real technical wall: images pasted inline in chat don't land on this
+session's filesystem, and Instagram's CDN 403s on direct hotlink fetches (no
+session/referer). Checked the safe alternative — TMDB's 8 episode stills for
+S1 plus Jocko Sims' full photo gallery — and none of them show him in
+costume as Tann yet (only a generic modern headshot). Left unresolved: needs
+either a real transferable file from the owner, or to wait for TMDB to index
+better stills as the show gets more coverage.
+
+## Home hero feature: "Why Did I Get Married Again?" (2026-07-09)
+Owner: replace the Dinner Table Debate slot on home with "a beautiful
+looking feature" for the film — trailer, cast in circular photos, release
+date, and a Let's Go/Meh vote. Built as `#marriedFeature`/
+`paintMarriedFeature()`, called from `renderHome()` in the exact slot
+`renderDebate()` used to occupy. **Debate itself is untouched, not
+deleted** — `renderHome()` just no longer calls it, same pattern as the
+Group Chat removal (a live feature isn't destroyed just because it's
+unwired from one page); `#debateBox` stays in the markup, hidden.
+
+Real data throughout, "nothing fake" held all the way through:
+- The film (`cs-1522689`, from `COMING_SOON`) had `trailer:null` — TMDB's
+  `/videos` endpoint has nothing indexed for it yet. Rather than skip the
+  ask or fake an ID, found the actual official teaser via web search,
+  confirmed it's real via YouTube's oEmbed API (title: "Tyler Perry's Why
+  Did I Get Married Again? | Official Teaser", channel: Netflix's own
+  `@Netflix`), and set `trailer:'t_QUYXwkwss'` in `COMING_SOON` — this also
+  means the existing excitement-vote gate (`excitementButtons()`, "only
+  shown where there's a trailer") now correctly shows Let's Go/Meh on this
+  title everywhere it appears (Coming Soon page, film page), not just the
+  new home feature.
+- `MARRIED_CAST` — 8 real cast members with real TMDB profile photo paths,
+  fetched and verified directly (Tyler Perry, Taraji P. Henson, Jill Scott,
+  Richard T. Jones, Tasha Smith, Michael Jai White, Lamman Rucker, Sharon
+  Leal). Baked directly rather than live-fetched since this is a one-off
+  hero for a single title, same reasoning as `EMMY_NOMS_2026`/`FEATURED`
+  being hand-curated arrays instead of a general mechanism.
+- The excitement vote buttons/backend are reused exactly as built for
+  Coming Soon — no new voting system, no new table. `refreshExcitement()`
+  and `loadAllExcitement()` gained a branch to repaint the home feature
+  block specifically (`v==='home'`) so vote counts and pressed-state stay
+  in sync everywhere the title appears, same as the existing soon/film
+  branches.
+- Visual treatment matches this session's "spotlight" bar: dark stage card,
+  rotating conic-gradient sweep, twinkling sparkles, shimmer-text ribbon
+  (`.mf-*` CSS, reuses the existing `emmySpin`/`emmyTwinkle`/`emmyShine`
+  keyframes rather than duplicating them). Cast photos use a new
+  gold-ringed circular avatar (`.mf-cast-av`) sized for a dark background;
+  the excitement buttons got scoped light-on-dark color overrides since
+  their default styling assumes a light panel.
+- Verified in headless Chromium: debate box hidden, feature visible, real
+  trailer iframe src correct, 8 cast cards render, date reads "Streaming
+  Sep 9, 2026", voting toggles state and persists through
+  `refreshExcitement`, "More on this title" navigates into the full
+  `cs-1522689` detail page, mobile layout holds up. The trailer itself
+  can't play inside this sandbox (no outbound access to youtube.com from
+  headless Chromium here) — a test-environment limit, not a code issue;
+  the embed URL is a verified-real video id.
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical
