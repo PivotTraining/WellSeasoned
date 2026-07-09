@@ -159,6 +159,16 @@
   .topnav nav a{font-size:15px;font-weight:700;letter-spacing:.01em;line-height:1;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;height:100%;padding:0 1px;border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap}
   .topnav nav a:hover{color:var(--ink)}
   .topnav nav a.active{color:var(--ink);border-color:var(--paprika)}
+  .nav-more-wrap{position:relative;height:100%;display:flex;align-items:center}
+  .nav-more-btn{font-family:inherit;font-size:15px;font-weight:700;letter-spacing:.01em;line-height:1;color:var(--ink-2);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:4px;height:100%;padding:0 1px;border-bottom:2.5px solid transparent;margin-bottom:-1px}
+  .nav-more-btn:hover{color:var(--ink)}
+  .nav-more-btn.active{color:var(--ink);border-color:var(--paprika)}
+  .nav-more-btn svg{transition:transform .15s}
+  .nav-more-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+  .nav-more-panel{position:absolute;top:calc(100% + 10px);left:0;min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:6px;z-index:95;animation:sugIn .16s ease;display:flex;flex-direction:column}
+  .nav-more-panel a{font-size:14.5px;font-weight:700;color:var(--ink-2);cursor:pointer;padding:9px 12px;border-radius:9px;white-space:nowrap}
+  .nav-more-panel a:hover{background:var(--inset);color:var(--ink)}
+  .nav-more-panel a.active{color:var(--gold-ink);background:var(--inset)}
   .topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;flex:none}
   .topnav .right .btn{white-space:nowrap}
   .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;min-width:150px;max-width:230px;flex:1;position:relative}
@@ -772,6 +782,14 @@
   .cert-chip{font-family:var(--mono);font-weight:700;font-size:11px;border:1.5px solid var(--ink-3);border-radius:5px;padding:2px 7px;color:var(--ink-2)}
   .pr-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-3)}
   .kidok{color:var(--herb-ink);font-weight:600;font-size:12.5px}
+  /* Real, TMDB-sourced age-approval badge — separate from the pepper-row
+     advisory (which has no data behind it yet). Never shown unless a real
+     US certification resolved. */
+  .age-badge{display:inline-flex;align-items:center;gap:8px;margin:0 0 15px;padding:6px 12px 6px 6px;border-radius:99px;font-weight:700;font-size:13px}
+  .age-badge .age-cert{font-family:var(--mono);font-weight:700;font-size:10.5px;background:rgba(0,0,0,.14);border-radius:5px;padding:2px 7px}
+  .age-badge.age-kid{background:rgba(46,139,87,.14);color:var(--herb-ink);border:1px solid rgba(46,139,87,.3)}
+  .age-badge.age-teen{background:rgba(228,155,11,.14);color:var(--gold-ink);border:1px solid rgba(228,155,11,.32)}
+  .age-badge.age-ya{background:rgba(190,59,24,.12);color:var(--paprika-ink);border:1px solid rgba(190,59,24,.3)}
   .card-peppers{display:inline-flex;gap:1px;align-items:center}
   .empty-note{font-size:14px;color:var(--ink-2);font-style:italic;padding:8px 0}
   .cur-tools{display:flex;gap:10px;margin:2px 0 12px}
@@ -1332,10 +1350,19 @@
     <nav aria-label="Primary">
       <a data-nav="home" onclick="go('home')" tabindex="0">Home</a>
       <a data-nav="browse" onclick="go('browse')" tabindex="0">Browse</a>
+      <a data-nav="kids" onclick="go('kids')" tabindex="0">Kids</a>
       <a data-nav="ranked" onclick="go('ranked')" tabindex="0">Rankings</a>
-      <a data-nav="theaters" onclick="go('theaters')" tabindex="0">In Theaters</a><a data-nav="soon" onclick="go('soon')" tabindex="0">Coming Soon</a>
-      <a data-nav="word" onclick="go('word')" tabindex="0">The Word</a><a data-nav="couch" onclick="go('couch')" tabindex="0">On The Couch</a><a data-nav="vault" onclick="go('vault')" tabindex="0">The Vault</a><a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
-
+      <div class="nav-more-wrap" id="navMoreWrap">
+        <button type="button" class="nav-more-btn" id="navMoreBtn" onclick="toggleMoreNav()" aria-haspopup="true" aria-expanded="false">More <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="nav-more-panel" id="navMorePanel" style="display:none" role="menu">
+          <a data-nav="theaters" onclick="closeMoreNav();go('theaters')" tabindex="0" role="menuitem">In Theaters</a>
+          <a data-nav="soon" onclick="closeMoreNav();go('soon')" tabindex="0" role="menuitem">Coming Soon</a>
+          <a data-nav="word" onclick="closeMoreNav();go('word')" tabindex="0" role="menuitem">The Word</a>
+          <a data-nav="couch" onclick="closeMoreNav();go('couch')" tabindex="0" role="menuitem">On The Couch</a>
+          <a data-nav="vault" onclick="closeMoreNav();go('vault')" tabindex="0" role="menuitem">The Vault</a>
+        </div>
+      </div>
+      <a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
     </nav>
     <div class="right">
       <button type="button" id="mobileSearchBtn" class="mobile-search-btn" onclick="toggleMobileSearch()" aria-label="Search films &amp; shows" aria-expanded="false" aria-controls="searchInput">
@@ -1590,6 +1617,11 @@
     <div class="wrap" id="couchContent"></div>
   </section>
 
+  <!-- ============ KIDS ============ -->
+  <section class="view" data-view="kids" aria-label="Kids">
+    <div class="wrap" id="kidsContent"></div>
+  </section>
+
   <!-- ============ THE BRACKET ============ -->
   <section class="view" data-view="bracket" aria-label="The Bracket">
     <div class="wrap" id="bracketContent"></div>
@@ -1707,7 +1739,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -4521,7 +4553,7 @@ function hydrateFromTMDB(){
 }
 
 /* ============ FILM ROOM: backdrop + cast/crew (TMDB, lazy per film) ============ */
-var MEDIA_CACHE_KEY='ws_media_v3';   // v3: also store TMDB person ids so cast/crew link to artist pages
+var MEDIA_CACHE_KEY='ws_media_v4';   // v4: also store the real US content rating (see ageTier)
 function loadMediaCache(){ try{return JSON.parse(localStorage.getItem(MEDIA_CACHE_KEY)||'{}');}catch(e){return {};} }
 function saveMediaCache(c){ try{localStorage.setItem(MEDIA_CACHE_KEY,JSON.stringify(c));}catch(e){} }
 function applyMedia(f,m){
@@ -4530,6 +4562,36 @@ function applyMedia(f,m){
   if(m.dp) f.dirPhoto='https://image.tmdb.org/t/p/w185'+m.dp;
   if(m.di) f.dirId=m.di;
   if(m.cast&&m.cast.length) f.castFull=m.cast.map(function(c){ return {name:c.n,character:c.c,profile:c.p?'https://image.tmdb.org/t/p/w185'+c.p:null,id:c.i}; });
+  if(m.cert) f.ageCert=m.cert;
+}
+/* Kid/Teen/Young Adult Approved — derived from the film/show's REAL US
+   certification (MPAA for movies, TV content rating for series), pulled
+   live from TMDB same as the poster/backdrop/cast. Never invented: a title
+   with no resolved cert, or one rated NC-17, just shows no badge rather
+   than a guessed one. */
+function ageTier(cert){
+  if(!cert) return null;
+  var c=cert.toUpperCase();
+  if(['G','PG','TV-Y','TV-Y7','TV-Y7-FV','TV-G'].indexOf(c)>=0) return 'kid';
+  if(['PG-13','TV-PG','TV-14'].indexOf(c)>=0) return 'teen';
+  if(['R','TV-MA'].indexOf(c)>=0) return 'ya';
+  return null;
+}
+var AGE_TIER_LABEL={kid:'🧒 Kid Approved',teen:'🧑 Teen Approved',ya:'🔞 Young Adult Approved'};
+function ageRatingHTML(f){
+  var t=ageTier(f.ageCert); if(!t) return '';
+  return '<div class="age-badge age-'+t+'"><span>'+AGE_TIER_LABEL[t]+'</span><span class="age-cert">'+esc(f.ageCert)+'</span></div>';
+}
+/* extract the US certification from a TMDB /release_dates (movie) or
+   /content_ratings (tv) response — real data, same trust level as the
+   posters/backdrops the site already pulls live. */
+function extractUSCert(rt,isTV){
+  if(!rt||!rt.results) return null;
+  var us=rt.results.filter(function(r){return r.iso_3166_1==='US';})[0];
+  if(!us) return null;
+  if(isTV) return us.rating||null;
+  var rd=(us.release_dates||[]).filter(function(x){return x.certification;});
+  return rd.length?rd[0].certification:null;
 }
 /* the hero background: real TMDB backdrop if we have it, else the designed gradient */
 function roomBg(f){
@@ -4590,13 +4652,18 @@ function hydrateFilmMedia(f){
     .then(function(r){return r.json();})
     .then(function(d){ var hit=d&&d.results&&d.results[0]; if(!hit)return null;
       var m={b:hit.backdrop_path||null};
-      return fetch('https://api.themoviedb.org/3/'+(isTV?'tv':'movie')+'/'+hit.id+'/credits?api_key='+TMDB_KEY)
-        .then(function(r){return r.json();})
-        .then(function(cr){
-          if(cr&&cr.cast) m.cast=cr.cast.slice(0,12).map(function(c){ return {n:c.name,c:c.character,p:c.profile_path,i:c.id}; });
-          if(cr&&cr.crew){ var dir=cr.crew.filter(function(c){return c.job==='Director';})[0]; if(dir){ if(dir.profile_path)m.dp=dir.profile_path; m.di=dir.id; } }
-          return m;
-        }).catch(function(){ return m; });
+      var creditsUrl='https://api.themoviedb.org/3/'+(isTV?'tv':'movie')+'/'+hit.id+'/credits?api_key='+TMDB_KEY;
+      var ratingUrl='https://api.themoviedb.org/3/'+(isTV?'tv':'movie')+'/'+hit.id+(isTV?'/content_ratings':'/release_dates')+'?api_key='+TMDB_KEY;
+      return Promise.all([
+        fetch(creditsUrl).then(function(r){return r.json();}).catch(function(){return null;}),
+        fetch(ratingUrl).then(function(r){return r.json();}).catch(function(){return null;})
+      ]).then(function(res){
+        var cr=res[0], rt=res[1];
+        if(cr&&cr.cast) m.cast=cr.cast.slice(0,12).map(function(c){ return {n:c.name,c:c.character,p:c.profile_path,i:c.id}; });
+        if(cr&&cr.crew){ var dir=cr.crew.filter(function(c){return c.job==='Director';})[0]; if(dir){ if(dir.profile_path)m.dp=dir.profile_path; m.di=dir.id; } }
+        var cert=extractUSCert(rt,isTV); if(cert) m.cert=cert;
+        return m;
+      });
     })
     .then(function(m){ if(!m)return false; cache[f.id]=m; saveMediaCache(cache); applyMedia(f,m); return true; })
     .catch(function(){ return false; });
@@ -4679,15 +4746,17 @@ function loadState(){
 }
 
 /* ============ ROUTER ============ */
+var NAV_MORE_VIEWS=['theaters','soon','word','couch','vault'];
 function setActiveNav(view){
   document.querySelectorAll('[data-nav]').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-nav')===view);
   });
+  var moreBtn=byId('navMoreBtn'); if(moreBtn) moreBtn.classList.toggle('active', NAV_MORE_VIEWS.indexOf(view)>=0);
 }
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -4730,6 +4799,7 @@ function render(view,arg){
   else if(view==='curate')renderCuratePage(arg);
   else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
   else if(view==='couch')renderCouch();
+  else if(view==='kids')renderKids();
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
@@ -6121,6 +6191,7 @@ function renderFilm(id){
       '</div>'+
       '<div id="featQuoteBlock"></div>'+
       '<p class="film-syn">'+esc(f.syn)+'</p>'+
+      '<div id="ageRatingWrap">'+ageRatingHTML(f)+'</div>'+
       pepperRow(f)+
       castCrewHTML(f)+
       '<div class="tag-row">'+tags+'</div>'+
@@ -6148,6 +6219,7 @@ function renderFilm(id){
     if(!(on&&on.getAttribute('data-view')==='film'&&_activeFilm===f.id&&byId('roomBackdrop')))return;
     applyHeroBg(f);   // real backdrop just arrived from TMDB — swap it in over the poster blur
     var cs=byId('castSection'); if(cs) cs.outerHTML=castCrewHTML(f);
+    var ar=byId('ageRatingWrap'); if(ar) ar.innerHTML=ageRatingHTML(f);
   });
   loadNowPlaying(function(){   // verified now-playing list may still be loading on first visit
     var on=document.querySelector('.view.on');
@@ -7183,6 +7255,32 @@ function renderCouch(){
     (list.length?'<div class="grid-cards">'+list.map(cardHTML).join('')+'</div>'
       :'<div class="empty"><h3>Nothing on this shelf yet.</h3><p>Try a different platform.</p></div>');
 }
+/* Kids — every Family/Animation-tagged title, one dedicated page instead of
+   being buried inside the "Serve me something" modal. Real curated tags,
+   same predicate SERVE_MOODS already uses for its 'kids' flavor — no new
+   data invented, just a proper home for it. */
+var KIDS_TYPE='all';
+function setKidsType(t){ KIDS_TYPE=t; renderKids(); }
+function isKidFriendly(f){ return f.tags&&(f.tags.indexOf('Family')>=0||f.tags.indexOf('Animation')>=0); }
+function renderKids(){
+  var el=byId('kidsContent'); if(!el)return;
+  var all=FILMS.filter(function(f){ return !f.noart && scopeMatch(f) && isKidFriendly(f); });
+  var types=[['All','all'],['Movies','movie'],['Series','tv']];
+  var list=all.filter(function(f){ return KIDS_TYPE==='all' || f.type===KIDS_TYPE; })
+    .sort(function(a,b){ return b.year-a.year || a.title.localeCompare(b.title); });
+  el.innerHTML='<div class="browse-head"><span class="eyebrow">Family &amp; Animation</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Kids.</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Family films and animation from the catalog — real scores, nothing sanitized or faked, just filtered to what’s made for the whole room. Open any title for its real Kid/Teen/Young Adult rating.</p></div>'+
+    '<div id="kidsScope" style="margin-top:14px">'+scopeToggleHTML('Our Picks','All Picks','Black-led family films & animation.','Every family film & animation title in the catalog.')+'</div>'+
+    '<div class="filters" role="group" aria-label="Filter by type">'+
+      '<span class="flabel">Type</span>'+types.map(function(t){
+        return '<button class="chip'+(KIDS_TYPE===t[1]?' on':'')+'" onclick="setKidsType(\''+t[1]+'\')">'+t[0]+'</button>';
+      }).join('')+
+    '</div>'+
+    '<p class="browse-count" style="margin:14px 0">'+fmt(list.length)+' title'+(list.length===1?'':'s')+'</p>'+
+    (list.length?'<div class="grid-cards">'+list.map(cardHTML).join('')+'</div>'
+      :'<div class="empty"><h3>Nothing here yet.</h3><p>Try a different type.</p></div>');
+}
 function setSort(v){FILTERS.sort=v;renderBrowse();}
 function renderBrowse(){
   var moods=['All','Intense','Contemplative','Tender','Uplifting','Playful','Ancestral'];
@@ -7367,7 +7465,7 @@ function scopeToggleHTML(labelOurs,labelAll,noteOurs,noteAll){
 /* Scope toggle lives on Browse, Couch, and Rankings — one shared app.scope
    preference across all three. Home is always Black film & TV regardless, so
    we clear any home toggle and never let "All Films" change the home shelves. */
-function refreshScopeToggles(){ var hs=byId('homeScope'); if(hs)hs.innerHTML=''; var bs=byId('browseScope'); if(bs)bs.innerHTML=scopeToggleHTML(); var cs=byId('couchScope'); if(cs)cs.innerHTML=scopeToggleHTML('Our Shows','All Shows','Black-led series, curated by the Kitchen.','Every series in the catalog, including wider picks.'); }
+function refreshScopeToggles(){ var hs=byId('homeScope'); if(hs)hs.innerHTML=''; var bs=byId('browseScope'); if(bs)bs.innerHTML=scopeToggleHTML(); var cs=byId('couchScope'); if(cs)cs.innerHTML=scopeToggleHTML('Our Shows','All Shows','Black-led series, curated by the Kitchen.','Every series in the catalog, including wider picks.'); var ks=byId('kidsScope'); if(ks)ks.innerHTML=scopeToggleHTML('Our Picks','All Picks','Black-led family films & animation.','Every family film & animation title in the catalog.'); }
 function setScope(s){
   if(app.scope===s)return;
   app.scope=s; saveState(); renderHome();
@@ -7375,6 +7473,7 @@ function setScope(s){
   if(v==='browse')renderBrowse();
   if(v==='ranked')renderRanked();
   if(v==='couch')renderCouch();
+  if(v==='kids')renderKids();
   refreshScopeToggles();
   toast(s==='ours'?'Showing Our Films.':'Showing All Films.');
 }
@@ -8839,6 +8938,26 @@ document.addEventListener('click',function(ev){
   if(!_notifOpen)return;
   var w=byId('notifWrap');
   if(w && !w.contains(ev.target)) closeNotifDropdown();
+});
+/* "More" nav dropdown — the top nav had 9 flat links (too busy); the
+   less-frequent ones now live behind this menu instead. */
+var _moreNavOpen=false;
+function toggleMoreNav(){ if(_moreNavOpen) closeMoreNav(); else openMoreNav(); }
+function openMoreNav(){
+  _moreNavOpen=true;
+  var p=byId('navMorePanel'); if(!p)return;
+  p.style.display='flex';
+  var b=byId('navMoreBtn'); if(b)b.setAttribute('aria-expanded','true');
+}
+function closeMoreNav(){
+  _moreNavOpen=false;
+  var p=byId('navMorePanel'); if(p)p.style.display='none';
+  var b=byId('navMoreBtn'); if(b)b.setAttribute('aria-expanded','false');
+}
+document.addEventListener('click',function(ev){
+  if(!_moreNavOpen)return;
+  var w=byId('navMoreWrap');
+  if(w && !w.contains(ev.target)) closeMoreNav();
 });
 function signOut(){
   if(sbConfigured() && authSession && authSession.access_token){

@@ -639,6 +639,55 @@ the correct inline `background-image` — the fake test image itself renders
 as a blank tile since it's a 1px stub, which is a test-fixture limitation,
 not a code issue (production TMDB backdrops are real 1280px photos).
 
+## Kids section + real age-approval ratings (2026-07-09)
+Owner: "We need a more prominent kids section. Also a way to rate adult
+movies kids can see. Kid approved- Teen Approved- Young Adult Approved."
+Also: "conflate the tabs at the top its too busy" — addressed together
+since adding a 10th flat nav link would've made the busy-nav complaint
+worse.
+
+- **`#/kids`** (`renderKids()`, index.html) — a real dedicated page (not
+  buried inside the "Serve me something" modal's `kids` flavor anymore,
+  though that predicate — `f.tags` has `Family` or `Animation` — is reused
+  as-is, no new data invented). Same scope-toggle + type-chip + grid pattern
+  as Couch/Browse (`scopeToggleHTML('Our Picks','All Picks',...)`,
+  `KIDS_TYPE`/`setKidsType`). Linked in the top nav, the footer link row,
+  and `refreshScopeToggles()`/`setScope()` wired the same way Couch is.
+- **Top nav decluttered**: was 9 flat links (Home/Browse/Rankings/In
+  Theaters/Coming Soon/The Word/On The Couch/The Vault/Join). Now 5 direct
+  links (Home/Browse/**Kids**/Rankings/Join) + a **"More ▾"** dropdown
+  (`#navMoreWrap`/`toggleMoreNav()`, same open/close-on-outside-click
+  pattern as the notifications bell) holding the less-frequent five: In
+  Theaters, Coming Soon, The Word, On The Couch, The Vault.
+  `NAV_MORE_VIEWS` makes the "More" button itself show `.active` when the
+  current page is one of its children, so there's still a nav landmark when
+  the panel is closed. Mobile is unaffected — it already used the separate
+  bottom `.tabbar`, not this dropdown, and wasn't part of the complaint.
+- **Kid/Teen/Young Adult Approved badge** (film pages) — the site already
+  had a full "content pepper" advisory UI (`pepperRow`, language/violence/
+  sexual-content flags + an MPAA-style cert) but **zero films had that data
+  populated**, so it was fully dormant. Rather than fabricate cert data,
+  this pulls the **real** US certification live from TMDB — same trust
+  level as the posters/backdrops/cast already sourced live — via
+  `/movie/{id}/release_dates` or `/tv/{id}/content_ratings`, added onto the
+  existing `hydrateFilmMedia()` fetch (one extra parallel request, no new
+  network round-trip pattern). `ageTier(cert)` maps G/PG/TV-Y/TV-G→**Kid**,
+  PG-13/TV-PG/TV-14→**Teen**, R/TV-MA→**Young Adult**; NC-17 or an
+  unresolved cert renders **no badge at all** rather than guessing — this
+  literally answers "a way to rate adult movies kids can see": open any
+  title, including one that isn't in Kids at all, and its real rating tier
+  shows. `MEDIA_CACHE_KEY` bumped to `ws_media_v4` so the new field
+  populates on next hydrate instead of waiting for every visitor's cache to
+  naturally expire (no expiry exists otherwise).
+- Verified in headless Chromium with mocked TMDB responses: `/kids` renders
+  46 real Family/Animation titles with correct scope/type filtering; the
+  nav dropdown opens, shows all 5 links, and closes on outside click; a
+  mocked `PG-13` movie cert renders "🧑 Teen Approved" and a mocked `TV-MA`
+  TV rating renders "🔞 Young Adult Approved" end-to-end from fetch → tier
+  → badge. Caught and fixed a real bug along the way: the Kids scope-toggle
+  note text was pre-escaped (`&amp;`) on top of `scopeToggleHTML()`'s own
+  `esc()` call, double-encoding into a literal `&amp;` on the page.
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical
