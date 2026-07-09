@@ -699,6 +699,26 @@ dropped to 600 so the `.active` item (700, gold) actually stands out, more
 generous padding (10px) with a 1px gap between rows, and a small triangle
 pointer (`::before`) connecting the panel visually to the "More" button.
 
+## Little House on the Prairie (2026, Netflix) added (2026-07-09)
+Owner asked to add it to the catalog and the `FEATURED` home carousel. Flagged
+first: the core Ingalls-family cast and credited EPs (Rebecca Sonnenshine and
+others) aren't Black, so on its face this doesn't clear the site's usual
+Black-led bar. Owner's answer was "Who is playing George Tann" — verified via
+TMDB + web search: **Jocko Sims plays Dr. George A. Tann**, based on a real
+free-born Black physician who was the only doctor for miles on the actual
+frontier — a substantive, named, real-history Black storyline, even though
+he's billed below the four leads. Same "closer than usual bar" pattern as
+`lioness`/`paradise`, documented the same way. `id:'little-house-on-the-
+prairie-2026'` (year-suffixed since the original 1974 series could plausibly
+be added later — catalog identity is title+year, never title alone), real
+TMDB data throughout (`k`/`t` null, `votes:0`, `reviews:[]`), poster pinned in
+`WS_POSTERS` since it was already confirmed against the correct TMDB id
+(283304) while researching the Tann question. Synopsis leads with the Tann
+context specifically, since that's the actual reason it's in the catalog, not
+an incidental detail. Added to `FEATURED` as the 4th carousel slide
+(`ey:'New series · Streaming today'` — it aired the same day as this
+addition). Ran `node scripts/build-films-json.cjs` after, per convention.
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical
