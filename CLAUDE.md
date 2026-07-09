@@ -265,6 +265,22 @@ docs. Every push deploys production — verify locally (headless Chromium,
 `/opt/pw-browsers/chromium`) before pushing.
 
 ## Conventions
+- **Visual bar for "featured moment" UI** (set 2026-07-09 via the Emmy
+  carousel, owner: "remember this level of style for the future"): when
+  building a promotional/spotlight unit — banners, carousels, callouts for a
+  real event/moment (awards, drops, etc.) — default to depth and energy, not
+  a flat card. Reference example: `.emmy-car-*` (index.html). Concretely:
+  dark "stage" background rather than a light panel-in-a-panel box (content
+  sits directly on the page, no boxed-in-a-box framing); gold spotlight/glow
+  motion (conic-gradient sweep, pulsing box-shadow glow, twinkle accents);
+  a foil-framed/badged image treatment instead of a bare `<img>`; real
+  progress feedback (story-style segmented fill) instead of static dots;
+  one big, confident title instead of a small eyebrow + separate headline.
+  Still CSS-only (`animation`/`transition`, no new deps), still respects
+  `prefers-reduced-motion`, still no fabricated data — the energy is in the
+  chrome, not in inventing numbers or reviews. Default to this level of
+  polish for the next spotlight-style feature rather than shipping a plain
+  version first and iterating up.
 - Catalog at 1053 titles (2026-07-08): +10 more via a direct owner list — Good
   Burger, Good Burger 2, Don't Be a Menace to South Central While Drinking
   Your Juice in the Hood, Booty Call, The Brothers, Mr. Church, Pride (2007,
