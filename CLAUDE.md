@@ -432,8 +432,8 @@ requiring a manual takedown — originally ~36h, extended 2026-07-09 to a full
 below was added.
 
 **Nominee photo carousel** (2026-07-09): `#emmyCar`/`paintEmmyCarousel()` —
-one medium (170×170) image per unique nominee/show, auto-advancing every 4s
-(pauses on hover), same track/dots pattern as the home `FEATURED` carousel
+one medium (184×184) image per unique nominee/show, auto-advancing every 4s
+(pauses on hover), same track pattern as the home `FEATURED` carousel
 (`featSlideHTML`/`featPlay`) but sized as a small self-contained card instead
 of a full-width banner. `emmyCarouselItems()` dedupes `EMMY_NOMS_2026` by
 name (Colman Domingo's two nods collapse into one slide listing both
@@ -446,6 +446,20 @@ once per unique name (`hydrateEmmyPhotosOnce`, guarded against overlap/
 infinite-repaint) and the carousel silently repaints in place once photos
 land — a slide with no resolved photo falls back to an emoji tile rather
 than a broken image.
+
+Restyled 2026-07-09 (owner: "so basic... needs pizzazz and depth and energy
+like the award show") — a dark stage card with a rotating gold spotlight
+sweep (`.emmy-car-wrap::after`, CSS `conic-gradient` + `emmySpin`), three
+twinkling sparkle dots, a gold gradient-foil photo frame with a slow pulsing
+glow (`emmyGlow`) and a circular trophy/TV badge pinned to its corner, a
+shimmering gold-foil-text ribbon ("Nominee"/"Nominated series"), the
+category rendered as a gold pill instead of plain text, and prev/next arrow
+buttons. Dots were replaced with Instagram-Stories-style progress segments
+(`emmySegHTML`/`.emmy-car-seg`) — the active segment fills over the real 4s
+interval via a CSS `emmySegFill` animation, completed ones stay full, so the
+bar always reflects true position instead of a static dot. All motion is CSS
+(`animation`/`transition`), respects `prefers-reduced-motion`, and is purely
+decorative — no new network calls or data.
 
 **Bug found and fixed while building this**: the catalog-wide poster
 hydrator (`hydrateFromTMDB()`, used for every TV/film card without a baked
