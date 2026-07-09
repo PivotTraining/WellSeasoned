@@ -707,6 +707,7 @@ adds/backfills, it doesn't prune stale entries, so a plain re-run wouldn't
 have caught this). If it comes back, the original entry + real TMDB
 data/reasoning (the Dr. George Tann "closer than usual bar" case) is
 preserved in git history on this same date.
+
 Owner asked to add it to the catalog and the `FEATURED` home carousel. Flagged
 first: the core Ingalls-family cast and credited EPs (Rebecca Sonnenshine and
 others) aren't Black, so on its face this doesn't clear the site's usual
@@ -736,6 +737,18 @@ S1 plus Jocko Sims' full photo gallery — and none of them show him in
 costume as Tann yet (only a generic modern headshot). Left unresolved: needs
 either a real transferable file from the owner, or to wait for TMDB to index
 better stills as the show gets more coverage.
+
+## `.scope-wrap` spacing bug on Couch/Kids (2026-07-09)
+Owner screenshotted the Kids scope toggle — "Our Picks / All Picks" pill sat
+flush against its note text ("Black-led family films & animation.") with no
+gap. Root cause: `scopeToggleHTML()` returns the `.scope` pill and
+`.scope-note` span as siblings, and relies on being wrapped in a
+`class="scope-wrap"` container for the `display:flex;gap:12px` that actually
+spaces them apart. Home's `#homeScope` and Browse's `#browseScope` (both
+static markup) had the class; `#couchScope` and `#kidsScope` (both built via
+JS string concatenation when those pages were added) were missing it —
+same bug on both pages, only Kids got reported. Fixed by adding
+`class="scope-wrap"` to both wrapper divs.
 
 ## Home hero feature: "Why Did I Get Married Again?" (2026-07-09)
 Owner: replace the Dinner Table Debate slot on home with "a beautiful

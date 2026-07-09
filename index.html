@@ -7326,7 +7326,7 @@ function renderCouch(){
   el.innerHTML='<div class="browse-head"><span class="eyebrow">Black TV · every platform</span>'+
     '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">On The Couch.</h1>'+
     '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Every Black-led series in the catalog, wherever it streams — one shelf instead of ten apps.</p></div>'+
-    '<div id="couchScope" style="margin-top:14px">'+scopeToggleHTML('Our Shows','All Shows','Black-led series, curated by the Kitchen.','Every series in the catalog, including wider picks.')+'</div>'+
+    '<div id="couchScope" class="scope-wrap" style="margin-top:14px">'+scopeToggleHTML('Our Shows','All Shows','Black-led series, curated by the Kitchen.','Every series in the catalog, including wider picks.')+'</div>'+
     '<div class="filters" role="group" aria-label="Filter by platform">'+
       '<span class="flabel">Where</span>'+wheres.map(function(w){
         return '<button class="chip'+(COUCH_WHERE===w?' on':'')+'" onclick="setCouchWhere(\''+esc(w)+'\')">'+esc(w)+'</button>';
@@ -7352,7 +7352,7 @@ function renderKids(){
   el.innerHTML='<div class="browse-head"><span class="eyebrow">Family &amp; Animation</span>'+
     '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Kids.</h1>'+
     '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Family films and animation from the catalog — real scores, nothing sanitized or faked, just filtered to what’s made for the whole room. Open any title for its real Kid/Teen/Young Adult rating.</p></div>'+
-    '<div id="kidsScope" style="margin-top:14px">'+scopeToggleHTML('Our Picks','All Picks','Black-led family films & animation.','Every family film & animation title in the catalog.')+'</div>'+
+    '<div id="kidsScope" class="scope-wrap" style="margin-top:14px">'+scopeToggleHTML('Our Picks','All Picks','Black-led family films & animation.','Every family film & animation title in the catalog.')+'</div>'+
     '<div class="filters" role="group" aria-label="Filter by type">'+
       '<span class="flabel">Type</span>'+types.map(function(t){
         return '<button class="chip'+(KIDS_TYPE===t[1]?' on':'')+'" onclick="setKidsType(\''+t[1]+'\')">'+t[0]+'</button>';
