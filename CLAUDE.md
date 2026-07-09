@@ -461,6 +461,17 @@ bar always reflects true position instead of a static dot. All motion is CSS
 (`animation`/`transition`), respects `prefers-reduced-motion`, and is purely
 decorative — no new network calls or data.
 
+Enlarged 2026-07-09 (owner: "remove the box of all the nominees and use that
+space to enlarge the carousel") — deleted the plain text roster below the
+carousel (`#emmyList`/`emmyNomRow`/`.emmy-row` grid) and the separate
+"Nominated series" line (`#emmyShows`), since both were now redundant with
+the carousel itself (every nominee and both shows already appear as slides).
+`paintEmmyBanner()` simplified to just toggle the section and call
+`paintEmmyCarousel()` — no more list-building. The freed vertical space went
+into the carousel: card width is now `clamp(320px,46vw,460px)` (was a fixed
+300px), the photo frame `clamp(200px,32vw,290px)` (was fixed 184px), name/
+category/badge/arrows sized up to match.
+
 **Bug found and fixed while building this**: the catalog-wide poster
 hydrator (`hydrateFromTMDB()`, used for every TV/film card without a baked
 poster) was querying TMDB's **movie** search for every title regardless of
