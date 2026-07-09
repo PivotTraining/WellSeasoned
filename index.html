@@ -343,6 +343,13 @@
   .card-fmt.cf-short{background:rgba(138,46,90,.8)}
   .card-fmt.cf-sports{background:rgba(30,110,60,.82)}
   .card:hover .poster{transform:translateY(-6px) scale(1.015);filter:brightness(1.05) saturate(1.04)}
+  /* Hover glow keyed to the film's own Kitchen tier — same colors as the
+     cert-seal (.a-certified/.a-well/.a-light) — so browsing itself carries
+     the site's verdict language instead of a generic gray hover. A
+     'pending' (unscored) film gets no color claim — nothing to celebrate yet. */
+  .card:hover .poster.t-certified{box-shadow:var(--shadow-3),0 0 0 2px rgba(228,155,11,.6),0 0 26px rgba(228,155,11,.3)}
+  .card:hover .poster.t-well{box-shadow:var(--shadow-3),0 0 0 2px rgba(190,59,24,.5),0 0 26px rgba(190,59,24,.26)}
+  .card:hover .poster.t-light{box-shadow:var(--shadow-3),0 0 0 2px rgba(46,139,87,.5),0 0 26px rgba(46,139,87,.24)}
   .card .poster::after{content:"";position:absolute;inset:0;opacity:.15;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n2)'/%3E%3C/svg%3E")}
   .card .p-ttl{font-weight:900;font-size:15.5px;color:#fff;position:relative;z-index:2;line-height:.96;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .card .p-verdict{position:absolute;top:9px;left:9px;z-index:3}
@@ -666,26 +673,37 @@
   .freedom-wl-cr{font-size:12.5px;color:#0A7A33;font-weight:700;text-decoration:none}
   .freedom-wl-cr:hover{text-decoration:underline}
   @media(max-width:640px){ .freedom{padding:16px 14px} .freedom-h{font-size:21px} .aa-flag{width:52px;height:34px} .freedom-wl-h{font-size:16px} }
-  /* Featured spotlight carousel (home) */
+  /* Featured spotlight carousel (home) — same "stage" language as the Emmy
+     carousel (gold sweep, shimmer text, story-bar progress) so the site's
+     two big carousels don't read as two different builds. */
   .feat-wrap{margin:0 0 22px}
-  .feat-car{position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 30px rgba(0,0,0,.28)}
-  .feat-track{display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1);will-change:transform}
+  .feat-car{position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid rgba(244,197,66,.28);
+    box-shadow:0 14px 36px rgba(0,0,0,.34),0 0 0 1px rgba(244,197,66,.08) inset,0 0 40px rgba(228,155,11,.1);isolation:isolate}
+  .feat-car::after{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.13) 10deg,transparent 26deg,transparent 334deg);
+    animation:emmySpin 10s linear infinite;pointer-events:none;mix-blend-mode:screen;z-index:0}
+  .feat-track{position:relative;z-index:1;display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1);will-change:transform}
   .feat{flex:0 0 100%;position:relative;overflow:hidden;background-color:#0b1420;background-size:cover;background-position:center 26%;display:flex;align-items:stretch;gap:26px;min-height:236px;padding:26px 58px;cursor:pointer}
   .feat:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
   .feat-body{flex:1 1 auto;align-self:center;max-width:620px;position:relative;z-index:1}
-  .feat-ey{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .feat-ey{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;display:inline-block;
+    background:linear-gradient(90deg,#a9720b,#f9dd8b,#a9720b);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:emmyShine 3s linear infinite}
   .feat-ttl{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.03;color:#fff;margin:8px 0 6px;text-shadow:0 2px 18px rgba(0,0,0,.6)}
   .feat-meta{font-size:13px;color:rgba(255,255,255,.74);margin-bottom:10px}
   .feat-syn{font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.92);margin-bottom:16px;max-width:560px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   .feat-cta{display:flex;gap:10px;flex-wrap:wrap}
   .feat-poster{flex:none;width:150px;align-self:center;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.55);object-fit:cover;position:relative;z-index:1}
-  .feat-arw{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(12,8,4,.55);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .15s;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-  .feat-arw:hover{background:rgba(12,8,4,.82)}
+  .feat-arw{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;border-radius:50%;border:1px solid rgba(244,197,66,.4);background:rgba(12,8,4,.55);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .15s;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .feat-arw:hover{background:rgba(244,197,66,.28)}
   .feat-arw.prev{left:12px}
   .feat-arw.next{right:12px}
-  .feat-dots{position:absolute;left:0;right:0;bottom:12px;display:flex;gap:7px;justify-content:center;z-index:3}
-  .feat-dot{width:8px;height:8px;border-radius:50%;border:none;padding:0;background:rgba(255,255,255,.42);cursor:pointer;transition:all .18s}
-  .feat-dot.on{background:var(--gold);width:22px;border-radius:5px}
+  .feat-segs{position:absolute;left:16px;right:16px;top:14px;display:flex;gap:5px;z-index:3}
+  .feat-seg{flex:1;height:3px;border:0;padding:0;cursor:pointer;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}
+  .feat-seg i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f4c542,#fff2c2);border-radius:3px}
+  .feat-seg.done i{width:100%}
+  .feat-seg.active i{animation:featSegFill 6.5s linear forwards}
+  @keyframes featSegFill{from{width:0}to{width:100%}}
+  @media (prefers-reduced-motion:reduce){ .feat-car::after,.feat-ey,.feat-seg.active i{animation:none} }
   @media (max-width:640px){
     .feat{flex-direction:column;gap:16px;padding:20px 20px 34px;background-position:center}
     .feat-ttl{font-size:26px}
@@ -847,19 +865,41 @@
   .critic-stats .cs b{font-weight:900;font-size:22px;color:var(--gold-ink)}
   .critic-stats .cs span{font-size:12.5px;color:var(--ink-2);display:block}
 
-  /* ============ MEMBERSHIP ============ */
-  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}
-  .plan{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px 22px;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:var(--shadow-1)}
-  .plan.feature{border-color:var(--gold);background:linear-gradient(180deg,rgba(228,155,11,.16),var(--panel) 60%)}
-  .plan .p-tag{position:absolute;top:0;right:0;background:var(--gold);color:#20160B;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-bottom-left-radius:12px}
-  .plan h3{font-size:21px}
-  .plan .p-price{font-weight:900;font-size:32px;margin:8px 0 2px}
-  .plan .p-price small{font-size:14px;font-weight:600;color:var(--ink-2)}
-  .plan .p-note{font-size:13px;color:var(--ink-2);min-height:34px}
-  .plan ul{list-style:none;margin:15px 0 20px;display:flex;flex-direction:column;gap:9px}
-  .plan li{font-size:14px;display:flex;gap:8px;align-items:flex-start}
-  .plan li svg{flex:none;margin-top:3px}
+  /* ============ MEMBERSHIP / ADVERTISE PRICING — dark premium "stage"
+     card, same design language as the Emmy carousel, since these are the
+     site's two money pages and deserve the most authority, not the least. */
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:26px;align-items:start}
+  .plan{position:relative;display:flex;flex-direction:column;padding:28px 24px;border-radius:22px;overflow:hidden;
+    background:linear-gradient(165deg,#20140a 0%,#140c05 68%,#0c0703 100%);
+    border:1px solid rgba(244,197,66,.22);
+    box-shadow:0 16px 34px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04);
+    color:rgba(255,255,255,.82);
+    transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+  .plan:hover{transform:translateY(-4px);box-shadow:0 22px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05)}
+  .plan.feature{z-index:1;isolation:isolate;transform:scale(1.03);
+    border:1px solid rgba(244,197,66,.6);
+    background:radial-gradient(120% 90% at 50% -15%,rgba(244,197,66,.26),transparent 55%),linear-gradient(165deg,#251807 0%,#160e05 68%,#0c0703 100%);
+    box-shadow:0 22px 48px rgba(0,0,0,.5),0 0 0 1px rgba(244,197,66,.14) inset,0 0 44px rgba(228,155,11,.16)}
+  .plan.feature:hover{transform:scale(1.03) translateY(-4px)}
+  .plan.feature::after{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.14) 10deg,transparent 26deg,transparent 334deg);
+    animation:emmySpin 9s linear infinite;pointer-events:none;mix-blend-mode:screen;z-index:0}
+  .plan.feature>*{position:relative;z-index:1}
+  .plan .p-tag{position:absolute;top:18px;right:-38px;width:170px;z-index:2;text-align:center;
+    transform:rotate(40deg);background:linear-gradient(90deg,#a9720b,#f4c542,#a9720b);background-size:200% auto;
+    color:#20160B;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 0;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);animation:emmyShine 3s linear infinite}
+  .plan h3{font-family:var(--display);font-size:21px;font-weight:800;color:#fff}
+  .plan .p-price{font-family:var(--display);font-weight:900;font-size:34px;margin:10px 0 2px;color:#fff}
+  .plan .p-price small{font-size:13.5px;font-weight:600;color:rgba(255,255,255,.55)}
+  .plan .p-note{font-size:13px;color:rgba(255,255,255,.6);min-height:34px;line-height:1.5}
+  .plan ul{list-style:none;margin:16px 0 22px;display:flex;flex-direction:column;gap:10px}
+  .plan li{font-size:14px;display:flex;gap:9px;align-items:flex-start;color:rgba(255,255,255,.84)}
+  .plan li svg{flex:none;margin-top:3px;color:#F4B733}
   .plan .btn{margin-top:auto}
+  .plan .btn-ghost{background:transparent;border-color:rgba(255,255,255,.32);color:#fff}
+  .plan .btn-ghost:hover{border-color:var(--gold-soft);color:var(--gold-soft)}
+  @media (prefers-reduced-motion:reduce){ .plan.feature::after,.plan .p-tag{animation:none} }
+  @media (max-width:640px){ .plan.feature{transform:none} .plan.feature:hover{transform:translateY(-4px)} }
   .plan .btn+.btn{margin-top:8px}
 
   /* ============ ADVERTISE ============ */
@@ -1451,9 +1491,9 @@
           <h3>At the Table</h3><div class="p-price">Free</div>
           <p class="p-note">For everyone who watches and has something to say.</p>
           <ul>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Browse every score and review</li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Vote in The People's Cut</li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Comment and reply</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Browse every score and review</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Vote in The People's Cut</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Comment and reply</li>
           </ul>
           <button class="btn btn-ghost" onclick="openAuth('signup')">Create account</button>
         </div>
@@ -1462,9 +1502,9 @@
           <h3>The Regular</h3><div class="p-price">$6<small>/mo · at launch</small></div>
           <p class="p-note">For the one who plans the whole watch night. Billing opens at launch — join the waitlist and lock in founding-member pricing.</p>
           <ul>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>My Plate watchlist and where-to-watch alerts</li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Personalized picks and early lists</li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Ad-free, plus showtimes and tickets</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>My Plate watchlist and where-to-watch alerts</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Personalized picks and early lists</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Ad-free, plus showtimes and tickets</li>
           </ul>
           <button class="btn btn-gold" onclick="startMembershipCheckout()">Become a member</button>
           <button class="btn btn-ghost" onclick="openWaitlist('The Regular')">Join the waitlist</button>
@@ -1473,9 +1513,9 @@
           <h3>The Kitchen</h3><div class="p-price">Earned</div>
           <p class="p-note">For verified critics whose reviews move the Kitchen Score. Application based, never bought.</p>
           <ul>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Critic profile and verified badge</li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Reviews count toward the official score</li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Say in editorial lists and features</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Critic profile and verified badge</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Reviews count toward the official score</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>Say in editorial lists and features</li>
           </ul>
           <button class="btn btn-ghost" onclick="openApplyKitchen()">Apply to The Kitchen</button>
         </div>
@@ -5748,6 +5788,12 @@ function featSlideHTML(f,ey){
     (poster?'<img class="feat-poster" src="'+poster+'" alt="'+esc(f.title)+' poster" loading="lazy">':'')+
   '</div>';
 }
+function featSegHTML(slides){
+  return '<div class="feat-segs">'+slides.map(function(_,j){
+    var cls=j<_featIdx?'done':(j===_featIdx?'active':'');
+    return '<button class="feat-seg'+(cls?' '+cls:'')+'" aria-label="Slide '+(j+1)+'" onclick="featSet('+j+')"><i></i></button>';
+  }).join('')+'</div>';
+}
 function paintFeatured(){
   var el=byId('featuredBanner'); if(!el) return;
   var slides=featSlides();
@@ -5756,15 +5802,13 @@ function paintFeatured(){
   if(_featIdx>=slides.length) _featIdx=0;
   var single=slides.length<2;
   var html='<div class="feat-car"'+(single?'':' onmouseenter="featPause()" onmouseleave="featPlay()"')+'>'+
+    (single?'':featSegHTML(slides))+
     '<div class="feat-track">';
   for(var i=0;i<slides.length;i++){ html+=featSlideHTML(slides[i].f,slides[i].ey); }
   html+='</div>';
   if(!single){
     html+='<button class="feat-arw prev" aria-label="Previous" onclick="featGo(-1)">‹</button>'+
-      '<button class="feat-arw next" aria-label="Next" onclick="featGo(1)">›</button>'+
-      '<div class="feat-dots">';
-    for(var j=0;j<slides.length;j++){ html+='<button class="feat-dot'+(j===_featIdx?' on':'')+'" aria-label="Slide '+(j+1)+'" onclick="featSet('+j+')"></button>'; }
-    html+='</div>';
+      '<button class="feat-arw next" aria-label="Next" onclick="featGo(1)">›</button>';
   }
   html+='</div>';
   el.innerHTML=html;
@@ -5774,7 +5818,7 @@ function paintFeatured(){
 function featApply(){
   var el=byId('featuredBanner'); if(!el)return;
   var track=el.querySelector('.feat-track'); if(track) track.style.transform='translateX(-'+(_featIdx*100)+'%)';
-  var dots=el.querySelectorAll('.feat-dot'); for(var i=0;i<dots.length;i++){ dots[i].className='feat-dot'+(i===_featIdx?' on':''); }
+  var segs=el.querySelector('.feat-segs'); if(segs) segs.outerHTML=featSegHTML(featSlides());
 }
 function featSet(i){ var n=featSlides().length; if(!n)return; _featIdx=((i%n)+n)%n; featApply(); featPlay(); }
 function featGo(d){ featSet(_featIdx+d); }
@@ -5930,7 +5974,7 @@ function cardHTML(id){
   var f=(typeof id==='string')?find(id):id;
   var hov=f.trailer?' onmouseenter="cardPreview(this,\''+f.trailer+'\')" onmouseleave="cardPreviewOut(this)"':'';
   return '<div class="card" tabindex="0" role="button" aria-label="'+esc(f.title)+'" onclick="go(\'film\',\''+f.id+'\')" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
-    '<div class="poster'+(f.noart?' noart':'')+'"'+hov+' style="'+(f.noart?'':'background:'+f.grad)+'">'+fmtBadge(f)+posterInner(f,'p-ttl')+'</div>'+
+    '<div class="poster'+(f.noart?' noart':'')+' t-'+tier(f.k)+'"'+hov+' style="'+(f.noart?'':'background:'+f.grad)+'">'+fmtBadge(f)+posterInner(f,'p-ttl')+'</div>'+
     '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div>'+
       cardScores(f)+
       '<div class="c-sub">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'By ':'Dir. ')+esc(f.dir)+' · ':'')+f.year+(f.type==='tv'?' · Series':'')+'</div>'+
@@ -8004,7 +8048,7 @@ function advertiseTierHTML(t){
     '<h3>'+esc(t.name)+'</h3><div class="p-price">'+esc(t.price)+'</div>'+
     '<p class="p-note">'+esc(t.note)+'</p>'+
     '<ul>'+t.items.map(function(li){
-      return '<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#875B07" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>'+esc(li)+'</li>';
+      return '<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>'+esc(li)+'</li>';
     }).join('')+'</ul>'+
     '<button class="btn btn-gold btn-sm" onclick="openAdvertiseInquiry(\''+esc(t.name)+'\')">Request the media kit</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="emailAdvertiseInquiry(\''+esc(t.name)+'\')">Email us directly</button>'+

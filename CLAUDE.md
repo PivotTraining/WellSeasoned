@@ -506,6 +506,51 @@ line — `.emmy-h` now reads "🏆 The 2026 Emmy Nominations" directly, sized wa
 up (`clamp(30px,4.4vw,44px)`, was `clamp(20px,2.6vw,26px)`). `.emmy-ey` CSS
 removed as dead (no longer referenced anywhere).
 
+## Site-wide "spotlight" pass (2026-07-09)
+Owner asked for a real design critique ("what's weak, where does it leak,
+what lacks authority, what's boring/disconnected"), then to act on it
+aggressively. Findings + fixes, applying the visual-bar convention above
+beyond just the Emmy carousel:
+
+- **Money pages lacked authority.** `#/join` and `#/advertise` both use the
+  shared `.plan`/`.plans` card (`index.html`, "MEMBERSHIP / ADVERTISE
+  PRICING" CSS block) — previously a flat `var(--panel)` cream card
+  indistinguishable from any generic SaaS pricing table, on the two pages
+  that most need to feel premium/trustworthy. Rebuilt as a dark stage card
+  (same gradient/shadow language as `.plan.feature`/Emmy): `.plan.feature`
+  (the "Most popular"/"Most visible" tier) gets the full treatment — scaled
+  up, gold-foil border, rotating spotlight sweep (`emmySpin`, reused
+  keyframe), a diagonal shimmering ribbon badge instead of a flat corner
+  tag. All checkmark icons switched from a hardcoded `stroke="#875B07"` to
+  `stroke="currentColor"` so `.plan li svg{color:#F4B733}` can theme them
+  gold on the new dark background — one CSS change, no per-icon edits.
+  `.btn-ghost` inside `.plan` gets its own light-on-dark override so it
+  stays legible. Since `#/advertise`'s tiers share the same `.plan` markup
+  (`advertiseTierHTML`), this fix landed on both money pages at once.
+- **Two carousels, two different design languages.** The home `FEATURED`
+  spotlight carousel (`.feat-car`) predated the Emmy carousel and looked
+  like a different build sitting next to it. Brought it up to match: same
+  rotating conic-gradient spotlight sweep on the card border, the `.feat-ey`
+  eyebrow now uses the same shimmering gold-gradient-text treatment as the
+  Emmy ribbon, and the plain `.feat-dot` dots were replaced with the same
+  Instagram-Stories-style segmented progress bar pattern (`.feat-seg`,
+  `featSegHTML()`) — the active segment now visibly fills over the real
+  6.5s interval instead of just lighting up a static dot. `paintFeatured()`/
+  `featApply()` updated accordingly; `.feat-dot`/`.feat-dots` CSS removed as
+  dead.
+- **Browsing itself didn't carry the site's identity.** The Kitchen/Table
+  dual-verdict system only showed up in text and the small aura-ring badges
+  under each card — the poster grid itself (`.grid-cards`, the site's most-
+  used surface) looked like any generic film-site poster wall. `cardHTML()`
+  now stamps each poster with its own Kitchen tier (`t-certified`/`t-well`/
+  `t-light`/`t-pending`, from the existing `tier(f.k)` helper) and a hover
+  glow keyed to that tier reusing the *exact* colors already used by
+  `.cert-seal` (`.a-certified`/`.a-well`/`.a-light` — gold/paprika/green) —
+  so hovering a card previews the same verdict language the seal uses, no
+  new color vocabulary invented. A `pending` (unscored) film gets no color
+  claim on hover — consistent with "nothing fake": no claiming a verdict
+  that hasn't been earned yet.
+
 **Bug found and fixed while building this**: the catalog-wide poster
 hydrator (`hydrateFromTMDB()`, used for every TV/film card without a baked
 poster) was querying TMDB's **movie** search for every title regardless of
