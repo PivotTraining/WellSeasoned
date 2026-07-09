@@ -604,6 +604,21 @@ faint tint. Card text still needs no override — the panel backgrounds stay
 light enough for the default dark ink at these opacities (checked visually,
 not just numerically).
 
+**Bug found and fixed right after** (2026-07-09, owner: "the color gradient
+is pushing against the words on the page") — the `.shelf-band` padding
+(`26px 26px 14px 32px`, added specifically to clear the new 6px left accent
+bar) was silently losing to the base `section.shelf{padding:30px 0}` rule:
+same property, and `section.shelf` (type+class, specificity 0-1-1) beats a
+plain `.shelf-band` (class-only, 0-1-0) regardless of which is declared
+later in the stylesheet. So the accent bar/gradient edge was rendering
+flush against the shelf heading and card labels with zero clearance — e.g.
+"Free on Tubi" visually crowded against the teal bar, "Season" nearly
+touching it. Fixed by bumping the selector to `.shelf.shelf-band` (two
+classes, specificity 0-2-0, which does outrank `section.shelf`) for both
+the base rule and its `max-width:640px` override. Verified via
+`getBoundingClientRect()` before/after (heading moved from x:73 → x:105,
+clear of the bar) and screenshots at desktop + mobile widths.
+
 **Emmy carousel backdrops** (2026-07-09, owner: "put some rich backdrop
 behind the emmy nominated winners") — `emmyCarSlideHTML()` now sets a real
 photographic backdrop behind each slide (dark scrim + `background-image`,

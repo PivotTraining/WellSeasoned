@@ -333,7 +333,11 @@
      own zone (tinted panel, same gradient-wash pattern as .freedom, so card
      text never needs a contrast override) or their own density, instead of
      every section looking identical. */
-  .shelf-band{position:relative;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 26px 14px 32px;margin:8px 0}
+  /* .shelf.shelf-band (two classes) — needs to out-specificity the base
+     `section.shelf{padding:30px 0}` rule (type+class), or the padding here
+     silently loses and the accent bar/gradient edge sits flush against the
+     heading and card text with zero clearance. */
+  .shelf.shelf-band{position:relative;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 26px 14px 32px;margin:8px 0}
   .shelf-band::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:var(--r-xl) 0 0 var(--r-xl);background:var(--line-strong)}
   .shelf-band-tubi{background:linear-gradient(135deg,rgba(20,175,175,.30),rgba(130,50,215,.16) 55%,var(--panel) 88%);border-color:rgba(15,140,140,.55)}
   .shelf-band-tubi::before{background:linear-gradient(180deg,#12ADAD,#6A2FBE)}
@@ -341,7 +345,7 @@
   .shelf-band-stage::before{background:linear-gradient(180deg,var(--paprika),var(--sumac))}
   .shelf-band-vintage{background:linear-gradient(135deg,rgba(228,155,11,.32),rgba(94,62,4,.14) 55%,var(--panel) 88%);border-color:rgba(94,62,4,.5)}
   .shelf-band-vintage::before{background:linear-gradient(180deg,var(--gold),var(--gold-deep))}
-  @media (max-width:640px){ .shelf-band{padding:18px 16px 8px 22px;border-radius:var(--r-lg)} .shelf-band::before{width:5px} }
+  @media (max-width:640px){ .shelf.shelf-band{padding:18px 16px 8px 22px;border-radius:var(--r-lg)} .shelf-band::before{width:5px} }
   /* rail-lg: fewer, bigger cards — a "this matters more" shelf right after
      the mosaic. rail-sm: more, smaller cards — a quick-scan density shelf. */
   .rail.rail-lg .card{flex:0 0 calc((100% - 26px)/3)}
