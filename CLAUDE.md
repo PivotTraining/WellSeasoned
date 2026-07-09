@@ -426,8 +426,41 @@ show names link to a real catalog entry only where one exists (`abbott`,
 `paradise`) — never a fake/dead link. `paradise` (Sterling K. Brown's Hulu
 series, Black-led via its star/EP though creator Dan Fogelman is not Black
 — same "closer bar" case as `lioness`) was added to the catalog specifically
-so the banner could link to it. Auto-expires via `EMMY_EXPIRES` (owner asked
-for ~36h up, then pivot) instead of requiring a manual takedown.
+so the banner could link to it. Auto-expires via `EMMY_EXPIRES` instead of
+requiring a manual takedown — originally ~36h, extended 2026-07-09 to a full
+7 days (`2026-07-16T23:59:59Z`) per owner request when the photo carousel
+below was added.
+
+**Nominee photo carousel** (2026-07-09): `#emmyCar`/`paintEmmyCarousel()` —
+one medium (170×170) image per unique nominee/show, auto-advancing every 4s
+(pauses on hover), same track/dots pattern as the home `FEATURED` carousel
+(`featSlideHTML`/`featPlay`) but sized as a small self-contained card instead
+of a full-width banner. `emmyCarouselItems()` dedupes `EMMY_NOMS_2026` by
+name (Colman Domingo's two nods collapse into one slide listing both
+categories) and appends the two `EMMY_SHOWS_2026` entries. Show slides reuse
+`servePoster()` (same poster the rest of the site shows — no separate art).
+Person photos come from a live TMDB person search, cached to localStorage
+(`EMMY_PHOTOS_KEY`/`loadEmmyPhotos`) — real photos only, no placeholder/stock
+images, same "nothing fake" bar as every other real-photo feature. Fetched
+once per unique name (`hydrateEmmyPhotosOnce`, guarded against overlap/
+infinite-repaint) and the carousel silently repaints in place once photos
+land — a slide with no resolved photo falls back to an emoji tile rather
+than a broken image.
+
+**Bug found and fixed while building this**: the catalog-wide poster
+hydrator (`hydrateFromTMDB()`, used for every TV/film card without a baked
+poster) was querying TMDB's **movie** search for every title regardless of
+`f.type` — for TV shows this could return a same-named but unrelated movie.
+Confirmed live via the API: `Lioness` (2023, Zoe Saldaña/Paramount+) was
+resolving to *Leeuwin*, a same-year Dutch football drama also titled
+"Lioness" on TMDB, on the Couch/Browse cards. All 168 TV titles in the
+catalog rely on this hydrator (none have a baked poster), so any other TV
+title whose name collided with an unrelated movie was equally at risk. Fixed
+by branching on `f.type==='tv'` to hit `search/tv` (mirrors the already-
+correct per-film `hydrateFilmMedia()`); bumped `POSTER_CACHE_KEY` to
+`ws_posters_v2` so every visitor's already-poisoned localStorage cache gets
+dropped and re-resolved correctly rather than silently keeping the wrong
+poster forever.
 
 ## UX fixes (2026-07-08, owner-reported)
 - **Showtimes ZIP input collapsed to a ~26px "blank box."** Root cause,

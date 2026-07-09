@@ -613,6 +613,18 @@
   .emmy-shows{font-size:13px;color:var(--ink-2);margin-top:14px}
   .emmy-shows a{cursor:pointer;color:var(--gold-ink);font-weight:700}
   .emmy-shows-lab{font-weight:700;color:var(--ink)}
+  .emmy-car-outer{margin-top:16px}
+  .emmy-car-wrap{position:relative;max-width:220px;margin:0 auto;overflow:hidden;border-radius:var(--r-lg);border:1px solid rgba(228,155,11,.3);background:var(--panel)}
+  .emmy-car-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+  .emmy-car-slide{flex:0 0 100%;width:100%;cursor:pointer;text-align:center;padding:14px 14px 12px}
+  .emmy-car-slide img{width:100%;max-width:170px;height:170px;object-fit:cover;border-radius:10px;margin:0 auto;display:block;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .emmy-car-noimg{width:170px;height:170px;border-radius:10px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(160deg,rgba(228,155,11,.25),rgba(228,155,11,.05))}
+  .emmy-car-cap{margin-top:10px}
+  .emmy-car-cap b{display:block;font-size:14px;font-weight:800;color:var(--ink)}
+  .emmy-car-cap span{display:block;font-size:11.5px;color:var(--ink-2);margin-top:2px;line-height:1.3}
+  .emmy-car-dots{display:flex;justify-content:center;gap:5px;padding:0 0 12px}
+  .emmy-car-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);border:0;cursor:pointer;padding:0}
+  .emmy-car-dot.on{background:var(--gold)}
   /* July 4 freedom spotlight — African-American flag (red/black/green) accent */
   .freedom{margin:2px 0 22px;padding:20px 22px;border-radius:var(--r-lg);border:1px solid rgba(10,122,51,.34);background:linear-gradient(135deg,rgba(206,17,38,.10),rgba(20,20,20,.06) 46%,rgba(10,122,51,.12))}
   .freedom-top{display:flex;align-items:center;gap:14px}
@@ -1265,6 +1277,7 @@
         <section id="emmyBanner" class="emmy-banner" style="display:none">
           <div class="emmy-top"><span class="emmy-ey">🏆 2026 Emmy Nominations</span><h2 class="emmy-h">Black excellence, nominated.</h2></div>
           <p class="emmy-sub">The Television Academy announced its 2026 nominations today — every Black actor, director, and writer from the culture who made the list.</p>
+          <div id="emmyCar" class="emmy-car-outer" style="display:none"></div>
           <div id="emmyList" class="emmy-list"></div>
           <p id="emmyShows" class="emmy-shows" style="display:none"></p>
         </section>
@@ -4371,7 +4384,7 @@ function toggleSound(){ app.sound = app.sound===false ? true : false; saveState(
 /* ============ REAL POSTERS via TMDB (keyed by CONFIG.TMDB_KEY) ============ */
 /* Cached to localStorage so posters load instantly on later visits, even offline.
    With no key, the designed posters render and nothing here runs. */
-var POSTER_CACHE_KEY='ws_posters_v1';
+var POSTER_CACHE_KEY='ws_posters_v2';   // v2: TV titles were poisoned by a movie-search mismatch (see hydrateFromTMDB) — drop old caches
 function loadPosterCache(){ try{return JSON.parse(localStorage.getItem(POSTER_CACHE_KEY)||'{}');}catch(e){return {};} }
 function savePosterCache(c){ try{localStorage.setItem(POSTER_CACHE_KEY,JSON.stringify(c));}catch(e){} }
 function applyPoster(f,path){ if(path) f.poster='https://image.tmdb.org/t/p/w342'+path; }
@@ -4395,7 +4408,14 @@ function hydrateFromTMDB(){
     while(active<MAXC && i<pending.length){
       (function(f){
         active++;
-        fetch('https://api.themoviedb.org/3/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&year='+f.year)
+        // TV titles must hit the TV search endpoint — the movie search returns
+        // an unrelated same-named film (e.g. "Lioness" matched a Dutch football
+        // drama instead of the Zoe Saldaña series) and permanently caches the
+        // wrong poster.
+        var srchUrl=f.type==='tv'
+          ? 'https://api.themoviedb.org/3/search/tv?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&first_air_date_year='+f.year
+          : 'https://api.themoviedb.org/3/search/movie?api_key='+TMDB_KEY+'&query='+encodeURIComponent(f.title)+'&year='+f.year;
+        fetch(srchUrl)
           .then(function(r){return r.json();})
           .then(function(d){ var hit=d&&d.results&&d.results[0]; if(hit&&hit.poster_path){ cache[f.id]=hit.poster_path; applyPoster(f,hit.poster_path); fetched++; } })
           .catch(function(){})
@@ -5440,12 +5460,98 @@ function emmyNomRow(n){
   return '<div class="emmy-row"><a class="emmy-name" onclick="go(\'artist\',\''+esc(n.name)+'\')">'+esc(n.name)+'</a>'+
     '<span class="emmy-cat">'+esc(n.cat)+'</span><span class="emmy-show">'+showLink+'</span></div>';
 }
-/* Owner asked to keep this up ~36 hours from publish (2026-07-08 ~22:47 UTC),
-   then pivot — rather than requiring a manual takedown, it just auto-expires. */
-var EMMY_EXPIRES='2026-07-10T11:00:00Z';
+/* Owner extended this from the original ~36hr window to a full 7 days from
+   2026-07-09 (owner request: "get a carousel... keep it up for 7 days from
+   today") — still auto-expires, no manual takedown needed. */
+var EMMY_EXPIRES='2026-07-16T23:59:59Z';
+/* ---- Emmy nominee photo carousel: one medium image per unique nominee/show,
+   auto-advancing every 4s. Person photos come from a live TMDB person search
+   (cached to localStorage, same "nothing fake" bar as every other real-photo
+   feature on the site — no placeholder/stock images); show slides reuse
+   servePoster() so they stay in sync with the catalog's own poster art. */
+var EMMY_PHOTOS_KEY='ws_emmy_photos_v1';
+function loadEmmyPhotos(){ try{return JSON.parse(localStorage.getItem(EMMY_PHOTOS_KEY)||'{}');}catch(e){return {};} }
+function saveEmmyPhotos(c){ try{localStorage.setItem(EMMY_PHOTOS_KEY,JSON.stringify(c));}catch(e){} }
+function emmyCarouselItems(){
+  var items=[], byName={};
+  EMMY_NOMS_2026.forEach(function(n){
+    if(byName[n.name]){ byName[n.name].cats.push({cat:n.cat,show:n.show,filmId:n.filmId}); return; }
+    var it={type:'person',name:n.name,cats:[{cat:n.cat,show:n.show,filmId:n.filmId}]};
+    byName[n.name]=it; items.push(it);
+  });
+  EMMY_SHOWS_2026.forEach(function(s){ var f=find(s.filmId); if(f) items.push({type:'show',filmId:s.filmId,title:f.title,cat:s.cat}); });
+  return items;
+}
+var _emmyCarIdx=0,_emmyCarTimer=null,_emmyPhotosLoading=false;
+function emmyCarSlideHTML(it,photos){
+  if(it.type==='show'){
+    var f=find(it.filmId);
+    var img=f?((typeof servePoster==='function'?servePoster(f):null)||f.poster||''):'';
+    var open="go('film','"+it.filmId+"')";
+    return '<div class="emmy-car-slide" role="button" tabindex="0" onclick="'+open+'" onkeydown="if(event.key===\'Enter\')'+open+'">'+
+      (img?'<img src="'+img+'" alt="'+esc(f.title)+'" loading="lazy">':'<div class="emmy-car-noimg" aria-hidden="true">📺</div>')+
+      '<div class="emmy-car-cap"><b>'+esc(f?f.title:'')+'</b><span>'+esc(it.cat)+'</span></div>'+
+    '</div>';
+  }
+  var path=photos[it.name];
+  var img=path?'https://image.tmdb.org/t/p/w300'+path:'';
+  var capText=it.cats.map(function(c){ return c.cat+(c.show?' · '+c.show:''); }).join(' & ');
+  return '<div class="emmy-car-slide" role="button" tabindex="0" onclick="go(\'artist\',\''+esc(it.name)+'\')" onkeydown="if(event.key===\'Enter\')go(\'artist\',\''+esc(it.name)+'\')">'+
+    (img?'<img src="'+img+'" alt="'+esc(it.name)+'" loading="lazy">':'<div class="emmy-car-noimg" aria-hidden="true">🏆</div>')+
+    '<div class="emmy-car-cap"><b>'+esc(it.name)+'</b><span>'+esc(capText)+'</span></div>'+
+  '</div>';
+}
+function paintEmmyCarousel(){
+  var el=byId('emmyCar'); if(!el)return;
+  var items=emmyCarouselItems();
+  if(!items.length){ el.style.display='none'; return; }
+  el.style.display='';
+  var photos=loadEmmyPhotos();
+  if(_emmyCarIdx>=items.length) _emmyCarIdx=0;
+  var single=items.length<2;
+  var html='<div class="emmy-car-wrap"'+(single?'':' onmouseenter="emmyCarPause()" onmouseleave="emmyCarPlay()"')+'>'+
+    '<div class="emmy-car-track">'+items.map(function(it){ return emmyCarSlideHTML(it,photos); }).join('')+'</div>';
+  if(!single){
+    html+='<div class="emmy-car-dots">'+items.map(function(_,j){
+      return '<button class="emmy-car-dot'+(j===_emmyCarIdx?' on':'')+'" aria-label="Slide '+(j+1)+'" onclick="emmyCarSet('+j+')"></button>';
+    }).join('')+'</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  emmyCarApply();
+  if(!single) emmyCarPlay();
+  hydrateEmmyPhotosOnce(items);
+}
+function emmyCarApply(){
+  var el=byId('emmyCar'); if(!el)return;
+  var track=el.querySelector('.emmy-car-track'); if(track) track.style.transform='translateX(-'+(_emmyCarIdx*100)+'%)';
+  var dots=el.querySelectorAll('.emmy-car-dot'); for(var i=0;i<dots.length;i++){ dots[i].className='emmy-car-dot'+(i===_emmyCarIdx?' on':''); }
+}
+function emmyCarSet(i){ var n=emmyCarouselItems().length; if(!n)return; _emmyCarIdx=((i%n)+n)%n; emmyCarApply(); emmyCarPlay(); }
+function emmyCarGo(d){ emmyCarSet(_emmyCarIdx+d); }
+function emmyCarPlay(){ emmyCarPause(); if(emmyCarouselItems().length<2)return; _emmyCarTimer=setInterval(function(){ emmyCarGo(1); },4000); }
+function emmyCarPause(){ if(_emmyCarTimer){ clearInterval(_emmyCarTimer); _emmyCarTimer=null; } }
+function hydrateEmmyPhotosOnce(items){
+  if(_emmyPhotosLoading||!TMDB_KEY)return;
+  var photos=loadEmmyPhotos();
+  var people=items.filter(function(it){ return it.type==='person' && !(it.name in photos); });
+  if(!people.length)return;
+  _emmyPhotosLoading=true;
+  var remaining=people.length;
+  people.forEach(function(it){
+    fetch('https://api.themoviedb.org/3/search/person?api_key='+TMDB_KEY+'&query='+encodeURIComponent(it.name))
+      .then(function(r){return r.json();})
+      .then(function(d){ var h=d&&d.results&&d.results[0]; photos[it.name]=(h&&h.profile_path)||null; })
+      .catch(function(){ photos[it.name]=null; })
+      .then(function(){
+        remaining--;
+        if(remaining===0){ saveEmmyPhotos(photos); _emmyPhotosLoading=false; paintEmmyCarousel(); }
+      });
+  });
+}
 function paintEmmyBanner(){
   var s=byId('emmyBanner'), g=byId('emmyList'); if(!s||!g)return;
-  if(!EMMY_NOMS_2026.length || Date.now()>Date.parse(EMMY_EXPIRES)){ s.style.display='none'; return; }
+  if(!EMMY_NOMS_2026.length || Date.now()>Date.parse(EMMY_EXPIRES)){ s.style.display='none'; emmyCarPause(); return; }
   var shows=EMMY_SHOWS_2026.filter(function(x){ return !!find(x.filmId); });
   var showsLine=shows.length?shows.map(function(x){ var f=find(x.filmId);
     return '<a onclick="go(\'film\',\''+x.filmId+'\')">'+esc(f.title)+'</a> ('+esc(x.cat)+')';
@@ -5454,6 +5560,7 @@ function paintEmmyBanner(){
   var showsEl=byId('emmyShows');
   if(showsEl){ showsEl.innerHTML=showsLine?'<span class="emmy-shows-lab">Nominated series:</span> '+showsLine:''; showsEl.style.display=showsLine?'':'none'; }
   s.style.display='';
+  paintEmmyCarousel();
 }
 function isoDaysAgo(n){ var d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 function soonReleased(c){ return c.date && c.date <= isoToday(); }   // its release date has arrived
