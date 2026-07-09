@@ -688,6 +688,17 @@ worse.
   note text was pre-escaped (`&amp;`) on top of `scopeToggleHTML()`'s own
   `esc()` call, double-encoding into a literal `&amp;` on the page.
 
+**"More" dropdown redesign** (2026-07-09, owner: "the more dropdown is
+cluttered and bad") — first pass was 5 links, all the same bold weight
+(700), no icons, cramped 9px padding with no gap between rows, so it read
+as one dense block of bold text rather than a menu. Fixed: each link now
+has its own icon (reusing the exact SVGs from the mobile `.tabbar` for
+Theaters/Coming Soon/Vault so the iconography stays consistent across
+surfaces; new simple line icons for The Word/On The Couch), default weight
+dropped to 600 so the `.active` item (700, gold) actually stands out, more
+generous padding (10px) with a 1px gap between rows, and a small triangle
+pointer (`::before`) connecting the panel visually to the "More" button.
+
 ## Organic traffic / SEO (2026-07-09)
 Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
 Fandango for traffic and Letterboxd." Audited the site's actual technical

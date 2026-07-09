@@ -165,10 +165,14 @@
   .nav-more-btn.active{color:var(--ink);border-color:var(--paprika)}
   .nav-more-btn svg{transition:transform .15s}
   .nav-more-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
-  .nav-more-panel{position:absolute;top:calc(100% + 10px);left:0;min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:6px;z-index:95;animation:sugIn .16s ease;display:flex;flex-direction:column}
-  .nav-more-panel a{font-size:14.5px;font-weight:700;color:var(--ink-2);cursor:pointer;padding:9px 12px;border-radius:9px;white-space:nowrap}
+  .nav-more-panel{position:absolute;top:calc(100% + 12px);left:-4px;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3);padding:8px;z-index:95;animation:sugIn .16s ease;display:flex;flex-direction:column;gap:1px}
+  .nav-more-panel::before{content:'';position:absolute;top:-6px;left:24px;width:11px;height:11px;background:var(--panel);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg);border-radius:2px 0 0 0}
+  .nav-more-panel a{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:600;color:var(--ink-2);cursor:pointer;padding:10px 12px;border-radius:10px;white-space:nowrap;transition:background .12s,color .12s}
+  .nav-more-panel a svg{flex:none;width:17px;height:17px;color:var(--ink-3);transition:color .12s}
   .nav-more-panel a:hover{background:var(--inset);color:var(--ink)}
-  .nav-more-panel a.active{color:var(--gold-ink);background:var(--inset)}
+  .nav-more-panel a:hover svg{color:var(--ink)}
+  .nav-more-panel a.active{color:var(--gold-ink);background:rgba(228,155,11,.12);font-weight:700}
+  .nav-more-panel a.active svg{color:var(--gold-ink)}
   .topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;flex:none}
   .topnav .right .btn{white-space:nowrap}
   .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;min-width:150px;max-width:230px;flex:1;position:relative}
@@ -1355,11 +1359,11 @@
       <div class="nav-more-wrap" id="navMoreWrap">
         <button type="button" class="nav-more-btn" id="navMoreBtn" onclick="toggleMoreNav()" aria-haspopup="true" aria-expanded="false">More <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="nav-more-panel" id="navMorePanel" style="display:none" role="menu">
-          <a data-nav="theaters" onclick="closeMoreNav();go('theaters')" tabindex="0" role="menuitem">In Theaters</a>
-          <a data-nav="soon" onclick="closeMoreNav();go('soon')" tabindex="0" role="menuitem">Coming Soon</a>
-          <a data-nav="word" onclick="closeMoreNav();go('word')" tabindex="0" role="menuitem">The Word</a>
-          <a data-nav="couch" onclick="closeMoreNav();go('couch')" tabindex="0" role="menuitem">On The Couch</a>
-          <a data-nav="vault" onclick="closeMoreNav();go('vault')" tabindex="0" role="menuitem">The Vault</a>
+          <a data-nav="theaters" onclick="closeMoreNav();go('theaters')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>In Theaters</a>
+          <a data-nav="soon" onclick="closeMoreNav();go('soon')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Coming Soon</a>
+          <a data-nav="word" onclick="closeMoreNav();go('word')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>The Word</a>
+          <a data-nav="couch" onclick="closeMoreNav();go('couch')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 3l-5 4-5-4"/></svg>On The Couch</a>
+          <a data-nav="vault" onclick="closeMoreNav();go('vault')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg>The Vault</a>
         </div>
       </div>
       <a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
