@@ -7,6 +7,7 @@
     { "source": "/apply/:role", "destination": "/api/apply?role=:role" },
     { "source": "/apply", "destination": "/api/apply?role=critic" },
     { "source": "/read/:slug", "destination": "/api/read?slug=:slug" },
-    { "source": "/advertise", "destination": "/api/advertise" }
+    { "source": "/advertise", "destination": "/api/advertise" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
   ]
 }

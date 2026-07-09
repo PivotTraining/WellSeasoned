@@ -237,6 +237,19 @@ Open/backlog:
 - Vercel Web Analytics dashboard toggle (owner action).
 - More real Tubi Black-culture titles to deepen the shelf (verify each vs
   TMDB — nothing fake).
+- **Interviews section** (2026-07-09, owner: "score an interview to put on
+  the site... scaffold an interview area eventually not now") — a new
+  content type for real interviews with actors/actresses from upcoming
+  Black-led TV shows or movies, displayed cleanly and on-brand (same visual
+  bar as the rest of the site — see "Conventions" spotlight-UI note).
+  Explicitly deferred by the owner — do NOT build UI yet. When it's time to
+  scaffold: likely mirrors The Word's article pattern (`openArticleEditor`/
+  `publish_article`, owner-only) rather than a new backend primitive —
+  interviews are editorial content like articles, just video/quote-driven
+  instead of prose. Needs real audio/video or transcript, real photo, real
+  attribution — same "nothing fake" bar as reviews. Ask the owner for format
+  (embedded video? transcript? both?) and the first real interview's media
+  before building.
 
 ## Monetization direction (decided 2026-07-03)
 Owner rule: truest-to-brand, **no non-Black advertising**. That rules out
@@ -550,6 +563,55 @@ beyond just the Emmy carousel:
   new color vocabulary invented. A `pending` (unscored) film gets no color
   claim on hover — consistent with "nothing fake": no claiming a verdict
   that hasn't been earned yet.
+
+## Organic traffic / SEO (2026-07-09)
+Owner: "we need traffic... we are battling Rotten Tomatoes and Flixster and
+Fandango for traffic and Letterboxd." Audited the site's actual technical
+SEO before touching design and found the single biggest leak: **zero
+indexable film pages**. `#/film/<id>` is a hash route (never reaches a
+server, nothing for a crawler to fetch), and the one static per-film
+surface that did exist (`/f/<id>`, `api/f.js`) explicitly set
+`<meta name="robots" content="noindex">` and auto-redirected via
+`location.replace()` before a crawler could index anything — so a site with
+1,000+ real film pages had exactly one indexable URL (the homepage). Fixed:
+- **`api/f.js` rewritten**: dropped `noindex`, added `<link rel="canonical">`,
+  and added real substantive body content (poster, title, year, real
+  synopsis from the same baked catalog — no invented copy) instead of a
+  single bounce link. Added `application/ld+json` structured data
+  (`Movie`/`TVSeries` schema, keyed off `f.tv`) for search rich-result
+  eligibility — deliberately did NOT include a fake `aggregateRating`; only
+  real Kitchen/Table numbers would ever go in there, and `films.json`
+  (the crawler-facing extract) doesn't carry live scores, so it's omitted
+  rather than faked. **Also removed the auto-redirect.** An immediate
+  `location.replace` makes Google treat the page as a pointer to the hash
+  URL (not independently indexable) instead of indexing `/f/<id>`'s own
+  content — so humans now get a clear gold "Rate this film/series on Well
+  Seasoned →" CTA into the full app instead of a zero-friction bounce. This
+  is a real UX tradeoff (one extra click for anyone who already had an
+  `/f/<id>` link) traded for actually being indexable — flagging it in case
+  the owner wants the auto-redirect back for social-share clicks
+  specifically (would need to special-case by referrer, not done here).
+- **`robots.txt`** (repo root, served as a static file same as `og.png`) —
+  didn't exist at all before. Points crawlers at the new sitemap.
+- **`api/sitemap.js`** (new, zero-dep, same pattern as `api/f.js`) — reads
+  `films.json` and emits `sitemap.xml` (rewrite added in `vercel.json`)
+  listing every `/f/<id>` plus the core static pages (`/`, `/join`,
+  `/advertise`, `/apply/critic`, `/apply/writer`). Always in sync with the
+  catalog automatically — no hand-maintained URL list to go stale.
+- **Positioning vs. the named competitors**: Rotten Tomatoes/Letterboxd
+  already own generic "[title] review" search intent at far higher domain
+  authority — the realistic wedge is the combination no competitor has: a
+  Black-culture-curated catalog + an honest **two-number** verdict (critics
+  AND community, separately) instead of one aggregate score. The per-film
+  page copy (synopsis-first, real CTA copy naming both "Kitchen"/"Table")
+  is built to read distinctly from an RT/Letterboxd snippet in search
+  results, not to out-rank them on volume.
+- **Not done here (flagged, not executed):** regenerating `api/films.json`
+  is still the existing manual step (`node scripts/build-films-json.cjs`)
+  whenever `FILMS` changes — the sitemap/f.js SEO surface is only as fresh
+  as that file. `api/apply.js`/`api/advertise.js` still auto-redirect
+  (kept as-is — those are two pages, not 1,000+, and the instant-redirect
+  UX matters more there than incremental indexability).
 
 **Bug found and fixed while building this**: the catalog-wide poster
 hydrator (`hydrateFromTMDB()`, used for every TV/film card without a baked
