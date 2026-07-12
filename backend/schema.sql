@@ -583,3 +583,41 @@ begin
 end $$;
 revoke all on function public.delete_article(text, text) from public;
 grant execute on function public.delete_article(text, text) to anon, authenticated;
+
+-- ========================================================
+-- ADMIN DASHBOARD STATS (2026-07-12)
+-- Owner-only, read-only snapshot of users + traffic + votes, surfaced on the
+-- #/curate page (loadAdminStats/statTile in index.html). SECURITY DEFINER so
+-- it can read auth.users and the RLS-locked public.events table server-side —
+-- the publishable/anon key can read NEITHER directly (correct security), so
+-- this RPC is the only in-site way to see registered-user counts and traffic.
+-- Same auth gate as verify_critic/set_comment_featured: owner login
+-- (auth.jwt()->>'email' = hello@pivottraining.us) OR the curation_admin
+-- passphrase. Grants no new table access to anyone; returns only aggregate
+-- counts, never row data.
+create or replace function public.admin_dashboard_stats(p_secret text default null)
+returns json language plpgsql security definer set search_path = public, auth as $$
+declare expected text;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  return json_build_object(
+    'users_total',     (select count(*) from auth.users),
+    'users_email',     (select count(*) from auth.users where email is not null and email <> ''),
+    'users_anon',      (select count(*) from auth.users where coalesce(is_anonymous, false)),
+    'users_new_7d',    (select count(*) from auth.users where created_at > now() - interval '7 days'),
+    'users_active_7d', (select count(*) from auth.users where last_sign_in_at > now() - interval '7 days'),
+    'events_total',    (select count(*) from public.events),
+    'events_24h',      (select count(*) from public.events where created_at > now() - interval '24 hours'),
+    'events_7d',       (select count(*) from public.events where created_at > now() - interval '7 days'),
+    'events_30d',      (select count(*) from public.events where created_at > now() - interval '30 days'),
+    'votes_total',     (select count(*) from public.votes),
+    'votes_7d',        (select count(*) from public.votes where created_at > now() - interval '7 days'),
+    'comments_total',  (select count(*) from public.comments)
+  );
+end $$;
+revoke all on function public.admin_dashboard_stats(text) from public;
+grant execute on function public.admin_dashboard_stats(text) to anon, authenticated;

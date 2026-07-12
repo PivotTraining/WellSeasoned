@@ -1175,6 +1175,29 @@ rule as always).
   scratchpad only (regenerable from the HTML; the print files themselves are
   stored on Printify, referenced by upload id) — not committed.
 
+## Admin dashboard stats — users + traffic + votes (2026-07-12)
+Owner asked for an in-site way to see registered users and traffic (the anon
+key can't read `auth.users` or the RLS-locked `events` table, and the
+Supabase MCP tools return permission-denied in this environment, so neither
+was visible any other way). Built as a read-only owner-gated snapshot:
+- **`admin_dashboard_stats(p_secret)`** (backend/schema.sql) — SECURITY
+  DEFINER RPC, same auth gate as verify_critic/set_comment_featured (owner
+  login OR curation_admin passphrase). Returns aggregate counts only (never
+  row data): users total/with-email/anon/new-7d/active-7d, events
+  24h/7d/30d/all, votes total/7d, comments total. SECURITY DEFINER lets it
+  read auth.users + public.events server-side; grants no new table access.
+- **Client** (`loadAdminStats`/`statTile`, `.cur-stats`/`.stat-tile` CSS) —
+  a stat-tile dashboard pinned to the top of `#/curate` (owner-only page),
+  called on render, with a ↻ Refresh button. Degrades gracefully: if the RPC
+  isn't deployed yet it shows a one-line "run the SQL from backend/schema.sql"
+  hint instead of an error.
+- **NOT yet applied to the live DB** — the Supabase MCP path is
+  permission-blocked here, so the owner must paste the
+  `admin_dashboard_stats` block from backend/schema.sql into the Supabase SQL
+  editor once. Until then the curate page shows the hint. Verified both
+  states in headless Chromium (mocked success → 12 tiles across People /
+  Traffic / Votes; mocked 404 → the deploy hint), zero console errors.
+
 ## Shop: capsule backs, cap front-fix, bottom ordering (2026-07-12)
 Owner: "put the new tees at the bottom but they also need some design on the
 back. The hat is still turned around the wrong way." Three fixes:

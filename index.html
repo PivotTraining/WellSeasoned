@@ -413,6 +413,17 @@
   .mosaic .card,.grid-cards .card{min-width:0}
   body{overflow-x:clip}
   .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  /* ============ ADMIN dashboard stats ============ */
+  .cur-stats{margin:8px 0 20px;display:flex;flex-direction:column;gap:14px}
+  .cur-stats-note{font-size:13px;color:var(--ink-2);background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;line-height:1.5}
+  .cur-stats-note code{font-family:var(--mono);font-size:12px;background:var(--panel);padding:1px 5px;border-radius:4px}
+  .stat-group{display:flex;flex-direction:column;gap:7px}
+  .stat-head{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+  .stat-row{display:flex;flex-wrap:wrap;gap:10px}
+  .stat-tile{flex:1 1 120px;min-width:110px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--shadow-1)}
+  .stat-tile b{display:block;font-family:var(--display);font-size:26px;font-weight:800;line-height:1.05;color:var(--ink)}
+  .stat-tile span{display:block;margin-top:3px;font-size:11px;color:var(--ink-3);font-weight:600}
+  .stat-refresh{align-self:flex-start}
   /* ============ SHOP (Printify merch) — lookbook display ============
      Editorial, not e-commerce-default: taller portrait photography, a
      front→back crossfade on hover using real Printify mockups (never a
@@ -5939,6 +5950,7 @@ function renderCuratePage(tab){
     '<button class="btn btn-ghost btn-sm" onclick="seatCritic()">Seat a critic</button>'+
     '<button class="btn btn-gold btn-sm" onclick="openArticleEditor()">\u270e Write a Word</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="exportCuration()">Export JSON</button></div>'+
+    '<div class="cur-stats" id="curStats"><p class="hero-lead" style="margin:0">Loading dashboard…</p></div>'+
     '<div class="cur-tabs" id="curTabs"></div>'+
     '<div id="curTabCatalog">'+
       '<div class="curp-tools"><input id="curPageSearch" placeholder="Search '+FILMS.length+' titles\u2026" oninput="CUR_SHOWN=120;renderCurPageList()"></div>'+
@@ -5959,7 +5971,40 @@ function renderCuratePage(tab){
   byId('curTabs').innerHTML=CUR_TABS.map(function(t){
     return '<button class="chip'+(CUR_TAB===t[0]?' on':'')+'" onclick="curSetTab(\''+t[0]+'\')">'+t[1]+'</button>';
   }).join('');
+  loadAdminStats();
   curShowTab(CUR_TAB);
+}
+/* Owner-only dashboard: users + traffic + votes, via the SECURITY DEFINER
+   admin_dashboard_stats RPC (owner login OR passphrase). Reads auth.users and
+   the RLS-locked events table server-side; the anon key can't read either
+   directly, so this is the only in-site way to see them. Degrades gracefully
+   if the RPC isn't deployed yet (shows a one-line "run the SQL" hint). */
+function statTile(n,label){ return '<div class="stat-tile"><b>'+(n==null?'—':fmt(n))+'</b><span>'+esc(label)+'</span></div>'; }
+function loadAdminStats(){
+  var el=byId('curStats'); if(!el)return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      var el=byId('curStats'); if(!el)return;
+      var s=res.d;
+      if(!res.ok||!s||typeof s!=='object'||s.code||s.message){
+        el.innerHTML='<div class="cur-stats-note">Dashboard stats aren’t live yet — run the <code>admin_dashboard_stats</code> function from <code>backend/schema.sql</code> in the Supabase SQL editor, then reload.</div>';
+        return;
+      }
+      el.innerHTML=
+        '<div class="stat-group"><div class="stat-head">People</div><div class="stat-row">'+
+          statTile(s.users_total,'Total users')+statTile(s.users_email,'With email')+
+          statTile(s.users_anon,'Anonymous')+statTile(s.users_new_7d,'New · 7d')+
+          statTile(s.users_active_7d,'Active · 7d')+'</div></div>'+
+        '<div class="stat-group"><div class="stat-head">Traffic</div><div class="stat-row">'+
+          statTile(s.events_24h,'Events · 24h')+statTile(s.events_7d,'Events · 7d')+
+          statTile(s.events_30d,'Events · 30d')+statTile(s.events_total,'Events · all')+'</div></div>'+
+        '<div class="stat-group"><div class="stat-head">Votes &amp; talk</div><div class="stat-row">'+
+          statTile(s.votes_total,'Votes · all')+statTile(s.votes_7d,'Votes · 7d')+
+          statTile(s.comments_total,'Comments')+'</div></div>'+
+        '<button class="btn btn-ghost btn-sm stat-refresh" onclick="loadAdminStats()">↻ Refresh</button>';
+    })
+    .catch(function(){ var el=byId('curStats'); if(el)el.innerHTML='<div class="cur-stats-note">Couldn’t load dashboard stats right now.</div>'; });
 }
 function curShowTab(tab){
   byId('curTabCatalog').style.display=(tab==='catalog')?'':'none';
