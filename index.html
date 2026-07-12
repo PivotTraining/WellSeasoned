@@ -413,22 +413,36 @@
   .mosaic .card,.grid-cards .card{min-width:0}
   body{overflow-x:clip}
   .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  /* ============ SHOP (Printify merch) ============ */
-  .shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:6px}
-  .shop-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .2s cubic-bezier(.2,.7,.2,1),box-shadow .2s;display:flex;flex-direction:column;height:100%}
-  .shop-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
-  .shop-card-img{aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset)}
-  .shop-card-meta{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column}
-  .shop-card-ttl{font-weight:700;font-size:14.5px;line-height:1.25}
-  .shop-card-price{font-family:var(--mono);font-size:13px;color:var(--gold-ink);font-weight:700;margin-top:auto;padding-top:5px}
+  /* ============ SHOP (Printify merch) — lookbook display ============
+     Editorial, not e-commerce-default: taller portrait photography, a
+     front→back crossfade on hover using real Printify mockups (never a
+     mismatched color), generous type, minimal chrome. */
+  .shop-lookbook-head .eyebrow{color:var(--gold-ink)}
+  .shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 22px;margin-top:10px}
+  .shop-card{cursor:pointer;background:transparent;border:0;box-shadow:none;transition:transform .25s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;height:100%}
+  .shop-card:hover{transform:translateY(-3px)}
+  .shop-card-img{position:relative;aspect-ratio:4/5;border-radius:var(--r-lg);overflow:hidden;background-color:var(--inset);box-shadow:var(--shadow-1);transition:box-shadow .25s}
+  .shop-card:hover .shop-card-img{box-shadow:var(--shadow-3)}
+  .shop-card-img-f,.shop-card-img-b{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .4s ease}
+  .shop-card-img-b{opacity:0}
+  .shop-card:hover .shop-card-img-b{opacity:1}
+  .shop-card:hover .shop-card-img-f{opacity:0}
+  .shop-card-meta{padding:14px 2px 0;flex:1;display:flex;flex-direction:column}
+  .shop-card-ttl{font-family:var(--display);font-weight:700;font-size:16.5px;line-height:1.25}
+  .shop-card-tag{font-size:12.5px;font-style:italic;color:var(--ink-3);margin-top:3px}
+  .shop-dots{display:flex;gap:5px;margin-top:9px;align-items:center}
+  .shop-dot{width:11px;height:11px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block}
+  .shop-dot-more{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:2px}
+  .shop-card-price{font-family:var(--mono);font-size:13px;color:var(--gold-ink);font-weight:700;margin-top:auto;padding-top:9px}
   .shop-modal{display:flex;gap:26px;flex-wrap:wrap}
-  .shop-modal-img{position:relative;flex:1 1 260px;min-width:220px;aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset);border-radius:var(--r-lg)}
+  .shop-modal-img{position:relative;flex:1 1 300px;min-width:240px;aspect-ratio:4/5;background-size:cover;background-position:center;background-color:var(--inset);border-radius:var(--r-lg)}
   .shop-face-toggle{position:absolute;right:12px;bottom:12px;font-family:inherit;font-weight:700;font-size:12px;padding:7px 13px;border-radius:999px;border:0;background:rgba(20,14,6,.72);color:#F6ECD7;cursor:pointer;backdrop-filter:blur(3px)}
   .shop-face-toggle:hover{background:rgba(20,14,6,.88)}
   .shop-modal-body{flex:1 1 260px;min-width:220px}
-  .shop-modal-ttl{font-family:var(--display);font-size:22px;font-weight:800}
-  .shop-modal-price{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--gold-ink);margin-top:6px}
-  .shop-modal-desc{font-size:13.5px;color:var(--ink-2);margin-top:10px;line-height:1.5}
+  .shop-modal-ttl{font-family:var(--display);font-size:24px;font-weight:800}
+  .shop-modal-tag{font-size:13.5px;font-style:italic;color:var(--ink-3);margin-top:4px}
+  .shop-modal-price{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--gold-ink);margin-top:8px}
+  .shop-modal-desc{font-size:13.5px;color:var(--ink-2);margin-top:10px;line-height:1.55}
   .shop-opt-lab{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-top:16px}
   .shop-swatch-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
   .shop-swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;box-shadow:var(--shadow-1)}
@@ -437,8 +451,9 @@
   .shop-size-btn{font-family:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:9px;border:1.5px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer}
   .shop-size-btn.on{background:var(--ink);color:var(--on-dark);border-color:var(--ink)}
   .shop-buy-btn{width:100%;margin-top:20px}
-  @media(max-width:900px){ .shop-grid{grid-template-columns:repeat(3,1fr)} }
-  @media(max-width:640px){ .shop-grid{grid-template-columns:repeat(2,1fr)} .shop-modal{gap:16px} }
+  @media(prefers-reduced-motion:reduce){ .shop-card-img-f,.shop-card-img-b{transition:none} }
+  @media(max-width:900px){ .shop-grid{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:640px){ .shop-grid{grid-template-columns:repeat(2,1fr);gap:20px 14px} .shop-modal{gap:16px} }
   .card .poster{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-2);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s,filter .24s}
   .card:hover .poster{box-shadow:var(--shadow-3)}
   .card-fmt{position:absolute;top:9px;left:9px;z-index:2;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:999px;color:#fff;background:rgba(18,10,6,.68);backdrop-filter:blur(5px);line-height:1;pointer-events:none}
@@ -7406,6 +7421,26 @@ function renderKids(){
    Stripe membership before real keys existed. Checkout (actually charging
    someone) is a separate phase — the buy button is honest about that until
    it's wired up. */
+// Printify's product titles/descriptions are SEO-flavored listing copy
+// ("...| Pocket Logo", "...| Women's Boxy Tee") built for their own catalog
+// search, not our brand voice. This overrides the DISPLAY copy only (keyed
+// by the real Printify product id) — checkout still uses the real
+// title/price straight from Printify (api/shop-checkout.js), so nothing
+// about the actual transaction is altered, just how it reads on-page. Any
+// product without an entry here just falls back to its raw Printify title/
+// description — new products the owner adds still show up correctly.
+var SHOP_COPY={
+  '6a5266fabf712a91f40c04fc':{title:'The Cookout Scene Tee',tag:'Every classic has one.',desc:'There’s always a cookout scene — the one that makes the whole movie worth it. This one’s for the people who know exactly which scene we mean.'},
+  '6a5265cda2ffc8e4f30523d3':{title:'Officially Seasoned Boxy Tee',tag:'Relaxed fit. Seasoned taste.',desc:'Our signature salt shaker mark on a boxy, relaxed cut. For the ones who season everything — including their watchlist.'},
+  '6a526439038338057301a562':{title:'Well Seasoned Pin',tag:'Small, gold, and exactly right.',desc:'Our house mark in pin form. Rep the culture on a jacket, a bag, or wherever you carry it.'},
+  '6a526351a68f5d552701f839':{title:'Bland Script Tee',tag:'We said what we said.',desc:'Sometimes the cast eats and the script still doesn’t. A real verdict, worn proudly.'},
+  '6a5262d6a68f5d552701f7f6':{title:'Officially Well Seasoned Tee',tag:'The house mark.',desc:'Our core salt shaker mark, front and center. The most “us” shirt in the lineup.'},
+  '6a526056f56b5c6fa30ca732':{title:'Bland Films Don’t Make The Table Tee',tag:'The Table has standards.',desc:'Straight from our own verdict system — bland doesn’t make it to The Table. Neither should a boring fit.'},
+  '6a525e007fc5af7d01040bf8':{title:'Well Seasoned Oversized Tee',tag:'Relaxed fit, sharp taste.',desc:'A blank-canvas oversized tee carrying the Well Seasoned mark. Everyday rotation.'}
+};
+function shopTitle(p){ return (SHOP_COPY[p.id]&&SHOP_COPY[p.id].title)||p.title; }
+function shopTag(p){ return SHOP_COPY[p.id]&&SHOP_COPY[p.id].tag||''; }
+function shopDesc(p){ return (SHOP_COPY[p.id]&&SHOP_COPY[p.id].desc)||p.description; }
 var _shopProducts=null, _shopLoading=false, _shopErr=null;
 function loadShopProducts(cb){
   if(_shopProducts){ cb&&cb(); return; }
@@ -7425,18 +7460,44 @@ function shopPriceLabel(p){
   var lo='$'+(p.priceMin/100).toFixed(2), hi='$'+(p.priceMax/100).toFixed(2);
   return p.priceMin===p.priceMax ? lo : lo+' – '+hi;
 }
+function shopCardBackImage(p){
+  // Only cross-fades to a back photo of the SAME color shown up front —
+  // never a mismatched color's back view, even if that means no hover
+  // effect for a product whose default color has no back mockup.
+  for(var i=0;i<p.colors.length;i++){
+    if(p.imagesByColor[p.colors[i].id]===p.defaultImage){
+      return (p.backImagesByColor&&p.backImagesByColor[p.colors[i].id])||null;
+    }
+  }
+  return null;
+}
+function shopSwatchDotsHTML(p){
+  if(!p.colors.length)return '';
+  var shown=p.colors.slice(0,6);
+  var dots=shown.map(function(c){ return '<span class="shop-dot" style="background:'+(c.hex||'#999')+'" title="'+esc(c.title)+'"></span>'; }).join('');
+  var more=p.colors.length>shown.length?'<span class="shop-dot-more">+'+(p.colors.length-shown.length)+'</span>':'';
+  return '<div class="shop-dots">'+dots+more+'</div>';
+}
 function shopCardHTML(p){
-  return '<div class="shop-card" tabindex="0" role="button" aria-label="'+esc(p.title)+'" onclick="openShopProduct(\''+p.id+'\')" onkeydown="if(event.key===\'Enter\')openShopProduct(\''+p.id+'\')">'+
-    '<div class="shop-card-img" style="background-image:url(\''+esc(p.defaultImage)+'\')"></div>'+
-    '<div class="shop-card-meta"><div class="shop-card-ttl">'+esc(p.title)+'</div>'+
-    '<div class="shop-card-price">'+shopPriceLabel(p)+'</div></div>'+
+  var back=shopCardBackImage(p);
+  return '<div class="shop-card" tabindex="0" role="button" aria-label="'+esc(shopTitle(p))+'" onclick="openShopProduct(\''+p.id+'\')" onkeydown="if(event.key===\'Enter\')openShopProduct(\''+p.id+'\')">'+
+    '<div class="shop-card-img">'+
+      '<div class="shop-card-img-f" style="background-image:url(\''+esc(p.defaultImage)+'\')"></div>'+
+      (back?'<div class="shop-card-img-b" style="background-image:url(\''+esc(back)+'\')"></div>':'')+
+    '</div>'+
+    '<div class="shop-card-meta">'+
+      '<div class="shop-card-ttl">'+esc(shopTitle(p))+'</div>'+
+      (shopTag(p)?'<div class="shop-card-tag">'+esc(shopTag(p))+'</div>':'')+
+      shopSwatchDotsHTML(p)+
+      '<div class="shop-card-price">'+shopPriceLabel(p)+'</div>'+
+    '</div>'+
   '</div>';
 }
 function renderShop(){
   var el=byId('shopContent'); if(!el)return;
-  el.innerHTML='<div class="browse-head"><span class="eyebrow">Merch</span>'+
-    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Well Seasoned Shop.</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Real merch, printed on demand. Nothing fake here either — every piece shown is a real product from our actual shop.</p></div>'+
+  el.innerHTML='<div class="browse-head shop-lookbook-head"><span class="eyebrow">The Lookbook</span>'+
+    '<h1 style="font-size:clamp(28px,4vw,44px);margin-top:8px">Well Seasoned, worn.</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Real pieces for people who take their culture — and their fit — seriously. Printed on demand, shipped by Printify. Nothing fake here either, not even the size chart.</p></div>'+
     '<div id="shopGrid"><div class="empty"><h3>Loading the shop…</h3></div></div>';
   loadShopProducts(function(){
     var g=byId('shopGrid'); if(!g)return;
@@ -7475,9 +7536,10 @@ function shopProductModalHTML(p){
         (backImg?'<button type="button" class="shop-face-toggle" onclick="shopToggleFace()">'+(_shopSel.face==='back'?'Show front':'Show back')+'</button>':'')+
       '</div>'+
       '<div class="shop-modal-body">'+
-        '<h2 class="shop-modal-ttl">'+esc(p.title)+'</h2>'+
+        '<h2 class="shop-modal-ttl">'+esc(shopTitle(p))+'</h2>'+
+        (shopTag(p)?'<div class="shop-modal-tag">'+esc(shopTag(p))+'</div>':'')+
         '<div class="shop-modal-price">'+price+'</div>'+
-        (p.description?'<p class="shop-modal-desc">'+esc(p.description.slice(0,220))+(p.description.length>220?'…':'')+'</p>':'')+
+        (shopDesc(p)?'<p class="shop-modal-desc">'+esc(shopDesc(p).slice(0,260))+(shopDesc(p).length>260?'…':'')+'</p>':'')+
         (p.colors.length?'<div class="shop-opt-lab">Color'+(p.colors.length&&_shopSel.colorId!=null?': '+esc((p.colors.filter(function(c){return c.id===_shopSel.colorId;})[0]||{}).title||''):'')+'</div>'+
           '<div class="shop-swatch-row">'+p.colors.map(function(c){
             return '<button class="shop-swatch'+(c.id===_shopSel.colorId?' on':'')+'" style="background:'+(c.hex||'#999')+'" title="'+esc(c.title)+'" aria-label="'+esc(c.title)+'" onclick="shopPick(\'color\','+JSON.stringify(c.id)+')"></button>';

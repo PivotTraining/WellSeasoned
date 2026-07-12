@@ -1058,3 +1058,41 @@ price display looked uneven card-to-card, not just the number formatting.
   across products, image swaps on click, label flips "Show back"/"Show
   front" correctly, price baseline confirmed aligned row-wide, zero console
   errors, `api/printify.js` still passes `node --check`.
+
+## Shop redesign — lookbook display + brand copy (2026-07-12)
+Owner: "Lets increase the look of the lookbook and way we display the tees.
+shift the naming of them and the description. Make it all match our brand."
+
+- **`SHOP_COPY`** (index.html, near the shop JS) — a display-only override
+  map keyed by real Printify product id, giving each product a brand-voice
+  title/tagline/description in place of Printify's SEO-style listing copy
+  (e.g. `"Officially Seasoned Salt Shaker Tee | Women's Boxy Tee"` →
+  **"Officially Seasoned Boxy Tee"** / *"Relaxed fit. Seasoned taste."*).
+  Deliberately display-only: checkout (`api/shop-checkout.js`) still reads
+  the real Printify title/price server-side for the actual Stripe line
+  item, so nothing about the transaction itself changes, only how it reads
+  on-page. `shopTitle()`/`shopTag()`/`shopDesc()` fall back to the raw
+  Printify title/description for any future product the owner adds that
+  hasn't been curated yet — a new product still displays correctly, just
+  without brand copy until someone adds an entry.
+- **Lookbook grid redesign** — went from a dense 4-col square-crop grid
+  (generic e-commerce default) to a 3-col grid of taller 4:5 portrait
+  photos with no card chrome (no border/panel box — the photo IS the
+  card), display-font titles, an italic tagline line, and a row of small
+  color-swatch dots previewing the real available colors at a glance
+  without opening the modal. **Front→back crossfade on hover**
+  (`shopCardBackImage()`): reuses the real back-mockup data added earlier
+  this session, but only cross-fades to the back photo of the exact same
+  color shown up front — a product whose default color has no back mockup
+  just has no hover effect rather than flashing a mismatched color's back
+  view. Respects `prefers-reduced-motion` (no crossfade transition).
+- Product modal picked up the same tagline line and the longer brand
+  description (280-char clamp, up from 220, since the new copy reads
+  better at full length).
+- Verified in headless Chromium against the owner's real 7-product catalog:
+  all 7 cards show brand titles/taglines (not Printify's raw SEO titles),
+  3-column grid confirmed, `aspect-ratio:4/5` confirmed, swatch dots render
+  on the 6 color-bearing products (correctly absent on the pin button,
+  which has no color option), front/back toggle and price-row alignment
+  re-verified working post-redesign, shop checkout flow unaffected, zero
+  console errors.
