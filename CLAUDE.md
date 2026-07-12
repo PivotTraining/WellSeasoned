@@ -955,3 +955,62 @@ account. Built as **two phases** — this entry covers Phase 1 only:
   show real products (no tool in this environment can set Vercel env vars
   programmatically — confirmed via search, same limitation noted for
   Stripe/SerpApi keys).
+
+## Shop Phase 2 — real checkout + Printify order fulfillment (2026-07-12)
+Owner: "we need this [Stripe] for the clothes." Built the actual checkout
+path immediately after Phase 1 (browse-only), skipping the originally-
+planned pause — the owner was already mid-flow creating a Stripe restricted
+key for this exact purpose when they asked.
+
+- **`api/shop-checkout.js`** (new) — POST `{productId,variantId,quantity}`,
+  config-gated on `STRIPE_SECRET_KEY` + `PRINTIFY_API_TOKEN` +
+  `PRINTIFY_SHOP_ID` (503 + honest client message if any are unset, same
+  convention as membership). Deliberately does NOT trust price/title from
+  the client — re-fetches the specific product from Printify server-side
+  and builds the Stripe line item (`price_data`, one-time `mode:'payment'`,
+  not the subscription mode membership uses) from that authoritative data,
+  so a tampered request can't under-charge or buy a disabled variant.
+  `shipping_address_collection` is turned on, US-only for now (international
+  shipping/rates aren't confirmed yet — flagged as a follow-up, not
+  silently assumed). Client wiring: `shopBuy()` (index.html) now POSTs here
+  and redirects to the real Stripe-hosted checkout URL instead of the old
+  "Checkout is almost here" placeholder toast — that toast still fires as
+  the honest fallback if the endpoint 503s (unconfigured) or the network
+  call fails.
+- **`api/stripe-webhook.js`** (new) — the fulfillment half: on
+  `checkout.session.completed`, places the paid order with Printify's
+  Orders API (`POST /shops/{id}/orders.json`) so the shirt/pin actually
+  gets printed and shipped. Verifies Stripe's webhook signature manually
+  via Node's built-in `crypto` (HMAC-SHA256 over `timestamp + '.' +
+  rawBody`, timing-safe compare) — zero-dep, matching the rest of this
+  repo's `api/*.js` convention of calling REST APIs directly instead of
+  adding SDKs. Requires Vercel's automatic body parsing to be OFF
+  (`export const config = {api:{bodyParser:false}}`) since signature
+  verification needs the exact raw bytes Stripe signed, not a re-serialized
+  JSON object. Shipping name is split into first/last for Printify's
+  `address_to` fields; only merch sessions (metadata carries `productId`)
+  trigger a Printify order, so a future membership-subscription webhook
+  hitting the same endpoint wouldn't misfire an order.
+- **Known limitation, flagged not silently shipped**: no persistent record
+  of processed Stripe sessions (no new Supabase table — deliberately, since
+  schema changes are a stop-and-confirm risk tier here and this was built
+  in the same turn as the ask). A failed Printify order-placement call
+  after a successful charge just logs server-side for manual fulfillment
+  via the Printify dashboard; it does not retry itself, and there's no
+  owner-facing order dashboard yet. Low risk at current volume, but flag to
+  the owner if order volume grows enough that this needs real tracking.
+- Verified: both new files pass `node --check`; end-to-end in headless
+  Chromium (mocked `/api/shop-checkout`) confirms the client sends the
+  correct `{productId,variantId,quantity}` for a real in-stock variant and
+  attempts to redirect to the returned Stripe URL — the actual redirect
+  can't complete inside this sandboxed environment (no route to the real
+  internet for a fake test URL), a test-environment limitation, not a code
+  issue.
+- Owner still needs to, in order: (1) finish creating the restricted Stripe
+  key scoped to Checkout Sessions → Write only, paste as `STRIPE_SECRET_KEY`
+  in Vercel (shared with membership — one key covers both use cases); (2)
+  once deployed, create a webhook endpoint in the Stripe dashboard pointing
+  at `https://itswellseasoned.com/api/stripe-webhook` listening for
+  `checkout.session.completed`, then paste its signing secret into Vercel
+  as `STRIPE_WEBHOOK_SECRET`; (3) do a real end-to-end test purchase before
+  telling anyone the shop is open.

@@ -7488,8 +7488,20 @@ function shopPick(kind,val){
 function shopBuy(){
   var p=shopFindProduct(_shopSel.productId); var v=p&&shopVariantFor(p,_shopSel.colorId,_shopSel.sizeId);
   if(!v||!v.inStock){ toast('Pick an available color/size.'); return; }
-  toast('Checkout is almost here — check back soon.');
   track('shop_buy_intent',{product:_shopSel.productId,variant:v.id});
+  var btn=document.querySelector('.shop-buy-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Starting checkout…'; }
+  fetch('/api/shop-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:_shopSel.productId,variantId:v.id,quantity:1})})
+    .then(function(r){ return r.json().then(function(data){ return {ok:r.ok,data:data}; }); })
+    .then(function(res){
+      if(res.ok && res.data && res.data.url){ window.location.href=res.data.url; return; }
+      toast((res.data&&res.data.error)||'Checkout is almost here — check back soon.');
+      if(btn){ btn.disabled=false; btn.textContent='Buy now'; }
+    })
+    .catch(function(){
+      toast('Could not start checkout. Please try again.');
+      if(btn){ btn.disabled=false; btn.textContent='Buy now'; }
+    });
 }
 function setSort(v){FILTERS.sort=v;renderBrowse();}
 function renderBrowse(){
