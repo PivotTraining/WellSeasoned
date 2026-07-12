@@ -7509,9 +7509,19 @@ function renderShop(){
   });
 }
 var _shopSel={productId:null,colorId:null,sizeId:null,face:'front'};
+function shopDefaultVariant(p){
+  // Printify doesn't guarantee every color comes in every size — defaulting
+  // to colors[0]+sizes[0] blindly can land on a combination that isn't a
+  // real variant at all, which used to show a false "out of stock" on
+  // products that are actually fully in stock. Default to a real, in-stock
+  // variant instead (any real variant if somehow none are in stock).
+  var inStock=p.variants.filter(function(v){return v.inStock;});
+  return inStock[0]||p.variants[0]||null;
+}
 function openShopProduct(id){
   var p=shopFindProduct(id); if(!p)return;
-  _shopSel={productId:id,colorId:(p.colors[0]&&p.colors[0].id)||null,sizeId:(p.sizes[0]&&p.sizes[0].id)||null,face:'front'};
+  var dv=shopDefaultVariant(p);
+  _shopSel={productId:id,colorId:dv?dv.colorId:((p.colors[0]&&p.colors[0].id)||null),sizeId:dv?dv.sizeId:((p.sizes[0]&&p.sizes[0].id)||null),face:'front'};
   showModal(shopProductModalHTML(p));
 }
 function shopVariantFor(p,colorId,sizeId){
@@ -7554,8 +7564,18 @@ function shopProductModalHTML(p){
     '</div>';
 }
 function shopPick(kind,val){
-  if(kind==='color')_shopSel.colorId=val; else _shopSel.sizeId=val;
   var p=shopFindProduct(_shopSel.productId); if(!p)return;
+  if(kind==='color')_shopSel.colorId=val; else _shopSel.sizeId=val;
+  // If the newly-picked color/size doesn't exist alongside the OTHER
+  // current selection (Printify doesn't offer every color×size pairing),
+  // shift that other dimension to a real, preferably in-stock variant
+  // instead of leaving the picker pointed at a nonexistent combination.
+  if(!shopVariantFor(p,_shopSel.colorId,_shopSel.sizeId)){
+    var matches=p.variants.filter(function(v){
+      return kind==='color' ? v.colorId===_shopSel.colorId : v.sizeId===_shopSel.sizeId;
+    }).sort(function(a,b){ return (b.inStock?1:0)-(a.inStock?1:0); });
+    if(matches[0]){ if(kind==='color')_shopSel.sizeId=matches[0].sizeId; else _shopSel.colorId=matches[0].colorId; }
+  }
   byId('modal').innerHTML=shopProductModalHTML(p);
 }
 function shopBuy(){

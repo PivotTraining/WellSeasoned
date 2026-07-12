@@ -1096,3 +1096,35 @@ shift the naming of them and the description. Make it all match our brand."
   which has no color option), front/back toggle and price-row alignment
   re-verified working post-redesign, shop checkout flow unaffected, zero
   console errors.
+
+## Shop: false "out of stock" bug (2026-07-12)
+Owner: "i seen out of stock on things." Two real bugs, both in how variants
+were being matched, not in Printify's data:
+
+1. **Default selection landed on a nonexistent combo.** Opening a product
+   picked `colors[0]` + `sizes[0]` independently, but Printify doesn't
+   guarantee every color comes in every size — for 5 of the 7 real
+   products, that default pairing wasn't an actual variant at all, so the
+   modal opened straight to "Out of stock" on products that were 100% in
+   stock. Fixed: `shopDefaultVariant(p)` now defaults to a real, in-stock
+   variant's own color+size pair; `shopPick()` also auto-shifts the *other*
+   dimension when a newly-clicked color/size doesn't exist alongside the
+   current selection, instead of leaving the picker pointed at nothing.
+2. **Bigger root cause, in `api/printify.js`**: the color/size swatch lists
+   were built from Printify's `product.options[].values` — the FULL set of
+   colors/sizes the blank garment template supports — not from what the
+   seller actually published as real variants. Confirmed against live data:
+   one shirt declares 9 possible colors but only 6 were ever turned into
+   real, purchasable variants; the other 3 (Soft Pink, Natural, Athletic
+   Heather) rendered as clickable swatches that could never resolve to an
+   actual product no matter what size was picked — genuinely un-buyable,
+   not a false positive. Fixed by deriving `colors`/`sizes` from the ids
+   that actually appear in `variants`, not from the option template's full
+   universe — a shopper can now only ever pick a combination Printify can
+   actually fulfill.
+- Verified against the owner's real catalog: color counts dropped
+  accordingly per product (e.g. one tee went from 22 listed colors to the
+  4 actually sold), every remaining color/size click resolves to a real
+  variant every time (stress-tested every color × every size in isolation
+  on the highest-variant-count product), all 7 products now default to
+  "Buy now" on open instead of a false "Out of stock," zero console errors.

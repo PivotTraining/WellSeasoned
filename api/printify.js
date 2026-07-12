@@ -43,13 +43,13 @@ export default async function handler(req, res) {
         // and safe regardless of how Printify orders either array.
         const colorOpt = (p.options || []).find((o) => (o.type || '').toLowerCase() === 'color');
         const sizeOpt = (p.options || []).find((o) => (o.type || '').toLowerCase() === 'size');
+        // colorIds/sizeIds cover the FULL option universe the blank garment
+        // supports (used only for matching a variant's option ids to the
+        // right dimension, see variantColorId/variantSizeId below) — not
+        // every value in that universe was actually turned into a real,
+        // purchasable variant by the seller.
         const colorIds = colorOpt ? new Set(colorOpt.values.map((v) => v.id)) : null;
         const sizeIds = sizeOpt ? new Set(sizeOpt.values.map((v) => v.id)) : null;
-
-        const colors = colorOpt
-          ? colorOpt.values.map((v) => ({ id: v.id, title: v.title, hex: (v.colors && v.colors[0]) || null }))
-          : [];
-        const sizes = sizeOpt ? sizeOpt.values.map((v) => ({ id: v.id, title: v.title })) : [];
 
         function variantColorId(v) { return colorIds ? (v.options || []).find((id) => colorIds.has(id)) : null; }
         function variantSizeId(v) { return sizeIds ? (v.options || []).find((id) => sizeIds.has(id)) : null; }
@@ -61,6 +61,19 @@ export default async function handler(req, res) {
           price: v.price, // cents, real Printify retail price
           inStock: v.is_available !== false,
         }));
+
+        // The storefront's color/size pickers must only ever offer values a
+        // real variant exists for — Printify's product.options[].values list
+        // is the full universe the blank garment supports, which can include
+        // colors/sizes the seller never actually enabled as a variant at
+        // all. Showing those as clickable swatches let a shopper pick a
+        // combination that could never resolve to a real product.
+        const usedColorIds = new Set(variants.map((v) => v.colorId).filter((id) => id != null));
+        const usedSizeIds = new Set(variants.map((v) => v.sizeId).filter((id) => id != null));
+        const colors = colorOpt
+          ? colorOpt.values.filter((v) => usedColorIds.has(v.id)).map((v) => ({ id: v.id, title: v.title, hex: (v.colors && v.colors[0]) || null }))
+          : [];
+        const sizes = sizeOpt ? sizeOpt.values.filter((v) => usedSizeIds.has(v.id)).map((v) => ({ id: v.id, title: v.title })) : [];
 
         // One representative front image per color, keyed by color id, so
         // the gallery can swap photos as the shopper picks a swatch — falls
