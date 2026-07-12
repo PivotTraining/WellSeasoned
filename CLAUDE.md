@@ -1174,3 +1174,34 @@ rule as always).
   correct, zero console errors. The extracted design PNGs live in the session
   scratchpad only (regenerable from the HTML; the print files themselves are
   stored on Printify, referenced by upload id) — not committed.
+
+## Shop: capsule backs, cap front-fix, bottom ordering (2026-07-12)
+Owner: "put the new tees at the bottom but they also need some design on the
+back. The hat is still turned around the wrong way." Three fixes:
+- **Back prints on all 6 capsule tees** (via Printify API, `print_areas`
+  with a `back` placeholder alongside `front`): Crest and Monogram tees get
+  the **Seal** on the back; Seal tees get the **Crest** — non-redundant with
+  each front. Gotcha found: a first PUT that spread the existing placeholder
+  objects wholesale saved the back placeholder with **0 images** (Printify
+  silently dropped it); rebuilding each image as a clean `{id,x,y,scale,
+  angle,flipX,flipY}` object made it stick. bp1382 supports front/neck/back;
+  min margin still ~$22 after the second print location, verified. The
+  existing site front/back toggle (`.shop-face-toggle`, `backImagesByColor`)
+  now lights up for these tees automatically since Printify tags the new
+  back mockups `position:back`.
+- **Trucker cap "turned around the wrong way"**: the cap only ever had ONE
+  mockup selected and it was the back angle (`camera_label=back`, position
+  `other`) — the design was correctly on `front_dtf`, but no front mockup
+  existed, and re-saving `print_areas` did NOT regenerate more angles. Fix:
+  **recreate the product fresh via API** (a fresh `POST products.json`
+  auto-generates the full mockup set — front/back/person angles — with a
+  front view as `is_default`), verify the front mockup shows the badge, make
+  it visible, then DELETE the old back-only cap. New cap id
+  `6a53d7abc154a354f50e8cb3` (old `6a53014af13bf5813304cc16` deleted);
+  `SHOP_COPY` re-keyed to the new id.
+- **New tees to the bottom of the shop**: `shopOrder()` (index.html) +
+  `SHOP_BOTTOM` (the 6 capsule product ids) — everything else keeps
+  Printify's newest-first order up top, the 6 capsule tees pinned last in a
+  fixed order. Verified in headless Chromium: capsule tees are the last 6
+  cards, cap leads with its front image, capsule-tee modals show a working
+  "Show back" toggle, zero console errors.
