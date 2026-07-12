@@ -1128,3 +1128,49 @@ were being matched, not in Printify's data:
   variant every time (stress-tested every color × every size in isolation
   on the highest-variant-count product), all 7 products now default to
   "Buy now" on open instead of a false "Out of stock," zero console errors.
+
+## Shop: API-created "Capsule 03 · The Mark" tees + price unlock (2026-07-12)
+Owner pasted a real Printify API token (products.write scope) and asked to
+fix prices, then to "Create designs, mens and womens tees and price them
+accordingly and put on site. Ensure all designs are aligned perfectly." All
+done directly against the live Printify account via the REST API (token used
+inline only, NEVER written to any git-tracked file — same secret-handling
+rule as always).
+
+- **Price unlock + size-scaled .97 pricing**: every product was stuck
+  `is_locked:true` (custom-integration publish lock — Printify locks a
+  product on Publish and waits for the integration to POST a
+  publishing_succeeded/failed callback; ours only reads, so they never
+  unlocked). That lock blocks BOTH the dashboard AND the API price edit
+  (error 8252 "Product is disabled for editing"). Fix: POST
+  `/shops/{id}/products/{pid}/publishing_succeeded.json` to release the lock,
+  then PUT the product with size-scaled prices rounded UP to the next `.97`
+  (preserves the existing per-size margin structure, scales with size, ends
+  in .97 per owner's rule). Verified every size still clears print cost
+  (tightest ~$6.95). Note: clicking Publish in Printify re-locks; just
+  release again if needed.
+- **New products via API** — the uploaded HTML ("Capsule 03 · The Mark") is
+  a canvas-based **design generator**, not flat art. Ran it headless
+  (Playwright) and exported clean, transparent, print-ready PNGs of the
+  house marks (crest, interlock WS, seal) by calling its own global draw fns
+  and trimming to content. Then, per design: `POST /uploads/images.json`
+  (base64), `POST /shops/{id}/products.json` with the same blueprints the
+  owner's existing tees use (men's = blueprint 1382, women's boxy = 1393,
+  both print provider 99), dark colorways where the bone art pops (men's:
+  Black/Navy/Forest; women's: Black/Pepper), prices matched to the existing
+  same-blueprint tees ($38.97/$39.97/$42.97 men's; $41.97/$44.97 women's),
+  design centered `x:0.5,y:0.5` with per-shape scale (crest .80–.82,
+  monogram .72–.74, seal .78–.80). Six products: Crest / Monogram / Seal ×
+  men's + women's. Created each **`visible:false` first**, pulled the real
+  Printify front mockup, visually verified alignment, THEN flipped
+  `visible:true` — nothing went live unverified. Shop went 10 → 16 products.
+- **`SHOP_COPY`** (index.html) gained brand title/tagline/desc entries for
+  all 6 new tees (keyed by real Printify product id) plus the 3 remaining
+  pre-existing products that still showed raw Printify SEO titles, so the
+  whole shop now reads on-brand. Display-only, as before — checkout still
+  uses Printify's real title/price server-side.
+- Verified end-to-end in headless Chromium against the real 16-product
+  catalog: all render, new tees show brand copy, 2-col lookbook grid, prices
+  correct, zero console errors. The extracted design PNGs live in the session
+  scratchpad only (regenerable from the HTML; the print files themselves are
+  stored on Printify, referenced by upload id) — not committed.
