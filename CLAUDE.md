@@ -1014,3 +1014,47 @@ key for this exact purpose when they asked.
   `checkout.session.completed`, then paste its signing secret into Vercel
   as `STRIPE_WEBHOOK_SECRET`; (3) do a real end-to-end test purchase before
   telling anyone the shop is open.
+
+## Shop: front/back photo toggle + price alignment (2026-07-12)
+Owner: "id rather show the back of the tee shorts on the site. can you align
+prices as well and change them?" Clarified via quick questions: front stays
+the default photo with a toggle to flip to the back (not back-only), tees
+get one flat price across all sizes (ending in `.97`) except the Women's
+Boxy Tee which stays its own price, and "align" meant the actual on-page
+price display looked uneven card-to-card, not just the number formatting.
+
+- **Front/back toggle** — `api/printify.js` now also returns
+  `backImagesByColor` alongside the existing `imagesByColor`, built from
+  Printify's own `image.position==='back'` tag on its real mockup photos
+  (confirmed live: every tee has real back-view mockups, though only for a
+  subset of colors — Printify doesn't render a mockup for every color/angle
+  combination). `shopProductModalHTML()` shows a small "Show back"/"Show
+  front" pill button (`.shop-face-toggle`, bottom-right of the product
+  photo) **only when a real back photo exists for the currently selected
+  color** — no fabricated or guessed angle if Printify has nothing to show,
+  same "nothing fake" bar as everywhere else. Switching color swatches
+  re-evaluates this per color, so the toggle silently disappears if the new
+  color has no back mockup rather than showing a stale/wrong photo.
+- **Price alignment** — `.shop-card` (the grid card) is now a flex column
+  with `.shop-card-meta{flex:1}` and `.shop-card-price{margin-top:auto}`, so
+  every card's price sits flush against the same bottom edge regardless of
+  how many lines the title wraps to. Previously prices could land at
+  different heights card-to-card within the same grid row. Verified via
+  `getBoundingClientRect()` in headless Chromium — all cards in a row now
+  share one exact price baseline.
+- **Price change — done via Printify, not code**: `api/printify.js` and
+  `api/shop-checkout.js` both already read price live from Printify on
+  every request, so a price change needs zero code changes — it only needs
+  updating at the source. Regular tees (all except the Women's Boxy Tee) →
+  **$39.97 flat across every size** (they currently range $38.58–$42.87 by
+  size due to Printify's per-size cost tiers). Women's Boxy Tee → **$44.97**
+  (currently $41.17–$44.52 by size). Owner needs to set these directly in
+  the Printify dashboard (Products → each tee → Pricing → set one price for
+  all variants) — not done here, since it's a live pricing change to a real
+  account this environment has no write-scoped credential for right now.
+- Verified end-to-end in headless Chromium against the owner's real
+  7-product catalog (cached in this session's scratchpad from earlier
+  verification, not committed): toggle appears/hides correctly per color
+  across products, image swaps on click, label flips "Show back"/"Show
+  front" correctly, price baseline confirmed aligned row-wide, zero console
+  errors, `api/printify.js` still passes `node --check`.

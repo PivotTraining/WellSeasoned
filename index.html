@@ -415,14 +415,16 @@
   .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
   /* ============ SHOP (Printify merch) ============ */
   .shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:6px}
-  .shop-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .2s cubic-bezier(.2,.7,.2,1),box-shadow .2s}
+  .shop-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .2s cubic-bezier(.2,.7,.2,1),box-shadow .2s;display:flex;flex-direction:column;height:100%}
   .shop-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
   .shop-card-img{aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset)}
-  .shop-card-meta{padding:12px 14px 14px}
+  .shop-card-meta{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column}
   .shop-card-ttl{font-weight:700;font-size:14.5px;line-height:1.25}
-  .shop-card-price{font-family:var(--mono);font-size:13px;color:var(--gold-ink);font-weight:700;margin-top:5px}
+  .shop-card-price{font-family:var(--mono);font-size:13px;color:var(--gold-ink);font-weight:700;margin-top:auto;padding-top:5px}
   .shop-modal{display:flex;gap:26px;flex-wrap:wrap}
-  .shop-modal-img{flex:1 1 260px;min-width:220px;aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset);border-radius:var(--r-lg)}
+  .shop-modal-img{position:relative;flex:1 1 260px;min-width:220px;aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset);border-radius:var(--r-lg)}
+  .shop-face-toggle{position:absolute;right:12px;bottom:12px;font-family:inherit;font-weight:700;font-size:12px;padding:7px 13px;border-radius:999px;border:0;background:rgba(20,14,6,.72);color:#F6ECD7;cursor:pointer;backdrop-filter:blur(3px)}
+  .shop-face-toggle:hover{background:rgba(20,14,6,.88)}
   .shop-modal-body{flex:1 1 260px;min-width:220px}
   .shop-modal-ttl{font-family:var(--display);font-size:22px;font-weight:800}
   .shop-modal-price{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--gold-ink);margin-top:6px}
@@ -7445,10 +7447,10 @@ function renderShop(){
     g.innerHTML='<div class="shop-grid">'+_shopProducts.map(shopCardHTML).join('')+'</div>';
   });
 }
-var _shopSel={productId:null,colorId:null,sizeId:null};
+var _shopSel={productId:null,colorId:null,sizeId:null,face:'front'};
 function openShopProduct(id){
   var p=shopFindProduct(id); if(!p)return;
-  _shopSel={productId:id,colorId:(p.colors[0]&&p.colors[0].id)||null,sizeId:(p.sizes[0]&&p.sizes[0].id)||null};
+  _shopSel={productId:id,colorId:(p.colors[0]&&p.colors[0].id)||null,sizeId:(p.sizes[0]&&p.sizes[0].id)||null,face:'front'};
   showModal(shopProductModalHTML(p));
 }
 function shopVariantFor(p,colorId,sizeId){
@@ -7456,13 +7458,22 @@ function shopVariantFor(p,colorId,sizeId){
     return (colorId==null||v.colorId===colorId) && (sizeId==null||v.sizeId===sizeId);
   })[0]||null;
 }
+function shopToggleFace(){
+  _shopSel.face=(_shopSel.face==='back')?'front':'back';
+  var p=shopFindProduct(_shopSel.productId); if(!p)return;
+  byId('modal').innerHTML=shopProductModalHTML(p);
+}
 function shopProductModalHTML(p){
   var v=shopVariantFor(p,_shopSel.colorId,_shopSel.sizeId);
-  var img=(_shopSel.colorId!=null && p.imagesByColor[_shopSel.colorId]) || p.defaultImage;
+  var frontImg=(_shopSel.colorId!=null && p.imagesByColor[_shopSel.colorId]) || p.defaultImage;
+  var backImg=(p.backImagesByColor && _shopSel.colorId!=null) ? p.backImagesByColor[_shopSel.colorId] : null;
+  var img=(_shopSel.face==='back' && backImg) ? backImg : frontImg;
   var price=v?'$'+(v.price/100).toFixed(2):shopPriceLabel(p);
   return '<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<div class="shop-modal">'+
-      '<div class="shop-modal-img" style="background-image:url(\''+esc(img)+'\')"></div>'+
+      '<div class="shop-modal-img" style="background-image:url(\''+esc(img)+'\')">'+
+        (backImg?'<button type="button" class="shop-face-toggle" onclick="shopToggleFace()">'+(_shopSel.face==='back'?'Show front':'Show back')+'</button>':'')+
+      '</div>'+
       '<div class="shop-modal-body">'+
         '<h2 class="shop-modal-ttl">'+esc(p.title)+'</h2>'+
         '<div class="shop-modal-price">'+price+'</div>'+

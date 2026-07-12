@@ -62,16 +62,25 @@ export default async function handler(req, res) {
           inStock: v.is_available !== false,
         }));
 
-        // One representative image per color, keyed by color id, so the
-        // gallery can swap photos as the shopper picks a swatch — falls
-        // back to the product's default image when a color has none of
-        // its own tagged images yet.
+        // One representative front image per color, keyed by color id, so
+        // the gallery can swap photos as the shopper picks a swatch — falls
+        // back to the product's default image when a color has none of its
+        // own tagged images yet. Real Printify mockups are tagged with a
+        // "position" (front/back/other) — a separate back-image map lets the
+        // storefront offer a front/back toggle using only real photos (no
+        // fabricated angle if Printify has no back mockup for that color).
         const imagesByColor = {};
+        const backImagesByColor = {};
         (p.images || []).forEach((img) => {
           (img.variant_ids || []).forEach((vid) => {
             const variant = enabledVariants.find((v) => v.id === vid);
             const cid = variant ? variantColorId(variant) : null;
-            if (cid != null && !imagesByColor[cid]) imagesByColor[cid] = img.src;
+            if (cid == null) return;
+            if (img.position === 'back') {
+              if (!backImagesByColor[cid]) backImagesByColor[cid] = img.src;
+            } else if (!imagesByColor[cid]) {
+              imagesByColor[cid] = img.src;
+            }
           });
         });
         const defaultImg = (p.images.find((i) => i.is_default) || p.images[0] || {}).src || null;
@@ -85,6 +94,7 @@ export default async function handler(req, res) {
           sizes,
           variants,
           imagesByColor,
+          backImagesByColor,
           defaultImage: defaultImg,
           priceMin: prices.length ? Math.min(...prices) : null,
           priceMax: prices.length ? Math.max(...prices) : null,
