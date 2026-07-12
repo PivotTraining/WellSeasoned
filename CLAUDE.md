@@ -902,3 +902,56 @@ poster forever.
   (`_npTitles`/`loadNowPlaying`) the Theaters page uses, with an async
   upgrade (`#ticketBlockWrap`) once that data arrives — mirrors the existing
   backdrop/cast hydration pattern on the film page.
+
+## Shop — real Printify merch (2026-07-12)
+Owner: "we need to. create a printify store with merchandise. It needs to be
+beautiful, easy ability to select colors and sizes." Chose "Custom-built
+into the site" (a real `#/shop` page matching the site's own visual
+identity, not Printify's hosted Pop-Up Store) over an embedded/linked-out
+store, and confirmed real products already exist in a live Printify
+account. Built as **two phases** — this entry covers Phase 1 only:
+
+- **Phase 1 (built, this entry)**: browse real products, pick color/size,
+  see the real price — no payment processing. `api/printify.js` (new,
+  zero-dep, same config-gated pattern as `api/checkout.js`/`api/showtimes.js`)
+  proxies Printify's Shop Products API server-side (`PRINTIFY_API_TOKEN`/
+  `PRINTIFY_SHOP_ID` in Vercel env — unset yet, so it 503s and the client
+  shows an honest "The shop isn't open yet" empty state, same convention as
+  Stripe membership before real keys existed). Sanitizes the response to
+  exactly what the storefront needs (never leaks Printify's internal cost
+  price or unpublished/disabled products/variants). `#/shop`
+  (`renderShop()`) is a poster-style grid (`.shop-grid`/`shopCardHTML`);
+  clicking a card opens the existing site-wide modal (`showModal`) with a
+  color-swatch row, a size-pill row, live price, and a "Buy now" button.
+  The buy button is deliberately honest right now — it toasts "Checkout is
+  almost here" and fires `track('shop_buy_intent',...)` rather than doing
+  anything fake. Linked from the "More ▾" nav dropdown and the footer link
+  row (not primary nav — same reasoning as Advertise: a shop link isn't the
+  first thing most visitors need).
+- **Phase 2 (not started, flagged to owner)**: actual checkout — charging a
+  customer (needs live Stripe keys, same gap the membership scaffold has)
+  and then placing the paid order with Printify for fulfillment
+  (Printify's Orders API). Deliberately out of scope until the owner
+  decides on payment flow.
+- Confirmed live against the owner's real account (JWT token pasted
+  transiently in chat, used only inline for verification — never written to
+  any git-tracked file): Shop ID `1105035` ("PIVOT Wear"), 7 real published
+  products (tees + a pin button).
+- **Bug found and fixed while building this**: Printify's `variant.options[]`
+  array is NOT reliably ordered to match `product.options[]`'s declared
+  order. Verified against live data — a product declaring
+  `options:[size,color]` still reported every variant's `options` array as
+  `[colorId, sizeId]` (color first), the opposite of the declared order.
+  Position-based indexing (`v.options[optionIndex]`) would have silently
+  swapped color/size for at least some real products. Fixed by matching
+  each variant option id against which option's own `values` list (by id,
+  via a `Set`) it actually belongs to — order-independent regardless of how
+  Printify orders either array. Re-verified against all 7 real products
+  after the fix (zero mismatches) and end-to-end in a browser render (real
+  color names/sizes render correctly, price and buy button behave
+  correctly for the specific product that exposed the bug).
+- `PRINTIFY_API_TOKEN`/`PRINTIFY_SHOP_ID` still need to be added by the
+  owner in Vercel → Settings → Environment Variables for the live site to
+  show real products (no tool in this environment can set Vercel env vars
+  programmatically — confirmed via search, same limitation noted for
+  Stripe/SerpApi keys).

@@ -413,6 +413,30 @@
   .mosaic .card,.grid-cards .card{min-width:0}
   body{overflow-x:clip}
   .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  /* ============ SHOP (Printify merch) ============ */
+  .shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:6px}
+  .shop-card{cursor:pointer;border-radius:var(--r-lg);overflow:hidden;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .2s cubic-bezier(.2,.7,.2,1),box-shadow .2s}
+  .shop-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
+  .shop-card-img{aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset)}
+  .shop-card-meta{padding:12px 14px 14px}
+  .shop-card-ttl{font-weight:700;font-size:14.5px;line-height:1.25}
+  .shop-card-price{font-family:var(--mono);font-size:13px;color:var(--gold-ink);font-weight:700;margin-top:5px}
+  .shop-modal{display:flex;gap:26px;flex-wrap:wrap}
+  .shop-modal-img{flex:1 1 260px;min-width:220px;aspect-ratio:1/1;background-size:cover;background-position:center;background-color:var(--inset);border-radius:var(--r-lg)}
+  .shop-modal-body{flex:1 1 260px;min-width:220px}
+  .shop-modal-ttl{font-family:var(--display);font-size:22px;font-weight:800}
+  .shop-modal-price{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--gold-ink);margin-top:6px}
+  .shop-modal-desc{font-size:13.5px;color:var(--ink-2);margin-top:10px;line-height:1.5}
+  .shop-opt-lab{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-top:16px}
+  .shop-swatch-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
+  .shop-swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;box-shadow:var(--shadow-1)}
+  .shop-swatch.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--gold)}
+  .shop-size-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .shop-size-btn{font-family:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:9px;border:1.5px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer}
+  .shop-size-btn.on{background:var(--ink);color:var(--on-dark);border-color:var(--ink)}
+  .shop-buy-btn{width:100%;margin-top:20px}
+  @media(max-width:900px){ .shop-grid{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:640px){ .shop-grid{grid-template-columns:repeat(2,1fr)} .shop-modal{gap:16px} }
   .card .poster{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-2);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s,filter .24s}
   .card:hover .poster{box-shadow:var(--shadow-3)}
   .card-fmt{position:absolute;top:9px;left:9px;z-index:2;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:999px;color:#fff;background:rgba(18,10,6,.68);backdrop-filter:blur(5px);line-height:1;pointer-events:none}
@@ -1403,6 +1427,7 @@
           <a data-nav="word" onclick="closeMoreNav();go('word')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>The Word</a>
           <a data-nav="couch" onclick="closeMoreNav();go('couch')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 3l-5 4-5-4"/></svg>On The Couch</a>
           <a data-nav="vault" onclick="closeMoreNav();go('vault')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg>The Vault</a>
+          <a data-nav="shop" onclick="closeMoreNav();go('shop')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Shop</a>
         </div>
       </div>
       <a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
@@ -1666,6 +1691,11 @@
     <div class="wrap" id="kidsContent"></div>
   </section>
 
+  <!-- ============ SHOP ============ -->
+  <section class="view" data-view="shop" aria-label="Shop">
+    <div class="wrap" id="shopContent"></div>
+  </section>
+
   <!-- ============ THE BRACKET ============ -->
   <section class="view" data-view="bracket" aria-label="The Bracket">
     <div class="wrap" id="bracketContent"></div>
@@ -1783,7 +1813,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Word</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -4790,7 +4820,7 @@ function loadState(){
 }
 
 /* ============ ROUTER ============ */
-var NAV_MORE_VIEWS=['theaters','soon','word','couch','vault'];
+var NAV_MORE_VIEWS=['theaters','soon','word','couch','vault','shop'];
 function setActiveNav(view){
   document.querySelectorAll('[data-nav]').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-nav')===view);
@@ -4800,7 +4830,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -4844,6 +4874,7 @@ function render(view,arg){
   else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
   else if(view==='couch')renderCouch();
   else if(view==='kids')renderKids();
+  else if(view==='shop')renderShop();
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
@@ -7365,6 +7396,100 @@ function renderKids(){
     '<p class="browse-count" style="margin:14px 0">'+fmt(list.length)+' title'+(list.length===1?'':'s')+'</p>'+
     (list.length?'<div class="grid-cards">'+list.map(cardHTML).join('')+'</div>'
       :'<div class="empty"><h3>Nothing here yet.</h3><p>Try a different type.</p></div>');
+}
+/* ============ SHOP (Printify) ============
+   Real products pulled live from api/printify.js (Printify's Shop Products
+   API, server-side token). No mock/placeholder merch — an unconfigured or
+   empty shop just shows an honest "not open yet" state, same convention as
+   Stripe membership before real keys existed. Checkout (actually charging
+   someone) is a separate phase — the buy button is honest about that until
+   it's wired up. */
+var _shopProducts=null, _shopLoading=false, _shopErr=null;
+function loadShopProducts(cb){
+  if(_shopProducts){ cb&&cb(); return; }
+  if(_shopLoading)return;
+  _shopLoading=true;
+  fetch('/api/printify').then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      _shopLoading=false;
+      if(!res.ok||!res.d||!Array.isArray(res.d.products)){ _shopErr=(res.d&&res.d.error)||'Could not load the shop.'; cb&&cb(); return; }
+      _shopProducts=res.d.products; cb&&cb();
+    })
+    .catch(function(){ _shopLoading=false; _shopErr='Could not load the shop.'; cb&&cb(); });
+}
+function shopFindProduct(id){ if(!_shopProducts)return null; for(var i=0;i<_shopProducts.length;i++){ if(String(_shopProducts[i].id)===String(id))return _shopProducts[i]; } return null; }
+function shopPriceLabel(p){
+  if(p.priceMin==null)return '';
+  var lo='$'+(p.priceMin/100).toFixed(2), hi='$'+(p.priceMax/100).toFixed(2);
+  return p.priceMin===p.priceMax ? lo : lo+' – '+hi;
+}
+function shopCardHTML(p){
+  return '<div class="shop-card" tabindex="0" role="button" aria-label="'+esc(p.title)+'" onclick="openShopProduct(\''+p.id+'\')" onkeydown="if(event.key===\'Enter\')openShopProduct(\''+p.id+'\')">'+
+    '<div class="shop-card-img" style="background-image:url(\''+esc(p.defaultImage)+'\')"></div>'+
+    '<div class="shop-card-meta"><div class="shop-card-ttl">'+esc(p.title)+'</div>'+
+    '<div class="shop-card-price">'+shopPriceLabel(p)+'</div></div>'+
+  '</div>';
+}
+function renderShop(){
+  var el=byId('shopContent'); if(!el)return;
+  el.innerHTML='<div class="browse-head"><span class="eyebrow">Merch</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Well Seasoned Shop.</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Real merch, printed on demand. Nothing fake here either — every piece shown is a real product from our actual shop.</p></div>'+
+    '<div id="shopGrid"><div class="empty"><h3>Loading the shop…</h3></div></div>';
+  loadShopProducts(function(){
+    var g=byId('shopGrid'); if(!g)return;
+    if(!_shopProducts||!_shopProducts.length){
+      g.innerHTML='<div class="empty"><h3>The shop isn’t open yet.</h3><p>'+esc(_shopErr||'Check back soon — real merch is on the way.')+'</p></div>';
+      return;
+    }
+    g.innerHTML='<div class="shop-grid">'+_shopProducts.map(shopCardHTML).join('')+'</div>';
+  });
+}
+var _shopSel={productId:null,colorId:null,sizeId:null};
+function openShopProduct(id){
+  var p=shopFindProduct(id); if(!p)return;
+  _shopSel={productId:id,colorId:(p.colors[0]&&p.colors[0].id)||null,sizeId:(p.sizes[0]&&p.sizes[0].id)||null};
+  showModal(shopProductModalHTML(p));
+}
+function shopVariantFor(p,colorId,sizeId){
+  return p.variants.filter(function(v){
+    return (colorId==null||v.colorId===colorId) && (sizeId==null||v.sizeId===sizeId);
+  })[0]||null;
+}
+function shopProductModalHTML(p){
+  var v=shopVariantFor(p,_shopSel.colorId,_shopSel.sizeId);
+  var img=(_shopSel.colorId!=null && p.imagesByColor[_shopSel.colorId]) || p.defaultImage;
+  var price=v?'$'+(v.price/100).toFixed(2):shopPriceLabel(p);
+  return '<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<div class="shop-modal">'+
+      '<div class="shop-modal-img" style="background-image:url(\''+esc(img)+'\')"></div>'+
+      '<div class="shop-modal-body">'+
+        '<h2 class="shop-modal-ttl">'+esc(p.title)+'</h2>'+
+        '<div class="shop-modal-price">'+price+'</div>'+
+        (p.description?'<p class="shop-modal-desc">'+esc(p.description.slice(0,220))+(p.description.length>220?'…':'')+'</p>':'')+
+        (p.colors.length?'<div class="shop-opt-lab">Color'+(p.colors.length&&_shopSel.colorId!=null?': '+esc((p.colors.filter(function(c){return c.id===_shopSel.colorId;})[0]||{}).title||''):'')+'</div>'+
+          '<div class="shop-swatch-row">'+p.colors.map(function(c){
+            return '<button class="shop-swatch'+(c.id===_shopSel.colorId?' on':'')+'" style="background:'+(c.hex||'#999')+'" title="'+esc(c.title)+'" aria-label="'+esc(c.title)+'" onclick="shopPick(\'color\','+JSON.stringify(c.id)+')"></button>';
+          }).join('')+'</div>':'')+
+        (p.sizes.length?'<div class="shop-opt-lab">Size</div>'+
+          '<div class="shop-size-row">'+p.sizes.map(function(s){
+            return '<button class="shop-size-btn'+(s.id===_shopSel.sizeId?' on':'')+'" onclick="shopPick(\'size\','+JSON.stringify(s.id)+')">'+esc(s.title)+'</button>';
+          }).join('')+'</div>':'')+
+        '<button class="btn btn-gold shop-buy-btn" onclick="shopBuy()">'+(v&&v.inStock?'Buy now':'Out of stock in this size/color')+'</button>'+
+        '<p class="cbox-hint" style="margin-top:8px">Printed on demand and shipped by Printify.</p>'+
+      '</div>'+
+    '</div>';
+}
+function shopPick(kind,val){
+  if(kind==='color')_shopSel.colorId=val; else _shopSel.sizeId=val;
+  var p=shopFindProduct(_shopSel.productId); if(!p)return;
+  byId('modal').innerHTML=shopProductModalHTML(p);
+}
+function shopBuy(){
+  var p=shopFindProduct(_shopSel.productId); var v=p&&shopVariantFor(p,_shopSel.colorId,_shopSel.sizeId);
+  if(!v||!v.inStock){ toast('Pick an available color/size.'); return; }
+  toast('Checkout is almost here — check back soon.');
+  track('shop_buy_intent',{product:_shopSel.productId,variant:v.id});
 }
 function setSort(v){FILTERS.sort=v;renderBrowse();}
 function renderBrowse(){
