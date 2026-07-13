@@ -429,6 +429,26 @@
      front→back crossfade on hover using real Printify mockups (never a
      mismatched color), generous type, minimal chrome. */
   .shop-lookbook-head .eyebrow{color:var(--gold-ink)}
+  /* Shop hero — a live spotlight banner using a real featured product image */
+  .shop-hero{position:relative;overflow:hidden;border-radius:var(--r-lg);margin:6px 0 30px;
+    background:linear-gradient(150deg,#241809,#110a04);display:flex;align-items:center;gap:40px;
+    padding:46px 48px;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+  .shop-hero::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);
+    pointer-events:none;background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.13) 87%,transparent 95%);
+    animation:emmySpin 15s linear infinite}
+  .sh-copy{position:relative;z-index:1;flex:1 1 52%}
+  .sh-eyebrow{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
+  .sh-h{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,58px);line-height:.96;margin-top:12px;color:#F4ECD8;text-transform:uppercase}
+  .sh-h span{color:#F4C542}
+  .sh-lead{color:#D8C9A8;font-size:15px;line-height:1.6;margin-top:14px;max-width:46ch}
+  .sh-cta{margin-top:22px}
+  .sh-art{position:relative;z-index:1;flex:0 0 auto}
+  .sh-card{width:clamp(220px,26vw,300px);border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 26px 60px rgba(0,0,0,.5);animation:emmyGlow 5s ease-in-out infinite}
+  .sh-card img{display:block;width:100%;height:auto}
+  @media(prefers-reduced-motion:reduce){ .shop-hero::after,.sh-card{animation:none} }
+  @media(max-width:720px){ .shop-hero{flex-direction:column-reverse;text-align:center;padding:32px 26px;gap:24px}
+    .sh-lead{margin-left:auto;margin-right:auto}.sh-card{width:min(68%,260px);margin:0 auto} }
   .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:34px 28px;margin-top:10px}
   .shop-card{cursor:pointer;background:transparent;border:0;box-shadow:none;transition:transform .25s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;height:100%}
   .shop-card:hover{transform:translateY(-3px)}
@@ -7559,19 +7579,41 @@ function shopCardHTML(p){
 }
 function renderShop(){
   var el=byId('shopContent'); if(!el)return;
-  el.innerHTML='<div class="browse-head shop-lookbook-head"><span class="eyebrow">The Lookbook</span>'+
-    '<h1 style="font-size:clamp(28px,4vw,44px);margin-top:8px">Well Seasoned, worn.</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Real pieces for people who take their culture — and their fit — seriously. Printed on demand, shipped by Printify. Nothing fake here either, not even the size chart.</p></div>'+
+  el.innerHTML='<div id="shopHero"></div>'+
     '<div id="shopGrid"><div class="empty"><h3>Loading the shop…</h3></div></div>';
   loadShopProducts(function(){
-    var g=byId('shopGrid'); if(!g)return;
+    var g=byId('shopGrid'), h=byId('shopHero');
     if(!_shopProducts||!_shopProducts.length){
-      g.innerHTML='<div class="empty"><h3>The shop isn’t open yet.</h3><p>'+esc(_shopErr||'Check back soon — real merch is on the way.')+'</p></div>';
+      if(h)h.innerHTML='';
+      if(g)g.innerHTML='<div class="empty"><h3>The shop isn’t open yet.</h3><p>'+esc(_shopErr||'Check back soon — real merch is on the way.')+'</p></div>';
       return;
     }
-    g.innerHTML='<div class="shop-grid">'+_shopProducts.map(shopCardHTML).join('')+'</div>';
+    if(h)h.innerHTML=shopHeroHTML(shopFeatured());
+    if(g)g.innerHTML='<div class="shop-grid">'+_shopProducts.map(shopCardHTML).join('')+'</div>';
   });
 }
+// The featured tee for the hero — prefers a strong mark tee, else the first
+// live product. Its image is the REAL Printify mockup from the loaded shop
+// data, so the banner can never show a product that isn't actually for sale.
+function shopFeatured(){
+  if(!_shopProducts||!_shopProducts.length)return null;
+  var pref=['Seal Tee','Crest Tee','Monogram Tee'];
+  for(var k=0;k<pref.length;k++){ for(var i=0;i<_shopProducts.length;i++){ if(shopTitle(_shopProducts[i]).indexOf(pref[k])>-1)return _shopProducts[i]; } }
+  return _shopProducts[0];
+}
+function shopHeroHTML(p){
+  var img=p&&p.defaultImage;
+  return '<section class="shop-hero" aria-label="Season One merch">'+
+    '<div class="sh-copy">'+
+      '<span class="sh-eyebrow">Season One · The Drop</span>'+
+      '<h1 class="sh-h">Wear your <span>verdict.</span></h1>'+
+      '<p class="sh-lead">Real heavyweight tees, boxy women’s cuts, and the cap — printed on demand, shipped to your door. Nothing fake here either, not even the size chart.</p>'+
+      '<button class="btn btn-gold sh-cta" onclick="shopScrollGrid()">Shop the drop ↓</button>'+
+    '</div>'+
+    (img?'<div class="sh-art"><div class="sh-card"><img src="'+esc(img)+'" alt="Well Seasoned merch" loading="lazy"></div></div>':'')+
+  '</section>';
+}
+function shopScrollGrid(){ var g=byId('shopGrid'); if(g)g.scrollIntoView({behavior:'smooth',block:'start'}); }
 var _shopSel={productId:null,colorId:null,sizeId:null,face:'front'};
 function shopDefaultVariant(p){
   // Printify doesn't guarantee every color comes in every size — defaulting

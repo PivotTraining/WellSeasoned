@@ -1175,6 +1175,29 @@ rule as always).
   scratchpad only (regenerable from the HTML; the print files themselves are
   stored on Printify, referenced by upload id) — not committed.
 
+## Shop hero banner — "Wear Your Verdict" spotlight (2026-07-12)
+Owner asked to bring the merch promo look (built as social graphics) onto the
+site. Chose "top of the Shop page." Replaced the plain `.shop-lookbook-head`
+("Well Seasoned, worn.") header with `#shopHero` — a live spotlight banner
+(`shopHeroHTML`, `.shop-hero` CSS) in the site's established spotlight
+language (dark stage card, rotating gold conic sweep reusing `emmySpin`,
+gold-foil shimmer eyebrow reusing `emmyShine`, pulsing glow `emmyGlow`).
+Headline "Wear your **verdict.**", a lead line, and a "Shop the drop ↓"
+button (`shopScrollGrid`) that smooth-scrolls to the product grid. The
+featured product IMAGE is pulled LIVE from the loaded `_shopProducts` data
+(`shopFeatured()` prefers a Seal/Crest/Monogram tee, else the first product,
+`defaultImage`) — so the banner can never show a product that isn't actually
+for sale (same "nothing baked/faked" rule as prices and votes). Painted only
+after products load; the honest "shop isn't open yet" empty-state clears the
+hero entirely (no orphan banner). CSS-only motion, respects
+`prefers-reduced-motion`, stacks on mobile (`flex-direction:column-reverse`
+under 720px). Verified in headless Chromium at desktop (1200px) and mobile
+(390/420px): hero renders with the real Printify mockup, headline/CTA
+present, grid ordering + back toggle + empty-state all still work, zero
+console errors. (The flat social PNGs — promo/catalog/story — live in the
+session scratchpad only, not committed; the on-site banner is the live HTML
+version, not a baked image.)
+
 ## Admin dashboard stats — users + traffic + votes (2026-07-12)
 Owner asked for an in-site way to see registered users and traffic (the anon
 key can't read `auth.users` or the RLS-locked `events` table, and the
