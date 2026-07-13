@@ -1888,7 +1888,7 @@
 <!-- Kids Key — pinned during scroll, ONLY on #/kids (toggled by refreshKidsKey) -->
 <div class="kids-key-dock" id="kidsKeyDock" style="display:none">
   <div class="kids-key-panel" id="kidsKeyPanel" role="region" aria-label="Kids age rating key" hidden></div>
-  <button class="kids-key-toggle" id="kidsKeyToggle" onclick="toggleKidsKey()" aria-expanded="false" aria-controls="kidsKeyPanel"><span class="kk-ic">🧒</span><span class="kk-tx">Kids Key</span></button>
+  <button class="kids-key-toggle" id="kidsKeyToggle" onclick="toggleKidsKey()" aria-expanded="false" aria-controls="kidsKeyPanel"><span class="kk-ic">🧒🏾</span><span class="kk-tx">Kids Key</span></button>
 </div>
 
 <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
@@ -4764,7 +4764,7 @@ function ageTier(cert){
   if(['R','TV-MA'].indexOf(c)>=0) return 'ya';
   return null;
 }
-var AGE_TIER_LABEL={kid:'🧒 Kid Approved',teen:'🧑 Teen Approved',ya:'🔞 Young Adult Approved'};
+var AGE_TIER_LABEL={kid:'🧒🏾 Kid Approved',teen:'🧑🏽 Teen Approved',ya:'🔞 Young Adult Approved'};
 function ageRatingHTML(f){
   var t=ageTier(f.ageCert); if(!t) return '';
   return '<div class="age-badge age-'+t+'"><span>'+AGE_TIER_LABEL[t]+'</span><span class="age-cert">'+esc(f.ageCert)+'</span></div>';
@@ -7534,8 +7534,8 @@ function kidsHeroHTML(){
       '<h1 class="kh-h">Family movie night,<br>sorted.</h1>'+
       '<p class="kh-lead">Real family films and animation from the culture — nothing sanitized, nothing faked. Every title opens with its real age rating, so you know exactly who it’s for.</p>'+
       '<div class="kh-legend">'+
-        '<span class="kh-pill kh-kid">🧒 Kid Approved</span>'+
-        '<span class="kh-pill kh-teen">🧑 Teen Approved</span>'+
+        '<span class="kh-pill kh-kid">🧒🏾 Kid Approved</span>'+
+        '<span class="kh-pill kh-teen">🧑🏽 Teen Approved</span>'+
         '<span class="kh-pill kh-ya">🔞 Young Adult</span>'+
       '</div>'+
     '</div>'+
@@ -9047,8 +9047,8 @@ function kidsKeyPanelHTML(){
   }
   return '<div class="kk-head"><b>🍿 Parent’s guide</b><button class="lp-close" onclick="toggleKidsKey()" aria-label="Close">✕</button></div>'+
     '<p class="kk-intro">Every title opens with its <b>real</b> age rating, pulled live — never a guess. Here’s how we sort them:</p>'+
-    tier('kid','🧒','Kid Approved','G · PG · TV-Y · TV-Y7 · TV-G','Made for the whole room — press play with anybody.')+
-    tier('teen','🧑','Teen Approved','PG-13 · TV-PG · TV-14','Older kids and up. Some edge — a quick heads-up may help.')+
+    tier('kid','🧒🏾','Kid Approved','G · PG · TV-Y · TV-Y7 · TV-G','Made for the whole room — press play with anybody.')+
+    tier('teen','🧑🏽','Teen Approved','PG-13 · TV-PG · TV-14','Older kids and up. Some edge — a quick heads-up may help.')+
     tier('ya','🔞','Young Adult','R · TV-MA','Grown themes. Preview it first before the little ones.')+
     '<p class="kk-note">If a title is NC-17 or has no confirmed rating, it shows <b>no badge at all</b> rather than pretend — nothing fake, even here.</p>';
 }
