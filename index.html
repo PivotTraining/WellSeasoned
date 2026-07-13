@@ -1110,7 +1110,7 @@
   @media(max-width:820px){ .ad-how-grid{grid-template-columns:1fr 1fr} }
   @media(max-width:520px){ .ad-how-grid{grid-template-columns:1fr} }
   @media print{
-    .topnav,.tabbar,footer,.legend-dock,.toast-wrap{display:none!important}
+    .topnav,.tabbar,footer,.legend-dock,.kids-key-dock,.toast-wrap{display:none!important}
     .advertise-print{color:#111;background:#fff}
     .advertise-print .adprint-hide{display:none!important}
     .advertise-print .plan{break-inside:avoid;border-color:#999;box-shadow:none}
@@ -1294,6 +1294,30 @@
   .legend-panel .lp-sec:nth-child(4){animation-delay:.26s}
   @keyframes lpRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){ .legend-panel,.legend-panel .lp-sec{animation:none;opacity:1;transform:none} .lt-ic,.legend-dock.open .legend-toggle{transition:none} }
+  /* Kids Key dock — pinned bottom-LEFT (clear of the global Key bottom-right) */
+  .kids-key-dock{position:fixed;left:18px;bottom:20px;z-index:90;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+  .kids-key-toggle{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:9px 16px 9px 11px;cursor:pointer;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.03em;color:#fff;
+    background:linear-gradient(135deg,#F4B733,#E8722C);box-shadow:0 8px 22px rgba(200,90,20,.4);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+  .kids-key-toggle:hover{transform:translateY(-2px)}
+  .kids-key-toggle .kk-ic{font-size:16px;line-height:1}
+  .kids-key-dock.open .kids-key-toggle{transform:scale(.96)}
+  .kids-key-panel{width:308px;max-width:calc(100vw - 36px);max-height:calc(100dvh - 92px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:16px 17px 14px;
+    transform-origin:bottom left;animation:keySwing .4s cubic-bezier(.34,1.5,.5,1) both}
+  .kk-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .kk-head b{font-family:var(--display);font-weight:800;font-size:16.5px}
+  .kk-intro{font-size:12.5px;line-height:1.5;color:var(--ink-2);margin:6px 0 12px}
+  .kk-tier{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border-radius:12px;margin-bottom:9px;border:1px solid var(--line)}
+  .kk-kid{background:rgba(59,163,74,.09)} .kk-teen{background:rgba(224,123,26,.10)} .kk-ya{background:rgba(196,48,43,.09)}
+  .kk-badge{font-size:24px;line-height:1;flex:0 0 auto}
+  .kk-body{display:flex;flex-direction:column;gap:2px}
+  .kk-body b{font-size:14px}
+  .kk-certs{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.02em}
+  .kk-blurb{font-size:12px;color:var(--ink-2);line-height:1.4;margin-top:2px}
+  .kk-note{font-size:11.5px;color:var(--ink-3);line-height:1.45;margin-top:6px}
+  @media (prefers-reduced-motion:reduce){ .kids-key-panel{animation:none} .kids-key-toggle{transition:none} }
+  @media (max-width:640px){ .kids-key-dock{left:14px;bottom:calc(var(--tab-h) + 14px)} .kids-key-panel{max-height:calc(100dvh - var(--tab-h) - 76px)} }
   .lp-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-15px;margin:-15px -16px 0;padding:15px 16px 8px;background:var(--panel);z-index:2}
   .lp-head b{font-family:var(--display);font-weight:800;font-size:16px}
   .lp-close{background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:16px;line-height:1}
@@ -1860,6 +1884,11 @@
 <div class="legend-dock" id="legendDock">
   <div class="legend-panel" id="legendPanel" role="region" aria-label="Score legend" hidden></div>
   <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()" aria-expanded="false" aria-controls="legendPanel"><span class="lt-ic">?</span><span class="lt-tx">Key</span></button>
+</div>
+<!-- Kids Key — pinned during scroll, ONLY on #/kids (toggled by refreshKidsKey) -->
+<div class="kids-key-dock" id="kidsKeyDock" style="display:none">
+  <div class="kids-key-panel" id="kidsKeyPanel" role="region" aria-label="Kids age rating key" hidden></div>
+  <button class="kids-key-toggle" id="kidsKeyToggle" onclick="toggleKidsKey()" aria-expanded="false" aria-controls="kidsKeyPanel"><span class="kk-ic">🧒</span><span class="kk-tx">Kids Key</span></button>
 </div>
 
 <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
@@ -4941,6 +4970,7 @@ function render(view,arg){
   }
   document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')===view);});
   setActiveNav(view);
+  refreshKidsKey(view);
   window.scrollTo({top:0,behavior:'auto'});
   if(view==='film')renderFilm(arg);
   else if(view==='browse')renderBrowse();
@@ -9005,6 +9035,40 @@ document.addEventListener('click',function(e){
   var d=byId('legendDock'); if(d&&d.classList.contains('open')&&!d.contains(e.target)) toggleLegend();
 });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape'){var d=byId('legendDock'); if(d&&d.classList.contains('open'))toggleLegend();} });
+/* ---- Kids Key: a parent-facing age-rating helper, pinned during scroll but
+   shown ONLY on #/kids. Explains the real Kid/Teen/Young Adult tiers and which
+   actual certifications map to each (same mapping ageTier() uses on film
+   pages). Nothing invented — every film still shows its own real rating. */
+function kidsKeyPanelHTML(){
+  function tier(cls,emoji,label,certs,blurb){
+    return '<div class="kk-tier kk-'+cls+'"><div class="kk-badge">'+emoji+'</div>'+
+      '<div class="kk-body"><b>'+label+'</b><span class="kk-certs">'+certs+'</span>'+
+      '<span class="kk-blurb">'+blurb+'</span></div></div>';
+  }
+  return '<div class="kk-head"><b>🍿 Parent’s guide</b><button class="lp-close" onclick="toggleKidsKey()" aria-label="Close">✕</button></div>'+
+    '<p class="kk-intro">Every title opens with its <b>real</b> age rating, pulled live — never a guess. Here’s how we sort them:</p>'+
+    tier('kid','🧒','Kid Approved','G · PG · TV-Y · TV-Y7 · TV-G','Made for the whole room — press play with anybody.')+
+    tier('teen','🧑','Teen Approved','PG-13 · TV-PG · TV-14','Older kids and up. Some edge — a quick heads-up may help.')+
+    tier('ya','🔞','Young Adult','R · TV-MA','Grown themes. Preview it first before the little ones.')+
+    '<p class="kk-note">If a title is NC-17 or has no confirmed rating, it shows <b>no badge at all</b> rather than pretend — nothing fake, even here.</p>';
+}
+function toggleKidsKey(){
+  var d=byId('kidsKeyDock'), p=byId('kidsKeyPanel'), t=byId('kidsKeyToggle');
+  if(!d)return;
+  var open=!d.classList.contains('open');
+  d.classList.toggle('open',open);
+  if(open){ p.innerHTML=kidsKeyPanelHTML(); p.hidden=false; t.setAttribute('aria-expanded','true'); }
+  else { p.hidden=true; t.setAttribute('aria-expanded','false'); }
+}
+function refreshKidsKey(view){
+  var d=byId('kidsKeyDock'); if(!d)return;
+  if(view==='kids'){ d.style.display='flex'; }
+  else { d.style.display='none'; if(d.classList.contains('open'))toggleKidsKey(); }
+}
+document.addEventListener('click',function(e){
+  var d=byId('kidsKeyDock'); if(d&&d.classList.contains('open')&&!d.contains(e.target)) toggleKidsKey();
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){var d=byId('kidsKeyDock'); if(d&&d.classList.contains('open'))toggleKidsKey();} });
 function openTeach(){
   app.taughtThis=true; saveState();
   var ib=document.querySelector('.info-btn.pulse'); if(ib)ib.classList.remove('pulse');

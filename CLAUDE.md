@@ -1284,3 +1284,25 @@ holds the brand + "nothing fake" rules:
   horizontal overflow (the one overflow at 390px is the pre-existing header
   auth-button cluster, site-wide, not introduced here). Reduced-motion
   disables the floating emoji.
+
+## Kids Key — parent-facing age-rating helper (2026-07-13)
+Owner: "is there a rating system and key we can pin during scroll... a kids
+key that opens that helps with their movies on this page only." Built a
+second floating dock, mirroring the global score-legend dock pattern but
+**scoped to #/kids only**:
+- `#kidsKeyDock` (markup near `#legendDock`) — a pinned "🧒 Kids Key" toggle
+  at **bottom-LEFT** (the global "? Key" is bottom-right, so they never
+  collide), opening a "🍿 Parent's guide" panel (`kidsKeyPanelHTML`) that
+  explains the three tiers with the **real certifications** each maps to
+  (same mapping `ageTier()` uses on film pages): Kid = G/PG/TV-Y/TV-Y7/TV-G,
+  Teen = PG-13/TV-PG/TV-14, Young Adult = R/TV-MA. Honest note: NC-17 /
+  unrated titles show no badge rather than guess.
+- `refreshKidsKey(view)` (called from `render()` right after `setActiveNav`)
+  shows the dock only when `view==='kids'`, hides + closes it on every other
+  view. Same click-outside + Escape close handlers as the legend dock;
+  `.kids-key-dock` added to the print-hide rule; reduced-motion safe; sits
+  above the mobile tabbar on small screens.
+- Verified in headless Chromium: hidden on Home/Browse, visible + labeled on
+  Kids, opens 3 tiers with correct cert strings, no horizontal overlap with
+  the global Key (x:18 vs x:1188), auto-hides on navigation, zero console
+  errors.
