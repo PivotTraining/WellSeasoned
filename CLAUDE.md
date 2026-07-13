@@ -1306,3 +1306,30 @@ second floating dock, mirroring the global score-legend dock pattern but
   Kids, opens 3 tiers with correct cert strings, no horizontal overlap with
   the global Key (x:18 vs x:1188), auto-hides on navigation, zero console
   errors.
+
+## Admin: Critic posts tab — see everything critics have posted (2026-07-13)
+Owner: "For the critics on the site, i want to be able to see what they have
+posted on the site from the admin side." Added a fourth tab to `#/curate`
+("Critic posts") that aggregates every Kitchen review across the whole
+catalog in one scrollable, searchable list — a critic's reviews were
+previously only visible one at a time, on each film's own page.
+- **No new backend needed** — `critic_reviews` is already publicly readable
+  (`cr_read` policy: readable when the row's `user_id` belongs to a seated
+  critic), the exact same query shape `loadKitchenReviews()` already uses
+  per-film, just without the `film_slug=eq.` filter and joined to
+  `profiles(name,critic_outlet,avatar_url)`. Read-only by design — the ask
+  was to *see* what's posted, not moderate it, so no delete/remove action
+  was added (a natural follow-up if ever needed, but out of scope here).
+- `loadCurReviews()`/`renderCurReviewsList()`/`curReviewRowHTML()`
+  (index.html) — fetches up to 500 most-recent reviews, client-side search
+  across critic name/outlet/film title/review text. Each row shows the
+  critic's avatar, name + outlet, the film (a real link into `renderFilm`
+  via `find(film_slug)`), the score as a gold pill, the date, and the
+  written review — or an honest "Score only — no written review" line for
+  score-only entries, never inventing filler text.
+- Verified in headless Chromium (mocked `critic_reviews` data, including one
+  score-only row to check the empty-review fallback): tab renders alongside
+  the existing three, 3/3 mock reviews render with correct film titles
+  (resolved via `find()`) and scores, search filters correctly by critic
+  name, clicking a film title navigates to that film's real page
+  (`#/film/sinners`), zero console errors.

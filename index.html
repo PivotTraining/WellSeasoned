@@ -424,6 +424,16 @@
   .stat-tile b{display:block;font-family:var(--display);font-size:26px;font-weight:800;line-height:1.05;color:var(--ink)}
   .stat-tile span{display:block;margin-top:3px;font-size:11px;color:var(--ink-3);font-weight:600}
   .stat-refresh{align-self:flex-start}
+  /* Admin — Critic posts tab */
+  .cr-row{display:flex;gap:12px;padding:12px 13px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel)}
+  .cr-body{flex:1;min-width:0}
+  .cr-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .cr-film{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);cursor:pointer;text-decoration:none}
+  .cr-film:hover{color:var(--gold-ink)}
+  .cr-score{font-family:var(--mono);font-weight:800;font-size:13px;color:var(--gold-ink);background:var(--gold-wash,rgba(228,155,11,.14));padding:2px 8px;border-radius:999px}
+  .cr-byline{font-size:12px;color:var(--ink-3);margin-top:2px}
+  .cr-quote{font-size:13.5px;color:var(--ink-2);line-height:1.5;margin-top:7px}
+  .cr-quote.cr-empty{font-style:italic;color:var(--ink-3)}
   /* ============ SHOP (Printify merch) — lookbook display ============
      Editorial, not e-commerce-default: taller portrait photography, a
      front→back crossfade on hover using real Printify mockups (never a
@@ -6023,7 +6033,7 @@ function curSetFilter(v){ CUR_FILTER=v; CUR_SHOWN=120; renderCurPageList(); }
 function curMore(){ CUR_SHOWN+=200; renderCurPageList(); }
 function curPageQ(){ var el=byId('curPageSearch'); return el?el.value:''; }
 var CUR_TAB='catalog';
-var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['subs','Film submissions']];
+var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['subs','Film submissions'],['reviews','Critic posts']];
 function renderCuratePage(tab){
   var w=byId('curPageWrap'); if(!w)return;
   if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Curate</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to curate.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
@@ -6052,6 +6062,12 @@ function renderCuratePage(tab){
     '<div id="curTabSubs" style="display:none">'+
       '<div class="curp-count" id="curSubsCount"></div>'+
       '<div class="cur-list" id="curSubsList"></div>'+
+    '</div>'+
+    '<div id="curTabReviews" style="display:none">'+
+      '<div class="curp-tools"><input id="curReviewsSearch" placeholder="Search by critic or film…" oninput="renderCurReviewsList()">'+
+        '<button class="btn btn-ghost btn-sm" onclick="loadCurReviews()">↻ Refresh</button></div>'+
+      '<div class="curp-count" id="curReviewsCount"></div>'+
+      '<div class="cur-list" id="curReviewsList"><p class="hero-lead">Loading…</p></div>'+
     '</div>';
   byId('curTabs').innerHTML=CUR_TABS.map(function(t){
     return '<button class="chip'+(CUR_TAB===t[0]?' on':'')+'" onclick="curSetTab(\''+t[0]+'\')">'+t[1]+'</button>';
@@ -6095,9 +6111,11 @@ function curShowTab(tab){
   byId('curTabCatalog').style.display=(tab==='catalog')?'':'none';
   byId('curTabApps').style.display=(tab==='apps')?'':'none';
   byId('curTabSubs').style.display=(tab==='subs')?'':'none';
+  byId('curTabReviews').style.display=(tab==='reviews')?'':'none';
   if(tab==='catalog')renderCurPageList();
   else if(tab==='apps')inboxLoad();
   else if(tab==='subs')adminSubs();
+  else if(tab==='reviews')loadCurReviews();
 }
 function curSetTab(tab){
   CUR_TAB=tab;
@@ -6120,6 +6138,57 @@ function renderCurPageList(){
 function curRefresh(){
   if(byId('curPageList')&&document.querySelector('.view[data-view=curate].on')) renderCurPageList();
   else renderCurList(curQ());
+}
+/* Owner-only aggregated view of every Kitchen review a seated critic has
+   posted, across the whole catalog in one place — same data already shown
+   per-film on the review card (critic_reviews is publicly readable, joined
+   to profiles), just gathered here for a quick admin scan instead of
+   clicking through 1000+ film pages one at a time. Read-only by design —
+   the ask was to SEE what's been posted, not moderate it. */
+var _curReviews=null, _curReviewsLoading=false;
+function loadCurReviews(){
+  var el=byId('curReviewsList'); if(!el)return;
+  if(_curReviewsLoading)return;
+  _curReviewsLoading=true;
+  el.innerHTML='<p class="hero-lead">Loading…</p>';
+  fetch(SUPABASE_URL+'/rest/v1/critic_reviews?select=id,film_slug,score,body,created_at,user_id,profiles(name,critic_outlet,avatar_url)&order=created_at.desc&limit=500',{headers:sbUserHeaders()})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      _curReviewsLoading=false;
+      if(!res.ok||!Array.isArray(res.d)){ var e=byId('curReviewsList'); if(e)e.innerHTML='<p class="empty-note">Couldn’t load reviews right now.</p>'; return; }
+      _curReviews=res.d;
+      renderCurReviewsList();
+    })
+    .catch(function(){ _curReviewsLoading=false; var e=byId('curReviewsList'); if(e)e.innerHTML='<p class="empty-note">Couldn’t load reviews right now.</p>'; });
+}
+function curReviewRowHTML(r){
+  var pr=r.profiles||{};
+  var f=find(r.film_slug);
+  var filmTitle=f?f.title:r.film_slug;
+  var filmLink=f?'<a class="cr-film" onclick="go(\'film\',\''+esc(r.film_slug)+'\')">'+esc(filmTitle)+'</a>':'<span class="cr-film">'+esc(filmTitle)+'</span>';
+  var av=pr.avatar_url?'<div class="ic-av" style="background-image:url(\''+esc(pr.avatar_url)+'\')"></div>':'<div class="ic-av ic-av-none">'+esc((pr.name||'?').slice(0,1).toUpperCase())+'</div>';
+  var when=r.created_at?esc(String(r.created_at).slice(0,10)):'';
+  return '<div class="cr-row">'+av+
+    '<div class="cr-body">'+
+      '<div class="cr-head">'+filmLink+'<span class="cr-score">'+r.score+'</span></div>'+
+      '<div class="cr-byline">'+esc(pr.name||'Verified critic')+' &middot; '+esc(pr.critic_outlet||'The Kitchen')+' &middot; '+when+'</div>'+
+      (r.body?'<p class="cr-quote">'+esc(r.body)+'</p>':'<p class="cr-quote cr-empty">Score only — no written review.</p>')+
+    '</div></div>';
+}
+function renderCurReviewsList(){
+  var el=byId('curReviewsList'), cEl=byId('curReviewsCount'); if(!el)return;
+  if(!_curReviews){ el.innerHTML='<p class="hero-lead">Loading…</p>'; return; }
+  var q=(byId('curReviewsSearch')&&byId('curReviewsSearch').value||'').toLowerCase().trim();
+  var list=_curReviews.filter(function(r){
+    if(!q)return true;
+    var pr=r.profiles||{}; var f=find(r.film_slug);
+    return (pr.name||'').toLowerCase().indexOf(q)>-1
+      || (pr.critic_outlet||'').toLowerCase().indexOf(q)>-1
+      || (f?f.title:r.film_slug||'').toLowerCase().indexOf(q)>-1
+      || (r.body||'').toLowerCase().indexOf(q)>-1;
+  });
+  if(cEl)cEl.textContent=list.length+' review'+(list.length===1?'':'s')+(_curReviews.length!==list.length?' of '+_curReviews.length:'');
+  el.innerHTML=list.length?list.map(curReviewRowHTML).join(''):'<p class="empty-note">No reviews match.</p>';
 }
 /* ============ HOME RENDER ============ */
 var HOME_SORT='new';   // curated | popular | new — default 'new' so the top rows open on the newest titles
