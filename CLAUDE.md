@@ -1251,3 +1251,36 @@ back. The hat is still turned around the wrong way." Three fixes:
   fixed order. Verified in headless Chromium: capsule tees are the last 6
   cards, cap leads with its front image, capsule-tee modals show a working
   "Show back" toggle, zero console errors.
+
+## Kids page redesign — "Family movie night, sorted." (2026-07-13)
+Owner: "we need to make the kids page more dope. Its weak and boring." The
+page was just Browse with the word "Kids." on it — same eyebrow/headline/
+scope-toggle/type-chips/grid as every other browse view, zero identity.
+Rebuilt `renderKids()` (index.html) into a warm, playful zone that still
+holds the brand + "nothing fake" rules:
+- **Bright hero band** (`.kids-hero`, `kidsHeroHTML`) — a warm gold→orange→
+  paprika gradient (a deliberately bright "cookout/movie-night" zone against
+  the site's usual dark surfaces), big display headline "Family movie night,
+  sorted.", floating emoji accents (🍿🎬⭐🧸🎈, CSS `khFloat`, reduced-motion
+  safe), and the **age-approval system shown off as a feature** — Kid/Teen/
+  Young Adult legend pills, tying into the existing real-TMDB `ageTier()`
+  badges (honest: "every title opens with its real age rating").
+- **Weekly family pick** (`.kids-feat`, `kidsFeatured`/`kidsFeaturedHTML`) —
+  one standout title spotlighted big with cinematic backdrop art, HOME_SEED-
+  seeded so it holds steady all week then rotates (same pattern as the home
+  shelves). **Biased to Animation**, because the `isKidFriendly` predicate
+  (tags include Family OR Animation) catches grown-folks dramas — the first
+  pick landed on "Tyler Perry's The Oval" (a TV-14 soap), so `kidsFeatured`
+  now prefers Animation titles and only falls back to the broader Family pool
+  if none exist. Backdrop resolves live via `hydrateFilmMedia` then repaints
+  just the featured block (guarded on `parseHash().view==='kids'`).
+- **Friendlier filters** — type chips got emoji + bigger pills (✨ Everything
+  / 🎬 Movies / 📺 Series), and the grid sits under a real section header
+  ("The whole family shelf" + live count) instead of a bare count line. Scope
+  toggle (Our Picks / All Picks) unchanged.
+- Verified in headless Chromium desktop + mobile (390px): hero/legend/
+  featured/chips/46 grid cards all render, featured pick is now a real
+  animated film (Mufasa: The Lion King), zero console errors, no Kids-content
+  horizontal overflow (the one overflow at 390px is the pre-existing header
+  auth-button cluster, site-wide, not introduced here). Reduced-motion
+  disables the floating emoji.

@@ -428,6 +428,41 @@
      Editorial, not e-commerce-default: taller portrait photography, a
      front→back crossfade on hover using real Printify mockups (never a
      mismatched color), generous type, minimal chrome. */
+  /* ============ KIDS page — bright, playful zone ============ */
+  .kids-hero{position:relative;overflow:hidden;border-radius:var(--r-lg);margin:6px 0 20px;padding:44px 46px;
+    background:linear-gradient(135deg,#F4B733 0%,#E8722C 47%,#C33C2A 100%);box-shadow:0 26px 60px rgba(180,80,20,.26)}
+  .kh-emojis{position:absolute;inset:0;pointer-events:none}
+  .kh-emojis span{position:absolute;font-size:36px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.18))}
+  .kh-emojis span:nth-child(1){top:13%;right:8%;font-size:54px;animation:khFloat 5s ease-in-out infinite}
+  .kh-emojis span:nth-child(2){top:54%;right:15%;animation:khFloat 6s ease-in-out infinite .5s}
+  .kh-emojis span:nth-child(3){top:24%;right:29%;font-size:30px;animation:khFloat 4.6s ease-in-out infinite 1s}
+  .kh-emojis span:nth-child(4){bottom:15%;right:6%;font-size:34px;animation:khFloat 5.4s ease-in-out infinite .3s}
+  .kh-emojis span:nth-child(5){top:11%;right:39%;font-size:26px;animation:khFloat 5s ease-in-out infinite .8s}
+  @keyframes khFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
+  .kh-in{position:relative;z-index:1;max-width:60%}
+  .kh-eyebrow{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.9)}
+  .kh-h{font-family:var(--display);font-weight:800;font-size:clamp(32px,5.2vw,56px);line-height:.98;margin-top:10px;color:#fff;text-shadow:0 2px 12px rgba(120,40,10,.35)}
+  .kh-lead{color:rgba(255,255,255,.95);font-size:15px;line-height:1.55;margin-top:14px;max-width:52ch}
+  .kh-legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+  .kh-pill{font-family:var(--mono);font-weight:700;font-size:12.5px;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.94);color:#7a3a12;box-shadow:0 3px 8px rgba(0,0,0,.14)}
+  .kids-feat{display:block;width:100%;text-align:left;border:0;cursor:pointer;border-radius:var(--r-lg);overflow:hidden;
+    min-height:236px;background-color:var(--ink);background-size:cover;background-position:center 22%;
+    box-shadow:0 24px 60px rgba(0,0,0,.42);position:relative;transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+  .kids-feat:hover{transform:translateY(-3px);box-shadow:0 30px 70px rgba(0,0,0,.5)}
+  .kf-in{padding:34px 36px;max-width:62%}
+  .kf-tag{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#F4C542}
+  .kf-ttl{font-family:var(--display);font-weight:800;font-size:clamp(26px,3.6vw,40px);color:#fff;margin-top:8px;line-height:1.02}
+  .kf-meta{color:rgba(246,236,215,.72);font-size:13px;margin-top:7px;font-family:var(--mono)}
+  .kf-syn{color:rgba(246,236,215,.9);font-size:14px;line-height:1.5;margin-top:12px}
+  .kf-cta{display:inline-block;margin-top:16px;font-weight:700;color:#F4C542}
+  .kids-filters{margin-top:18px;gap:10px;flex-wrap:wrap}
+  .kids-chip{font-size:14px;padding:9px 16px;border-radius:999px;font-weight:700}
+  .kids-shelfhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:24px 0 12px}
+  .kids-shelfhead h2{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:800}
+  .kids-shelfhead span{font-family:var(--mono);font-size:13px;color:var(--ink-3);white-space:nowrap}
+  @media(prefers-reduced-motion:reduce){ .kh-emojis span{animation:none} }
+  @media(max-width:720px){ .kh-in{max-width:100%} .kh-emojis span{opacity:.35} .kf-in{max-width:100%} }
+  @media(max-width:640px){ .kids-hero{padding:30px 24px} .kids-feat{min-height:200px} .kf-in{padding:24px 22px} }
   .shop-lookbook-head .eyebrow{color:var(--gold-ink)}
   /* Shop hero — a live spotlight banner using a real featured product image */
   .shop-hero{position:relative;overflow:hidden;border-radius:var(--r-lg);margin:6px 0 30px;
@@ -7461,24 +7496,75 @@ function renderCouch(){
 var KIDS_TYPE='all';
 function setKidsType(t){ KIDS_TYPE=t; renderKids(); }
 function isKidFriendly(f){ return f.tags&&(f.tags.indexOf('Family')>=0||f.tags.indexOf('Animation')>=0); }
+function kidsHeroHTML(){
+  return '<section class="kids-hero" aria-label="Kids">'+
+    '<div class="kh-emojis" aria-hidden="true"><span>🍿</span><span>🎬</span><span>⭐</span><span>🧸</span><span>🎈</span></div>'+
+    '<div class="kh-in">'+
+      '<span class="kh-eyebrow">Family &amp; Animation</span>'+
+      '<h1 class="kh-h">Family movie night,<br>sorted.</h1>'+
+      '<p class="kh-lead">Real family films and animation from the culture — nothing sanitized, nothing faked. Every title opens with its real age rating, so you know exactly who it’s for.</p>'+
+      '<div class="kh-legend">'+
+        '<span class="kh-pill kh-kid">🧒 Kid Approved</span>'+
+        '<span class="kh-pill kh-teen">🧑 Teen Approved</span>'+
+        '<span class="kh-pill kh-ya">🔞 Young Adult</span>'+
+      '</div>'+
+    '</div>'+
+  '</section>';
+}
+// One standout family title, spotlighted big with cinematic art. Weekly-seeded
+// (HOME_SEED) so it holds steady all week for everyone, then rotates — same
+// approach the home shelves use. Real catalog title only, no fabrication.
+function kidsFeatured(all){
+  var withArt=all.filter(function(f){ return servePoster(f)||f.backdrop; });
+  if(!withArt.length)withArt=all;
+  // Prefer Animation for the big spotlight — it's far more reliably family-safe
+  // than a loosely "Family"-tagged live-action title (which can be a grown-folks
+  // drama). Only fall back to the broader pool if there's no animation to show.
+  var anim=withArt.filter(function(f){ return f.tags&&f.tags.indexOf('Animation')>=0; });
+  var pool=anim.length?anim:withArt;
+  return seededShuffle(pool,(HOME_SEED+7)>>>0)[0]||null;
+}
+function kidsFeaturedHTML(f){
+  var bg=f.backdrop||servePoster(f)||'';
+  var yr=f.year?(' · '+f.year):'';
+  return '<button class="kids-feat" onclick="go(\'film\',\''+f.id+'\')" aria-label="'+esc(f.title)+'" style="'+
+    (bg?'background-image:linear-gradient(95deg,rgba(18,10,3,.94) 0%,rgba(18,10,3,.55) 55%,rgba(18,10,3,.2) 100%),url(\''+esc(bg)+'\')':'')+'">'+
+    '<div class="kf-in">'+
+      '<span class="kf-tag">⭐ This week’s family pick</span>'+
+      '<h2 class="kf-ttl">'+esc(f.title)+'</h2>'+
+      '<div class="kf-meta">'+esc((f.genre||'Family')+yr)+'</div>'+
+      (f.syn?'<p class="kf-syn">'+esc(f.syn.slice(0,150))+(f.syn.length>150?'…':'')+'</p>':'')+
+      '<span class="kf-cta">Watch with the family →</span>'+
+    '</div>'+
+  '</button>';
+}
 function renderKids(){
   var el=byId('kidsContent'); if(!el)return;
   var all=FILMS.filter(function(f){ return !f.noart && scopeMatch(f) && isKidFriendly(f); });
-  var types=[['All','all'],['Movies','movie'],['Series','tv']];
+  var types=[['✨ Everything','all'],['🎬 Movies','movie'],['📺 Series','tv']];
   var list=all.filter(function(f){ return KIDS_TYPE==='all' || f.type===KIDS_TYPE; })
     .sort(function(a,b){ return b.year-a.year || a.title.localeCompare(b.title); });
-  el.innerHTML='<div class="browse-head"><span class="eyebrow">Family &amp; Animation</span>'+
-    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Kids.</h1>'+
-    '<p class="hero-lead" style="margin-top:8px;max-width:62ch">Family films and animation from the catalog — real scores, nothing sanitized or faked, just filtered to what’s made for the whole room. Open any title for its real Kid/Teen/Young Adult rating.</p></div>'+
-    '<div id="kidsScope" class="scope-wrap" style="margin-top:14px">'+scopeToggleHTML('Our Picks','All Picks','Black-led family films & animation.','Every family film & animation title in the catalog.')+'</div>'+
-    '<div class="filters" role="group" aria-label="Filter by type">'+
-      '<span class="flabel">Type</span>'+types.map(function(t){
-        return '<button class="chip'+(KIDS_TYPE===t[1]?' on':'')+'" onclick="setKidsType(\''+t[1]+'\')">'+t[0]+'</button>';
+  var feat=kidsFeatured(all);
+  var shelfName=(KIDS_TYPE==='tv')?'Family series':(KIDS_TYPE==='movie')?'Family movies':'The whole family shelf';
+  el.innerHTML=
+    kidsHeroHTML()+
+    (feat?'<div id="kidsFeat">'+kidsFeaturedHTML(feat)+'</div>':'')+
+    '<div id="kidsScope" class="scope-wrap" style="margin-top:22px">'+scopeToggleHTML('Our Picks','All Picks','Black-led family films & animation.','Every family film & animation title in the catalog.')+'</div>'+
+    '<div class="filters kids-filters" role="group" aria-label="Filter by type">'+
+      types.map(function(t){
+        return '<button class="chip kids-chip'+(KIDS_TYPE===t[1]?' on':'')+'" onclick="setKidsType(\''+t[1]+'\')">'+t[0]+'</button>';
       }).join('')+
     '</div>'+
-    '<p class="browse-count" style="margin:14px 0">'+fmt(list.length)+' title'+(list.length===1?'':'s')+'</p>'+
+    '<div class="kids-shelfhead"><h2>'+shelfName+'</h2><span>'+fmt(list.length)+' title'+(list.length===1?'':'s')+'</span></div>'+
     (list.length?'<div class="grid-cards">'+list.map(cardHTML).join('')+'</div>'
       :'<div class="empty"><h3>Nothing here yet.</h3><p>Try a different type.</p></div>');
+  // resolve the featured pick's backdrop live, then repaint just that block
+  if(feat && typeof hydrateFilmMedia==='function'){
+    hydrateFilmMedia(feat).then(function(changed){
+      if(!changed)return; var fe=byId('kidsFeat');
+      if(fe && parseHash().view==='kids') fe.innerHTML=kidsFeaturedHTML(feat);
+    });
+  }
 }
 /* ============ SHOP (Printify) ============
    Real products pulled live from api/printify.js (Printify's Shop Products
