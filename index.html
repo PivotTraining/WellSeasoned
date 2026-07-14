@@ -753,9 +753,10 @@
     background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
   .wcov-h{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.6vw,50px);line-height:1.03;margin-top:12px;color:#F4ECD8}
   .wcov-subject{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#F4C542;font-weight:700;margin-top:8px}
+  .wcov-copy{flex:1 1 46%}
   .wcov-lead{color:#D8C9A8;font-size:15.5px;line-height:1.6;margin-top:14px;max-width:52ch}
   .wcov-cta{display:inline-block;margin-top:22px}
-  .wcov-imgwrap{position:relative;z-index:1;flex:0 0 auto;width:clamp(220px,28vw,320px);aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 26px 60px rgba(0,0,0,.5);animation:emmyGlow 5s ease-in-out infinite}
+  .wcov-imgwrap{position:relative;z-index:1;flex:0 0 auto;width:clamp(250px,36vw,420px);aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 26px 60px rgba(0,0,0,.5);animation:emmyGlow 5s ease-in-out infinite}
   .wcov-imgwrap img{display:block;width:100%;height:100%;object-fit:cover}
   .wcov-imgwrap-none{display:grid;place-items:center;background:linear-gradient(135deg,#3a1e0a,#120a03)}
   .wcov-imgwrap-none span{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
@@ -776,6 +777,22 @@
   .wc-subject{font-weight:600;color:#D8C9A8}
   .wc-dek{font-size:13px;color:#D8C9A8;line-height:1.4}
   .wc-meta{font-family:var(--mono);font-size:11px;color:#B8A480;margin-top:2px}
+  /* Magazine index rows (the #/word sections) — a contents-page river, not a
+     grid of boxes: slim cover thumbnail + headline/dek, hairline dividers. */
+  .word-list{display:flex;flex-direction:column;margin-top:6px}
+  .word-row{position:relative;display:flex;gap:24px;align-items:center;padding:22px 6px;border-top:1px solid var(--line);cursor:pointer;color:inherit;transition:padding-left .18s ease,background .18s ease}
+  .word-row:last-child{border-bottom:1px solid var(--line)}
+  .word-row:hover{padding-left:14px;background:linear-gradient(90deg,rgba(244,197,66,.05),transparent 60%)}
+  .wr-thumb{flex:0 0 auto;width:118px;aspect-ratio:3/4;border-radius:11px;overflow:hidden;background-size:cover;background-position:center;background-color:var(--inset);box-shadow:0 10px 24px rgba(0,0,0,.30)}
+  .wr-thumb-none{background:linear-gradient(135deg,#3a1e0a,#120a03)}
+  .wr-text{flex:1;min-width:0}
+  .wr-kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
+  .wr-ttl{font-family:var(--display);font-weight:800;font-size:clamp(20px,2.4vw,28px);line-height:1.12;margin:5px 0 7px;color:var(--ink)}
+  .wr-subject{font-weight:600;color:var(--ink-2)}
+  .wr-dek{font-size:15px;color:var(--ink-2);line-height:1.5;max-width:62ch}
+  .wr-meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:9px}
+  .wr-edit{position:absolute;top:16px;right:4px}
+  @media(max-width:640px){ .word-row{gap:15px;padding:16px 2px} .wr-thumb{width:82px} .wr-dek{display:none} .word-row:hover{padding-left:6px} }
   .word-section{margin-top:8px} .word-section+.word-section{margin-top:34px}
   .word-section-h{font-family:var(--display);font-size:clamp(19px,2.2vw,24px);font-weight:800;margin:0 0 4px}
   .read-hero{height:340px;border-radius:var(--r-xl);background-size:cover;background-position:center;position:relative;margin-top:6px;box-shadow:var(--shadow-3)}
@@ -8441,9 +8458,23 @@ function articleCard(a){
     (a.dek?'<div class="wc-dek">'+esc(a.dek)+'</div>':'')+
     '<div class="wc-meta">'+(a.author?esc(a.author)+' · ':'')+artDate(a.created_at)+'</div></div></a>';
 }
+/* Magazine index row — the #/word sections read as a contents-page river
+   (thumbnail + headline/dek, hairline dividers) instead of a grid of poster
+   boxes, so the page doesn't feel blocky. Title sits beside the art here, so
+   there's no overlaid-title clash to worry about. */
+function articleRow(a){
+  var img=a.hero_image?'<div class="wr-thumb" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"></div>':'<div class="wr-thumb wr-thumb-none"></div>';
+  var edit=isOwner()?'<button class="wc-edit wr-edit" title="Edit this piece" onclick="event.stopPropagation();event.preventDefault();openArticleEditor(\''+esc(a.slug)+'\')">✎</button>':'';
+  var kindTag='<span class="wr-kind">'+((a.kind==='interview')?(a.video_url?'🎬 Video interview':'🎤 Interview'):(a.kind==='editorial'?'✍️ Editorial':'Feature'))+'</span>';
+  return '<a class="word-row" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+img+
+    '<div class="wr-text">'+kindTag+
+    '<div class="wr-ttl">'+esc(a.title)+(a.subject?' <span class="wr-subject">— '+esc(a.subject)+'</span>':'')+'</div>'+
+    (a.dek?'<div class="wr-dek">'+esc(a.dek)+'</div>':'')+
+    '<div class="wr-meta">'+(a.author?esc(a.author)+' · ':'')+artDate(a.created_at)+'</div></div>'+edit+'</a>';
+}
 /* Cover story — the newest piece gets a big dark-stage hero (same language
    as the shop/Emmy spotlight units), everything else runs in the sectioned
-   grid below it. */
+   list below it. */
 function wordCoverHTML(a){
   var kindLabel=(a.kind==='interview')?(a.video_url?'🎬 Video interview':'🎤 Interview'):(a.kind==='editorial'?'✍️ Editorial':'Cover story');
   var img=a.hero_image?'<div class="wcov-imgwrap"><img src="'+esc(a.hero_image)+'" alt=""></div>':'<div class="wcov-imgwrap wcov-imgwrap-none"><span>Well Seasoned</span></div>';
@@ -8471,11 +8502,11 @@ function renderWord(){
     var editorials=rest.filter(function(a){return a.kind==='editorial';});
     var articles=rest.filter(function(a){return a.kind!=='interview'&&a.kind!=='editorial';});
     var out='';
-    if(interviews.length)out+='<div class="word-section"><h2 class="word-section-h">Interviews</h2><div class="word-grid">'+interviews.map(articleCard).join('')+'</div></div>';
-    if(editorials.length)out+='<div class="word-section"><h2 class="word-section-h">Editorials</h2><div class="word-grid">'+editorials.map(articleCard).join('')+'</div></div>';
+    if(interviews.length)out+='<div class="word-section"><h2 class="word-section-h">Interviews</h2><div class="word-list">'+interviews.map(articleRow).join('')+'</div></div>';
+    if(editorials.length)out+='<div class="word-section"><h2 class="word-section-h">Editorials</h2><div class="word-list">'+editorials.map(articleRow).join('')+'</div></div>';
     if(articles.length){
       var artHead=(interviews.length||editorials.length)?'<h2 class="word-section-h">Features &amp; Reviews</h2>':'';
-      out+='<div class="word-section">'+artHead+'<div class="word-grid">'+articles.map(articleCard).join('')+'</div></div>';
+      out+='<div class="word-section">'+artHead+'<div class="word-list">'+articles.map(articleRow).join('')+'</div></div>';
     }
     g.innerHTML=out;
   });

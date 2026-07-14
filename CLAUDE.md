@@ -1499,3 +1499,23 @@ stands out."
   Still owner-run: paste `backend/seed_word_articles.sql` into the Supabase
   SQL editor once to publish (this env can't auth to `publish_article`). The
   art deploys with the push, so the hero URLs resolve by the time it's run.
+
+## The Word: de-blocked into a contents-page list + wider cover (2026-07-14)
+Owner: "I like the Colman banner but it should be wider? IDK. I hate the
+other boxes though. It makes the page feel blocky."
+- **Sections are no longer a poster grid.** The old `.word-grid`/`.word-card`
+  (a wall of tall bleed-image boxes) read as blocky. The #/word sections now
+  render as a magazine contents-page river (`articleRow`/`.word-list`/
+  `.word-row`/`.wr-*`): a slim 3:4 cover thumbnail + kind eyebrow + headline +
+  dek + byline, separated by hairline dividers, with a subtle slide-right
+  hover (no box-lift). The house photo-treatment art still shows, now as the
+  thumbnail. `articleCard`/`.word-grid` are UNCHANGED and still used by the
+  home "Reads from the culture" 3-up teaser — only the magazine page switched
+  to rows.
+- **Cover widened** per the (tentative) note: `.wcov-imgwrap` grew from
+  `clamp(220px,28vw,320px)` to `clamp(250px,36vw,420px)` and `.wcov-copy` set
+  to `flex:1 1 46%`, so the cover-story image reads bigger/more banner-like.
+  The side-by-side copy+portrait layout is otherwise unchanged (owner liked
+  it). Verified desktop + mobile (rows stack, dek hidden < 640px, cover image
+  leads on mobile); the only horizontal overflow is the pre-existing
+  site-wide header auth-cluster, not introduced here.
