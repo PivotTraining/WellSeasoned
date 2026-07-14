@@ -756,9 +756,11 @@
   .wc-meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:auto;padding-top:4px}
   .word-section{margin-top:8px} .word-section+.word-section{margin-top:34px}
   .word-section-h{font-family:var(--display);font-size:clamp(19px,2.2vw,24px);font-weight:800;margin:0 0 4px}
-  .read-subject{font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);font-weight:700;margin-top:2px}
   .read-hero{height:340px;border-radius:var(--r-xl);background-size:cover;background-position:center;position:relative;margin-top:6px;box-shadow:var(--shadow-3)}
-  .read-hero-scrim{position:absolute;inset:0;border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(12,7,2,0) 40%,rgba(12,7,2,.5))}
+  .read-hero-plain{height:auto;background:linear-gradient(135deg,#3a1e0a,#120a03);padding:20px 24px;box-shadow:none}
+  .read-hero-scrim{position:absolute;inset:0;border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(12,7,2,0) 40%,rgba(12,7,2,.7))}
+  .read-hero-subject{position:absolute;left:24px;bottom:18px;z-index:1;font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+  .read-hero-plain .read-hero-subject{position:static;text-shadow:none}
   .read-body{max-width:720px;margin:0 auto;padding:22px 0 60px}
   .read-ttl{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.5px;line-height:1.05;margin:6px 0 10px}
   .read-dek{font-size:19px;color:var(--ink-2);line-height:1.4;margin-bottom:12px}
@@ -8476,14 +8478,14 @@ function renderRead(slug){
   var el=byId('readContent');
   function paint(a){
     var f=a.film_slug?find(a.film_slug):null;
-    var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div></div>':'';
+    var heroSubject=a.subject?'<div class="read-hero-subject">With '+esc(a.subject)+'</div>':'';
+    var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div>'+heroSubject+'</div>':(a.subject?'<div class="read-hero read-hero-plain">'+heroSubject+'</div>':'');
     var vid=ytId(a.video_url);
     var video=vid?'<div class="mf-trailer" style="margin:18px 0"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(vid)+'?rel=0&amp;modestbranding=1" title="'+esc(a.title)+'" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>':'';
     var kindLabel=(a.kind&&ARTICLE_KIND_LABEL[a.kind])||'The Word';
     el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
       hero+
       '<article class="read-body"><span class="eyebrow">'+esc(kindLabel)+'</span><h1 class="read-ttl">'+esc(a.title)+'</h1>'+
-      (a.subject?'<div class="read-subject">With '+esc(a.subject)+'</div>':'')+
       (a.dek?'<p class="read-dek">'+esc(a.dek)+'</p>':'')+
       '<div class="read-meta">'+(a.author?'By '+esc(a.author)+' · ':'')+artDate(a.created_at)+
         ' · <a onclick="shareRead(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Share ↗</a>'+
