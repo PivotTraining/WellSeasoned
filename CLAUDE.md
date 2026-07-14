@@ -1369,3 +1369,60 @@ Verified in headless Chromium: mocked seat action fires
 `admin_set_application_status` with `p_status:'seated'`; a fresh page load
 against the now-updated mock row renders the `SEATED` badge and "Remove
 critic" button correctly — the exact persistence that was missing before.
+
+## The Word → magazine expansion: interviews + editorials (2026-07-14)
+Owner: "Also I want a feature magazine style page where we conduct
+interview, write features and editorials," then confirmed video is a real
+intended format: "we will also house video interviews here hopefully."
+Rather than build a parallel content system, expanded The Word's existing
+`articles` table/RPC/editor — same owner-only publish flow, same markdown
+body, same public read policy — since interviews/editorials are editorial
+content like articles, just video/quote-driven instead of prose (matches
+prior guidance already in this file). "Hopefully" signaled no real
+interview is lined up yet, so this is infrastructure only — no placeholder
+interview content or fake video was added, honoring "nothing fake."
+
+- **Schema** (`backend/schema.sql`) — additive/nullable-or-defaulted columns
+  on `articles`: `kind text not null default 'article' check (kind in
+  ('article','interview','editorial'))`, `video_url text`, `subject text`
+  (who's being interviewed — distinct from `author`, who wrote/conducted the
+  piece). `publish_article` now accepts/persists all three (defaults `kind`
+  to `'article'` for any caller that omits it, so nothing existing breaks).
+  **NOT YET APPLIED LIVE** — Supabase MCP is disconnected this session, so
+  the owner needs to paste the migration block (marked in schema.sql) into
+  the Supabase SQL editor, same as the still-pending `admin_dashboard_stats`
+  RPC from a prior entry.
+- **Graceful degradation until the migration runs**: `loadArticles`/
+  `_articleFetch` (index.html) try the full column list first; if PostgREST
+  400s on the unknown columns, they transparently retry with the original
+  column list and default every row's `kind` to `'article'` client-side —
+  so existing published pieces never disappear from The Word just because
+  the SQL hasn't been run yet. The write path degrades the same way: an
+  unmigrated `publish_article` RPC simply ignores the extra jsonb keys.
+- **`renderWord()`** now sections the grid — Interviews / Editorials /
+  Features & Reviews shelves (only rendering a section that actually has
+  pieces; falls back to one flat shelf, unlabeled, when nothing's
+  categorized yet, so an empty magazine doesn't show empty section
+  headers). `articleCard()` adds a kind badge (🎤 Interview / 🎬 Video
+  interview when `video_url` is set / ✍️ Editorial) and appends the
+  `subject` name to the title for interview/editorial pieces.
+- **`renderRead(slug)`** embeds a real video player (reusing the exact
+  `.mf-trailer`/YouTube-nocookie embed pattern already built for the home
+  "Why Did I Get Married Again?" feature) when `video_url` resolves to a
+  real YouTube id via the new `ytId()` helper (accepts a full watch/share/
+  embed URL or a bare id; returns null — no fake/broken embed — for
+  anything else). Shows a "With <subject>" line under the headline for
+  interview/editorial pieces that have one.
+- **`openArticleEditor`/`paintArticleEditor`/`doPublishArticle`** gained a
+  Kind selector (Article/Review, Interview, Editorial); picking Interview or
+  Editorial reveals Subject + Video URL fields (`arKindChanged()`, swapped
+  in via a small `#arKindFields` sub-render, not a full modal repaint). The
+  admin passphrase hint line notes when the magazine columns aren't live yet.
+- Verified in headless Chromium (mocked `articles` rows across all three
+  kinds): sectioned grid renders correctly scoped to the active `#/word`
+  view (the pre-existing Home-page "Reads from the culture" shelf reuses the
+  same `.word-card` markup and stays mounted-but-inactive elsewhere in the
+  SPA's DOM — not a bug, just something to scope test selectors around);
+  opening an interview piece renders the real YouTube embed + "With <subject>"
+  line + 🎤 Interview eyebrow; the owner editor's kind selector correctly
+  reveals/hides the subject/video fields; zero console errors.

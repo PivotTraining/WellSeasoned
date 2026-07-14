@@ -544,6 +544,22 @@ create table if not exists public.articles (
   updated_at timestamptz not null default now()
 );
 
+-- 2026-07-14: magazine expansion (interviews/editorials alongside articles).
+-- Additive/nullable-or-defaulted only — safe to run on the live table without
+-- touching any existing row. NOT YET APPLIED LIVE (Supabase MCP disconnected
+-- this session) — owner needs to paste this block into the Supabase SQL
+-- editor. Until then the client degrades gracefully: publish_article still
+-- writes kind='article' by default and renderRead/renderWord treat a missing
+-- kind the same as 'article'.
+alter table public.articles add column if not exists kind text not null default 'article';
+alter table public.articles add column if not exists video_url text;
+alter table public.articles add column if not exists subject text; -- who's being interviewed (distinct from `author`, who wrote/conducted it)
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'articles_kind_check') then
+    alter table public.articles add constraint articles_kind_check check (kind in ('article','interview','editorial'));
+  end if;
+end $$;
+
 alter table public.articles enable row level security;
 drop policy if exists articles_read on public.articles;
 create policy articles_read on public.articles for select using (published = true);
@@ -558,14 +574,17 @@ begin
   s := coalesce(nullif(p_article->>'slug',''), lower(regexp_replace(coalesce(p_article->>'title',''),'[^a-zA-Z0-9]+','-','g')));
   s := trim(both '-' from s);
   if s = '' then raise exception 'missing slug/title'; end if;
-  insert into public.articles as a (slug,title,dek,body,author,film_slug,hero_image,hero_pos,published,updated_at)
+  insert into public.articles as a (slug,title,dek,body,author,film_slug,hero_image,hero_pos,kind,video_url,subject,published,updated_at)
   values (s, p_article->>'title', nullif(p_article->>'dek',''), coalesce(p_article->>'body',''),
           nullif(p_article->>'author',''), nullif(p_article->>'film_slug',''), nullif(p_article->>'hero_image',''),
           nullif(p_article->>'hero_pos',''),
+          coalesce(nullif(p_article->>'kind',''), 'article'),
+          nullif(p_article->>'video_url',''), nullif(p_article->>'subject',''),
           coalesce((p_article->>'published')::boolean, true), now())
   on conflict (slug) do update set
     title=excluded.title, dek=excluded.dek, body=excluded.body, author=excluded.author,
     film_slug=excluded.film_slug, hero_image=excluded.hero_image, hero_pos=excluded.hero_pos,
+    kind=excluded.kind, video_url=excluded.video_url, subject=excluded.subject,
     published=excluded.published, updated_at=now();
   return s;
 end $$;

@@ -749,9 +749,14 @@
   .wc-hero-none{display:grid;place-items:center;background:linear-gradient(135deg,#3a1e0a,#120a03)}
   .wc-hero-none span{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
   .wc-body{padding:15px 16px 17px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .wc-kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
   .wc-ttl{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.15}
+  .wc-subject{font-weight:600;color:var(--ink-2)}
   .wc-dek{font-size:13.5px;color:var(--ink-2);line-height:1.4}
   .wc-meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:auto;padding-top:4px}
+  .word-section{margin-top:8px} .word-section+.word-section{margin-top:34px}
+  .word-section-h{font-family:var(--display);font-size:clamp(19px,2.2vw,24px);font-weight:800;margin:0 0 4px}
+  .read-subject{font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);font-weight:700;margin-top:2px}
   .read-hero{height:340px;border-radius:var(--r-xl);background-size:cover;background-position:center;position:relative;margin-top:6px;box-shadow:var(--shadow-3)}
   .read-hero-scrim{position:absolute;inset:0;border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(12,7,2,0) 40%,rgba(12,7,2,.5))}
   .read-body{max-width:720px;margin:0 auto;padding:22px 0 60px}
@@ -8364,15 +8369,24 @@ function paintArtist(d){
   window.scrollTo({top:0,behavior:'auto'});
 }
 /* ============ THE WORD — editorial articles/reviews ============ */
-var ARTICLES=null, _articleBySlug={};
+var ARTICLES=null, _articleBySlug={}, _articlesMagazineCols=true;
+/* The kind/video_url/subject columns (magazine expansion) may not exist yet
+   on the live DB until the owner runs the migration in backend/schema.sql —
+   PostgREST 400s on an unknown column. Try the full select first; if that
+   fails, fall back to the original column list so existing pieces never
+   disappear from The Word just because the migration hasn't landed. */
 function loadArticles(cb){
   if(!sbConfigured()){ if(cb)cb([]); return; }
-  fetch(SUPABASE_URL+'/rest/v1/articles?published=eq.true&select=slug,title,dek,author,film_slug,hero_image,hero_pos,created_at&order=created_at.desc&limit=50',{headers:sbHeaders()})
-    .then(function(r){return r.json();}).then(function(rows){
-      ARTICLES=Array.isArray(rows)?rows:[];
-      ARTICLES.forEach(function(a){ if(!_articleBySlug[a.slug]) _articleBySlug[a.slug]=a; });
-      if(cb)cb(ARTICLES);
-    }).catch(function(){ ARTICLES=ARTICLES||[]; if(cb)cb(ARTICLES); });
+  var full='slug,title,dek,author,film_slug,hero_image,hero_pos,kind,video_url,subject,created_at';
+  var basic='slug,title,dek,author,film_slug,hero_image,hero_pos,created_at';
+  function finish(rows){
+    ARTICLES=Array.isArray(rows)?rows:[];
+    ARTICLES.forEach(function(a){ if(!a.kind)a.kind='article'; if(!_articleBySlug[a.slug]) _articleBySlug[a.slug]=a; });
+    if(cb)cb(ARTICLES);
+  }
+  fetch(SUPABASE_URL+'/rest/v1/articles?published=eq.true&select='+full+'&order=created_at.desc&limit=50',{headers:sbHeaders()})
+    .then(function(r){ if(!r.ok){ _articlesMagazineCols=false; return fetch(SUPABASE_URL+'/rest/v1/articles?published=eq.true&select='+basic+'&order=created_at.desc&limit=50',{headers:sbHeaders()}).then(function(r2){return r2.json();}); } return r.json(); })
+    .then(finish).catch(function(){ ARTICLES=ARTICLES||[]; if(cb)cb(ARTICLES); });
 }
 function artDate(s){ if(!s)return ''; var p=String(s).slice(0,10).split('-'); if(p.length<3)return ''; var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
 /* The pretty, server-rendered form — /read/<slug> (api/read.js) — carries the
@@ -8390,17 +8404,33 @@ function shareRead(slug){
 function articleCard(a){
   var img=a.hero_image?'<div class="wc-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"></div>':'<div class="wc-hero wc-hero-none"><span>The Word</span></div>';
   var edit=isOwner()?'<button class="wc-edit" title="Edit this piece" onclick="event.stopPropagation();event.preventDefault();openArticleEditor(\''+esc(a.slug)+'\')">✎</button>':'';
+  var kindTag=(a.kind==='interview'||a.kind==='editorial')?'<span class="wc-kind">'+(a.kind==='interview'?(a.video_url?'🎬 Video interview':'🎤 Interview'):'✍️ Editorial')+'</span>':'';
   return '<a class="word-card" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+edit+img+
-    '<div class="wc-body"><div class="wc-ttl">'+esc(a.title)+'</div>'+
+    '<div class="wc-body">'+kindTag+'<div class="wc-ttl">'+esc(a.title)+(a.subject?' <span class="wc-subject">— '+esc(a.subject)+'</span>':'')+'</div>'+
     (a.dek?'<div class="wc-dek">'+esc(a.dek)+'</div>':'')+
     '<div class="wc-meta">'+(a.author?esc(a.author)+' · ':'')+artDate(a.created_at)+'</div></div></a>';
 }
+/* Magazine sections: interviews and editorials get their own shelf when at
+   least one exists; everything else (including 'article' and any piece from
+   an unmigrated DB, which loadArticles defaults to kind:'article') lands in
+   the general Word shelf. */
 function renderWord(){
   var el=byId('wordContent');
-  el.innerHTML='<div class="browse-head"><span class="eyebrow">The Word</span><h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Reads from the culture.</h1><p class="you-sub" style="max-width:640px">Reviews, essays, and lists — our take, in our voice.</p></div><div id="wordGrid" class="word-grid"><p class="empty-note">Loading…</p></div>';
+  el.innerHTML='<div class="browse-head"><span class="eyebrow">The Word</span><h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">The magazine.</h1><p class="you-sub" style="max-width:640px">Interviews, features, and editorials from the culture — our take, in our voice.</p></div><div id="wordGrid"><p class="empty-note">Loading…</p></div>';
   loadArticles(function(list){
     var g=byId('wordGrid'); if(!g)return;
-    g.innerHTML=list.length?list.map(articleCard).join(''):'<p class="empty-note">The first pieces are being written. Check back soon.</p>';
+    if(!list.length){ g.innerHTML='<p class="empty-note">The first pieces are being written. Check back soon.</p>'; return; }
+    var interviews=list.filter(function(a){return a.kind==='interview';});
+    var editorials=list.filter(function(a){return a.kind==='editorial';});
+    var articles=list.filter(function(a){return a.kind!=='interview'&&a.kind!=='editorial';});
+    var out='';
+    if(interviews.length)out+='<div class="word-section"><h2 class="word-section-h">Interviews</h2><div class="word-grid">'+interviews.map(articleCard).join('')+'</div></div>';
+    if(editorials.length)out+='<div class="word-section"><h2 class="word-section-h">Editorials</h2><div class="word-grid">'+editorials.map(articleCard).join('')+'</div></div>';
+    if(articles.length){
+      var artHead=(interviews.length||editorials.length)?'<h2 class="word-section-h">Features &amp; Reviews</h2>':'';
+      out+='<div class="word-section">'+artHead+'<div class="word-grid">'+articles.map(articleCard).join('')+'</div></div>';
+    }
+    g.innerHTML=out;
   });
 }
 /* small, safe markdown: escape first, then headings / bold / italic / links / lists / paragraphs */
@@ -8420,19 +8450,46 @@ function mdToHtml(src){
   });
   return out.join('');
 }
+/* Extracts a YouTube video id from a full watch/share/embed URL, or passes
+   through a bare id if that's what was pasted. Returns null (no fake embed)
+   for anything unrecognized. */
+function ytId(url){
+  if(!url)return null;
+  var s=String(url).replace(/^\s+|\s+$/g,'');
+  var m=s.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  if(m)return m[1];
+  if(/^[A-Za-z0-9_-]{9,15}$/.test(s))return s;
+  return null;
+}
+var ARTICLE_KIND_LABEL={interview:'🎤 Interview',editorial:'✍️ Editorial',article:'The Word'};
+/* Reads with the magazine columns; falls back to the pre-migration column
+   list (same guard as loadArticles) so an unmigrated DB still serves reads. */
+function _articleFetch(qs, cb){
+  var full='slug,title,dek,author,film_slug,hero_image,hero_pos,kind,video_url,subject,body,created_at';
+  var basic='slug,title,dek,author,film_slug,hero_image,hero_pos,body,created_at';
+  fetch(SUPABASE_URL+'/rest/v1/articles?'+qs+'&select='+full,{headers:sbHeaders()})
+    .then(function(r){ if(!r.ok){ _articlesMagazineCols=false; return fetch(SUPABASE_URL+'/rest/v1/articles?'+qs+'&select='+basic,{headers:sbHeaders()}).then(function(r2){return r2.json();}); } return r.json(); })
+    .then(function(rows){ if(Array.isArray(rows))rows.forEach(function(a){ if(!a.kind)a.kind='article'; }); cb(rows); })
+    .catch(function(){ cb(null); });
+}
 function renderRead(slug){
   var el=byId('readContent');
   function paint(a){
     var f=a.film_slug?find(a.film_slug):null;
     var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div></div>':'';
+    var vid=ytId(a.video_url);
+    var video=vid?'<div class="mf-trailer" style="margin:18px 0"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(vid)+'?rel=0&amp;modestbranding=1" title="'+esc(a.title)+'" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>':'';
+    var kindLabel=(a.kind&&ARTICLE_KIND_LABEL[a.kind])||'The Word';
     el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
       hero+
-      '<article class="read-body"><span class="eyebrow">The Word</span><h1 class="read-ttl">'+esc(a.title)+'</h1>'+
+      '<article class="read-body"><span class="eyebrow">'+esc(kindLabel)+'</span><h1 class="read-ttl">'+esc(a.title)+'</h1>'+
+      (a.subject?'<div class="read-subject">With '+esc(a.subject)+'</div>':'')+
       (a.dek?'<p class="read-dek">'+esc(a.dek)+'</p>':'')+
       '<div class="read-meta">'+(a.author?'By '+esc(a.author)+' · ':'')+artDate(a.created_at)+
         ' · <a onclick="shareRead(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Share ↗</a>'+
         (isOwner()?' · <a onclick="openArticleEditor(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">✎ Edit</a>':'')+'</div>'+
       (f?'<a class="read-filmlink" onclick="go(\'film\',\''+esc(f.id)+'\')">On the film: '+esc(f.title)+' →</a>':'')+
+      video+
       '<div class="read-copy">'+mdToHtml(a.body)+'</div></article>';
     setDocMeta(a.title+' — Well Seasoned', a.dek||'A read from Well Seasoned.', '#/read/'+encodeURIComponent(a.slug), a.hero_image||(f&&f.poster)||null);
     window.scrollTo({top:0,behavior:'auto'});
@@ -8441,11 +8498,10 @@ function renderRead(slug){
   if(cached && cached.body!=null){ paint(cached); return; }
   el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Loading…</p>';
   if(!sbConfigured()){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Reads need the backend connection.</p>'; return; }
-  fetch(SUPABASE_URL+'/rest/v1/articles?slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&select=slug,title,dek,author,film_slug,hero_image,hero_pos,body,created_at',{headers:sbHeaders()})
-    .then(function(r){return r.json();}).then(function(rows){
-      var a=rows&&rows[0]; if(!a){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">That piece isn’t here. It may have moved.</p>'; return; }
-      _articleBySlug[slug]=a; paint(a);
-    }).catch(function(){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t load this read right now.</p>'; });
+  _articleFetch('slug=eq.'+encodeURIComponent(slug)+'&published=eq.true', function(rows){
+    var a=rows&&rows[0]; if(!a){ el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">That piece isn’t here. It may have moved.</p>'; return; }
+    _articleBySlug[slug]=a; paint(a);
+  });
 }
 /* Admin: write/edit a Word (passphrase-gated publish_article RPC). Fetches
    the full row (with body) first if only the list-shape copy is cached —
@@ -8455,19 +8511,33 @@ function openArticleEditor(slug){
   if(!isOwner()){ toast('Owner only — sign in as '+OWNER_EMAIL+'.'); return; }
   if(slug && (!_articleBySlug[slug] || _articleBySlug[slug].body==null)){
     if(!sbConfigured()){ toast('Backend not connected.'); return; }
-    fetch(SUPABASE_URL+'/rest/v1/articles?slug=eq.'+encodeURIComponent(slug)+'&select=slug,title,dek,author,film_slug,hero_image,hero_pos,body,created_at',{headers:sbHeaders()})
-      .then(function(r){return r.json();}).then(function(rows){
-        var a=rows&&rows[0]; if(!a){ toast('Couldn’t load that piece.'); return; }
-        _articleBySlug[slug]=a; paintArticleEditor(slug);
-      }).catch(function(){ toast('Network error.'); });
+    _articleFetch('slug=eq.'+encodeURIComponent(slug), function(rows){
+      var a=rows&&rows[0]; if(!a){ toast('Couldn’t load that piece.'); return; }
+      _articleBySlug[slug]=a; paintArticleEditor(slug);
+    });
     return;
   }
   paintArticleEditor(slug);
 }
+function _arKindFieldsHTML(kind,subject,videoUrl){
+  if(kind==='article')return '';
+  return '<div class="field"><label for="arSubject">Who\'s the subject</label><input id="arSubject" value="'+esc(subject||'')+'" placeholder="e.g. the actor/director being interviewed"></div>'+
+    '<div class="field"><label for="arVideo">Video URL (optional)</label><input id="arVideo" value="'+esc(videoUrl||'')+'" placeholder="YouTube link — leave blank for a text-only piece"></div>';
+}
+function arKindChanged(){
+  var kind=(byId('arKind')||{}).value||'article';
+  var wrap=byId('arKindFields'); if(!wrap)return;
+  wrap.innerHTML=_arKindFieldsHTML(kind,(byId('arSubject')||{}).value,(byId('arVideo')||{}).value);
+}
 function paintArticleEditor(slug){
   var a=slug?(_articleBySlug[slug]||{}):{};
+  var kind=a.kind||'article';
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
-    '<h2>'+(slug?'Edit':'Write')+' a Word</h2><p class="m-sub">Publishes to The Word for everyone. Markdown: <b>## heading</b>, <b>**bold**</b>, <b>*italic*</b>, <b>- list</b>, <b>[text](url)</b>.</p>'+
+    '<h2>'+(slug?'Edit':'Write')+' for the magazine</h2><p class="m-sub">Publishes to The Word for everyone. Markdown: <b>## heading</b>, <b>**bold**</b>, <b>*italic*</b>, <b>- list</b>, <b>[text](url)</b>.</p>'+
+    '<div class="field"><label for="arKind">Kind</label><select id="arKind" onchange="arKindChanged()">'+
+      [['article','Article / Review'],['interview','Interview'],['editorial','Editorial']].map(function(k){ return '<option value="'+k[0]+'"'+(kind===k[0]?' selected':'')+'>'+k[1]+'</option>'; }).join('')+
+      '</select></div>'+
+    '<div id="arKindFields">'+_arKindFieldsHTML(kind,a.subject,a.video_url)+'</div>'+
     '<div class="field"><label for="arTitle">Title</label><input id="arTitle" value="'+esc(a.title||'')+'" placeholder="Headline"></div>'+
     '<div class="field"><label for="arDek">Dek (subtitle)</label><input id="arDek" value="'+esc(a.dek||'')+'" placeholder="One line under the headline"></div>'+
     '<div class="field"><label for="arAuthor">Author</label><input id="arAuthor" value="'+esc(a.author||'The Founder')+'" placeholder="Byline"></div>'+
@@ -8480,7 +8550,7 @@ function paintArticleEditor(slug){
     '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
       '<button class="btn btn-gold" onclick="doPublishArticle('+(slug?'\''+esc(slug)+'\'':'null')+')">Publish</button>'+
       (slug?'<button class="btn btn-ghost" onclick="doDeleteArticle(\''+esc(slug)+'\')">Delete</button>':'')+
-      '<span class="cbox-hint">Uses your admin passphrase.</span></div>');
+      '<span class="cbox-hint">Uses your admin passphrase.'+(!_articlesMagazineCols?' Kind/video/subject need the magazine migration run in Supabase first.':'')+'</span></div>');
   if(byId('modal'))byId('modal').classList.add('wide');
 }
 function _adminSecret(){
@@ -8495,7 +8565,9 @@ function doPublishArticle(slug){
   if(!body.replace(/^\s+|\s+$/g,'')){ toast('Write something first.'); return; }
   var art={ title:title, dek:(byId('arDek')||{}).value||'', author:(byId('arAuthor')||{}).value||'',
     film_slug:(byId('arFilm')||{}).value||'', hero_image:(byId('arHero')||{}).value||'',
-    hero_pos:(byId('arHeroPos')||{}).value||'center', body:body, published:true };
+    hero_pos:(byId('arHeroPos')||{}).value||'center', body:body, published:true,
+    kind:(byId('arKind')||{}).value||'article', subject:(byId('arSubject')||{}).value||'',
+    video_url:(byId('arVideo')||{}).value||'' };
   if(slug)art.slug=slug;
   fetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
     body:JSON.stringify({p_secret:_adminSecretQuiet(),p_article:art})})
