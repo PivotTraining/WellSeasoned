@@ -1599,3 +1599,44 @@ Owner: "improve the images for all articles." Regenerated all six
   still real TMDB film art, license-consistent with the rest of the site.
 - Same filenames, so no seed change — the improved files just deploy over the
   old ones on push.
+
+## Magazine renamed → "The Balcony"; Michael $1B cover feature + home lead (2026-07-14)
+Owner: epic NYT-with-bite feature on the Michael Jackson biopic crossing
+$1B and how it indicts Hollywood's underfunding of Black film; make it the
+home lead (replacing the Emmy items); rename the magazine and put the name
+in the main nav banner, not the "More" dropdown. Owner picked **"The
+Balcony"** from four options.
+- **Fact-check first** (nothing fake): verified via web research that *Michael*
+  (dir. Antoine Fuqua; Jaafar Jackson as MJ; Colman Domingo as Joe, Nia Long
+  as Katherine) genuinely crossed **$1B on 2026-07-13** — the FIRST biopic
+  ever, past Oppenheimer ($975M) and Bohemian Rhapsody ($911M); ~$155M budget
+  (~6x); $629.8M/63% international; Lionsgate's first $1B film. Critique data
+  is real + attributed in-text (UCLA Hollywood Diversity Report: Black-lead
+  films ~25% smaller budgets, 40%+ less with 2+ Black creatives behind camera,
+  ~30% fewer intl markets, yet more return per dollar; McKinsey: $10B+/yr left
+  on the table). No fabricated quotes — the "three quotables" are pull quotes
+  drawn from the piece itself.
+- **Article** `michael-billion-dollar-reckoning` ("A Billion Dollars, and the
+  Death of an Excuse") added to `backend/seed_word_articles.sql` as the newest
+  → it's the cover of The Balcony AND the home lead. Real TMDB *Michael*
+  backdrop (Jaafar in the red Beat It jacket), same house photo-treatment.
+  Validated vs Postgres (7 rows, cover ordering, 3 pull quotes present).
+- **Pull quotes**: `mdToHtml` now renders markdown `> ` lines as
+  `.read-pq` blockquotes (NYT-style big serif, red left rule). Note esc()
+  turns `>` into `&gt;` so the parser matches `^&gt;`.
+- **Home lead**: replaced the `#emmyBanner` markup + `paintEmmyBanner()` call
+  with `#leadStory` / `paintLeadStory()` (`LEAD_STORY` object + `.lead-*`
+  CSS) — a dark cinematic banner (serif headline, gold shimmer eyebrow, sweep)
+  leading `renderHome()`, linking to the article. Baked promo content so it
+  shows regardless of DB state; edit the 4 `LEAD_STORY` fields to change which
+  piece leads the home. Emmy JS/data left defined but unused (dead).
+- **Rename** The Word → The Balcony across all user-facing surfaces (main nav
+  link promoted out of the "More" dropdown; `NAV_MORE_VIEWS` no longer lists
+  `word`; renderWord eyebrow; home "Reads from the culture" shelf; footer
+  link; join-portal writer lane + copy; writer onboarding/terms/toasts;
+  `ARTICLE_KIND_LABEL`/kicker labels). The internal view id is still `word`
+  (route `#/word`, `data-view="word"`) — only the display name changed; code
+  comments still say "The Word". Verified in headless Chromium: nav shows The
+  Balcony (not in More), Emmy gone, home lead renders + opens the article, 3
+  pull quotes render, Balcony landing + read eyebrow read "The Balcony", zero
+  console errors; mobile lead stacks (image over copy).

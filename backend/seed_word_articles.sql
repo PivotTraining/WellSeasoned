@@ -202,6 +202,50 @@ The numbers say the machine was built to run out the clock on him. He ran it out
  'The Founder', null,
  'https://itswellseasoned.com/word/colman-domingo-was-never-waiting.jpg', 'center',
  'article', true,
- '2026-07-14 15:00:00+00', '2026-07-14 15:00:00+00')
+ '2026-07-14 15:00:00+00', '2026-07-14 15:00:00+00'),
+
+-- 7) FEATURE — Michael $1B (cover story + home lead; newest) ------------------
+('michael-billion-dollar-reckoning',
+ 'A Billion Dollars, and the Death of an Excuse',
+ $d$“Michael” is the first biographical film in history to cross a billion dollars — and nearly two-thirds of it came from the overseas audiences Hollywood swore didn’t exist for Black stories. Consider the excuse officially dead.$d$,
+ $md$On the second Sunday of July, a movie about a Black kid from Gary, Indiana did something no film about a real human being had ever done. *Michael*, Antoine Fuqua's chronicle of the life of Michael Jackson, crossed one billion dollars at the global box office.
+
+Read that again, because the history in it is easy to miss. Not the highest-grossing music biopic — it took that months ago, stepping over *Bohemian Rhapsody* and its $911 million. Not the highest-grossing film about a real person — it took that in late June, walking past *Oppenheimer*'s $975 million without slowing down. *Michael* is the first biopic, in the entire history of the form, to reach a billion dollars. There is no second.
+
+> No biopic in the history of the medium had ever crossed a billion dollars. The one that finally did is about a Black man, led by a Black man, directed by a Black man.
+
+The film cost Lionsgate about $155 million to make. It has now returned more than six times that — the studio's first billion-dollar release in its history, and only the second film of 2026 to clear the mark. Jaafar Jackson, Michael's real-life nephew, carries it in his first-ever acting role; Colman Domingo plays Joe Jackson, Nia Long plays Katherine. A cast that is Black from the marquee to the margins made the roundest, most undeniable number the business keeps.
+
+## The excuse it kills
+
+For as long as Hollywood has been asked why it spends less on Black films, it has offered the same answer, usually in a lowered voice: *they don't travel*. The overseas markets — Europe, Asia, Latin America — supposedly won't turn out for Black faces, and since foreign box office is where the modern blockbuster lives or dies, the rest writes itself. Smaller global ceiling, smaller budget, smaller push, smaller expectations.
+
+*Michael* made $629.8 million overseas.
+
+> Sixty-three cents of every dollar came from the international audience Hollywood spent thirty years insisting did not exist.
+
+That is not a rounding error on the theory. That is the theory face-down on the floor. Nearly two-thirds of a billion dollars, earned in exactly the markets that were supposed to shrug.
+
+And here is the part that should sting: the receipts were always there. UCLA's annual Hollywood Diversity Report has found, year after year, that films with a Black lead are handed budgets a quarter smaller on average than films without one — and when two or more Black creatives sit in the key jobs behind the camera, the gap widens past forty percent. Those same films are shipped to roughly thirty percent fewer international markets. Then, having been underfunded and under-distributed on purpose, they are asked to prove themselves — and they do, returning *more* per dollar than the films that were trusted with more. A McKinsey study put the money the industry leaves on the table every year, by refusing to fund and distribute Black stories at parity, at more than ten billion dollars.
+
+Ten billion. Annually. Left in the street, out of a conviction that the audience isn't there — an audience that just handed a single film ten figures.
+
+## The bow it does not deserve
+
+None of this is a feel-good story, and it should not be told as one. *Michael* did not reach a billion because the industry finally believed; part of its reshoot bill was covered by the Jackson estate, not the studio. The machine did not bet on this movie. It got dragged to a billion dollars behind a Black icon, a first-time Black lead and a Black director — and now it will do what it always does with a Black success it never saw coming. It will call the result a phenomenon, a bolt of lightning specific to the man in the red jacket. Anything but a verdict on its own math.
+
+> The industry did not bet on Michael. It got dragged to a billion dollars, and now it's taking a bow.
+
+We have seen this rerun. *Black Panther* was the "risky" superhero movie that made $1.3 billion. *Sinners* was the original, un-franchised swing nobody was sure of. *Girls Trip*, *The Woman King*, *Us* — every few years a Black film clears a bar it was never funded to clear, and every few years the surprise is performed again, as if the last ten weren't evidence. The surprise is the tell. You cannot be genuinely shocked by the same outcome for three decades unless you have decided, somewhere, not to learn.
+
+So let *Michael* be the one they can't file away. Not because a Black film made money — Black films have always made money, disproportionate money, money per dollar any honest accountant can see. But because this one made *the* number, the round and sacred billion that ends every argument in this town. There is no smaller print left to bury it in.
+
+The audience has spoken, in the only language the studios claim to respect. A billion dollars is not a plea for a seat at the table. It's an invoice. The industry can pay it — fund Black films like the propositions they keep proving to be, send them everywhere, and retire the shocked face for good — or it can keep leaving ten billion a year on the ground and calling the people who point it out ungrateful.
+
+Michael Jackson spent his life being told the ceiling was the ceiling, right up until he moonwalked through it. Forty years later, a movie about him did it again. The only question left is whether Hollywood was watching — or just counting.$md$,
+ 'The Founder', null,
+ 'https://itswellseasoned.com/word/michael-billion-dollar-reckoning.jpg', 'center',
+ 'article', true,
+ '2026-07-14 18:00:00+00', '2026-07-14 18:00:00+00')
 
 on conflict (slug) do nothing;
