@@ -739,21 +739,43 @@
   .sc-soc:active{transform:scale(.94)}
   .sc-x{background:#000} .sc-facebook{background:#1877F2} .sc-whatsapp{background:#25D366} .sc-threads{background:#000}
   .sc-copy{background:var(--inset);color:var(--ink);border:1.5px solid var(--line-strong)}
-  /* THE WORD (editorial) */
-  .word-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
-  .word-card{position:relative;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-2);cursor:pointer;transition:transform .16s,box-shadow .16s;color:inherit}
-  .wc-edit{position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;border-radius:50%;border:none;background:rgba(20,13,5,.65);color:var(--gold);font-size:13px;cursor:pointer;display:grid;place-items:center}
+  /* THE WORD (magazine) — cover story hero, same dark-stage/gold-sweep
+     language as .shop-hero/.emmy-car-wrap; grid cards are bleed images with
+     the title/kind overlaid at the bottom, not a boxed panel below. */
+  .word-cover{position:relative;overflow:hidden;border-radius:var(--r-xl);margin:6px 0 34px;
+    background:linear-gradient(150deg,#241809,#110a04);display:flex;align-items:center;gap:40px;
+    padding:44px 46px;box-shadow:0 30px 70px rgba(0,0,0,.5);cursor:pointer}
+  .word-cover::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);
+    pointer-events:none;background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.13) 87%,transparent 95%);
+    animation:emmySpin 15s linear infinite}
+  .wcov-copy{position:relative;z-index:1;flex:1 1 52%}
+  .wcov-eyebrow{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
+  .wcov-h{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.6vw,50px);line-height:1.03;margin-top:12px;color:#F4ECD8}
+  .wcov-subject{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#F4C542;font-weight:700;margin-top:8px}
+  .wcov-lead{color:#D8C9A8;font-size:15.5px;line-height:1.6;margin-top:14px;max-width:52ch}
+  .wcov-cta{display:inline-block;margin-top:22px}
+  .wcov-imgwrap{position:relative;z-index:1;flex:0 0 auto;width:clamp(220px,28vw,320px);aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 26px 60px rgba(0,0,0,.5);animation:emmyGlow 5s ease-in-out infinite}
+  .wcov-imgwrap img{display:block;width:100%;height:100%;object-fit:cover}
+  .wcov-imgwrap-none{display:grid;place-items:center;background:linear-gradient(135deg,#3a1e0a,#120a03)}
+  .wcov-imgwrap-none span{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+  @media(prefers-reduced-motion:reduce){ .word-cover::after,.wcov-imgwrap{animation:none} }
+  @media(max-width:720px){ .word-cover{flex-direction:column-reverse;text-align:center;padding:30px 24px;gap:22px}
+    .wcov-lead{margin-left:auto;margin-right:auto} .wcov-imgwrap{width:min(64%,260px)} }
+  .word-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px}
+  .word-card{position:relative;display:block;aspect-ratio:3/4;border-radius:var(--r-lg);overflow:hidden;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.35);transition:transform .2s,box-shadow .2s;color:#F4ECD8}
+  .word-card:hover{transform:translateY(-5px);box-shadow:0 22px 46px rgba(0,0,0,.5)}
+  .wc-edit{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;border:none;background:rgba(20,13,5,.65);color:var(--gold);font-size:13px;cursor:pointer;display:grid;place-items:center}
   .wc-edit:hover{background:rgba(20,13,5,.85)}
-  .word-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
-  .wc-hero{aspect-ratio:16/9;background-size:cover;background-position:center;background-color:var(--inset)}
-  .wc-hero-none{display:grid;place-items:center;background:linear-gradient(135deg,#3a1e0a,#120a03)}
-  .wc-hero-none span{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
-  .wc-body{padding:15px 16px 17px;display:flex;flex-direction:column;gap:6px;flex:1}
-  .wc-kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700}
-  .wc-ttl{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.15}
-  .wc-subject{font-weight:600;color:var(--ink-2)}
-  .wc-dek{font-size:13.5px;color:var(--ink-2);line-height:1.4}
-  .wc-meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:auto;padding-top:4px}
+  .wc-img{position:absolute;inset:0;background-size:cover;background-position:center;background-color:var(--inset)}
+  .wc-img-none{background:linear-gradient(135deg,#3a1e0a,#120a03)}
+  .wc-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,2,0) 32%,rgba(10,6,2,.58) 64%,rgba(10,6,2,.94) 100%)}
+  .wc-body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:16px 16px 15px;display:flex;flex-direction:column;gap:5px}
+  .wc-kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#F4C542;font-weight:700}
+  .wc-ttl{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.18;color:#fff}
+  .wc-subject{font-weight:600;color:#D8C9A8}
+  .wc-dek{font-size:13px;color:#D8C9A8;line-height:1.4}
+  .wc-meta{font-family:var(--mono);font-size:11px;color:#B8A480;margin-top:2px}
   .word-section{margin-top:8px} .word-section+.word-section{margin-top:34px}
   .word-section-h{font-family:var(--display);font-size:clamp(19px,2.2vw,24px);font-weight:800;margin:0 0 4px}
   .read-hero{height:340px;border-radius:var(--r-xl);background-size:cover;background-position:center;position:relative;margin-top:6px;box-shadow:var(--shadow-3)}
@@ -8403,28 +8425,47 @@ function shareRead(slug){
   else toast(u);
   try{ track('article_share',{slug:slug}); }catch(e){}
 }
+/* Bleed-image magazine card — the photo IS the card (same "no chrome, real
+   photo" convention as the shop lookbook), title/kind/meta overlaid at the
+   bottom over a dark scrim rather than in a boxed panel below the image. */
 function articleCard(a){
-  var img=a.hero_image?'<div class="wc-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"></div>':'<div class="wc-hero wc-hero-none"><span>The Word</span></div>';
+  var img=a.hero_image?'<div class="wc-img" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"></div>':'<div class="wc-img wc-img-none"></div>';
   var edit=isOwner()?'<button class="wc-edit" title="Edit this piece" onclick="event.stopPropagation();event.preventDefault();openArticleEditor(\''+esc(a.slug)+'\')">✎</button>':'';
-  var kindTag=(a.kind==='interview'||a.kind==='editorial')?'<span class="wc-kind">'+(a.kind==='interview'?(a.video_url?'🎬 Video interview':'🎤 Interview'):'✍️ Editorial')+'</span>':'';
-  return '<a class="word-card" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+edit+img+
+  var kindTag='<span class="wc-kind">'+((a.kind==='interview')?(a.video_url?'🎬 Video interview':'🎤 Interview'):(a.kind==='editorial'?'✍️ Editorial':'The Word'))+'</span>';
+  return '<a class="word-card" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+edit+img+'<div class="wc-scrim"></div>'+
     '<div class="wc-body">'+kindTag+'<div class="wc-ttl">'+esc(a.title)+(a.subject?' <span class="wc-subject">— '+esc(a.subject)+'</span>':'')+'</div>'+
     (a.dek?'<div class="wc-dek">'+esc(a.dek)+'</div>':'')+
     '<div class="wc-meta">'+(a.author?esc(a.author)+' · ':'')+artDate(a.created_at)+'</div></div></a>';
 }
+/* Cover story — the newest piece gets a big dark-stage hero (same language
+   as the shop/Emmy spotlight units), everything else runs in the sectioned
+   grid below it. */
+function wordCoverHTML(a){
+  var kindLabel=(a.kind==='interview')?(a.video_url?'🎬 Video interview':'🎤 Interview'):(a.kind==='editorial'?'✍️ Editorial':'Cover story');
+  var img=a.hero_image?'<div class="wcov-imgwrap"><img src="'+esc(a.hero_image)+'" alt=""></div>':'<div class="wcov-imgwrap wcov-imgwrap-none"><span>Well Seasoned</span></div>';
+  return '<div class="word-cover" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+
+    '<div class="wcov-copy"><span class="wcov-eyebrow">'+esc(kindLabel)+'</span>'+
+    '<h2 class="wcov-h">'+esc(a.title)+'</h2>'+
+    (a.subject?'<div class="wcov-subject">With '+esc(a.subject)+'</div>':'')+
+    (a.dek?'<p class="wcov-lead">'+esc(a.dek)+'</p>':'')+
+    '<span class="btn btn-gold wcov-cta">Read the story →</span></div>'+img+'</div>';
+}
 /* Magazine sections: interviews and editorials get their own shelf when at
    least one exists; everything else (including 'article' and any piece from
    an unmigrated DB, which loadArticles defaults to kind:'article') lands in
-   the general Word shelf. */
+   the general Word shelf. The newest piece overall leads as the cover story
+   and isn't repeated in the shelves below. */
 function renderWord(){
   var el=byId('wordContent');
-  el.innerHTML='<div class="browse-head"><span class="eyebrow">The Word</span><h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">The magazine.</h1><p class="you-sub" style="max-width:640px">Interviews, features, and editorials from the culture — our take, in our voice.</p></div><div id="wordGrid"><p class="empty-note">Loading…</p></div>';
+  el.innerHTML='<div class="browse-head"><span class="eyebrow">The Word</span><h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">The magazine.</h1><p class="you-sub" style="max-width:640px">Interviews, features, and editorials from the culture — our take, in our voice.</p></div><div id="wordCover"></div><div id="wordGrid"><p class="empty-note">Loading…</p></div>';
   loadArticles(function(list){
-    var g=byId('wordGrid'); if(!g)return;
-    if(!list.length){ g.innerHTML='<p class="empty-note">The first pieces are being written. Check back soon.</p>'; return; }
-    var interviews=list.filter(function(a){return a.kind==='interview';});
-    var editorials=list.filter(function(a){return a.kind==='editorial';});
-    var articles=list.filter(function(a){return a.kind!=='interview'&&a.kind!=='editorial';});
+    var g=byId('wordGrid'), cv=byId('wordCover'); if(!g)return;
+    if(!list.length){ g.innerHTML='<p class="empty-note">The first pieces are being written. Check back soon.</p>'; if(cv)cv.innerHTML=''; return; }
+    var cover=list[0], rest=list.slice(1);
+    if(cv)cv.innerHTML=wordCoverHTML(cover);
+    var interviews=rest.filter(function(a){return a.kind==='interview';});
+    var editorials=rest.filter(function(a){return a.kind==='editorial';});
+    var articles=rest.filter(function(a){return a.kind!=='interview'&&a.kind!=='editorial';});
     var out='';
     if(interviews.length)out+='<div class="word-section"><h2 class="word-section-h">Interviews</h2><div class="word-grid">'+interviews.map(articleCard).join('')+'</div></div>';
     if(editorials.length)out+='<div class="word-section"><h2 class="word-section-h">Editorials</h2><div class="word-grid">'+editorials.map(articleCard).join('')+'</div></div>';
