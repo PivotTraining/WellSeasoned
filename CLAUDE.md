@@ -1712,3 +1712,32 @@ sits ABOVE the body copy, 4 chips link to #/artist, branded share sheet (6
 buttons incl. Instagram) fits with zero modal overflow, zero console errors.
 The only page horizontal overflow is the pre-existing header auth-cluster
 (search + Sign in/Join), not introduced here.
+
+## Rotating banner → "Moment Radar" (2026-07-14)
+Owner shared a "Moment Radar" content-calendar concept (upcoming cultural
+premieres/drops to have a page ready for) and said it fits the rotating home
+banner (the `FEATURED` carousel). Wired it up for the two near-term SHOW
+premieres in the window — both fact-checked via web search before going live
+("nothing fake"):
+- **Lanterns** (HBO Max, **Aug 16 2026**, Aaron Pierre as John Stewart / Kyle
+  Chandler as Hal Jordan; 8 eps; Mundy/Lindelof/King). Added to the catalog as
+  a real TV entry (pinned TMDB backdrop + poster in WS_POSTERS). `scope:'ours'`
+  is a closer-bar call like `paradise`/`lioness` — dual lead, but Aaron Pierre
+  as the iconic Black Green Lantern is the draw for the culture.
+- **Fightland** (Starz, **Jul 31 2026**, Howard Charles/Nicholas Pinnock/
+  Deborah Ayorinde, 50 Cent EP). Added as a real TV entry (poster pinned; TMDB
+  had no textless backdrop, so the slide rides its poster + gradient).
+- **Date-gated moment support in `FEATURED`/`featSlides()`**: a slide can carry
+  `premiere` (flips the eyebrow from the pre-drop tease `ey` → `eyLive` on the
+  day) and `until` (auto-retires the slide after its window, no manual
+  takedown). Non-moment slides (no dates) stay evergreen. So the banner now
+  self-manages timely moments: Lanterns shows "Premieres Aug 16 · HBO Max"
+  now, flips to "New series · HBO Max" on 8/16, and drops off after 10/15.
+- Ran `node scripts/build-films-json.cjs` per convention (1056 titles, +2).
+  Verified in headless Chromium (sandbox clock is 2026-07-14): banner leads
+  with both premieres carrying the right "Premieres …" eyebrows, then the
+  evergreen slides; zero console errors. NOT wired (out of scope this pass):
+  the brief's watch-list pages, verdict/where-to-watch hubs, and short-form
+  video angles — the banner surfacing is the piece the owner pointed at.
+  Unconfirmed items from the brief (I Love Boosters streaming date, specific
+  BlackStar 2026 lineup) were deliberately left off pending confirmation.
