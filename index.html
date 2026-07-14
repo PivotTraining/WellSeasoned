@@ -1374,6 +1374,8 @@
   footer{border-top:1px solid var(--line);margin-top:20px;padding:34px 0 30px;color:var(--ink-2);font-size:13.5px}
   /* Contributor sign-up portal (footer) */
   .join-portal{padding:6px 0 30px;margin-bottom:26px;border-bottom:1px solid var(--line)}
+  /* The Word is a clean magazine — no recruitment boxes under the grid. */
+  body[data-view="word"] .join-portal{display:none}
   .jp-head{max-width:680px}
   .jp-head h2{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05;margin:7px 0 10px;color:var(--ink)}
   .jp-lead{color:var(--ink-2);font-size:15.5px;line-height:1.55;max-width:648px}
@@ -5003,11 +5005,13 @@ function render(view,arg){
     // show home behind and open the application form so an external link lands
     // straight on the form.
     document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')==='home');});
+    if(document.body)document.body.setAttribute('data-view','home');
     setActiveNav('home'); window.scrollTo({top:0,behavior:'auto'}); renderHome(); applyMetaTags('home');
     openContribute(arg==='writer'?'writer':'critic');
     return;
   }
   document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')===view);});
+  if(document.body)document.body.setAttribute('data-view',view);
   setActiveNav(view);
   refreshKidsKey(view);
   window.scrollTo({top:0,behavior:'auto'});

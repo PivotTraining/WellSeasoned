@@ -1426,3 +1426,39 @@ interview content or fake video was added, honoring "nothing fake."
   opening an interview piece renders the real YouTube embed + "With <subject>"
   line + 🎤 Interview eyebrow; the owner editor's kind selector correctly
   reveals/hides the subject/video fields; zero console errors.
+
+## The Word: magazine polish + five launch pieces (2026-07-14)
+Owner (after the magazine redesign): "lets remove the boxes and source some
+topics we can discuss and write them. Five articles."
+- **Boxes removed on The Word only**: the global footer `.join-portal`
+  (critic/writer recruitment cards + newsletter box) rendered on every page,
+  cluttering the bottom of the new clean magazine. `render()` now stamps
+  `document.body[data-view]` and CSS `body[data-view="word"] .join-portal
+  {display:none}` hides it on `#/word` ONLY — the recruitment funnel is
+  untouched on every other page. Verified: hidden on Word, present on Home.
+- **Magazine visual redesign** (same commit lineage): `#/word` leads with a
+  dark cover-story hero (`.word-cover`/`wordCoverHTML`, reusing the shop/Emmy
+  `emmySpin`/`emmyShine`/`emmyGlow` spotlight language) for the newest piece,
+  and the grid cards (`.word-card`) are now bled-image — the photo IS the
+  card, kind/title/meta overlaid on a scrim (`.wc-scrim`), same "no chrome"
+  convention as the shop lookbook — instead of the old boxed cream panel.
+- **Five real launch articles** — `backend/seed_word_articles.sql` (real
+  editorial content, real films, real facts, real TMDB backdrop art as
+  heroes; bylined "The Founder"). Two features + three editorials: "The Genre
+  Was Always Ours" (Black horror lineage, Sinners — the cover story),
+  "Ryan Coogler Bet On Us Every Time", "The Case for Black Romance",
+  "In Defense of the Cookout Canon", "Streaming Keeps Losing Our Movies".
+  Heroes pull real `image.tmdb.org` backdrops (Sinners/Fruitvale/Love Jones/
+  Love & Basketball/Daughters of the Dust — each verified 200 + backdrop_path
+  pulled live from TMDB). "Nothing fake" held: these are genuine essays the
+  owner asked to be drafted in their voice, every film/fact checked (no
+  fabricated data), and NO interviews were seeded (an interview needs a real
+  subject/video — none exists yet). Bodies use the site's markdown subset.
+  **NOT AUTO-PUBLISHED** — this environment can't authenticate to the
+  owner-gated `publish_article` RPC, so the content is delivered as an
+  idempotent SQL seed (dollar-quoted bodies, `on conflict (slug) do nothing`)
+  for the owner to run once in the Supabase SQL editor, same pattern as the
+  migration. Validated against a throwaway Postgres 16: inserts 5 (3
+  editorial/2 article), cover ordering correct, re-run inserts 0.
+  Requires the magazine migration (kind/video_url/subject) to be live first —
+  it is (owner ran it this session).
