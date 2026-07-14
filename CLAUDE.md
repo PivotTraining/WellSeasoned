@@ -1640,3 +1640,19 @@ Balcony"** from four options.
   Balcony (not in More), Emmy gone, home lead renders + opens the article, 3
   pull quotes render, Balcony landing + read eyebrow read "The Balcony", zero
   console errors; mobile lead stacks (image over copy).
+
+## The Balcony: Michael feature rewritten in NYMag/VF longform voice (2026-07-14)
+Owner supplied a detailed New York Magazine / Vanity Fair style brief
+(immersive longform: delayed lead, scene-setting, flowing rhythm, wry
+insight, resonant close). Rewrote the Michael $1B feature body in that voice
+— opens on a documented real scene (Motown 25, 1983, the moonwalk debut,
+Fred Astaire's next-day call — all real, hedged as "the story goes"), carries
+the same verified facts/critique, and closes by circling back to the moonwalk
+as an illusion of forward motion. "Nothing fake" held: no fabricated quotes,
+no invented private scenes — the immersion is built from documented history +
+real box-office/UCLA/McKinsey data. Dropped the explainer subheads for a
+flowing single-arc structure (VF features don't use them). Same title/dek/
+hero/slug, so the home lead + art are unchanged; only the article prose
+deepened. Validated vs Postgres (7 rows, moonwalk lead + all 3 pull quotes
+present, body ~7.3k chars) and rendered on the dark read page (3 .read-pq
+blockquotes, 15 paragraphs, zero console errors).
