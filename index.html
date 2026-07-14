@@ -815,6 +815,18 @@
   body[data-view="word"] footer .foot-row{color:#C6B896}
   body[data-view="word"] footer .foot-row a{color:#D8C9A8}
   body[data-view="word"] footer .fine{color:#8A7B5E}
+  /* Article (read) page — same dark stage, but the article body sits in a
+     floating cream "paper" column for long-form readability (owner's pick). */
+  body[data-view="read"]{background-color:#161210;
+    background-image:radial-gradient(130% 80% at 50% -8%,#241a10 0,rgba(20,14,8,0) 55%),linear-gradient(180deg,#1b140d 0,#141009 560px)}
+  body[data-view="read"] .backbtn{color:#D8C9A8}
+  body[data-view="read"] .read-body{background:var(--panel);max-width:772px;margin:26px auto 60px;padding:38px 50px 54px;border-radius:16px;box-shadow:0 34px 80px rgba(0,0,0,.55)}
+  body[data-view="read"] footer{border-top:1px solid rgba(244,236,216,.12)}
+  body[data-view="read"] footer .ftag{color:#D8C9A8}
+  body[data-view="read"] footer .foot-row{color:#C6B896}
+  body[data-view="read"] footer .foot-row a{color:#D8C9A8}
+  body[data-view="read"] footer .fine{color:#8A7B5E}
+  @media(max-width:640px){ body[data-view="read"] .read-body{padding:24px 20px 42px;margin:16px auto 44px;border-radius:12px} }
   .read-hero{height:340px;border-radius:var(--r-xl);background-size:cover;background-position:center;position:relative;margin-top:6px;box-shadow:var(--shadow-3)}
   .read-hero-plain{height:auto;background:linear-gradient(135deg,#3a1e0a,#120a03);padding:20px 24px;box-shadow:none}
   .read-hero-scrim{position:absolute;inset:0;border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(12,7,2,0) 40%,rgba(12,7,2,.7))}
@@ -1412,7 +1424,7 @@
   /* Contributor sign-up portal (footer) */
   .join-portal{padding:6px 0 30px;margin-bottom:26px;border-bottom:1px solid var(--line)}
   /* The Word is a clean magazine — no recruitment boxes under the grid. */
-  body[data-view="word"] .join-portal{display:none}
+  body[data-view="word"] .join-portal,body[data-view="read"] .join-portal{display:none}
   .jp-head{max-width:680px}
   .jp-head h2{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05;margin:7px 0 10px;color:var(--ink)}
   .jp-lead{color:var(--ink-2);font-size:15.5px;line-height:1.55;max-width:648px}

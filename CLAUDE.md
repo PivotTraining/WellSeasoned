@@ -1559,3 +1559,19 @@ navigating away — attribute-scoped, no bleed). The light site nav header sits
 above the dark page (intentional, small clean seam). The article READ page
 (#/read/<slug>) is still light for long-form readability — a dark→light
 transition on click; can be darkened too if the owner wants full parity.
+
+## The Word: article (read) page — dark + floating paper column (2026-07-14)
+Owner picked (from 3 rendered mockups: light / full-dark / hybrid) the
+HYBRID for the article read page. Scoped to `body[data-view="read"]`: same
+dark warm-charcoal stage as the #/word landing, full-width dark hero, then the
+article body (`.read-body`) becomes a floating cream "paper" column
+(background var(--panel), max-width 772px, centered, rounded, big shadow) so
+long-form reading stays on light with dark serif type — best readability while
+keeping the dark-magazine cohesion, no dark→light flip from the landing.
+Back button lightened; footer text re-lightened (same as the landing); the
+global join-portal recruitment block is now hidden on the read page too
+(added `body[data-view="read"]` to the existing word hide rule) for a clean
+dark reading experience — the funnel still shows on every light page. Verified
+real render: body bg rgb(22,18,16), card bg cream, card max-width 772px,
+join-portal display:none, zero console errors. Mobile: card padding/margins
+reduced < 640px.
