@@ -1333,3 +1333,39 @@ previously only visible one at a time, on each film's own page.
   (resolved via `find()`) and scores, search filters correctly by critic
   name, clicking a film title navigates to that film's real page
   (`#/film/sinners`), zero console errors.
+
+## Fix: seating a critic didn't persist — "nothing showed up" on refresh (2026-07-13)
+Owner: "I just seated a critic and hit refresh and nothing showed up. I feel
+like im losing critics who have applied." Root cause found in `inboxSeat`/
+`inboxApproveWriter`/`inboxRemove`/`inboxRemoveWriter` (index.html): they
+correctly flipped `profiles.is_critic`/`is_writer` via `verify_critic`/
+`verify_writer`, but **never wrote the application's own `status` column**
+back to `'seated'` (or reverted it on removal). `inboxCardHTML`'s button
+logic reads `seated=(status==='seated')` to decide whether to show "Seat as
+critic" or "Remove critic" — so after seating, the application row kept
+whatever status it had before (e.g. `'received'`), and on refresh the card
+rendered exactly as if the seat action had silently failed. The applicant
+was never actually lost (no row deleted, no data missing) — the seat
+genuinely took (`profiles.is_critic=true`), it just didn't visually persist,
+which reads identically to "disappeared" from the owner's side.
+
+Fix: added `_syncAppStatus(id,status)` — fires the existing
+`admin_set_application_status` RPC (already used by the Shortlist/Pass
+buttons) after seat/approve succeeds (→ `'seated'`) and after remove
+succeeds (→ `'review'`, so the buttons reset to seatable rather than
+getting stuck showing "Remove critic" for someone no longer seated).
+
+Note on diagnosis: the Supabase MCP connector was disconnected this session,
+so live `critic_applications` rows couldn't be queried directly, and a
+direct anon-key pull of applicant PII was correctly blocked by the auto-mode
+production-read guard. Root-caused purely by reading the client code path
+end to end instead — `admin_list_applications`/`critic_applications` live
+only in the actual Supabase DB (never backfilled into backend/schema.sql,
+a known pre-existing gap), so their exact server-side definitions weren't
+inspectable either; the fix only needed the client-side write, which was
+provably the missing piece.
+
+Verified in headless Chromium: mocked seat action fires
+`admin_set_application_status` with `p_status:'seated'`; a fresh page load
+against the now-updated mock row renders the `SEATED` badge and "Remove
+critic" button correctly — the exact persistence that was missing before.

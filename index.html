@@ -6949,11 +6949,22 @@ function inboxSetStatus(id,status){
     .then(function(){ toast('Updated.'); inboxLoad(); })
     .catch(function(){ toast('Couldn’t update — make sure you’re signed in as the owner.'); });
 }
+/* Fire-and-forget status sync so the application row's own `status` column
+   (used by inboxCardHTML's seated=(status==='seated') check to decide which
+   buttons to show) never drifts from what verify_critic/verify_writer just
+   did to profiles.is_critic/is_writer. Without this, seating a critic looked
+   like it silently failed on refresh — the card kept showing "Seat as
+   critic" forever because nothing ever wrote 'seated' back onto the
+   application itself. */
+function _syncAppStatus(id,status){
+  if(id==null)return;
+  return fetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_status:status})}).catch(function(){});
+}
 function inboxSeat(id,email,outlet,name,uid){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('critic',email,name); notifyApplicant(uid,'You’re seated as a verified critic in The Kitchen — your reviews now move the official score.'); } else { toast('They need an account with this email first — then seat again.'); } })
+    .then(function(ok){ if(ok){ _syncAppStatus(id,'seated').then(function(){ inboxLoad(); }); seatedConfirm('critic',email,name); notifyApplicant(uid,'You’re seated as a verified critic in The Kitchen — your reviews now move the official score.'); } else { toast('They need an account with this email first — then seat again.'); } })
     .catch(function(){ toast('Couldn’t seat — make sure you’re signed in as the owner.'); });
 }
 /* Best-effort in-app notification alongside the existing manual "email them"
@@ -7004,7 +7015,7 @@ function inboxRemove(id,email,uid){
   if(!window.confirm('Remove this critic? Their seat is revoked and their reviews stop moving the Kitchen score.'))return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(){ toast('Critic removed. Seat revoked.'); inboxLoad(); notifyApplicant(uid,'Your critic seat in The Kitchen has been removed.'); })
+    .then(function(){ toast('Critic removed. Seat revoked.'); _syncAppStatus(id,'review').then(function(){ inboxLoad(); }); notifyApplicant(uid,'Your critic seat in The Kitchen has been removed.'); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* Admin: approve / remove a writer for The Word (mirrors critic seating). */
@@ -7012,7 +7023,7 @@ function inboxApproveWriter(id,email,name,uid){
   if(!sbConfigured())return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:true})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(ok){ if(ok){ inboxLoad(); seatedConfirm('writer',email,name); notifyApplicant(uid,'You’re approved to write for The Word — you’ve got a real byline now.'); } else { toast('They need an account with this email first — then approve again.'); } })
+    .then(function(ok){ if(ok){ _syncAppStatus(id,'seated').then(function(){ inboxLoad(); }); seatedConfirm('writer',email,name); notifyApplicant(uid,'You’re approved to write for The Word — you’ve got a real byline now.'); } else { toast('They need an account with this email first — then approve again.'); } })
     .catch(function(){ toast('Couldn’t approve — make sure you’re signed in as the owner.'); });
 }
 function inboxRemoveWriter(id,email,uid){
@@ -7020,7 +7031,7 @@ function inboxRemoveWriter(id,email,uid){
   if(!window.confirm('Remove this writer? Their byline in The Word is revoked.'))return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
-    .then(function(){ toast('Writer removed. Byline revoked.'); inboxLoad(); notifyApplicant(uid,'Your writer byline in The Word has been removed.'); })
+    .then(function(){ toast('Writer removed. Byline revoked.'); _syncAppStatus(id,'review').then(function(){ inboxLoad(); }); notifyApplicant(uid,'Your writer byline in The Word has been removed.'); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
 }
 /* One batched pull of every film's live tally, so The Table score on grid cards
