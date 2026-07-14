@@ -1656,3 +1656,16 @@ hero/slug, so the home lead + art are unchanged; only the article prose
 deepened. Validated vs Postgres (7 rows, moonwalk lead + all 3 pull quotes
 present, body ~7.3k chars) and rendered on the dark read page (3 .read-pq
 blockquotes, 15 paragraphs, zero console errors).
+
+## The Balcony: Domingo feature rewritten in NYMag/VF longform voice (2026-07-14)
+Same elevation as the Michael piece, applied to the Colman Domingo feature.
+Now opens on the real *Euphoria* pandemic bottle episode (Ali and Rue in the
+diner, 2020 — a documented, widely-praised scene) as the delayed lead, flows
+as a single immersive arc, and closes by circling back to that stillness.
+Same verified facts/critique (five Black Best Actor winners, 38-yr gap,
+Denzel/Training Day, Halle Berry sole winner, Rustin/Sing Sing firsts +
+equal-pay model, back-to-back noms/no win). "Nothing fake": no invented
+quotes or private scenes — immersion built from his real on-screen work +
+real awards history. Same title/dek/hero/slug; only prose deepened. Validated
+vs Postgres (7 rows, diner lead + 3 pull quotes, ~6.6k chars) and rendered on
+the dark read page (3 .read-pq, 10 paragraphs, zero console errors).
