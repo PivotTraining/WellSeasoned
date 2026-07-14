@@ -793,6 +793,28 @@
   .vf-edit{position:absolute;top:9px;right:9px}
   @media(max-width:900px){ .vf-grid{grid-template-columns:repeat(2,1fr);gap:34px 28px} }
   @media(max-width:560px){ .vf-grid{grid-template-columns:1fr;gap:30px} .vf-thumb{aspect-ratio:16/9} }
+  /* GALLERY-DARK tone — scoped to The Word (#/word) only via the body
+     data-view marker set in render(). The dark Colman cover banner melts into
+     the page; the film art pops. Footer text is re-lightened so nothing goes
+     dark-on-dark. Every other page keeps the warm-cream tone untouched. */
+  body[data-view="word"]{background-color:#161210;
+    background-image:radial-gradient(130% 80% at 50% -8%,#241a10 0,rgba(20,14,8,0) 55%),linear-gradient(180deg,#1b140d 0,#141009 560px)}
+  body[data-view="word"] #wordContent .eyebrow{color:var(--gold-soft)}
+  body[data-view="word"] #wordContent .browse-head h1{color:#F4ECD8}
+  body[data-view="word"] #wordContent .you-sub{color:#C6B896}
+  body[data-view="word"] #wordContent .empty-note{color:#C6B896}
+  body[data-view="word"] .vf-grid{border-top-color:rgba(244,197,66,.20)}
+  body[data-view="word"] .vf-ttl{color:#F4ECD8}
+  body[data-view="word"] .vf-dek{color:#C6B896}
+  body[data-view="word"] .vf-subject{color:#C6B896}
+  body[data-view="word"] .vf-kind{color:#E4794A}
+  body[data-view="word"] .vf-byline{color:#9C8C6E}
+  body[data-view="word"] .vf-thumb{background-color:#241a10}
+  body[data-view="word"] footer{border-top:1px solid rgba(244,236,216,.12)}
+  body[data-view="word"] footer .ftag{color:#D8C9A8}
+  body[data-view="word"] footer .foot-row{color:#C6B896}
+  body[data-view="word"] footer .foot-row a{color:#D8C9A8}
+  body[data-view="word"] footer .fine{color:#8A7B5E}
   .read-hero{height:340px;border-radius:var(--r-xl);background-size:cover;background-position:center;position:relative;margin-top:6px;box-shadow:var(--shadow-3)}
   .read-hero-plain{height:auto;background:linear-gradient(135deg,#3a1e0a,#120a03);padding:20px 24px;box-shadow:none}
   .read-hero-scrim{position:absolute;inset:0;border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(12,7,2,0) 40%,rgba(12,7,2,.7))}

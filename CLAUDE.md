@@ -1543,3 +1543,19 @@ stories below it into a VF-style editorial grid:
   unchanged. Verified desktop + mobile in headless Chromium (serif headlines,
   red kickers, small-caps bylines render; grid stacks 3→1; zero console
   errors). No seed/schema change — CSS/markup only, deploys on push.
+
+## The Word: Gallery-Dark tone (2026-07-14)
+Owner picked "Gallery Dark" from four rendered tone options (warm cream /
+newsstand white / warm sepia / gallery dark) for The Word. Implemented as a
+dark warm-charcoal page scoped ONLY to #/word via the `body[data-view="word"]`
+marker (set in `render()`): dark background gradient, cream serif headlines,
+`--gold-soft` eyebrow, a lightened red kicker (#E4794A) and dek/byline tones,
+and — importantly — re-lightened footer text (`.ftag`/`.foot-row`/`.foot-row
+a`/`.fine`) so the global footer doesn't go dark-on-dark on this page. The
+dark Colman cover banner now melts into the page and the film art pops. Every
+other view keeps the warm-cream tone (verified: home/browse stay
+rgb(239,226,198), word is rgb(22,18,16), and the tone doesn't stick after
+navigating away — attribute-scoped, no bleed). The light site nav header sits
+above the dark page (intentional, small clean seam). The article READ page
+(#/read/<slug>) is still light for long-form readability — a dark→light
+transition on click; can be darkened too if the owner wants full parity.
