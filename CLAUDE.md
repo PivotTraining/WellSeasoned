@@ -1575,3 +1575,27 @@ dark reading experience — the funnel still shows on every light page. Verified
 real render: body bg rgb(22,18,16), card bg cream, card max-width 772px,
 join-portal display:none, zero console errors. Mobile: card padding/margins
 reduced < 640px.
+
+## The Word: improved article hero art (2026-07-14)
+Owner: "improve the images for all articles." Regenerated all six
+`/word/<slug>.jpg` heroes (`scratchpad/gen_word_art2.js`):
+- **Native landscape 3:2** (1600×1067) instead of the old 3:4 portrait — the
+  dark VF grid cards (3:2) and the read-page hero (wide) are landscape, so the
+  art is now composed for those crops instead of being center-cropped from a
+  portrait. The cover-story portrait frame (`.wcov-imgwrap` 3:4) still reads
+  great via object-fit cover (subject centered). Verified cover, cards, and
+  read hero all frame correctly.
+- **Cleaner, brighter editorial grade**: dropped the heavy bottom scrim (no
+  longer needed — titles now sit beside/below the image, never overlaid), the
+  busy gold frame, and the salt-shaker watermark. Now just a subtle warm cast,
+  a gentle vignette, a whisper of top/bottom depth, and light film grain — a
+  clean magazine-photo look (VF images carry no frames/watermarks).
+- **Better sources**: the Coogler piece moved off a dark, weak Fruitvale
+  Station still onto the iconic **Black Panther** character montage (his most
+  striking film; the piece covers his whole arc) — pulled as the top-voted
+  textless 4K backdrop via TMDB `/movie/{id}/images`. Daughters of the Dust /
+  Love Jones / Love & Basketball / Sinners kept their on-theme stills but read
+  much brighter under the new grade (Daughters was nearly black before). All
+  still real TMDB film art, license-consistent with the rest of the site.
+- Same filenames, so no seed change — the improved files just deploy over the
+  old ones on push.
