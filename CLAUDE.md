@@ -1519,3 +1519,27 @@ other boxes though. It makes the page feel blocky."
   it). Verified desktop + mobile (rows stack, dek hidden < 640px, cover image
   leads on mobile); the only horizontal overflow is the pre-existing
   site-wide header auth-cluster, not introduced here.
+
+## The Word: Vanity Fair editorial grid (2026-07-14)
+Owner showed a Vanity Fair homepage: "see this.. keep the header fix the
+rest." Kept the Colman dark cover banner (the "header"/hero) and rebuilt the
+stories below it into a VF-style editorial grid:
+- **`articleVFCard`/`.vf-grid`/`.vf-*`** — landscape (3:2) image, a RED kicker
+  (the piece's kind → `--paprika`, like VF's TELEVISION/EXCLUSIVE labels), a
+  serif headline (the already-loaded **Instrument Serif** via `--serif`,
+  underline-on-hover), a short dek, and a small-caps mono byline ("BY THE
+  FOUNDER") — all sitting on the open cream page with NO box, hairline top
+  rule, generous whitespace. A single mixed grid (3-col → 2 → 1), newest
+  first, no section headers — matching VF's homepage (kind conveyed by the
+  kicker, not a section label). Replaced the previous `.word-list` rows.
+- **Serif cohesion**: the cover headline (`.wcov-h`) and the article read
+  page title (`.read-ttl`) also switched to `--serif` so the whole magazine
+  reads like an editorial title face, top to bottom. Instrument Serif is a
+  single-weight display serif (400) — set weight 400, sized up for presence.
+- Kept: the header/intro, the dark Colman cover banner, the removed
+  recruitment boxes (`body[data-view="word"]`), and the custom house
+  photo-treatment art (now shown as the VF landscape thumbnails). The home
+  "Reads from the culture" teaser still uses the old `articleCard` grid —
+  unchanged. Verified desktop + mobile in headless Chromium (serif headlines,
+  red kickers, small-caps bylines render; grid stacks 3→1; zero console
+  errors). No seed/schema change — CSS/markup only, deploys on push.
