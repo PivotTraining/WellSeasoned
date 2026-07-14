@@ -742,8 +742,8 @@
   .sc-copy{background:var(--inset);color:var(--ink);border:1.5px solid var(--line-strong)}
   /* Featured-people row on the article read page (adjacent to the piece →
      click through to each actor's profile and keep perusing). */
-  .read-people{margin:36px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
-  .rp-lab{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+  .read-people{margin:14px 0 20px}
+  .rp-lab{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
   .rp-row{display:flex;flex-wrap:wrap;gap:12px}
   .rp-card{display:flex;align-items:center;gap:11px;padding:8px 15px 8px 8px;border:1px solid var(--line-strong);border-radius:999px;cursor:pointer;color:inherit;background:var(--panel);transition:transform .15s,border-color .15s,box-shadow .15s}
   .rp-card:hover{transform:translateY(-2px);border-color:var(--gold-ink);box-shadow:var(--shadow-1)}
@@ -8763,8 +8763,9 @@ function renderRead(slug){
         ' · <a onclick="shareRead(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Share ↗</a>'+
         (isOwner()?' · <a onclick="openArticleEditor(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">✎ Edit</a>':'')+'</div>'+
       (f?'<a class="read-filmlink" onclick="go(\'film\',\''+esc(f.id)+'\')">On the film: '+esc(f.title)+' →</a>':'')+
+      readPeopleHTML(a)+
       video+
-      '<div class="read-copy">'+mdToHtml(a.body)+'</div>'+readPeopleHTML(a)+'</article>';
+      '<div class="read-copy">'+mdToHtml(a.body)+'</div></article>';
     setDocMeta(a.title+' — Well Seasoned', a.dek||'A read from Well Seasoned.', '#/read/'+encodeURIComponent(a.slug), a.hero_image||(f&&f.poster)||null);
     window.scrollTo({top:0,behavior:'auto'});
     hydrateReadPeople(a);

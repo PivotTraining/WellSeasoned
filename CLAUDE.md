@@ -1701,3 +1701,14 @@ Stories, Facebook — stylize to that and lead back to the site."
   headless Chromium: chips render + link to #/artist, share modal shows 6
   branded buttons incl. Instagram, the 1080×1920 card builds, editor field
   present, zero console errors.
+
+## The Balcony: featured-actor chips moved to top of article (2026-07-14)
+Owner: "put the actor links at the top" + "make sure the mobile web version
+works." Moved the `readPeopleHTML` call in `renderRead` from after the body
+to directly under the byline (before the article copy); dropped the
+`.read-people` top border/padding since it no longer needs a divider there.
+Verified desktop (1180) + mobile (390) in headless Chromium: featured block
+sits ABOVE the body copy, 4 chips link to #/artist, branded share sheet (6
+buttons incl. Instagram) fits with zero modal overflow, zero console errors.
+The only page horizontal overflow is the pre-existing header auth-cluster
+(search + Sign in/Join), not introduced here.
