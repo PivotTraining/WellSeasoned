@@ -738,7 +738,21 @@
   .sc-soc:hover{transform:translateY(-2px)}
   .sc-soc:active{transform:scale(.94)}
   .sc-x{background:#000} .sc-facebook{background:#1877F2} .sc-whatsapp{background:#25D366} .sc-threads{background:#000}
+  .sc-instagram{background:linear-gradient(45deg,#F58529 5%,#DD2A7B 45%,#8134AF 75%,#515BD4 100%)}
   .sc-copy{background:var(--inset);color:var(--ink);border:1.5px solid var(--line-strong)}
+  /* Featured-people row on the article read page (adjacent to the piece →
+     click through to each actor's profile and keep perusing). */
+  .read-people{margin:36px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
+  .rp-lab{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+  .rp-row{display:flex;flex-wrap:wrap;gap:12px}
+  .rp-card{display:flex;align-items:center;gap:11px;padding:8px 15px 8px 8px;border:1px solid var(--line-strong);border-radius:999px;cursor:pointer;color:inherit;background:var(--panel);transition:transform .15s,border-color .15s,box-shadow .15s}
+  .rp-card:hover{transform:translateY(-2px);border-color:var(--gold-ink);box-shadow:var(--shadow-1)}
+  .rp-av{width:42px;height:42px;border-radius:50%;flex:none;background-size:cover;background-position:center top;background-color:var(--inset);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:16px;color:var(--gold-ink);overflow:hidden}
+  .rp-name{font-weight:700;font-size:15px;line-height:1.15}
+  .rp-name span{display:block;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-top:2px}
+  /* Article share sheet */
+  .rsh-hero{width:100%;aspect-ratio:16/9;border-radius:var(--r-lg);background-size:cover;background-position:center 30%;background-color:var(--inset);margin-bottom:6px}
+  .rsh-ttl{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.12;margin:2px 0 2px}
   /* THE WORD (magazine) — cover story hero, same dark-stage/gold-sweep
      language as .shop-hero/.emmy-car-wrap; grid cards are bleed images with
      the title/kind overlaid at the bottom, not a boxed panel below. */
@@ -8509,12 +8523,129 @@ function artDate(s){ if(!s)return ''; var p=String(s).slice(0,10).split('-'); if
    never reaches a server, so a share/copy from the address bar always falls
    back to the generic homepage card; this is the form to hand out instead. */
 function readShareUrl(slug){ return 'https://itswellseasoned.com/read/'+encodeURIComponent(slug); }
-function shareRead(slug){
-  var u=readShareUrl(slug), a=_articleBySlug[slug], title=(a&&a.title)||'Well Seasoned';
-  if(navigator.share){ navigator.share({title:title,text:title+' — Well Seasoned',url:u}).catch(function(){}); return; }
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(u).then(function(){ toast('Link copied — share it.'); },function(){ toast(u); }); }
-  else toast(u);
-  try{ track('article_share',{slug:slug}); }catch(e){}
+/* Article share sheet — branded, one-tap to Threads / Instagram Story /
+   Facebook / X / WhatsApp / copy. Every link is the /read/<slug> URL, which
+   serves its own OG card and leads straight back to the story on the site. */
+function shareRead(slug){ openReadShare(slug); }
+var _RS_SVG={
+  threads:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 11.2c1.2.7 1.9 1.9 1.9 3.5 0 1.6-.6 2.9-1.7 3.9-1.1 1-2.7 1.5-4.7 1.4-2.9 0-5-1-6.4-2.9C4.6 16.8 4 14.6 4 12s.6-4.8 1.8-6.5C7.1 3.6 9.2 2.6 12 2.6c2 0 3.6.5 4.8 1.6 1 .9 1.7 2 2.1 3.4l-2 .6c-.6-2-1.9-3.1-3.9-3.1-1.6 0-2.9.5-3.7 1.6-.9 1.1-1.3 2.8-1.3 4.7s.4 3.6 1.3 4.7c.8 1 2 1.6 3.6 1.6 1.3 0 2.3-.3 2.9-1 .4-.5.7-1 .7-1.7 0-.4-.1-.7-.2-1-.4.7-1.1 1.2-2.3 1.2-1 0-1.8-.3-2.4-.9-.5-.5-.8-1.2-.8-2 0-.9.4-1.6 1.1-2.1.7-.5 1.6-.7 2.7-.7.6 0 1.1.1 1.6.2Zm-2.4 1.5c-1.1 0-1.6.4-1.6 1.1 0 .6.5 1 1.3 1 1.1 0 1.8-.7 1.9-2-.5-.1-1-.1-1.6-.1Z"/></svg>',
+  instagram:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.3 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .3-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.3-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.3 2.2-.4C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.1 0-3.5 0-4.7.1-1.1 0-1.7.2-2.1.4-.5.2-.9.4-1.3.8-.4.4-.6.8-.8 1.3-.2.4-.3 1-.4 2.1C2.6 9.9 2.6 10.3 2.6 12s0 2.1.1 3.3c.1 1.1.2 1.7.4 2.1.2.5.4.9.8 1.3.4.4.8.6 1.3.8.4.2 1 .3 2.1.4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.1 0 1.7-.2 2.1-.4.5-.2.9-.4 1.3-.8.4-.4.6-.8.8-1.3.2-.4.3-1 .4-2.1.1-1.2.1-1.6.1-3.3s0-2.1-.1-3.3c-.1-1.1-.2-1.7-.4-2.1-.2-.5-.4-.9-.8-1.3-.4-.4-.8-.6-1.3-.8-.4-.2-1-.3-2.1-.4C15.5 4 15.1 4 12 4Zm0 3.1a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8Zm0 1.8a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2Zm5.1-.9a1.1 1.1 0 1 1-2.3 0 1.1 1.1 0 0 1 2.3 0Z"/></svg>',
+  facebook:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.8 3.8-3.8 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.5V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23 22h-6.8l-5.3-6.9L4.8 22H2l7.8-8.9L1.5 2h6.9l4.8 6.3L18.9 2Zm-1.2 18h1.9L7.1 4H5.1l12.6 16Z"/></svg>',
+  whatsapp:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4 0 .5l-.4.5-.3.3c-.2.2-.3.4-.1.7.1.2.6 1 1.3 1.6.9.8 1.6 1 1.9 1.1.2.1.4.1.6-.1l.6-.8c.2-.2.4-.2.6-.1l1.7.8c.2.1.4.2.5.3.1.2.1.7-.1 1.3Z"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>'
+};
+function openReadShare(slug){
+  var a=_articleBySlug[slug]||{}, u=readShareUrl(slug), title=(a.title||'Well Seasoned').replace(/'/g,"\\'");
+  var tEnc=esc(a.title||'Well Seasoned');
+  var hero=a.hero_image?'<div class="rsh-hero" style="background-image:url(\''+esc(a.hero_image)+'\')"></div>':'';
+  function b(pl,lab,fn){ return '<button class="sc-soc sc-'+pl+'" title="'+lab+'" aria-label="'+lab+'" onclick="'+fn+'">'+_RS_SVG[pl]+'</button>'; }
+  var row='<div class="sc-social">'+
+    b('threads','Share to Threads',"socialShare('threads','"+slug+"','"+u+"','"+title+"')")+
+    b('instagram','Instagram Story',"shareReadStory('"+slug+"')")+
+    b('facebook','Share to Facebook',"socialShare('facebook','"+slug+"','"+u+"','"+title+"')")+
+    b('x','Share to X',"socialShare('x','"+slug+"','"+u+"','"+title+"')")+
+    b('whatsapp','Share to WhatsApp',"socialShare('whatsapp','"+slug+"','"+u+"','"+title+"')")+
+    b('copy','Copy link',"copyShareLink('"+slug+"','"+u+"')")+'</div>';
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Share this read</h2><p class="m-sub">Post it — every link leads straight back to the story on Well Seasoned.</p>'+
+    hero+'<div class="rsh-ttl">'+tEnc+'</div>'+
+    '<div class="sc-soc-lab" style="margin-top:16px">Post to</div>'+row+
+    (navigator.share?'<div style="display:flex;justify-content:center;margin-top:15px"><button class="btn btn-ink" onclick="nativeShareRead(\''+slug+'\')">More sharing options…</button></div>':''));
+  try{ track('article_share_open',{slug:slug}); }catch(e){}
+}
+function nativeShareRead(slug){
+  var a=_articleBySlug[slug]||{}, u=readShareUrl(slug);
+  if(navigator.share){ navigator.share({title:a.title||'Well Seasoned',text:(a.title||'A read')+' — Well Seasoned',url:u}).catch(function(){}); }
+  else copyShareLink(slug,u);
+}
+/* Instagram Story: build a branded 9:16 card (the piece's own art + title +
+   wordmark + itswellseasoned.com) and share the image via the device sheet,
+   or download it to post to a Story. IG has no web share-to-story intent, so
+   a saveable branded image is the honest path — and it carries the URL back. */
+function shareReadStory(slug){
+  var a=_articleBySlug[slug]; if(!a){ toast('Open the article first.'); return; }
+  try{ track('share_click',{id:slug,to:'instagram_story'}); }catch(e){}
+  buildReadStoryCard(a,function(c){
+    if(!c){ nativeShareRead(slug); return; }
+    try{
+      c.toBlob(function(bl){
+        if(!bl){ nativeShareRead(slug); return; }
+        var file=new File([bl],'well-seasoned-'+slug+'.png',{type:'image/png'});
+        var data={files:[file],title:a.title||'Well Seasoned',text:(a.title||'A read')+' — itswellseasoned.com'};
+        if(navigator.canShare&&navigator.canShare(data)){ navigator.share(data).catch(function(){}); }
+        else { var url=URL.createObjectURL(bl); var el=document.createElement('a'); el.href=url; el.download='well-seasoned-'+slug+'.png'; document.body.appendChild(el); el.click(); el.remove(); setTimeout(function(){URL.revokeObjectURL(url);},4000); toast('Story image saved — add it to your Instagram Story.'); }
+      },'image/png');
+    }catch(e){ nativeShareRead(slug); }
+  });
+}
+function _rsWrap(ctx,text,x,y,maxW,lh){
+  var words=String(text).split(' '), line='', yy=y;
+  for(var i=0;i<words.length;i++){
+    var test=line?line+' '+words[i]:words[i];
+    if(ctx.measureText(test).width>maxW && line){ ctx.fillText(line,x,yy); line=words[i]; yy+=lh; }
+    else line=test;
+  }
+  ctx.fillText(line,x,yy); return yy;
+}
+function buildReadStoryCard(a,cb){
+  var W=1080,H=1920,c=document.createElement('canvas'); c.width=W;c.height=H; var ctx=c.getContext('2d');
+  function draw(img){
+    ctx.fillStyle='#161210'; ctx.fillRect(0,0,W,H);
+    if(img&&img.width){
+      var ih=H*0.68, s=Math.max(W/img.width, ih/img.height), dw=img.width*s, dh=img.height*s;
+      try{ ctx.drawImage(img,(W-dw)/2,(ih-dh)/2,dw,dh); }catch(e){}
+    }
+    var g=ctx.createLinearGradient(0,H*0.30,0,H); g.addColorStop(0,'rgba(22,18,16,0)'); g.addColorStop(0.60,'rgba(22,18,16,.78)'); g.addColorStop(1,'#161210'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.textAlign='left';
+    ctx.fillStyle='#F4C542'; ctx.font='700 32px "DejaVu Sans Mono",monospace'; ctx.fillText('THE BALCONY', 84, H-560);
+    ctx.fillStyle='#F6ECD7'; ctx.font='400 64px Georgia,"Times New Roman",serif';
+    _rsWrap(ctx, a.title||'', 84, H-490, W-168, 74);
+    ctx.fillStyle='#E7A21B'; ctx.fillRect(84,H-150,54,5);
+    ctx.fillStyle='#EFE4CE'; ctx.font='800 34px "DejaVu Sans",sans-serif'; ctx.fillText('WELL SEASONED', 84, H-96);
+    ctx.fillStyle='#9C8C6E'; ctx.font='400 28px "DejaVu Sans Mono",monospace'; ctx.fillText('itswellseasoned.com', 84, H-56);
+    cb(c);
+  }
+  if(!a.hero_image){ draw(null); return; }
+  var img=new Image(); img.crossOrigin='anonymous';
+  img.onload=function(){ draw(img); };
+  img.onerror=function(){ draw(null); };
+  img.src=a.hero_image;
+}
+/* Featured people — parsed from the comma-separated `subject` field; rendered
+   as clickable profile chips adjacent to the article so readers open each
+   actor's page and keep exploring the site. */
+function articlePeople(a){
+  if(!a||!a.subject)return [];
+  return String(a.subject).split(',').map(function(s){return s.replace(/^\s+|\s+$/g,'');}).filter(Boolean);
+}
+var _readPersonPhotos={};
+function readPeopleHTML(a){
+  var names=articlePeople(a); if(!names.length)return '';
+  var cards=names.map(function(n){
+    var ph=_readPersonPhotos[n.toLowerCase()];
+    var av=ph?' style="background-image:url(\'https://image.tmdb.org/t/p/w185'+esc(ph)+'\')"':'';
+    return '<a class="rp-card" data-person="'+esc(n)+'" onclick="go(\'artist\',\''+esc(n)+'\')" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'artist\',\''+esc(n)+'\')">'+
+      '<span class="rp-av"'+av+'>'+(ph?'':esc(n.charAt(0).toUpperCase()))+'</span>'+
+      '<span class="rp-name">'+esc(n)+'<span>View profile</span></span></a>';
+  }).join('');
+  return '<div class="read-people"><div class="rp-lab">Featured in this story</div><div class="rp-row">'+cards+'</div></div>';
+}
+function hydrateReadPeople(a){
+  if(!TMDB_KEY)return;
+  articlePeople(a).forEach(function(n){
+    var key=n.toLowerCase();
+    if(_readPersonPhotos[key]!==undefined){ _applyPersonPhoto(n); return; }
+    _readPersonPhotos[key]=null;
+    fetch('https://api.themoviedb.org/3/search/person?api_key='+TMDB_KEY+'&query='+encodeURIComponent(n))
+      .then(function(r){return r.json();}).then(function(d){ var h=d&&d.results&&d.results[0]; _readPersonPhotos[key]=(h&&h.profile_path)||null; _applyPersonPhoto(n); })
+      .catch(function(){});
+  });
+}
+function _applyPersonPhoto(n){
+  var ph=_readPersonPhotos[n.toLowerCase()]; if(!ph)return;
+  var cards=document.querySelectorAll('.rp-card[data-person]');
+  for(var i=0;i<cards.length;i++){ if(cards[i].getAttribute('data-person')===n){ var av=cards[i].querySelector('.rp-av'); if(av){ av.style.backgroundImage='url(\'https://image.tmdb.org/t/p/w185'+ph+'\')'; av.textContent=''; } } }
 }
 /* Bleed-image magazine card — the photo IS the card (same "no chrome, real
    photo" convention as the shop lookbook), title/kind/meta overlaid at the
@@ -8619,8 +8750,8 @@ function renderRead(slug){
   var el=byId('readContent');
   function paint(a){
     var f=a.film_slug?find(a.film_slug):null;
-    var heroSubject=a.subject?'<div class="read-hero-subject">With '+esc(a.subject)+'</div>':'';
-    var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div>'+heroSubject+'</div>':(a.subject?'<div class="read-hero read-hero-plain">'+heroSubject+'</div>':'');
+    var heroSubject=(a.subject&&a.kind==='interview')?'<div class="read-hero-subject">With '+esc(a.subject)+'</div>':'';
+    var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div>'+heroSubject+'</div>':(heroSubject?'<div class="read-hero read-hero-plain">'+heroSubject+'</div>':'');
     var vid=ytId(a.video_url);
     var video=vid?'<div class="mf-trailer" style="margin:18px 0"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(vid)+'?rel=0&amp;modestbranding=1" title="'+esc(a.title)+'" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>':'';
     var kindLabel=(a.kind&&ARTICLE_KIND_LABEL[a.kind])||'The Balcony';
@@ -8633,9 +8764,10 @@ function renderRead(slug){
         (isOwner()?' · <a onclick="openArticleEditor(\''+esc(a.slug)+'\')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">✎ Edit</a>':'')+'</div>'+
       (f?'<a class="read-filmlink" onclick="go(\'film\',\''+esc(f.id)+'\')">On the film: '+esc(f.title)+' →</a>':'')+
       video+
-      '<div class="read-copy">'+mdToHtml(a.body)+'</div></article>';
+      '<div class="read-copy">'+mdToHtml(a.body)+'</div>'+readPeopleHTML(a)+'</article>';
     setDocMeta(a.title+' — Well Seasoned', a.dek||'A read from Well Seasoned.', '#/read/'+encodeURIComponent(a.slug), a.hero_image||(f&&f.poster)||null);
     window.scrollTo({top:0,behavior:'auto'});
+    hydrateReadPeople(a);
   }
   var cached=_articleBySlug[slug];
   if(cached && cached.body!=null){ paint(cached); return; }
@@ -8662,15 +8794,14 @@ function openArticleEditor(slug){
   }
   paintArticleEditor(slug);
 }
-function _arKindFieldsHTML(kind,subject,videoUrl){
-  if(kind==='article')return '';
-  return '<div class="field"><label for="arSubject">Who\'s the subject</label><input id="arSubject" value="'+esc(subject||'')+'" placeholder="e.g. the actor/director being interviewed"></div>'+
-    '<div class="field"><label for="arVideo">Video URL (optional)</label><input id="arVideo" value="'+esc(videoUrl||'')+'" placeholder="YouTube link — leave blank for a text-only piece"></div>';
+function _arKindFieldsHTML(kind,videoUrl){
+  if(kind!=='interview')return '';
+  return '<div class="field"><label for="arVideo">Video URL (interview, optional)</label><input id="arVideo" value="'+esc(videoUrl||'')+'" placeholder="YouTube link — leave blank for a text-only interview"></div>';
 }
 function arKindChanged(){
   var kind=(byId('arKind')||{}).value||'article';
   var wrap=byId('arKindFields'); if(!wrap)return;
-  wrap.innerHTML=_arKindFieldsHTML(kind,(byId('arSubject')||{}).value,(byId('arVideo')||{}).value);
+  wrap.innerHTML=_arKindFieldsHTML(kind,(byId('arVideo')||{}).value);
 }
 function paintArticleEditor(slug){
   var a=slug?(_articleBySlug[slug]||{}):{};
@@ -8680,7 +8811,8 @@ function paintArticleEditor(slug){
     '<div class="field"><label for="arKind">Kind</label><select id="arKind" onchange="arKindChanged()">'+
       [['article','Article / Review'],['interview','Interview'],['editorial','Editorial']].map(function(k){ return '<option value="'+k[0]+'"'+(kind===k[0]?' selected':'')+'>'+k[1]+'</option>'; }).join('')+
       '</select></div>'+
-    '<div id="arKindFields">'+_arKindFieldsHTML(kind,a.subject,a.video_url)+'</div>'+
+    '<div class="field"><label for="arSubject">People featured (comma-separated)</label><input id="arSubject" value="'+esc(a.subject||'')+'" placeholder="e.g. Colman Domingo, Nia Long — each name links to their profile"></div>'+
+    '<div id="arKindFields">'+_arKindFieldsHTML(kind,a.video_url)+'</div>'+
     '<div class="field"><label for="arTitle">Title</label><input id="arTitle" value="'+esc(a.title||'')+'" placeholder="Headline"></div>'+
     '<div class="field"><label for="arDek">Dek (subtitle)</label><input id="arDek" value="'+esc(a.dek||'')+'" placeholder="One line under the headline"></div>'+
     '<div class="field"><label for="arAuthor">Author</label><input id="arAuthor" value="'+esc(a.author||'The Founder')+'" placeholder="Byline"></div>'+

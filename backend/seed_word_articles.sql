@@ -241,3 +241,15 @@ The moonwalk, remember, was an illusion of physics: a man moving forward by givi
  '2026-07-14 18:00:00+00', '2026-07-14 18:00:00+00')
 
 on conflict (slug) do nothing;
+
+-- Featured people (comma-separated) — powers the "Featured in this story"
+-- profile chips on each article's read page (each name links to that actor's
+-- TMDB-backed profile). Set via update so it applies whether the row was just
+-- inserted or already existed. Names must match TMDB person search.
+update public.articles set subject='Jaafar Jackson, Colman Domingo, Nia Long, Antoine Fuqua' where slug='michael-billion-dollar-reckoning';
+update public.articles set subject='Colman Domingo' where slug='colman-domingo-was-never-waiting';
+update public.articles set subject='Michael B. Jordan, Ryan Coogler' where slug='the-genre-was-always-ours';
+update public.articles set subject='Ryan Coogler, Michael B. Jordan' where slug='ryan-coogler-bet-on-us';
+update public.articles set subject='Nia Long, Larenz Tate' where slug='the-case-for-black-romance';
+update public.articles set subject='Sanaa Lathan, Omar Epps' where slug='the-cookout-canon';
+update public.articles set subject='Julie Dash' where slug='streaming-keeps-losing-our-movies';

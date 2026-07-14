@@ -1669,3 +1669,35 @@ quotes or private scenes — immersion built from his real on-screen work +
 real awards history. Same title/dek/hero/slug; only prose deepened. Validated
 vs Postgres (7 rows, diner lead + 3 pull quotes, ~6.6k chars) and rendered on
 the dark read page (3 .read-pq, 10 paragraphs, zero console errors).
+
+## The Balcony: featured-actor profiles + social share on articles (2026-07-14)
+Owner: "anytime we feature an actor their profile [should be] adjacent to the
+article so people can click through and keep perusing," and "the share buttons
+on the articles should be dope and shareable to social — Threads, Instagram
+Stories, Facebook — stylize to that and lead back to the site."
+- **Featured people** — reuses the EXISTING `subject` column (comma-separated
+  names; no migration). `renderRead` now renders a "Featured in this story"
+  row (`readPeopleHTML`/`.read-people`/`.rp-*`) of clickable profile chips at
+  the end of the article — each links to `#/artist/<name>` (the TMDB-backed
+  actor page). Avatars hydrate from a live TMDB person search
+  (`hydrateReadPeople`, initial-letter fallback). The interview-only "With
+  <subject>" hero line is now gated to `kind==='interview'`, so features use
+  `subject` purely as the featured-people list. The editor exposes a "People
+  featured (comma-separated)" field for ALL kinds (was interview-only);
+  `publish_article` already persists `subject`, so no RPC change. Seed sets
+  `subject` per article via idempotent `update` statements (Michael → Jaafar
+  Jackson/Colman Domingo/Nia Long/Antoine Fuqua; Domingo → Colman Domingo;
+  etc.).
+- **Social share sheet** — `shareRead` now opens a branded modal
+  (`openReadShare`) instead of a bare navigator.share: hero + serif title +
+  a one-tap row of Threads / Instagram Story / Facebook / X / WhatsApp / Copy
+  (`.sc-instagram` gradient added). Threads/FB/X/WhatsApp use the existing
+  `socialShare` with the `/read/<slug>` URL (its own OG card, bounces back to
+  the site). Instagram Story (`shareReadStory`/`buildReadStoryCard`) builds a
+  branded 1080×1920 canvas card (the piece's art + title + wordmark +
+  itswellseasoned.com) and shares the image via the device sheet, or downloads
+  it to post to a Story — IG has no web share-to-story intent, so a saveable
+  branded image is the honest path, and it carries the URL back. Verified in
+  headless Chromium: chips render + link to #/artist, share modal shows 6
+  branded buttons incl. Instagram, the 1080×1920 card builds, editor field
+  present, zero console errors.
