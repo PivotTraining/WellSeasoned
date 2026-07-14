@@ -40,7 +40,7 @@ A moment ends. This doesn't. From Gunn to Kasi Lemmons's *Eve's Bayou* to DaCost
 
 The genre was always ours. We're just finally the ones getting paid to admit it.$md$,
  'The Founder', 'sinners',
- 'https://image.tmdb.org/t/p/w1280/nAxGnGHOsfzufThz20zgmRwKur3.jpg', 'center',
+ 'https://itswellseasoned.com/word/the-genre-was-always-ours.jpg', 'center',
  'editorial', true,
  '2026-07-14 14:00:00+00', '2026-07-14 14:00:00+00'),
 
@@ -70,7 +70,7 @@ We talk a lot on this site about scores earned and never bought. Coogler's whole
 
 Every film was a bet that we would show up for something made with our full complexity intact. We keep proving him right.$md$,
  'The Founder', null,
- 'https://image.tmdb.org/t/p/w1280/u0nAnvRdzAGgDYLyfIbAUBDOcpb.jpg', 'center',
+ 'https://itswellseasoned.com/word/ryan-coogler-bet-on-us.jpg', 'center',
  'article', true,
  '2026-07-14 13:00:00+00', '2026-07-14 13:00:00+00'),
 
@@ -100,7 +100,7 @@ Here's the argument, plainly: a people who are constantly asked to justify their
 
 We should fund it like we mean it. Until the industry does, we'll keep pulling these films up ourselves, one rewatch at a time.$md$,
  'The Founder', null,
- 'https://image.tmdb.org/t/p/w1280/e9ZX5bzErTNVACJ4bBRlCmmsPMJ.jpg', 'center',
+ 'https://itswellseasoned.com/word/the-case-for-black-romance.jpg', 'center',
  'editorial', true,
  '2026-07-14 12:00:00+00', '2026-07-14 12:00:00+00'),
 
@@ -130,7 +130,7 @@ On Well Seasoned these titles sit next to the heavy hitters on purpose. A canon 
 
 Pull up a chair. Somebody's about to quote the whole first act.$md$,
  'The Founder', null,
- 'https://image.tmdb.org/t/p/w1280/jF71CkY9bHyWvZTNQUThyzecXYb.jpg', 'center',
+ 'https://itswellseasoned.com/word/the-cookout-canon.jpg', 'center',
  'article', true,
  '2026-07-14 11:00:00+00', '2026-07-14 11:00:00+00'),
 
@@ -158,8 +158,50 @@ This is the unglamorous reason a curated catalog matters. Not to compete with an
 
 Keeping track of our own work is not nostalgia. It's maintenance. Somebody has to write down where the culture is kept, or one day we'll go looking for it and the shelf will be empty.$md$,
  'The Founder', null,
- 'https://image.tmdb.org/t/p/w1280/l8ofJ0ErKaL5F3JKmYVn4aa4i1w.jpg', 'center',
+ 'https://itswellseasoned.com/word/streaming-keeps-losing-our-movies.jpg', 'center',
  'editorial', true,
- '2026-07-14 10:00:00+00', '2026-07-14 10:00:00+00')
+ '2026-07-14 10:00:00+00', '2026-07-14 10:00:00+00'),
+
+-- 6) FEATURE — Colman Domingo (cover story; newest) --------------------------
+('colman-domingo-was-never-waiting',
+ 'They Didn''t Discover Colman Domingo. They Stalled Him.',
+ $d$Five Black men have won Best Actor in the Academy's near-century. A thirty-eight-year silence sits in the middle of that record. Domingo's late ascent isn't the system working — it's a man outlasting a machine built to wait him out.$d$,
+ $md$Let's start with a number, because the number is the whole argument.
+
+In the roughly one hundred years the Academy has handed out its trophy for Best Actor, five Black men have won it. Five. Sidney Poitier in 1964. Then nothing — a silence you could raise a child in, send them to college, and bury a parent inside of — until Denzel Washington in 2002, thirty-eight years later. Jamie Foxx. Forest Whitaker. Will Smith. That's the list. That's the entire list.
+
+And when the silence finally broke, look at what broke it. Denzel had already lost as Malcolm X. He'd lost as Rubin "Hurricane" Carter, a wrongly convicted man. The Academy handed him the lead statue for *Training Day* — for playing a crooked narcotics cop, a Black man as predator, the safest possible thing for that room to reward. The pattern is not subtle once you've seen it. Black menace gets the trophy. Black dignity gets a nomination and a limo home.
+
+This is the industry that "discovered" Colman Domingo. Keep that number in your pocket. We'll need it.
+
+## The thirty years they didn't watch
+
+Domingo was born in West Philadelphia in 1969, which means that when the world decided he was a revelation, he was fifty-four years old and had been doing the work in plain sight since before some of the people writing his rediscovery were born.
+
+The stage had him for decades — a Tony nomination for *The Scottsboro Boys* in 2011, the kind of credit the film industry files under *respectable* and *ignorable*. Television let a mass audience finally register the voice through *Fear the Walking Dead*. And then *Euphoria* handed him Ali, the recovering addict who does nothing across two seasons but sit in a diner booth and a church basement and *listen* to a teenage girl — and Domingo turned listening into an Emmy in 2022.
+
+Here is the part the discovery story skips: none of this was latent. He wasn't unformed, waiting to be developed by some visionary. He was *finished* — a complete actor, fully in command — for the entire stretch that the business had no lead role for a middle-aged Black character man. The talent didn't ripen late. The industry's attention arrived late, and then had the nerve to call its own delay a fairy tale.
+
+## What they still wouldn't give him
+
+Then came the two years that are supposed to prove the machine works. They prove the opposite.
+
+*Rustin*, 2023: Domingo plays Bayard Rustin, the gay architect of the 1963 March on Washington, a man the movement itself shoved to the margins for being inconvenient. The nomination made Domingo the first Afro-Latino ever nominated for Best Actor, and the first Black gay man nominated for playing a gay character. Sit with how late those firsts are arriving — 2024, not 1974. He lost.
+
+*Sing Sing*, 2024: he plays Divine G, an incarcerated man performing his way toward his own humanity, made alongside the formerly incarcerated men of the real Rehabilitation Through the Arts program. And here Domingo did something the industry treats as heresy — he co-produced a film where *everyone got the same day rate*, the star and the youngest crew member paid identically, more than eighty artists holding real equity and cashing checks before a single ticket sold. A working rebuke to an industry whose entire architecture is built on paying the powerful more and everyone else in exposure. Back-to-back Best Actor nominations, a genuine rarity. He lost again.
+
+Twice to the front of that room. Twice sent home. And I want to be precise about what that is, because the polite version — *what an honor just to be nominated* — is a sedative. A category that has produced five Black winners in a century, whose companion prize for Black women has produced exactly one, ever — Halle Berry, in 2002, still alone up there a quarter-century later — is not a meritocracy having an off decade. It is a preference, expressed consistently, over a very long time.
+
+## The patience was a strategy
+
+So drop the discovery story entirely. It flatters the wrong party.
+
+The real story is a man who understood the arithmetic better than anyone and simply refused to be subtracted. The industry treats a Black actor's age as depreciation — use him young, discard him at forty, hand him the pastor and the ghost. Domingo inverted the math. Every year the room stayed turned away, he was compounding: the theater discipline, the supporting parts where he had to build a whole man before the scene cut, the flat refusal to play only the reduced version on offer. He didn't arrive late. He arrived with thirty years of interest the industry never thought it would have to pay.
+
+The numbers say the machine was built to run out the clock on him. He ran it out on the machine instead — and even now, holding two nominations and no trophy, standing exactly where the record predicted the door would stay shut, he is the most alive thing in the room. That's not gratitude. That's a verdict. He was this good the whole time. The only thing that ever needed discovering was the industry's willingness to admit it.$md$,
+ 'The Founder', null,
+ 'https://itswellseasoned.com/word/colman-domingo-was-never-waiting.jpg', 'center',
+ 'article', true,
+ '2026-07-14 15:00:00+00', '2026-07-14 15:00:00+00')
 
 on conflict (slug) do nothing;

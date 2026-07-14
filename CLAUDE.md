@@ -1462,3 +1462,40 @@ topics we can discuss and write them. Five articles."
   editorial/2 article), cover ordering correct, re-run inserts 0.
   Requires the magazine migration (kind/video_url/subject) to be live first —
   it is (owner ran it this session).
+
+## The Word: Colman Domingo cover feature + house photo-treatment (2026-07-14)
+Owner: "Write a feature piece on the industry or an actor... Vanity Fair
+level... New York Magazine like," then "more combative and well researched,"
+then "merge it all. artistically for the photos create something that
+stands out."
+- **Feature added** ("They Didn't Discover Colman Domingo. They Stalled
+  Him.") — a combative, sourced critical feature (NOT a reported profile —
+  zero fabricated quotes/scenes, "nothing fake"). Every stat verified via web
+  research: five Black Best Actor winners in ~a century; the 38-year
+  Poitier→Denzel gap; Denzel's lead win for a "crooked cop"; Domingo first
+  Afro-Latino / first Black gay man nominated for playing a gay character
+  (Rustin, 2024); back-to-back noms (Rustin/Sing Sing) with no win; Sing Sing
+  equal-pay/profit-share model; Halle Berry still the sole Black Best Actress
+  winner. Seeded as the newest piece → it's the cover story on #/word.
+- **House photo-treatment for all six pieces** — instead of raw TMDB stills,
+  `scratchpad/gen_word_art.js` renders a cohesive editorial-poster treatment
+  (Playwright → JPG, 1200×1600 @1.5x): the real film still graded toward the
+  brand palette (desaturate+warm+contrast), a soft-light brand wash, a frozen
+  gold spotlight + light streak, vignette, real SVG-turbulence film grain, a
+  hairline gold frame, and the foil salt-shaker mark top-left. Committed to
+  `/word/<slug>.jpg` (served as static files by Vercel — no rewrite catches
+  `/word/*`; verified vercel.json) and referenced as
+  `https://itswellseasoned.com/word/<slug>.jpg` in the seed. Deliberately
+  bakes NO title/kind text into the art — the site overlays those on the card
+  (`.wc-body`) and would clash; the treatment is purely visual so it reads as
+  a curated magazine's house style under the live typography. Sources per
+  still: Sinners / Fruitvale Station / Love Jones / Love & Basketball /
+  Daughters of the Dust / Rustin (Domingo) — all real, license-consistent
+  with the site's existing TMDB imagery. The Domingo hero is the real Rustin
+  still (the March reflected in his glasses) — genuinely his image, not a
+  fabricated portrait.
+- Seed now carries 6 pieces (3 features / 3 editorials), validated against a
+  throwaway Postgres 16 (INSERT 0 6, cover ordering correct, idempotent).
+  Still owner-run: paste `backend/seed_word_articles.sql` into the Supabase
+  SQL editor once to publish (this env can't auth to `publish_article`). The
+  art deploys with the push, so the hero URLs resolve by the time it's run.
