@@ -1741,3 +1741,26 @@ premieres in the window — both fact-checked via web search before going live
   video angles — the banner surfacing is the piece the owner pointed at.
   Unconfirmed items from the brief (I Love Boosters streaming date, specific
   BlackStar 2026 lineup) were deliberately left off pending confirmation.
+
+## Showtimes button gated to real theatrical runs + "Coming" date badge (2026-07-14)
+Owner: "make sure everything that's not in theaters does not have the showtime
+button." Root issue: the film page's Where-to-watch row had a standalone
+"Showtimes" button gated only on `f.type!=='tv'`, so EVERY movie (back-catalog,
+streaming-only, unreleased) showed it. Fixes:
+- Removed that ungated button. Showtimes/tickets now live ONLY in the already-
+  gated `ticketBlockHTML` "Get tickets" block, which shows only for titles
+  verified against the live TMDB now-playing list (`_npTitles`).
+- New `upcomingReleaseDate(f)`: if a title has a Coming Soon entry dated later
+  than today, it isn't out yet. `ticketBlockHTML` returns '' for such titles,
+  and the Theaters-page provisional list (the pre-verification `f.year>=now`
+  best-guess) now excludes them — so a Sept-2026 Netflix release like "Why Did
+  I Get Married Again?" no longer appears on "In Theaters" with a showtimes
+  button.
+- Film page now shows a "🗓 Coming <date> — not out yet" badge for any title
+  with a future Coming Soon date (directly answers "put a date on it"). "Why
+  Did I Get Married Again?" is confirmed Netflix **Sep 9, 2026** (verified via
+  web); the date already showed on the home hero feature + Coming Soon, now on
+  the film page too.
+- Verified in headless Chromium: WDIGMA film page has 0 showtimes buttons + the
+  Coming badge; a film forced into the now-playing list still gets "Get
+  tickets"; zero console errors.

@@ -686,6 +686,7 @@
   .room-where .where-lab{color:rgba(246,236,215,.72)}
   .room-where .svc-all,.room-where .svc-show{cursor:pointer;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.12);color:#fff}
   .room-where .svc-all:hover,.room-where .svc-show:hover{background:rgba(255,255,255,.2)}
+  .coming-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 13px;border-radius:999px;font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.03em;color:#F6ECD7;background:rgba(228,155,11,.18);border:1px solid rgba(228,155,11,.5)}
   .ticket-block{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;padding:10px 14px;background:rgba(228,155,11,.14);border:1px solid rgba(228,155,11,.4);border-radius:var(--r)}
   .ticket-ey{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-soft)}
   .ticket-via{font-size:12px;color:rgba(246,236,215,.7)}
@@ -6665,9 +6666,13 @@ function renderFilm(id){
           '<div class="room-lead">'+
             '<h1>'+esc(f.title)+'</h1>'+
             '<div class="room-meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+effGenre(f)+(f.type==='tv'?' &nbsp;·&nbsp; <strong>Series</strong>':'')+'</div>'+
+            (upcomingReleaseDate(f)?'<div class="coming-badge">🗓 Coming '+artDate(upcomingReleaseDate(f))+' — not out yet</div>':'')+
             '<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
-              '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a>'+
-              (f.type!=='tv'?'<button class="svc svc-show" onclick="openShowtimes(\''+f.id+'\')">Showtimes</button>':'')+'</div>'+
+              '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a></div>'+
+            /* Showtimes/tickets live ONLY in the gated ticket block below — it
+               shows for films verified against the live TMDB now-playing list,
+               so a streaming-only or back-catalog title never gets a showtimes
+               button implying a theatrical run it doesn't have. */
             '<div id="ticketBlockWrap">'+ticketBlockHTML(f)+'</div>'+
             '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="openShareCard(\''+f.id+'\')">Share</button></div>'+
             myWatchWidgetHTML(f)+
@@ -8304,7 +8309,18 @@ function fandangoUrl(title){
    streaming-only title would imply a theatrical run that doesn't exist.
    Label is deliberately its own attribution line, never blended into the
    button copy or synopsis, so it never reads as editorial content. */
+/* If this title has a Coming Soon entry dated later than today, it isn't out
+   yet — returns that ISO date. Used to (a) keep showtimes/ticket buttons off
+   unreleased titles and (b) show a "Coming <date>" badge on the film page. */
+function upcomingReleaseDate(f){
+  if(!f||f.type==='tv'||!f.title)return null;
+  var today=new Date().toISOString().slice(0,10), t=f.title.toLowerCase();
+  var list=(typeof COMING_SOON!=='undefined'&&COMING_SOON)||[];
+  for(var i=0;i<list.length;i++){ var c=list[i]; if(c&&c.title&&c.date&&c.date>today&&c.title.toLowerCase()===t) return c.date; }
+  return null;
+}
 function ticketBlockHTML(f){
+  if(upcomingReleaseDate(f)) return '';   // not released yet — never "in theaters now"
   // f.year>=now alone is too broad — it also flags stand-up specials and
   // straight-to-streaming 2026 titles that never had a theatrical run, which
   // is dishonest by implication. Only show once verified against the same
@@ -9029,8 +9045,10 @@ function loadNowPlaying(cb){
 }
 function renderTheaters(){
   var now=new Date().getFullYear();
-  // provisional list while the live Now Playing check runs: this year's titles
-  var inTheaters=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && f.year>=now; });
+  // provisional list while the live Now Playing check runs: this year's titles,
+  // MINUS anything with a known future release date (a Coming Soon entry dated
+  // later than today is not in theaters yet — no showtimes button for it).
+  var inTheaters=FILMS.filter(function(f){ return !f.noart && f.type!=='tv' && f.year>=now && !upcomingReleaseDate(f); });
   renderTheatersList(inTheaters,false);   // provisional paint first...
   loadNowPlaying(function(titles){         // ...so the verified list always lands last,
     var on=document.querySelector('.view.on');   // even when the cache answers synchronously
