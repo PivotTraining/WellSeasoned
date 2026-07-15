@@ -1887,3 +1887,38 @@ Supabase dashboard — this goes further with a per-user directory).
   directory, filter counts (Registered·3/Critics·1/Writers·1/Voters·4),
   default sort by last-seen, sort-by-votes, and search all correct, zero
   console errors; desktop + mobile.
+
+## The Pulse: promote members → critics + invite (2026-07-15)
+Owner: "move comments from my members to critics side… some signed up but
+skipped the separate critic sign-up… move those people to critics or invite
+them if they have commented on a lot of movies." Added owner-side promotion
+straight from the Pulse user directory (no application needed):
+- **New "Move / invite" column** on the `.pulse-table` — for any registered
+  (email) member: **Make critic** (gold) + **Invite ✉**; for a seated critic:
+  **Remove critic**; anon/no-email rows show "—". `pulseMakeCritic(email)`
+  reuses the SAME owner-gated `verify_critic` RPC the applications inbox uses
+  to seat an applicant (flips `profiles.is_critic`; coalesces bio/avatar so a
+  member with no application row just becomes a critic cleanly), then shows the
+  existing `seatedConfirm` modal (with its "email them the news" button) and
+  refreshes the directory so the row flips to Critic. `pulseRemoveCritic`
+  (verify_critic p_on:false, with confirm) and `pulseInvite` (a pre-filled
+  mailto nudge that name-checks their comment count, does NOT promote — for
+  when the owner wants to ask first) round it out. No new backend — all three
+  reuse verify_critic / notifyContributor patterns already in the inbox.
+- **New "Commenters" filter chip** (users with comments > 0) + the Comments
+  column now highlights (gold) when > 0 — so the owner can sort/filter to the
+  most active commenters and promote or invite them in one click. Directly
+  answers "invite them if they have commented on a lot."
+- NOTE on "move their comments to the critic side": a member's existing Table
+  comments stay comments (a Kitchen review is a *scored* review the critic
+  writes — fabricating scored reviews from unscored comments would break
+  "nothing fake"). Promoting makes them a critic going FORWARD; standout past
+  comments can still be featured via the existing set_comment_featured flow.
+- Still TODO (member-facing, flagged to owner as a separate auth/UX change,
+  not built this pass): making the critic path more discoverable at sign-up so
+  members don't skip it — e.g. a "Become a critic" CTA on the member's own You
+  page. Owner-side promotion (this entry) covers the immediate "move them" ask.
+- Verified in headless Chromium (mocked verify_critic): member row shows Make
+  critic + Invite, critic row shows Remove; clicking Make critic POSTs
+  verify_critic with the right p_email, the row flips to a Critic badge on
+  refresh; Commenters filter narrows to comments>0; zero console errors.

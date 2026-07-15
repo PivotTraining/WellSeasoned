@@ -451,7 +451,15 @@
   .pulse-badge.writ{background:rgba(190,59,24,.14);color:var(--paprika)}
   .pulse-badge.reg{background:var(--inset);color:var(--ink-2)}
   .pulse-badge.anon{background:transparent;color:var(--ink-3);border:1px dashed var(--line)}
-  @media (max-width:640px){ .pulse-table{font-size:12.5px} .pulse-table td,.pulse-table th{padding:8px 9px} }
+  .pulse-table th.ta,.pulse-table td.ta{text-align:right;white-space:nowrap}
+  .pulse-table th.ta{cursor:default}
+  .pu-act{display:inline-block;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;border:1px solid var(--line);cursor:pointer;margin-left:6px;white-space:nowrap;line-height:1.2}
+  .pu-act.gold{background:var(--gold);border-color:var(--gold);color:#3a2a06}
+  .pu-act.gold:hover{filter:brightness(1.05)}
+  .pu-act.ghost{background:transparent;color:var(--ink-2)}
+  .pu-act.ghost:hover{background:var(--inset);color:var(--ink)}
+  .pu-act-none{color:var(--ink-3)}
+  @media (max-width:640px){ .pulse-table{font-size:12.5px} .pulse-table td,.pulse-table th{padding:8px 9px} .pu-act{margin-left:4px;padding:4px 8px} }
   /* Admin — Critic posts tab */
   .cr-row{display:flex;gap:12px;padding:12px 13px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel)}
   .cr-body{flex:1;min-width:0}
@@ -6429,10 +6437,10 @@ function loadUserDirectory(){
 }
 function pulseFilters(){
   if(!_pulseRows)return [];
-  var reg=0,crit=0,writ=0,voters=0;
+  var reg=0,crit=0,writ=0,voters=0,commenters=0;
   for(var i=0;i<_pulseRows.length;i++){ var u=_pulseRows[i];
-    if(!u.is_anonymous&&u.email)reg++; if(u.is_critic)crit++; if(u.is_writer)writ++; if(u.votes>0)voters++; }
-  return [['all','Everyone',_pulseRows.length],['registered','Registered',reg],['critics','Critics',crit],['writers','Writers',writ],['voters','Voters',voters]];
+    if(!u.is_anonymous&&u.email)reg++; if(u.is_critic)crit++; if(u.is_writer)writ++; if(u.votes>0)voters++; if(u.comments>0)commenters++; }
+  return [['all','Everyone',_pulseRows.length],['registered','Registered',reg],['commenters','Commenters',commenters],['critics','Critics',crit],['writers','Writers',writ],['voters','Voters',voters]];
 }
 function renderPulseChips(){
   var el=byId('pulseChips'); if(!el)return;
@@ -6448,6 +6456,7 @@ function renderPulseTable(){
   var q=(byId('pulseSearch')&&byId('pulseSearch').value||'').toLowerCase().trim();
   var rows=_pulseRows.filter(function(u){
     if(_pulseFilter==='registered'&&(u.is_anonymous||!u.email))return false;
+    if(_pulseFilter==='commenters'&&!(u.comments>0))return false;
     if(_pulseFilter==='critics'&&!u.is_critic)return false;
     if(_pulseFilter==='writers'&&!u.is_writer)return false;
     if(_pulseFilter==='voters'&&!(u.votes>0))return false;
@@ -6463,23 +6472,70 @@ function renderPulseTable(){
   });
   var c=byId('pulseDirCount'); if(c)c.textContent=rows.length+' user'+(rows.length===1?'':'s');
   function th(col,label,cls){ var on=_pulseSort===col; return '<th class="'+(cls||'')+(on?' sorted':'')+'" onclick="pulseSort(\''+col+'\')">'+label+(on?(_pulseDir<0?' ↓':' ↑'):'')+'</th>'; }
-  var head='<thead><tr>'+th('name','User')+th('is_critic','Role','tc')+th('reviews','Reviews','tn')+th('votes','Votes','tn')+th('comments','Comments','tn')+th('events','Visits','tn')+th('last_seen','Last seen','td')+th('created_at','Joined','td')+'</tr></thead>';
+  var head='<thead><tr>'+th('name','User')+th('is_critic','Role','tc')+th('reviews','Reviews','tn')+th('votes','Votes','tn')+th('comments','Comments','tn')+th('events','Visits','tn')+th('last_seen','Last seen','td')+th('created_at','Joined','td')+'<th class="ta">Move / invite</th></tr></thead>';
   var body=rows.map(function(u){
     var who=u.name?esc(u.name):(u.email?esc(u.email):(u.is_anonymous?'Anonymous':'—'));
     var sub=u.name&&u.email?esc(u.email):(u.critic_outlet?esc(u.critic_outlet):'');
     var role=u.is_critic?'<span class="pulse-badge crit">Critic</span>':(u.is_writer?'<span class="pulse-badge writ">Writer</span>':(u.is_anonymous?'<span class="pulse-badge anon">Anon</span>':'<span class="pulse-badge reg">Member</span>'));
+    var act='';
+    if(u.is_anonymous||!u.email){ act='<span class="pu-act-none">—</span>'; }
+    else if(u.is_critic){ act='<button class="pu-act ghost" onclick="pulseRemoveCritic(\''+esc(u.email)+'\')">Remove critic</button>'; }
+    else {
+      act='<button class="pu-act gold" onclick="pulseMakeCritic(\''+esc(u.email)+'\')">Make critic</button>'+
+          '<button class="pu-act ghost" onclick="pulseInvite(\''+esc(u.email)+'\')" title="Email an invite to join The Kitchen">Invite ✉</button>';
+    }
     return '<tr>'+
       '<td class="tuser"><span class="pu-name">'+who+'</span>'+(sub?'<span class="pu-sub">'+sub+'</span>':'')+'</td>'+
       '<td class="tc">'+role+'</td>'+
       '<td class="tn'+(u.reviews>0?' hot':'')+'">'+(u.reviews||0)+'</td>'+
       '<td class="tn">'+(u.votes||0)+'</td>'+
-      '<td class="tn">'+(u.comments||0)+'</td>'+
+      '<td class="tn'+(u.comments>0?' hot':'')+'">'+(u.comments||0)+'</td>'+
       '<td class="tn">'+(u.events||0)+'</td>'+
       '<td class="td">'+_pulseFmtDate(u.last_seen)+'</td>'+
       '<td class="td">'+_pulseFmtDate(u.created_at)+'</td>'+
+      '<td class="ta">'+act+'</td>'+
     '</tr>';
   }).join('');
-  t.innerHTML='<table class="pulse-table">'+head+'<tbody>'+(body||'<tr><td colspan="8" class="empty-note" style="text-align:center">No users match.</td></tr>')+'</tbody></table>';
+  t.innerHTML='<table class="pulse-table">'+head+'<tbody>'+(body||'<tr><td colspan="9" class="empty-note" style="text-align:center">No users match.</td></tr>')+'</tbody></table>';
+}
+function _pulseRowByEmail(email){ if(!_pulseRows)return null; for(var i=0;i<_pulseRows.length;i++){ if(_pulseRows[i].email===email)return _pulseRows[i]; } return null; }
+/* Promote a member straight to critic from the dashboard (no application
+   needed) — reuses the same owner-gated verify_critic RPC the inbox uses to
+   seat an applicant. Their existing Table comments stay as comments; being a
+   critic lets them post Kitchen reviews (scored) going forward. On success we
+   show the seated-confirm modal with an "email them the news" button, then
+   refresh the directory so the row flips to Critic. */
+function pulseMakeCritic(email){
+  if(!email||!sbConfigured())return;
+  var u=_pulseRowByEmail(email), nm=u&&u.name;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(ok){
+      if(ok){ toast('Seated as critic — their reviews now move the Kitchen.'); seatedConfirm('critic',email,nm); loadUserDirectory(); }
+      else { toast('No account with that email yet — they need to sign in once first.'); }
+    })
+    .catch(function(){ toast('Couldn’t seat — make sure you’re signed in as the owner.'); });
+}
+function pulseRemoveCritic(email){
+  if(!email||!sbConfigured())return;
+  if(!window.confirm('Remove this critic? Their seat is revoked and their reviews stop moving the Kitchen score.'))return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
+    .then(function(){ toast('Critic removed. Seat revoked.'); loadUserDirectory(); })
+    .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
+}
+/* Invite (don't promote yet) — opens a pre-filled email nudging an active
+   member to join The Kitchen, name-checking how much they've engaged. */
+function pulseInvite(email){
+  if(!email)return;
+  var u=_pulseRowByEmail(email), nm=u&&u.name;
+  var tally=u?(u.comments||0):0;
+  var subj='Come sit at The Kitchen — Well Seasoned';
+  var body='Hi '+(nm||'there')+',\n\n'+
+    'We’ve noticed how active you’ve been on Well Seasoned'+(tally?(' — '+tally+' comment'+(tally===1?'':'s')+' and counting'):'')+'. That’s exactly the voice The Kitchen is built on.\n\n'+
+    'We’d love to seat you as a verified critic, where your reviews move the official Kitchen score. If you’re in, just reply to this email and we’ll set you up.\n\n'+
+    'Welcome to the table.\n— Well Seasoned\nhttps://itswellseasoned.com';
+  window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
 function renderCurPageList(){
   var el=byId('curPageList'); if(!el)return;
