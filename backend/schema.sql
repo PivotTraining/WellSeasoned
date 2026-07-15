@@ -640,3 +640,76 @@ begin
 end $$;
 revoke all on function public.admin_dashboard_stats(text) from public;
 grant execute on function public.admin_dashboard_stats(text) to anon, authenticated;
+
+-- ========================================================
+-- TITLE SUGGESTIONS (2026-07-15)
+-- Lets any visitor suggest a real film/series we're MISSING from the catalog
+-- (distinct from public.film_submissions, which is indie-filmmaker intake for
+-- their OWN work — screeners, loglines, "a human watches your film"). This is
+-- a catalog-gap request: "you don't have Love & Basketball, add it." Surfaced
+-- to the owner in the #/curate "Suggestions" tab.
+--
+-- NOT YET APPLIED LIVE — paste this whole block into the Supabase SQL editor
+-- once (same pending-migration pattern as the magazine columns +
+-- admin_dashboard_stats above). Until then the client degrades gracefully:
+-- the suggest form shows a friendly "couldn't send" message and the admin tab
+-- shows a one-line "run the SQL" hint instead of erroring.
+create table if not exists public.title_suggestions (
+  id         uuid primary key default gen_random_uuid(),
+  title      text not null,
+  year       text,
+  note       text,
+  email      text,
+  device_id  text,
+  user_id    uuid,
+  status     text not null default 'new',
+  created_at timestamptz not null default now()
+);
+alter table public.title_suggestions enable row level security;
+-- Anyone (including silent-anon identities running as role `authenticated`)
+-- can drop a suggestion. No public SELECT policy — the queue can only be read
+-- through the owner-gated RPC below, so suggester emails can't be enumerated.
+drop policy if exists title_sugg_insert on public.title_suggestions;
+create policy title_sugg_insert on public.title_suggestions for insert to anon, authenticated with check (true);
+
+-- Owner-gated read of the suggestion queue. Same auth gate as
+-- admin_dashboard_stats/verify_critic: owner login OR the curation_admin
+-- passphrase. Returns rows as json (SECURITY DEFINER bypasses the missing
+-- SELECT policy only for a verified admin).
+create or replace function public.list_title_suggestions(p_secret text default null)
+returns json language plpgsql security definer set search_path = public as $$
+declare expected text;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  return coalesce((
+    select json_agg(t) from (
+      select id, title, year, note, email, status, created_at
+      from public.title_suggestions
+      order by created_at desc
+      limit 500
+    ) t
+  ), '[]'::json);
+end $$;
+revoke all on function public.list_title_suggestions(text) from public;
+grant execute on function public.list_title_suggestions(text) to anon, authenticated;
+
+-- Owner-gated status change (new | reviewed | added | passed).
+create or replace function public.set_title_suggestion_status(p_secret text, p_id uuid, p_status text)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare expected text; n int;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  update public.title_suggestions set status = p_status where id = p_id;
+  get diagnostics n = row_count;
+  return n > 0;
+end $$;
+revoke all on function public.set_title_suggestion_status(text, uuid, text) from public;
+grant execute on function public.set_title_suggestion_status(text, uuid, text) to anon, authenticated;

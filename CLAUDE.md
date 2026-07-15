@@ -1764,3 +1764,71 @@ streaming-only, unreleased) showed it. Fixes:
 - Verified in headless Chromium: WDIGMA film page has 0 showtimes buttons + the
   Coming badge; a film forced into the now-playing list still gets "Get
   tickets"; zero console errors.
+
+## Showtimes modal reframed as a Fandango hand-off (2026-07-15)
+Owner (screenshot of Toy Story 5 → "No live showtimes near 30024"): "this
+feels like it is wrong and something isnt working because this movie just
+came out." Diagnosed against the live endpoint
+(`/api/showtimes?...&debug=1`): **the code is working correctly** — the
+`SERPAPI_KEY` IS set in Vercel (the endpoint resolves canonical locations and
+returns `knowledge_graph`/`organic_results`, not a 501), but SerpApi's
+`engine=google` returns **zero `showtimes` panel for every query** —
+confirmed empty for Toy Story 5 AND Superman, in Atlanta, LA, and 30024
+(`showtimes_len:0` every time). This is the documented provider limitation
+(Google no longer reliably exposes the classic showtimes panel to SerpApi's
+general google engine), not a regression from the recent showtimes-button
+gating. Since the live theater list can essentially never populate, the old
+fallback copy ("No live showtimes near X right now…") read as a broken
+search. Fix (`sampleShowtimes`, index.html): reframed the fallback as a
+confident **ticketing hand-off** — "Get tickets for <title>", a primary
+"Find showtimes on Fandango ↗" button, "Google showtimes ↗" backup, and a
+"Powered by Fandango" note — which is the actual ticketing path anyway (and
+the Fandango-affiliate monetization goal). The live `/api/showtimes` proxy
+still runs in the background and silently upgrades to a real theater list on
+the rare occasion it returns one (`renderRealShowtimes` unchanged), so this
+is the honest default state, not an error. "Nothing fake" held — no
+fabricated theaters/times, we hand off to the real source. Verified in
+headless Chromium: the modal now leads with "Get tickets for Sinners" +
+Fandango CTA + attribution, zero console errors. NOTE for the owner: to ever
+show an in-app theater list, we'd need a showtimes data source that actually
+returns theaters (SerpApi's google engine does not for this account) — flag
+if that becomes a priority; Fandango's own affiliate deep link is the
+reliable path today.
+
+## Suggest a title — viewer catalog-gap requests → admin (2026-07-15)
+Owner: "There should also be a way people can suggest a movie we don't have
+in the catalog that will show in the admin page." Distinct from the existing
+indie-filmmaker intake (`submitFilm` → `film_submissions`, a maker
+submitting their OWN work with a screener link) — this is a viewer telling us
+we're MISSING a real, existing title ("you don't have Love & Basketball").
+Built end to end:
+- **Backend** (`backend/schema.sql`, marked block) — new `title_suggestions`
+  table (title/year/note/email/device_id/user_id/status/created_at), RLS with
+  a public INSERT policy (anon + authenticated, so silent-anon identities can
+  submit) and NO public SELECT (emails can't be enumerated). Owner-gated read
+  via SECURITY DEFINER `list_title_suggestions(p_secret)` and status update
+  via `set_title_suggestion_status(p_secret,p_id,p_status)` — same
+  owner-login-OR-`curation_admin`-passphrase gate as `admin_dashboard_stats`/
+  `verify_critic`. **NOT YET APPLIED LIVE** — owner pastes the block into the
+  Supabase SQL editor once (same pending-migration pattern as the magazine
+  columns + `admin_dashboard_stats`). Validated against a throwaway Postgres
+  16: insert works, RPC returns rows with the passphrase, status updates,
+  wrong passphrase raises `unauthorized`.
+- **Client entry points**: the Browse **empty-search state** is the natural
+  "we don't have this" moment — when a search returns nothing it now reads
+  "No match for '<q>'" with a gold **Suggest "<q>"** button (prefilled), plus
+  a general "Suggest a title" in the footer link row and on the no-filter
+  empty state. `openSuggestTitle(prefill)` opens a modal (title required;
+  year/why/email optional); `submitTitleSuggestion()` inserts via
+  `sbVoteHeaders` (same pattern as `submitFilm`), success swaps the modal to
+  an "On the list. 🙌" confirmation. Degrades gracefully — a friendly
+  "couldn't send" toast if the table isn't live yet.
+- **Admin**: a new **"Suggestions"** tab on `#/curate` (`CUR_TABS`,
+  `adminSuggestions`/`suggStatus`) between Film submissions and Critic posts,
+  listing every suggestion (title/year/status/date/email/note) with
+  Reviewed/Added/Pass buttons. Owner-only; shows a one-line "run the SQL"
+  hint until the migration is live.
+- Verified in headless Chromium: no-match empty state shows the prefilled
+  Suggest button → modal → mocked 201 POST (correct body) → "On the list"
+  confirmation; the curate Suggestions tab renders mock rows with status/
+  date/email/note; zero console errors.

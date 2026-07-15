@@ -2047,7 +2047,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -5487,6 +5487,79 @@ function subStatus(id,st){
     headers:sbHeaders({'Content-Type':'application/json'}),body:JSON.stringify({secret:secret,sub_id:id,new_status:st})})
   .then(function(r){ if(r.ok){ toast('Marked '+st+'.'); adminSubs(); } else toast('Failed.'); });
 }
+/* ============ SUGGEST A TITLE (catalog gap) ============
+   Distinct from the indie-filmmaker intake above (submitFilm → film_submissions,
+   for a maker's OWN work). This is a viewer telling us we're MISSING a real,
+   existing title — "you don't have Love & Basketball." Lands in
+   title_suggestions and shows in the #/curate "Suggestions" tab. Nothing fake:
+   it's a request queue, never auto-added to the catalog. Degrades gracefully
+   if the backend migration (backend/schema.sql) hasn't been run yet. */
+function openSuggestTitle(prefill){
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Suggest a title</h2><p class="m-sub">Know a film or series we should have on the shelves? Tell us — a human reads every one.</p>'+
+    '<label class="f-lab">Title</label><input id="tsTitle" class="f-in" placeholder="e.g. Love & Basketball" value="'+esc(prefill||'')+'">'+
+    '<label class="f-lab">Year (optional)</label><input id="tsYear" class="f-in" placeholder="e.g. 2000">'+
+    '<label class="f-lab">Why it belongs (optional)</label><textarea id="tsNote" class="f-in" rows="2" placeholder="A line on what makes it ours."></textarea>'+
+    '<label class="f-lab">Your email (optional)</label><input id="tsEmail" class="f-in" type="email" placeholder="you@email.com — if you want a heads-up when it lands">'+
+    '<button class="btn btn-gold" style="margin-top:14px" onclick="submitTitleSuggestion()">Send suggestion</button>');
+  var i=byId('tsTitle'); if(i){ i.focus(); if(prefill) i.setSelectionRange(prefill.length,prefill.length); }
+}
+function submitTitleSuggestion(){
+  var t=byId('tsTitle'), y=byId('tsYear'), n=byId('tsNote'), e=byId('tsEmail');
+  var title=t?t.value.trim():''; if(!title){ toast('Add a title first.'); if(t)t.focus(); return; }
+  var email=e?e.value.trim():'';
+  if(email && email.indexOf('@')<1){ toast('That email doesn’t look right.'); return; }
+  var body={title:title,year:(y&&y.value.trim())||null,note:(n&&n.value.trim())||null,
+    email:email||null,device_id:wsDevice(),user_id:myUid()};
+  track('title_suggest',{});
+  ensureIdentityThen(function(){
+    fetch(SUPABASE_URL+'/rest/v1/title_suggestions',{method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify(body)})
+    .then(function(r){
+      if(r.status===201){
+        var m=byId('modal'); if(m){ var c=m.querySelector('.modal-inner')||m;
+          c.innerHTML='<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+            '<div style="text-align:center;padding:20px 6px"><h2 style="margin-bottom:8px">On the list. 🙌</h2>'+
+            '<p class="m-sub" style="margin:0 auto;max-width:34ch">Thank you — a human reads every suggestion. If it clears the bar, it takes its seat on the shelves.</p></div>'; }
+        toast('Suggestion sent.');
+      } else { toast('Couldn’t send that right now — try again in a minute.'); }
+    }).catch(function(){ toast('Couldn’t send that right now — try again in a minute.'); });
+  });
+}
+/* Admin: viewer title suggestions (catalog gaps). Owner-gated read via the
+   list_title_suggestions RPC (owner login OR passphrase). Degrades to a
+   "run the SQL" hint if the migration isn't live yet. */
+function adminSuggestions(){
+  var w=byId('curSuggList'); if(!w)return;
+  w.innerHTML='<p class="hero-lead">Loading…</p>';
+  fetch(SUPABASE_URL+'/rest/v1/rpc/list_title_suggestions',{method:'POST',
+    headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+  .then(function(res){
+    var w=byId('curSuggList'); if(!w)return;
+    if(!res.ok||!Array.isArray(res.d)){
+      w.innerHTML='<div class="cur-stats-note">Suggestions aren’t live yet — run the <code>title_suggestions</code> block from <code>backend/schema.sql</code> in the Supabase SQL editor, then reload.</div>';
+      var c=byId('curSuggCount'); if(c)c.textContent='';
+      return;
+    }
+    var rows=res.d, cnt=byId('curSuggCount'); if(cnt) cnt.textContent=rows.length+' suggestion'+(rows.length===1?'':'s');
+    w.innerHTML=rows.map(function(x){
+      var when=''; try{ when=new Date(x.created_at).toLocaleDateString(); }catch(e){}
+      return '<div class="cur-row" style="flex-wrap:wrap"><span class="cur-ttl">'+esc(x.title)+(x.year?' <em>('+esc(x.year)+')</em>':'')+
+        '<br><span style="font-size:12px;color:var(--ink-3)">'+esc(x.status||'new')+(when?' · '+esc(when):'')+(x.email?' · '+esc(x.email):'')+'</span>'+
+        (x.note?'<br><span style="font-size:12.5px">'+esc(x.note)+'</span>':'')+'</span>'+
+        '<button class="cur-ic" onclick="suggStatus(\''+x.id+'\',\'reviewed\')">Reviewed</button>'+
+        '<button class="cur-ic" onclick="suggStatus(\''+x.id+'\',\'added\')">Added</button>'+
+        '<button class="cur-ic hidebtn" onclick="suggStatus(\''+x.id+'\',\'passed\')">Pass</button></div>';
+    }).join('')||'<p class="empty-note">No suggestions yet. When someone can’t find a title, they can tell you right from search.</p>';
+  }).catch(function(){ var w=byId('curSuggList'); if(w)w.innerHTML='<p class="empty-note">Could not load suggestions right now.</p>'; });
+}
+function suggStatus(id,st){
+  fetch(SUPABASE_URL+'/rest/v1/rpc/set_title_suggestion_status',{method:'POST',
+    headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_status:st})})
+  .then(function(r){ if(r.ok){ toast('Marked '+st+'.'); adminSuggestions(); } else toast('Failed.'); });
+}
 /* ============ SERVE ME SOMETHING ============ */
 var SERVE_MOODS=[
  ['feelgood','Feel-good',function(f){return f.moods&&f.moods.indexOf('Playful')>=0;}],
@@ -6155,7 +6228,7 @@ function curSetFilter(v){ CUR_FILTER=v; CUR_SHOWN=120; renderCurPageList(); }
 function curMore(){ CUR_SHOWN+=200; renderCurPageList(); }
 function curPageQ(){ var el=byId('curPageSearch'); return el?el.value:''; }
 var CUR_TAB='catalog';
-var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['subs','Film submissions'],['reviews','Critic posts']];
+var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['subs','Film submissions'],['sugg','Suggestions'],['reviews','Critic posts']];
 function renderCuratePage(tab){
   var w=byId('curPageWrap'); if(!w)return;
   if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Curate</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to curate.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
@@ -6184,6 +6257,11 @@ function renderCuratePage(tab){
     '<div id="curTabSubs" style="display:none">'+
       '<div class="curp-count" id="curSubsCount"></div>'+
       '<div class="cur-list" id="curSubsList"></div>'+
+    '</div>'+
+    '<div id="curTabSugg" style="display:none">'+
+      '<div class="inbox-tools"><span class="ish-lab" style="flex:1">Titles visitors asked us to add — from search, when nothing matched.</span>'+
+        '<button class="btn btn-ghost btn-sm" onclick="adminSuggestions()">↻ Refresh</button><span id="curSuggCount" class="inbox-count"></span></div>'+
+      '<div class="cur-list" id="curSuggList"><p class="hero-lead">Loading…</p></div>'+
     '</div>'+
     '<div id="curTabReviews" style="display:none">'+
       '<div class="curp-tools"><input id="curReviewsSearch" placeholder="Search by critic or film…" oninput="renderCurReviewsList()">'+
@@ -6233,10 +6311,12 @@ function curShowTab(tab){
   byId('curTabCatalog').style.display=(tab==='catalog')?'':'none';
   byId('curTabApps').style.display=(tab==='apps')?'':'none';
   byId('curTabSubs').style.display=(tab==='subs')?'':'none';
+  byId('curTabSugg').style.display=(tab==='sugg')?'':'none';
   byId('curTabReviews').style.display=(tab==='reviews')?'':'none';
   if(tab==='catalog')renderCurPageList();
   else if(tab==='apps')inboxLoad();
   else if(tab==='subs')adminSubs();
+  else if(tab==='sugg')adminSuggestions();
   else if(tab==='reviews')loadCurReviews();
 }
 function curSetTab(tab){
@@ -8089,7 +8169,19 @@ function renderBrowse(){
   if(list.length===0){
     byId('browseBar').innerHTML='';
     byId('browseGrid').className='';
-    byId('browseGrid').innerHTML='<div class="empty"><h3>Nothing on this shelf yet.</h3><p>Loosen a filter and check again, or clear them all.</p><button class="btn btn-gold" onclick="clearFilters()">Clear filters</button></div>';
+    if(FILTERS.q){
+      var qEsc=esc(FILTERS.q), qArg=esc(FILTERS.q).replace(/'/g,"\\'");
+      byId('browseGrid').innerHTML='<div class="empty"><h3>No match for “'+qEsc+'”.</h3>'+
+        '<p>We might just not have it yet. If it belongs on our shelves, tell us and a human will look.</p>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px">'+
+        '<button class="btn btn-gold" onclick="openSuggestTitle(\''+qArg+'\')">Suggest “'+qEsc+'”</button>'+
+        '<button class="btn btn-ghost" onclick="clearFilters()">Clear search</button></div></div>';
+    } else {
+      byId('browseGrid').innerHTML='<div class="empty"><h3>Nothing on this shelf yet.</h3><p>Loosen a filter and check again, or clear them all.</p>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px">'+
+        '<button class="btn btn-gold" onclick="clearFilters()">Clear filters</button>'+
+        '<button class="btn btn-ghost" onclick="openSuggestTitle(\'\')">Suggest a title</button></div></div>';
+    }
   }else{
     var sorts=[['kitchen','The Kitchen score'],['table','The Table score'],['new','Newest'],['old','Oldest'],['az','A\u2013Z']];
     byId('browseBar').innerHTML='<span class="browse-count">'+list.length+' film'+(list.length===1?'':'s')+'</span>'+
@@ -8403,17 +8495,23 @@ function renderRealShowtimes(f,zip,days){
   }).join('');
   return head+rows+'<div class="st-note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Real theaters, addresses, and times pulled live from Google near '+esc(zip)+'. Times open the theater or Fandango for tickets.</span></div>';
 }
-/* Honest fallback — no fabricated theaters (nothing fake). When the live feed
-   has nothing to show, we hand off to the real sources instead of inventing
-   theater names and distances. */
+/* Ticketing hand-off — no fabricated theaters (nothing fake). Google's
+   showtimes panel isn't reliably available through our data provider, so
+   rather than present a "live showtimes" search that reads as broken when it
+   returns nothing, we lead with the real ticketing path: Fandango (pick your
+   own theater + time there), with Google as a backup. The live proxy still
+   runs in the background and upgrades this in place to a real theater list on
+   the rare occasion it returns one — so this is the confident default, not an
+   error state. */
 function sampleShowtimes(f,zip){
   var fUrl=fandangoUrl(f.title), gUrl='https://www.google.com/search?q='+encodeURIComponent(f.title+' showtimes '+zip);
   return '<div class="empty" style="padding:22px 16px;text-align:left">'+
-    '<h3 style="font-size:18px;margin-bottom:4px">No live showtimes near '+esc(zip)+' right now.</h3>'+
-    '<p style="color:var(--ink-2)">It may be between showings, or not playing in your area today. Check the live sources for exact theaters and times:</p>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
-    '<a class="btn btn-gold btn-sm" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">Fandango ↗</a>'+
-    '<a class="btn btn-ghost btn-sm" href="'+gUrl+'" target="_blank" rel="noopener noreferrer">Google showtimes ↗</a></div></div>';
+    '<h3 style="font-size:18px;margin-bottom:4px">Get tickets for '+esc(f.title)+'</h3>'+
+    '<p style="color:var(--ink-2)">Pick your theater and showtime near '+esc(zip)+' on Fandango — the fastest way to lock in seats.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
+    '<a class="btn btn-gold btn-sm" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">Find showtimes on Fandango ↗</a>'+
+    '<a class="btn btn-ghost btn-sm" href="'+gUrl+'" target="_blank" rel="noopener noreferrer">Google showtimes ↗</a></div>'+
+    '<div class="st-note" style="margin-top:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Powered by Fandango. Showtimes and seats are handled on Fandango’s site.</span></div></div>';
 }
 
 /* ============ THE VAULT ============ */
