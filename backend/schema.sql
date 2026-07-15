@@ -713,3 +713,54 @@ begin
 end $$;
 revoke all on function public.set_title_suggestion_status(text, uuid, text) from public;
 grant execute on function public.set_title_suggestion_status(text, uuid, text) to anon, authenticated;
+
+-- ========================================================
+-- PULSE — full per-user dashboard (2026-07-15)
+-- Powers the owner-only #/pulse page (renderPulse in index.html): every
+-- registered user, whether they've written a Kitchen review, their vote /
+-- comment counts, and their tracked visit activity. SECURITY DEFINER so it
+-- can read the RLS-locked auth.users + public.events server-side (the anon
+-- key can read neither directly). Same auth gate as admin_dashboard_stats:
+-- owner login OR the curation_admin passphrase. Returns per-user rows (not raw
+-- event rows) — aggregate activity only, capped at 2000 most-recent users.
+-- NOT YET APPLIED LIVE — paste this block into the Supabase SQL editor once
+-- (same pending-migration pattern as the other RPCs above).
+create or replace function public.admin_user_directory(p_secret text default null)
+returns json language plpgsql security definer set search_path = public, auth as $$
+declare expected text;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  return coalesce((
+    select json_agg(row_to_json(t)) from (
+      select
+        u.id,
+        u.email,
+        coalesce(u.is_anonymous, false)              as is_anonymous,
+        u.created_at,
+        u.last_sign_in_at,
+        p.name                                        as name,
+        coalesce(p.is_critic, false)                  as is_critic,
+        coalesce(p.is_writer, false)                  as is_writer,
+        p.critic_outlet                               as critic_outlet,
+        coalesce(rv.n, 0)                             as reviews,
+        coalesce(vo.n, 0)                             as votes,
+        coalesce(cm.n, 0)                             as comments,
+        coalesce(ev.n, 0)                             as events,
+        greatest(u.last_sign_in_at, ev.last_seen)     as last_seen
+      from auth.users u
+      left join public.profiles p on p.id = u.id
+      left join (select user_id, count(*) n from public.critic_reviews group by user_id) rv on rv.user_id = u.id
+      left join (select user_id, count(*) n from public.votes          group by user_id) vo on vo.user_id = u.id
+      left join (select user_id, count(*) n from public.comments       group by user_id) cm on cm.user_id = u.id
+      left join (select user_id, count(*) n, max(created_at) last_seen from public.events where user_id is not null group by user_id) ev on ev.user_id = u.id
+      order by u.created_at desc
+      limit 2000
+    ) t
+  ), '[]'::json);
+end $$;
+revoke all on function public.admin_user_directory(text) from public;
+grant execute on function public.admin_user_directory(text) to anon, authenticated;

@@ -424,6 +424,34 @@
   .stat-tile b{display:block;font-family:var(--display);font-size:26px;font-weight:800;line-height:1.05;color:var(--ink)}
   .stat-tile span{display:block;margin-top:3px;font-size:11px;color:var(--ink-3);font-weight:600}
   .stat-refresh{align-self:flex-start}
+  /* The Pulse — full dashboard */
+  .pulse-dir-head{display:flex;align-items:baseline;gap:12px;margin:26px 0 6px;flex-wrap:wrap}
+  .pulse-h2{font-family:var(--display);font-size:22px;font-weight:800;color:var(--ink)}
+  .pulse-count{font-size:12.5px;color:var(--ink-3);font-weight:600}
+  .pulse-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .pulse-tools input{flex:1 1 220px;min-width:180px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);font-size:14px;color:var(--ink)}
+  .pulse-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .pulse-tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);box-shadow:var(--shadow-1)}
+  .pulse-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px}
+  .pulse-table th{text-align:left;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:11px 12px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
+  .pulse-table th:hover{color:var(--ink)}
+  .pulse-table th.sorted{color:var(--gold-ink)}
+  .pulse-table th.tn,.pulse-table td.tn{text-align:right}
+  .pulse-table th.tc,.pulse-table td.tc{text-align:left}
+  .pulse-table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink-2)}
+  .pulse-table tbody tr:last-child td{border-bottom:0}
+  .pulse-table tbody tr:hover{background:var(--inset)}
+  .pulse-table td.tn{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+  .pulse-table td.tn.hot{color:var(--gold-ink)}
+  .pulse-table td.td{white-space:nowrap;font-size:12.5px;color:var(--ink-3)}
+  .pu-name{display:block;font-weight:700;color:var(--ink)}
+  .pu-sub{display:block;font-size:11.5px;color:var(--ink-3);margin-top:1px}
+  .pulse-badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .pulse-badge.crit{background:rgba(244,183,51,.18);color:var(--gold-ink)}
+  .pulse-badge.writ{background:rgba(190,59,24,.14);color:var(--paprika)}
+  .pulse-badge.reg{background:var(--inset);color:var(--ink-2)}
+  .pulse-badge.anon{background:transparent;color:var(--ink-3);border:1px dashed var(--line)}
+  @media (max-width:640px){ .pulse-table{font-size:12.5px} .pulse-table td,.pulse-table th{padding:8px 9px} }
   /* Admin — Critic posts tab */
   .cr-row{display:flex;gap:12px;padding:12px 13px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel)}
   .cr-body{flex:1;min-width:0}
@@ -1954,6 +1982,12 @@
     </div>
   </section>
 
+  <section class="view" data-view="pulse" aria-label="The Pulse">
+    <div class="wrap" style="padding-top:26px">
+      <div id="pulseWrap"></div>
+    </div>
+  </section>
+
   <section class="view" data-view="legal" aria-label="Legal">
     <div class="wrap" id="legalContent"></div>
   </section>
@@ -2047,7 +2081,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('pulse')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Pulse</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -5078,7 +5112,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -5122,6 +5156,7 @@ function render(view,arg){
   else if(view==='you')renderYou();
   else if(view==='legal')renderLegal(arg);
   else if(view==='curate')renderCuratePage(arg);
+  else if(view==='pulse')renderPulse();
   else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
   else if(view==='couch')renderCouch();
   else if(view==='kids')renderKids();
@@ -6330,6 +6365,121 @@ function curSetTab(tab){
     return '<button class="chip'+(CUR_TAB===t[0]?' on':'')+'" onclick="curSetTab(\''+t[0]+'\')">'+t[1]+'</button>';
   }).join('');
   curShowTab(tab);
+}
+/* ============ THE PULSE — full site dashboard (owner-only) ============
+   One page: top-line site stats (users / traffic / votes, via the aggregate
+   admin_dashboard_stats RPC) + a per-user directory (admin_user_directory RPC)
+   showing every registered user, whether they've written a Kitchen review,
+   their vote & comment counts, and their tracked visit activity. Both RPCs are
+   owner-gated (owner login OR curation_admin passphrase) and read the
+   RLS-locked auth.users / events tables server-side. Degrades gracefully if
+   the RPCs aren't deployed yet. */
+var _pulseRows=null, _pulseSort='last_seen', _pulseDir=-1, _pulseFilter='all';
+function renderPulse(){
+  var w=byId('pulseWrap'); if(!w)return;
+  if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>The Pulse</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to view the dashboard.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
+  w.innerHTML='<div class="browse-head" style="padding-bottom:4px"><span class="eyebrow">DASHBOARD</span><h1>The Pulse</h1>'+
+    '<p class="hero-lead" style="margin-top:8px;max-width:60ch">The whole site at a glance — who’s registered, who’s writing and voting, and how the culture is moving. Live from The Table.</p></div>'+
+    '<div class="curp-tools"><button class="btn btn-ghost btn-sm" onclick="loadPulse()">↻ Refresh</button>'+
+    '<a class="btn btn-ghost btn-sm" href="#/curate" onclick="go(\'curate\');return false;">⚙ Curate</a></div>'+
+    '<div class="cur-stats" id="pulseStats"><p class="hero-lead" style="margin:0">Loading…</p></div>'+
+    '<div class="pulse-dir-head"><h2 class="pulse-h2">Registered users</h2><span id="pulseDirCount" class="pulse-count"></span></div>'+
+    '<div class="pulse-tools"><input id="pulseSearch" placeholder="Search name, email, outlet…" oninput="renderPulseTable()">'+
+      '<div class="pulse-chips" id="pulseChips"></div></div>'+
+    '<div class="pulse-tablewrap"><div id="pulseTable"><p class="hero-lead">Loading users…</p></div></div>';
+  loadPulse();
+}
+function loadPulse(){ loadPulseStats(); loadUserDirectory(); }
+function loadPulseStats(){
+  var el=byId('pulseStats'); if(!el)return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      var el=byId('pulseStats'); if(!el)return; var s=res.d;
+      if(!res.ok||!s||typeof s!=='object'||s.code||s.message){
+        el.innerHTML='<div class="cur-stats-note">Stats aren’t live yet — run <code>admin_dashboard_stats</code> from <code>backend/schema.sql</code> in the Supabase SQL editor.</div>'; return;
+      }
+      el.innerHTML=
+        '<div class="stat-group"><div class="stat-head">People</div><div class="stat-row">'+
+          statTile(s.users_total,'Total users')+statTile(s.users_email,'Registered (email)')+
+          statTile(s.users_anon,'Anonymous')+statTile(s.users_new_7d,'New · 7d')+
+          statTile(s.users_active_7d,'Active · 7d')+'</div></div>'+
+        '<div class="stat-group"><div class="stat-head">Traffic</div><div class="stat-row">'+
+          statTile(s.events_24h,'Visits · 24h')+statTile(s.events_7d,'Visits · 7d')+
+          statTile(s.events_30d,'Visits · 30d')+statTile(s.events_total,'Visits · all')+'</div></div>'+
+        '<div class="stat-group"><div class="stat-head">Votes &amp; talk</div><div class="stat-row">'+
+          statTile(s.votes_total,'Votes · all')+statTile(s.votes_7d,'Votes · 7d')+
+          statTile(s.comments_total,'Comments')+'</div></div>';
+    })
+    .catch(function(){ var el=byId('pulseStats'); if(el)el.innerHTML='<div class="cur-stats-note">Couldn’t load stats right now.</div>'; });
+}
+function loadUserDirectory(){
+  var t=byId('pulseTable'); if(!t)return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_user_directory',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      var t=byId('pulseTable'); if(!t)return;
+      if(!res.ok||!Array.isArray(res.d)){
+        t.innerHTML='<div class="cur-stats-note">The user directory isn’t live yet — run the <code>admin_user_directory</code> block from <code>backend/schema.sql</code> in the Supabase SQL editor, then reload.</div>';
+        var c=byId('pulseDirCount'); if(c)c.textContent=''; return;
+      }
+      _pulseRows=res.d; renderPulseChips(); renderPulseTable();
+    })
+    .catch(function(){ var t=byId('pulseTable'); if(t)t.innerHTML='<p class="empty-note">Couldn’t load the user directory right now.</p>'; });
+}
+function pulseFilters(){
+  if(!_pulseRows)return [];
+  var reg=0,crit=0,writ=0,voters=0;
+  for(var i=0;i<_pulseRows.length;i++){ var u=_pulseRows[i];
+    if(!u.is_anonymous&&u.email)reg++; if(u.is_critic)crit++; if(u.is_writer)writ++; if(u.votes>0)voters++; }
+  return [['all','Everyone',_pulseRows.length],['registered','Registered',reg],['critics','Critics',crit],['writers','Writers',writ],['voters','Voters',voters]];
+}
+function renderPulseChips(){
+  var el=byId('pulseChips'); if(!el)return;
+  el.innerHTML=pulseFilters().map(function(o){
+    return '<button class="chip'+(_pulseFilter===o[0]?' on':'')+'" onclick="setPulseFilter(\''+o[0]+'\')">'+o[1]+' · '+o[2]+'</button>';
+  }).join('');
+}
+function setPulseFilter(f){ _pulseFilter=f; renderPulseChips(); renderPulseTable(); }
+function pulseSort(col){ if(_pulseSort===col){ _pulseDir=-_pulseDir; } else { _pulseSort=col; _pulseDir=(col==='name'||col==='email')?1:-1; } renderPulseTable(); }
+function _pulseFmtDate(s){ if(!s)return '—'; try{ return new Date(s).toLocaleDateString(); }catch(e){ return '—'; } }
+function renderPulseTable(){
+  var t=byId('pulseTable'); if(!t||!_pulseRows)return;
+  var q=(byId('pulseSearch')&&byId('pulseSearch').value||'').toLowerCase().trim();
+  var rows=_pulseRows.filter(function(u){
+    if(_pulseFilter==='registered'&&(u.is_anonymous||!u.email))return false;
+    if(_pulseFilter==='critics'&&!u.is_critic)return false;
+    if(_pulseFilter==='writers'&&!u.is_writer)return false;
+    if(_pulseFilter==='voters'&&!(u.votes>0))return false;
+    if(q){ var hay=((u.name||'')+' '+(u.email||'')+' '+(u.critic_outlet||'')).toLowerCase(); if(hay.indexOf(q)<0)return false; }
+    return true;
+  });
+  var col=_pulseSort, dir=_pulseDir;
+  rows.sort(function(a,b){
+    var av=a[col], bv=b[col];
+    if(col==='name'||col==='email'||col==='critic_outlet'){ av=(av||'').toLowerCase(); bv=(bv||'').toLowerCase(); return av<bv?-dir:(av>bv?dir:0); }
+    if(col==='last_seen'||col==='created_at'){ av=av?Date.parse(av):0; bv=bv?Date.parse(bv):0; return (av-bv)*dir; }
+    return ((av||0)-(bv||0))*dir;
+  });
+  var c=byId('pulseDirCount'); if(c)c.textContent=rows.length+' user'+(rows.length===1?'':'s');
+  function th(col,label,cls){ var on=_pulseSort===col; return '<th class="'+(cls||'')+(on?' sorted':'')+'" onclick="pulseSort(\''+col+'\')">'+label+(on?(_pulseDir<0?' ↓':' ↑'):'')+'</th>'; }
+  var head='<thead><tr>'+th('name','User')+th('is_critic','Role','tc')+th('reviews','Reviews','tn')+th('votes','Votes','tn')+th('comments','Comments','tn')+th('events','Visits','tn')+th('last_seen','Last seen','td')+th('created_at','Joined','td')+'</tr></thead>';
+  var body=rows.map(function(u){
+    var who=u.name?esc(u.name):(u.email?esc(u.email):(u.is_anonymous?'Anonymous':'—'));
+    var sub=u.name&&u.email?esc(u.email):(u.critic_outlet?esc(u.critic_outlet):'');
+    var role=u.is_critic?'<span class="pulse-badge crit">Critic</span>':(u.is_writer?'<span class="pulse-badge writ">Writer</span>':(u.is_anonymous?'<span class="pulse-badge anon">Anon</span>':'<span class="pulse-badge reg">Member</span>'));
+    return '<tr>'+
+      '<td class="tuser"><span class="pu-name">'+who+'</span>'+(sub?'<span class="pu-sub">'+sub+'</span>':'')+'</td>'+
+      '<td class="tc">'+role+'</td>'+
+      '<td class="tn'+(u.reviews>0?' hot':'')+'">'+(u.reviews||0)+'</td>'+
+      '<td class="tn">'+(u.votes||0)+'</td>'+
+      '<td class="tn">'+(u.comments||0)+'</td>'+
+      '<td class="tn">'+(u.events||0)+'</td>'+
+      '<td class="td">'+_pulseFmtDate(u.last_seen)+'</td>'+
+      '<td class="td">'+_pulseFmtDate(u.created_at)+'</td>'+
+    '</tr>';
+  }).join('');
+  t.innerHTML='<table class="pulse-table">'+head+'<tbody>'+(body||'<tr><td colspan="8" class="empty-note" style="text-align:center">No users match.</td></tr>')+'</tbody></table>';
 }
 function renderCurPageList(){
   var el=byId('curPageList'); if(!el)return;

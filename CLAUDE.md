@@ -1854,3 +1854,36 @@ the film page shows the Fandango "Get tickets" block automatically. Ran
 `node scripts/build-films-json.cjs` (1057 titles, +1). Verified in headless
 Chromium: entry correct (scope/nulls/cast/dir/poster), findable in search,
 film page renders with the synopsis naming Lupita/Zendaya, zero console errors.
+
+## The Pulse — full site dashboard (2026-07-15)
+Owner: "a way to create a hub for every registered user and if they have
+written a critic on the site and their vote count and track visits... a full
+dashboard of the site" (ref: wellseasoned-pulse.netlify.app, a votes-only
+Supabase dashboard — this goes further with a per-user directory).
+- **`#/pulse`** (`renderPulse`, owner-only via `isOwner()`) — a dedicated
+  dashboard page (new view id `pulse`, footer admin link next to Curate).
+  Top: site-wide stat tiles (People / Traffic / Votes) reusing the existing
+  `admin_dashboard_stats` RPC + `.stat-tile` CSS. Below: a **per-user
+  directory** — every registered user with role badge (Critic/Writer/Member/
+  Anon), Kitchen reviews count, votes, comments, tracked visits (events), last
+  seen, and joined date. Searchable (name/email/outlet), filter chips
+  (Everyone/Registered/Critics/Writers/Voters with live counts), and every
+  column is click-to-sort (`.pulse-table`, horizontal-scroll wrapper on
+  mobile).
+- **Backend** (`backend/schema.sql`, marked block) — new SECURITY DEFINER RPC
+  `admin_user_directory(p_secret)` (owner-login-OR-passphrase gate, same as
+  `admin_dashboard_stats`). Reads the RLS-locked `auth.users` + `public.events`
+  server-side and left-joins `profiles`/`critic_reviews`/`votes`/`comments`/
+  `events` to return per-user aggregate rows (name, email, is_critic/is_writer,
+  reviews, votes, comments, events, last_seen), newest 2000 users. Returns
+  aggregate activity per user, never raw event rows. **NOT YET APPLIED LIVE** —
+  owner pastes the block into the Supabase SQL editor (same pending-migration
+  pattern as the other RPCs). Validated against a throwaway Postgres 16:
+  seeded critic user returns reviews:2/votes:2/comments:1/events:3 correctly;
+  wrong passphrase raises `unauthorized`.
+- Client degrades gracefully — if either RPC isn't deployed yet, the stats
+  block and the table each show a one-line "run the SQL" hint instead of
+  erroring. Verified in headless Chromium (mocked RPCs): 12 stat tiles, 4-user
+  directory, filter counts (Registered·3/Critics·1/Writers·1/Voters·4),
+  default sort by last-seen, sort-by-votes, and search all correct, zero
+  console errors; desktop + mobile.
