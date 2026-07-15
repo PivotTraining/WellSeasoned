@@ -1832,3 +1832,25 @@ Built end to end:
   Suggest button → modal → mocked 201 POST (correct body) → "On the list"
   confirmation; the curate Suggestions tab renders mock rows with status/
   date/email/note; zero console errors.
+
+## The Odyssey (2026, Nolan) added — closer-bar case (2026-07-15)
+Owner: "Odyssey is not on the site. Huge movie. Should be on 'all films'.
+Are there any black actors or actresses in this?" Verified via web + TMDB
+(id 1368337, dir Christopher Nolan — NOT the same-year Marcel Walz film
+1698863 or the doc): real Black cast in major roles — **Lupita Nyong'o**
+(Helen / Clytemnestra), **Zendaya** (Athena), **Corey Hawkins** (Polybus),
+alongside Matt Damon (Odysseus)/Holland/Hathaway/Pattinson/Theron. Not
+Black-led/created (Damon leads, Nolan directs), so it's a "closer than usual
+bar" case like `lioness`/`paradise`/`little-house` — included on the owner's
+call for the prominent Black cast, not authorship. Owner chose to scope it
+`'ours'` (both toggles), not just "all films". `id:'the-odyssey-2026'`
+(year-suffixed — the 1997 miniseries could be added later; identity is
+title+year). Real TMDB throughout (poster pinned in `WS_POSTERS` since
+multiple 2026 "The Odyssey" titles exist and the auto title+year hydrator
+could match the wrong one; backdrop `r57L2UBLPKcHdZQYg8tagv9XqK2` baked;
+`k`/`t` null, `votes:0`, `reviews:[]`). Synopsis leads with Nolan + names the
+three Black cast members and their real roles. In theatrical window now, so
+the film page shows the Fandango "Get tickets" block automatically. Ran
+`node scripts/build-films-json.cjs` (1057 titles, +1). Verified in headless
+Chromium: entry correct (scope/nulls/cast/dir/poster), findable in search,
+film page renders with the synopsis naming Lupita/Zendaya, zero console errors.
