@@ -8867,7 +8867,7 @@ function castVote(id,side){
   if(byId('tblCount')) byId('tblCount').textContent=tblCountText(f);
   refreshSeasoning(f);
   saveState();
-  maybeVoteNudge();
+  postVoteCapture(f,side);
 }
 /* After a few guest votes, one gentle (once-ever) nudge to make an account so
    votes + saves follow them across devices. Honest: it doesn't claim to move
@@ -8886,6 +8886,52 @@ function maybeVoteNudge(){
       '<div class="film-actions" style="margin-top:4px"><button class="btn btn-gold" onclick="openAuth(\'signup\')">Create free account</button><button class="btn btn-ghost" onclick="closeModal()">Maybe later</button></div>');
   }, 800);
 }
+/* THE post-vote capture moment (highest-leverage growth fix): the two seconds
+   right after an anonymous verdict, when the voter is most invested. We never
+   gate the vote — it's already counted — we offer to SAVE it and reveal where
+   they stand vs. the room and the critics. Honest throughout: real Table %/
+   Kitchen number when they exist, an honest "still counting / not plated yet"
+   curiosity line when they don't — never a fabricated score. Shown once per
+   session so it stays a moment, not a nag; after that it falls back to the
+   lighter 3-vote cross-device nudge. */
+function postVoteCapture(f,side){
+  if(app.signedIn||!sbConfigured()) return;
+  var seen=false; try{ seen=sessionStorage.getItem('ws_pvcapture')==='1'; }catch(e){}
+  if(seen){ maybeVoteNudge(); return; }
+  try{ sessionStorage.setItem('ws_pvcapture','1'); }catch(e){}
+  closeEmailNudge();
+  // let the celebration land first (the dopamine), THEN capture: a "for" vote
+  // stamps the seal (removed ~1360ms), an "against" vote just shakes.
+  setTimeout(function(){ if(!app.signedIn) showPostVoteCapture(f,side); }, side==='for'?1450:600);
+}
+function showPostVoteCapture(f,side){
+  var kt=f.k, ts=tableScore(f);
+  var ktTier=(kt==null)?'pending':tier(kt), tsTier=(ts==null)?'pending':tier(ts);
+  var kSub=(kt==null)?'Critics not in yet':esc(tierLabelKey(ktTier));
+  var tSub=(ts==null)?esc(tblCountText(f)):(ts+'% seasoned');
+  var gap;
+  if(kt!=null && ts!=null && !certified(f)){
+    gap='The Kitchen and The Table haven’t fully settled yet — that’s the good part. Save your seat and watch the verdict land.';
+  } else if(kt==null || ts==null){
+    gap='Be here when the full verdict drops — save your take and we’ll show you where the culture lands.';
+  } else {
+    gap='Save your verdict, start your taste profile, and see where you sit against the room.';
+  }
+  var head=side==='for'?'Seasoned. 🧂':'Sent it back. 🌶️';
+  // social login (Google) would slot in here as a second CTA — needs a Supabase
+  // auth-provider config first, so it's intentionally left for a later toggle.
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2 style="margin-bottom:4px">'+head+'</h2>'+
+    '<p class="m-sub" style="margin-top:0">Your verdict on <b>'+esc(f.title)+'</b> is counted. Here’s where the culture stands — <b>save yours</b> to lock it in.</p>'+
+    '<div style="display:flex;gap:18px;justify-content:center;align-items:flex-start;margin:14px 0 6px">'+
+      '<div style="text-align:center;min-width:88px">'+auraRing(kt,ktTier,60)+'<div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:6px">The Kitchen</div><div style="font-size:12px;color:var(--ink-2);margin-top:2px">'+kSub+'</div></div>'+
+      '<div style="text-align:center;min-width:88px">'+auraRing(ts,tsTier,60)+'<div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:6px">The Table</div><div style="font-size:12px;color:var(--ink-2);margin-top:2px">'+tSub+'</div></div>'+
+    '</div>'+
+    '<p style="text-align:center;color:var(--ink-2);font-size:13.5px;line-height:1.5;margin:2px 0 14px">'+gap+'</p>'+
+    '<div class="film-actions" style="margin-top:2px"><button class="btn btn-gold" onclick="closeModal();openAuth(\'signup\')">Save my verdict — free</button><button class="btn btn-ghost" onclick="closeModal()">Not now</button></div>'+
+    '<p class="m-alt" style="margin-top:10px">One tap. Your verdict &amp; My Plate follow you on every device.</p>');
+  track('post_vote_capture_shown',{film:f.id,side:side});
+}
 /* After a visitor's FIRST vote ever on any film, one gentle once-ever nudge to
    leave an email — a light bottom banner, not a blocking modal, page stays
    fully usable behind it. Skipped entirely for real signed-in accounts (their
@@ -8894,8 +8940,14 @@ function maybeEmailNudge(){
   if(app.signedIn||!sbConfigured()) return;
   var shown=false; try{ shown=localStorage.getItem('ws_email_nudge')==='1'; }catch(e){}
   if(shown) return;
-  try{ localStorage.setItem('ws_email_nudge','1'); }catch(e){}
-  setTimeout(function(){ if(!app.signedIn) showEmailNudge(); }, 1200);
+  setTimeout(function(){
+    if(app.signedIn) return;
+    // the stronger post-vote capture modal owns this session — don't stack a
+    // second ask under it (checked at fire time, after capture sets the flag)
+    try{ if(sessionStorage.getItem('ws_pvcapture')==='1') return; }catch(e){}
+    try{ localStorage.setItem('ws_email_nudge','1'); }catch(e){}
+    showEmailNudge();
+  }, 1200);
 }
 function showEmailNudge(){
   if(byId('emailNudge')) return;

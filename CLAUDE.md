@@ -1988,3 +1988,62 @@ prominent roles for OUR FILMS. if not just add them to all films. continue."
   headless Chromium: FILMS parses (1256), new entries present with real cast/
   pinned posters, F1 scope='all', Emergency resolves to the right RJ Cyler
   film, film pages render, zero console errors.
+
+## Bull Street (2024) added (2026-07-16)
+Owner sent the poster, "lets add this movie as well." Verified via TMDB (id
+1222327, dir. Lynn Dow) — matches the poster exactly: Loretta Devine leads as
+small-town attorney LouEster Sadie Gibbs, with Amy Madigan, Malynda Hale,
+Arielle Prepetit, Gary Ray Moore. Real Black-led courtroom drama (an Ivy
+League lawyer challenges her family's claim to their longtime home; privilege
+vs. legacy). `id:'bull-street-2024'`, `scope:'ours'`, real poster pinned in
+WS_POSTERS, backdrop baked, `k`/`t` null, `votes:0`, `reviews:[]` — nothing
+fake. Catalog 1256 → 1257; ran `node scripts/build-films-json.cjs`.
+
+## Post-vote capture moment — the highest-leverage growth fix (2026-07-16)
+Owner shared a growth strategy whose #1 item was: never gate the vote (it's
+the best engagement act — 279 in the last 7 days), instead capture the email
+in the two seconds RIGHT AFTER a vote, when the voter is most invested. Value
+first, capture second. Built `postVoteCapture(f,side)` + `showPostVoteCapture`
+(index.html), wired into `castVote` (replaced the old `maybeVoteNudge()` call
+at the end of a vote).
+- **Never gates.** The vote is already counted and celebrated first (a "for"
+  vote stamps the seal, removed ~1360ms) — the capture modal fires AFTER the
+  celebration lands (1450ms on `for`, 600ms on `against`) so the dopamine hit
+  comes first, then the ask. Exactly the plan's "give them the dopamine, then
+  capture."
+- **Curiosity gap, honest.** The modal reframes the moment as "Your verdict on
+  <title> is counted — here's where the culture stands, save yours to lock it
+  in": two verdict rings (The Kitchen `f.k` + The Table `tableScore`) reusing
+  the existing `auraRing`. Real numbers only — when the Kitchen is unscored it
+  reads "Critics not in yet" and when the Table is below quorum it shows the
+  real `tblCountText` ("N voted · M more to score it"), never a fabricated
+  score. The gap line adapts: pending → "be here when the full verdict drops";
+  both scored but not certified → "they haven't fully settled yet — that's the
+  good part." Primary CTA "Save my verdict — free" → `openAuth('signup')`.
+- **Once per session** (`sessionStorage ws_pvcapture`) so it stays a moment,
+  not a nag; after the first vote it falls back to the lighter 3-vote
+  cross-device `maybeVoteNudge`. Never shown to signed-in users
+  (`app.signedIn`) or when the backend's unconfigured.
+- **No double-ask.** The pre-existing once-ever email banner
+  (`maybeEmailNudge`, scheduled by `applyVote` at +1200ms) now re-checks the
+  capture flag at FIRE time (not just call time, since applyVote runs before
+  the flag is set) and defers when the capture owns the session — so the two
+  never stack. The banner also no longer marks itself "shown" unless it
+  actually renders.
+- **Social login (Google) is intentionally deferred** — flagged in a code
+  comment as a second CTA slot; it needs a Supabase auth-provider config first
+  (a stop-and-confirm auth-flow change), so #1 ships with the existing email
+  signup.
+- Verified in headless Chromium (desktop + mobile 390px): first anon vote
+  opens the capture after the seal clears, "Save my verdict" opens signup,
+  second vote same session does NOT reopen, signed-in users get nothing, no
+  email banner stacks under it, honest "Critics not in yet"/quorum copy
+  renders, zero console errors.
+- **Next in the same growth plan (not built yet, owner-steered):** #2 "Pull up
+  a seat at The Table" identity + You-page verdict list; #3 email capture moved
+  to scroll/exit-intent tied to "The Verdict Drop" newsletter; #4 Sept 9 (Why
+  Did I Get Married Again?) + Odyssey pre-registration hooks; #6 share-after-
+  vote loop; #7 anon→registered conversion % tile in The Pulse. Affiliate layer
+  (Amazon Associates, CJ/Fandango, FlexOffers, Skimlinks/Sovrn auto-linker) is
+  owner-signup work; Netflix has NO affiliate program (matters for the Sept 9
+  Netflix anchor — that's sponsorship/Amazon-adjacent money, not affiliate).
