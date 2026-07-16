@@ -2196,3 +2196,21 @@ once at boot):
   the affiliate signups (Amazon Associates / CJ-Fandango / FlexOffers /
   Skimlinks-Sovrn) — Netflix has NO affiliate program, so the Sept 9 anchor
   monetizes via sponsorship/Amazon-adjacent, not click-through.
+
+## Children of Blood and Bone (2027) added to the catalog (2026-07-16)
+Owner: "Put the children of the blood up on the site." It was already in
+COMING_SOON (cs-621304) but NOT in the main FILMS catalog, so it wasn't
+browsable/searchable/votable. Added it as a first-class catalog entry —
+`id:'children-of-blood-and-bone-2027'`, `scope:'ours'`. Unambiguous "our film":
+dir. Gina Prince-Bythewood, from Tomi Adeyemi's bestselling novel, all-Black
+lead cast (Thuso Mbedu, Amandla Stenberg, Damson Idris, Tosin Cole, + Viola
+Davis, Cynthia Erivo, Idris Elba, Lashana Lynch). Verified via TMDB (id 621304,
+Post Production, releases 2027-01-14, Action/Fantasy). Real poster pinned in
+WS_POSTERS; TMDB has no backdrop yet (post-production) so none baked — resolves
+live if one lands. `k`/`t` null, `votes:0`, `reviews:[]`, `rt:"TBA"` (runtime
+not final). Since it's still in COMING_SOON with a future date, the film page
+shows the honest "🗓 Coming Jan 14, 2027 — not out yet" badge (via
+`upcomingReleaseDate`) and no showtimes/tickets. Catalog 1257 → 1258; ran
+`node scripts/build-films-json.cjs`. Verified in headless Chromium: entry
+correct, findable in search, film page renders with the cast/director + coming
+badge, zero console errors.
