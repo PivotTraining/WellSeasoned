@@ -40,6 +40,7 @@ try { out = JSON.parse(fs.readFileSync(path.join(root, 'api/films.json'), 'utf8'
 var added = 0, backfilled = 0;
 FILMS.forEach(function (f) {
   if (!f || !f.id) return;
+  if (f.noart) { if (out[f.id]) delete out[f.id]; return; }   // never ship placeholder/no-art entries to crawlers (sitemap/OG)
   var pinned = WS_POSTERS[f.id] || null;
   if (!out[f.id]) {
     out[f.id] = { t: f.title, y: f.year, d: (f.syn || '').slice(0, 300), p: pinned, tv: f.type === 'tv' };

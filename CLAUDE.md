@@ -2302,3 +2302,24 @@ ability to be voted as if it's an active movie out in theaters." Two fixes:
   2027 / Dir. Gina Prince-Bythewood" etc.; share modal shows Save poster + 5
   social buttons; zero console errors. (Poster art is the gradient fallback in
   the sandbox — no outbound to image.tmdb.org — real poster loads in prod.)
+
+## Film counter accuracy — removed the [Sample Film] placeholder (2026-07-16)
+Owner: "is the film counter accurate?" It was off by one. The home hero counter
+(`paintCatalogCount`) and the advertise metric used raw `FILMS.length`, which
+included **`sample-bland` / "[Sample Film]"** — a dead dev placeholder (noart,
+fabricated k:41/t:38 + a fake "Imani Clarke" review) that every real
+browse/search/shelf already excluded via `!f.noart`. So the site claimed 1,258
+titles while only 1,257 were actually findable. Worse, `sample-bland` had leaked
+into `api/films.json`, so the sitemap/OG surface exposed a crawlable
+`/f/sample-bland` "[Sample Film]" page — a "nothing fake" leak. Fixes:
+- **Removed** the `sample-bland` FILMS entry + its `WS_CAST`-style override-map
+  reference (its baked scores/reviews were inert anyway — all FILMS k/t are
+  nulled on load; scores only ever come from the backend, verified
+  `withBakedScores:0` at runtime).
+- **`catalogCount()`** helper = `FILMS.filter(!noart).length`; both the home
+  counter and the advertise "Verified titles" metric now use it, so any future
+  placeholder can never inflate the public number.
+- **`scripts/build-films-json.cjs`** now skips (and deletes) any `noart` entry,
+  and the orphaned `sample-bland` was pruned from `api/films.json` → 1258 → 1257.
+- Verified: FILMS.length 1257, 0 noart entries, counter renders "1,257 Films &
+  shows", films.json 1257 with no sample-bland, zero console errors.

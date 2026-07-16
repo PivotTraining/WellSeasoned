@@ -2177,11 +2177,6 @@ var FILMS=[
    syn:'A reformed outlaw assembles his old gang for revenge. Style for days. The Kitchen and the Table did not fully agree on the substance underneath.',
    tags:['Western','Style-forward','Ensemble'],votes:{for:0,against:0},
    reviews:[{c:'Dupree Adams',v:true,o:'Sundown Journal',s:63,q:'The surface is gorgeous. I kept waiting for the story to catch up to the styling.'}]},
-  {id:'sample-bland',title:'[Sample Film]',year:2025,rt:'1h 58m',genre:'Drama',k:41,t:38,grad:'linear-gradient(160deg,#585049,#232019)',
-   moods:['Contemplative'],era:'2020s',where:['Rent'],noart:true,
-   syn:'A placeholder entry standing in for the Bland tier. In the real product this slot holds a real film that honestly under-delivered. Scoring real work low, when it earns it, is what makes the seal mean anything.',
-   tags:['Placeholder'],votes:{for:0,against:0},
-   reviews:[{c:'Imani Clarke',v:true,o:'The Marrow',s:40,q:'Handsome and hollow. It gestures at depth it never actually reaches.'}]},
   {id:'black-panther',title:'Black Panther',year:2018,rt:'2h 14m',genre:'Action',k:90,t:94,grad:'linear-gradient(160deg,#231a4d,#0b0820)',
    moods:['Intense','Uplifting','Ancestral'],era:'2010s',where:['Disney+','Rent'],
    syn:'After his father’s death, T’Challa returns home to the isolated, technologically advanced kingdom of Wakanda to take the throne, and is challenged by a rival with a claim of his own.',
@@ -5680,8 +5675,7 @@ var META={
   'passing':{dir:'Rebecca Hall',cast:['Tessa Thompson','Ruth Negga','André Holland']},
   'american-fiction':{dir:'Cord Jefferson',cast:['Jeffrey Wright','Tracee Ellis Ross','Issa Rae','Sterling K. Brown']},
   'creed':{dir:'Ryan Coogler',cast:['Michael B. Jordan','Sylvester Stallone','Tessa Thompson']},
-  'his-house':{dir:'Remi Weekes',cast:['Sope Dirisu','Wunmi Mosaku','Matt Smith']},
-  'sample-bland':{dir:'—',cast:[]}
+  'his-house':{dir:'Remi Weekes',cast:['Sope Dirisu','Wunmi Mosaku','Matt Smith']}
 };
 /* Merge metadata, and re-seed each film's raw votes so the count matches its Table score.
    This makes The Table score a live percentage: every vote you cast moves the number. */
@@ -7865,11 +7859,14 @@ function featSet(i){ var n=featSlides().length; if(!n)return; _featIdx=((i%n)+n)
 function featGo(d){ featSet(_featIdx+d); }
 function featPlay(){ featPause(); if(featSlides().length<2)return; _featTimer=setInterval(function(){ featGo(1); },6500); }
 function featPause(){ if(_featTimer){ clearInterval(_featTimer); _featTimer=null; } }
-/* Small, honest catalog-size counter on the home hero — just FILMS.length,
-   never a separate hand-maintained number that can drift out of sync. */
+/* The real, browsable catalog size — excludes any noart placeholder (e.g. the
+   old [Sample Film] tier demo) so the number matches what a visitor can actually
+   find in Browse/search/shelves. Never a hand-maintained figure that can drift. */
+function catalogCount(){ var n=0; for(var i=0;i<FILMS.length;i++){ if(!FILMS[i].noart)n++; } return n; }
+/* Small, honest catalog-size counter on the home hero. */
 function paintCatalogCount(){
   var el=byId('catalogCount'); if(!el)return;
-  el.innerHTML='<b>'+fmt(FILMS.length)+'</b><span>Films &amp; shows, and counting</span>';
+  el.innerHTML='<b>'+fmt(catalogCount())+'</b><span>Films &amp; shows, and counting</span>';
 }
 /* Home lead story — a dark cinematic banner promoting the current cover
    feature in The Balcony (replaced the 2026 Emmy nominations unit). Baked
@@ -10777,7 +10774,7 @@ var ADVERTISE_TIERS=[
 ];
 function advertiseMetricsHTML(){
   return '<div class="ad-metrics">'+
-    '<div class="ad-metric"><b>'+fmt(FILMS.length)+'</b><span>Verified titles in the catalog</span></div>'+
+    '<div class="ad-metric"><b>'+fmt(catalogCount())+'</b><span>Verified titles in the catalog</span></div>'+
     '<div class="ad-metric"><b>0</b><span>Non-Black advertisers, ever</span></div>'+
     '<div class="ad-metric"><b>0</b><span>Third-party trackers or ad networks</span></div>'+
   '</div>';
