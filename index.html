@@ -7114,14 +7114,77 @@ function renderSoonDetail(id){
     'Coming '+soonDate(c.date)+'. '+(c.syn||'').slice(0,140),
     '#/film/'+encodeURIComponent(c.id), c.poster||null);
 }
+/* Coming-soon share: a real generated POSTER image (canvas → PNG) in a share
+   modal, mirroring openShareCard for released films. The social buttons carry a
+   crawlable link — /f/<id> when the title also has a catalog entry (real OG
+   preview), else the hash route. Nothing fabricated: real poster, real premiere
+   date, no scores. */
+var _soonCanvas=null;
 function openShareCardSoon(id){
   var c=findSoon(id); if(!c)return;
-  var url='https://itswellseasoned.com/#/film/'+encodeURIComponent(id);
-  var data={title:c.title+' — Well Seasoned', text:'Coming '+soonDate(c.date)+'. On the watchlist.', url:url};
-  if(navigator.share){ navigator.share(data).catch(function(){}); return; }
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(function(){toast('Link copied — share it.');},function(){toast(url);}); return; }
-  toast(url);
+  _soonCanvas=null; track('share_soon',{film:id});
+  var fm=filmByTitle(c.title);
+  var url=fm?shareUrlFor(fm.id):('https://itswellseasoned.com/#/film/'+encodeURIComponent(id));
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Share the poster</h2><p class="m-sub">'+esc(c.title)+' — coming '+esc(soonDate(c.date))+'. Post the poster, build the hype.</p>'+
+    '<div id="scWrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Cooking up your poster…</span></div>'+
+    '<div class="sc-soc-lab">Post to</div>'+socialShareRow(id,url,c.title)+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px">'+
+      '<button class="btn btn-gold" onclick="saveSoonCard(\''+id+'\')">Save poster</button>'+
+      (navigator.share?'<button class="btn btn-ink" onclick="nativeSoonShare(\''+id+'\')">Share poster</button>':'')+
+    '</div>');
+  buildSoonShareCard(c,function(cv){ _soonCanvas=cv; var w=byId('scWrap'); if(!w)return; cv.style.cssText='width:min(300px,80vw);border-radius:14px;box-shadow:var(--shadow-3)'; w.innerHTML=''; w.appendChild(cv); });
 }
+function buildSoonShareCard(c,done){
+  var W=1080,H=1350,cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  var draw=function(img){
+    var g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#3A1E0A'); g.addColorStop(.55,'#241203'); g.addColorStop(1,'#120a03');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    var rg=ctx.createRadialGradient(W*0.25,H*0.12,60,W*0.25,H*0.12,W*0.9);
+    rg.addColorStop(0,'rgba(228,155,11,.18)'); rg.addColorStop(1,'rgba(228,155,11,0)'); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#E49B0B'; ctx.textAlign='center'; ctx.font='500 30px "DM Mono", monospace';
+    ctx.fillText('C O M I N G   S O O N', W/2, 96);
+    var pw=430, ph=645, px=(W-pw)/2, py=150;
+    ctx.save(); scRounded(ctx,px,py,pw,ph,26); ctx.clip();
+    if(img){ var s=Math.max(pw/img.width,ph/img.height); ctx.drawImage(img,px+(pw-img.width*s)/2,py+(ph-img.height*s)/2,img.width*s,img.height*s); }
+    else { var pg=ctx.createLinearGradient(px,py,px+pw,py+ph); pg.addColorStop(0,'#8a4a1a'); pg.addColorStop(1,'#2a1608'); ctx.fillStyle=pg; ctx.fillRect(px,py,pw,ph);
+      ctx.fillStyle='rgba(255,243,222,.9)'; ctx.font='800 44px "Bricolage Grotesque", Inter, sans-serif'; ctx.fillText(c.title,px+pw/2,py+ph/2); }
+    ctx.restore();
+    ctx.save(); scRounded(ctx,px,py,pw,ph,26); ctx.strokeStyle='rgba(228,155,11,.55)'; ctx.lineWidth=3; ctx.stroke(); ctx.restore();
+    ctx.fillStyle='#FFFFFF'; var tz=c.title.length>18?58:76; ctx.font='800 '+tz+'px "Bricolage Grotesque", Inter, sans-serif';
+    ctx.fillText(c.title, W/2, 880);
+    var yr=(c.date||'').slice(0,4);
+    ctx.fillStyle='rgba(246,236,215,.75)'; ctx.font='600 32px Inter, sans-serif';
+    ctx.fillText((c.dir?'Dir. '+c.dir+'  ·  ':'')+(yr||'TBA'), W/2, 936);
+    ctx.fillStyle='#F4B733'; ctx.font='800 52px "Bricolage Grotesque", Inter, sans-serif';
+    ctx.fillText('PREMIERES '+String(soonDate(c.date)).toUpperCase(), W/2, 1094);
+    ctx.fillStyle='rgba(246,236,215,.82)'; ctx.font='600 30px Inter, sans-serif';
+    ctx.fillText('On Well Seasoned’s radar — rated by the culture', W/2, 1150);
+    ctx.fillText('Cast your hype, then vote when it drops', W/2, 1192);
+    ctx.fillStyle='rgba(246,236,215,.6)'; ctx.font='500 28px "DM Mono", monospace';
+    ctx.fillText('itswellseasoned.com', W/2, 1306);
+    done(cv);
+  };
+  var posterUrl=c.poster;
+  if(posterUrl){
+    posterUrl=posterUrl.replace('/t/p/w342','/t/p/w500');
+    var corsUrl=posterUrl+(posterUrl.indexOf('?')<0?'?':'&')+'ws=cors';
+    var settled=false, finish=function(im){ if(settled)return; settled=true; draw(im); };
+    var img=new Image(); img.crossOrigin='anonymous'; img.onload=function(){finish(img);}; img.onerror=function(){finish(null);};
+    setTimeout(function(){finish(null);},6000); img.src=corsUrl;
+  } else draw(null);
+}
+function soonCardBlob(id,cb){ var go=function(cv){ cv.toBlob(function(b){cb(b);},'image/png'); }; if(_soonCanvas){go(_soonCanvas);} else { var c=findSoon(id); if(c)buildSoonShareCard(c,go); else cb(null); } }
+function saveSoonCard(id){ soonCardBlob(id,function(b){ if(!b){toast('Could not build the poster.');return;} var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='well-seasoned-'+id+'.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},4000); toast('Poster saved. Post it.'); }); }
+function nativeSoonShare(id){ var c=findSoon(id); soonCardBlob(id,function(b){
+    var link='https://itswellseasoned.com/#/film/'+encodeURIComponent(id);
+    if(!b){ if(navigator.share)navigator.share({title:c.title+' — Well Seasoned',text:'Coming '+soonDate(c.date),url:link}).catch(function(){}); return; }
+    var file=new File([b],'well-seasoned-'+id+'.png',{type:'image/png'});
+    var data={files:[file],title:c.title+' — Well Seasoned',text:'Coming '+soonDate(c.date)+' · itswellseasoned.com'};
+    if(navigator.canShare&&navigator.canShare(data)){ navigator.share(data).catch(function(){}); }
+    else if(navigator.share){ navigator.share({title:c.title+' — Well Seasoned',text:'Coming '+soonDate(c.date),url:link}).catch(function(){}); }
+  }); }
 function isoToday(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 /* July 4 freedom spotlight — live only on July 4 (visitor local time), 12:00am
    to 12:00am July 5. Real Black films on the fight against injustice and for
@@ -8011,6 +8074,7 @@ function renderFilm(id){
   var f=find(id); if(!f){go('home');return;}
   _activeFilm=id;
   var ts=tableScore(f), isCert=certified(f), split=Math.abs(f.k-ts);
+  var soonC=upcomingSoonEntry(f);   // non-null = not released yet → no "seen it" verdict vote, only hype
   applyMedia(f, loadMediaCache()[f.id]);   // paint cached backdrop/cast on first render
   var reviews=f.reviews.map(function(r){
     var av=r.av?'<span class="rv-av" style="background-image:url(\''+esc(r.av)+'\')"></span>'
@@ -8058,7 +8122,7 @@ function renderFilm(id){
                so a streaming-only or back-catalog title never gets a showtimes
                button implying a theatrical run it doesn't have. */
             '<div id="ticketBlockWrap">'+ticketBlockHTML(f)+'</div>'+
-            '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="openShareCard(\''+f.id+'\')">Share</button></div>'+
+            '<div class="film-actions">'+(f.trailer?'<button class="btn btn-gold" onclick="openTrailer(\''+f.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch trailer</button>':'')+'<button class="btn btn-ghost light" onclick="savePlate(\''+f.id+'\')">＋ My Plate</button><button class="btn btn-ghost light" onclick="'+(soonC?'openShareCardSoon(\''+soonC.id+'\')':'openShareCard(\''+f.id+'\')')+'">Share</button></div>'+
             myWatchWidgetHTML(f)+
           '</div>'+
         '</div>'+
@@ -8066,7 +8130,7 @@ function renderFilm(id){
       '<div class="film-verdict">'+
         '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
           '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
-        '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+tblCountText(f)+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
+        '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+(soonC?'Not out yet':tblCountText(f))+'</span><span id="tblTier">'+(soonC?'':tierChip(ts))+'</span></div></div>'+
         '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
         splitFlagHTML(f)+
       '</div>'+
@@ -8079,7 +8143,12 @@ function renderFilm(id){
     '</div>'+
     '<div class="detail-cols">'+
       '<div class="panel"><h3>The Kitchen</h3><p class="p-sub">Verified critics of the culture. These reviews move the official score.</p>'+(reviews||'<p class="empty-note">The Kitchen is being seated. Verified critic reviews are on the way — the culture writes them.</p>')+criticForm+'</div>'+
-      '<div class="panel" id="votePanel"><h3>The Table</h3><p class="p-sub">The People\u2019s Cut. Did it earn a seat at the table?</p>'+
+      '<div class="panel" id="votePanel"><h3>The Table</h3>'+
+      (soonC
+        ? '<p class="p-sub">Not out yet \u2014 the verdict opens the day it premieres. For now, tell the table how hyped you are.</p>'+
+          '<div style="font-weight:700;font-size:14px;margin:8px 0 8px">How hyped are you?</div>'+excitementButtons(soonC,true)+
+          (soonReleased(soonC)?'':premiereHookHTML(soonC.id,f.title,soonC.date,''))
+        : '<p class="p-sub">The People\u2019s Cut. Did it earn a seat at the table?</p>'+
         '<div class="vote-btns"><button class="vbtn for" id="btnFor" onclick="castVote(\''+f.id+'\',\'for\')">It\u2019s Seasoned</button>'+
         '<button class="vbtn against" id="btnAgainst" onclick="castVote(\''+f.id+'\',\'against\')">Send It Back</button></div>'+
         '<div class="tally"><span class="n for" id="forNum">'+fmt(f.votes.for)+'</span> seasoned <span style="flex:1"></span> sent back <span class="n against" id="againstNum">'+fmt(f.votes.against)+'</span></div>'+
@@ -8090,7 +8159,8 @@ function renderFilm(id){
           '<div class="cbox-row"><span class="cbox-hint" id="stanceHint">Pick a side above, then post.</span><button class="btn btn-gold btn-sm" onclick="postComment(\''+f.id+'\')">Post your read</button></div></div>'+
         '<div class="comments" id="commentList"></div>'+
         '<div class="safety-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>One vote per film. Reads are held to our <a onclick="openGuidelines()" tabindex="0" onkeydown="if(event.key===\'Enter\')openGuidelines()">community guidelines</a>.</div>'+
-        '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'+
+        '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'
+      )+
       '</div>'+
     '</div>';
   applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id); loadMyWatch(f.id);
@@ -8161,6 +8231,7 @@ function refreshSeasoning(f){
 }
 /* reflect this device's saved vote on the film detail */
 function restoreVoteUI(f){
+  if(!byId('btnFor')) return;   // unreleased film → no verdict buttons to restore
   var side=app.votes[f.id];
   byId('btnFor').classList.toggle('on',side==='for');
   byId('btnAgainst').classList.toggle('on',side==='against');
@@ -8173,6 +8244,7 @@ function restoreVoteUI(f){
    (Supabase) are merged in by loadBackendComments() when configured. */
 function ensureComments(f){ if(!f._comments){ f._comments=(app.comments[f.id]||[]).slice(); } }
 function renderVotes(f){
+  if(!byId('forNum')) return;   // unreleased film → verdict vote panel isn't rendered
   var total=f.votes.for+f.votes.against, pf=total?Math.round(f.votes.for/total*100):0;
   byId('forNum').textContent=fmt(f.votes.for); byId('againstNum').textContent=fmt(f.votes.against);
   byId('sbFor').style.width=pf+'%'; byId('sbAgainst').style.width=(total?100-pf:0)+'%';
@@ -8224,7 +8296,7 @@ function loadBackendVotes(slug){
       f.votes={for:c.for_count||0,against:c.against_count||0}; app.tally[slug]={for:f.votes.for,against:f.votes.against};
       if(document.querySelector('.view.on')&&document.querySelector('.view.on').getAttribute('data-view')==='film'&&_activeFilm===slug){
         var ts=tableScore(f), tr=byId('tblRing'); if(tr) tr.innerHTML=auraRing(ts,tier(ts),72,true);
-        if(byId('tblCount')) byId('tblCount').textContent=tblCountText(f);
+        if(byId('tblCount')) byId('tblCount').textContent=upcomingSoonEntry(f)?'Not out yet':tblCountText(f);
         if(byId('forNum')) renderVotes(f);   // keep the tally row + split bar in sync with backend counts
         refreshSeasoning(f); animateAura(byId('filmContent'));
       }
@@ -9105,6 +9177,7 @@ function featuredQuoteHTML(f){
     '<div class="fq-foot"><span class="fq-name">'+esc(c.name||'Guest')+'</span><span class="stance '+c.stance+'">'+lab+'</span></div></div>';
 }
 function renderComments(f){
+  if(!byId('commentList')) return;   // unreleased film → no reads panel rendered
   ensureComments(f);
   var fq=byId('featQuoteBlock'); if(fq) fq.innerHTML=featuredQuoteHTML(f);
   if(!f._comments.length){
@@ -9795,13 +9868,19 @@ function fandangoUrl(title){
 /* If this title has a Coming Soon entry dated later than today, it isn't out
    yet — returns that ISO date. Used to (a) keep showtimes/ticket buttons off
    unreleased titles and (b) show a "Coming <date>" badge on the film page. */
-function upcomingReleaseDate(f){
+function upcomingReleaseDate(f){ var c=upcomingSoonEntry(f); return c?c.date:null; }
+/* The COMING_SOON entry a catalog film maps to when it hasn't been released yet
+   (matched by title, dated in the future). Non-null means the title is not out —
+   so its film page shows the hype vote, never the "seen it" Seasoned/Sent-it-back
+   verdict, which would imply an active theatrical/streaming release. */
+function upcomingSoonEntry(f){
   if(!f||f.type==='tv'||!f.title)return null;
   var today=new Date().toISOString().slice(0,10), t=f.title.toLowerCase();
   var list=(typeof COMING_SOON!=='undefined'&&COMING_SOON)||[];
-  for(var i=0;i<list.length;i++){ var c=list[i]; if(c&&c.title&&c.date&&c.date>today&&c.title.toLowerCase()===t) return c.date; }
+  for(var i=0;i<list.length;i++){ var c=list[i]; if(c&&c.title&&c.date&&c.date>today&&c.title.toLowerCase()===t) return c; }
   return null;
 }
+function filmByTitle(t){ if(!t)return null; var lt=t.toLowerCase(); for(var i=0;i<FILMS.length;i++){ if(FILMS[i].title.toLowerCase()===lt) return FILMS[i]; } return null; }
 function ticketBlockHTML(f){
   if(upcomingReleaseDate(f)) return '';   // not released yet — never "in theaters now"
   // f.year>=now alone is too broad — it also flags stand-up specials and

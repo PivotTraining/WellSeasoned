@@ -2266,3 +2266,39 @@ headless Chromium: marquee iframe src correct, poster fallback gone, hype vote +
 share still present, detail page play button + 2 excite buttons, zero console
 errors. (The clip can't actually play inside the sandbox — no outbound to
 youtube — a test-env limit, not a code issue; the id is a verified-real embed.)
+
+## Unreleased films: no "seen it" verdict vote + Coming Soon share poster (2026-07-16)
+Owner: "The children of the bone needs a shared link that creates a coming soon
+poster image and the poster on the 'new' films needs to be removed from the
+ability to be voted as if it's an active movie out in theaters." Two fixes:
+- **No verdict vote on unreleased catalog films.** `upcomingReleaseDate` was
+  refactored to sit on a new `upcomingSoonEntry(f)` (returns the future-dated
+  COMING_SOON entry a catalog film maps to by title, or null). In `renderFilm`,
+  `var soonC=upcomingSoonEntry(f)` gates the `#votePanel`: when a title isn't out
+  yet, the Seasoned/Send-It-Back verdict buttons + tally + stance-comment box are
+  replaced with the **hype vote** ("How hyped are you?" → Let's Go/Meh via
+  `excitementButtons(soonC,true)`) + the premiere email hook — never the
+  "seen it" verdict, which implied an active theatrical/streaming release. The
+  Table ring meta reads "Not out yet" (both at first paint AND in the
+  `loadBackendVotes` refresh, which otherwise reset it to "Be the first").
+  `renderVotes`/`restoreVoteUI`/`renderComments` now early-return when their
+  elements are absent (they `byId(...).x` without null-checks), so the removed
+  panel can't throw. Released films are completely unchanged (verified: Bull
+  Street still shows the verdict buttons + comment box).
+- **Coming Soon share poster image.** `openShareCardSoon(id)` was a bare
+  link-share; rewrote it to open the same share modal as released films but
+  driven by a new `buildSoonShareCard(c)` canvas → PNG: a "COMING SOON" poster
+  (real poster art, title, "Dir. <name> · <year>", "PREMIERES <DATE>", brand
+  footer — no scores, nothing faked). Save poster / native share-image /
+  Threads-FB-X-WhatsApp-copy row, same plumbing as `openShareCard`
+  (`saveSoonCard`/`nativeSoonShare`/`soonCardBlob`, `_soonCanvas`). The social
+  buttons carry a crawlable link — `/f/<id>` when the title also has a catalog
+  entry (real OG preview, e.g. Children of Blood and Bone), else the hash route
+  (`filmByTitle` helper). The unreleased film page's Share button + the marquee/
+  Coming-Soon-detail share buttons all now produce this poster.
+- Verified in headless Chromium: CoBaB film page has NO verdict buttons, shows
+  the hype vote + premiere hook + "Not out yet"; Bull Street (released) still
+  votes normally; the soon card canvas draws "COMING SOON / PREMIERES JAN 14,
+  2027 / Dir. Gina Prince-Bythewood" etc.; share modal shows Save poster + 5
+  social buttons; zero console errors. (Poster art is the gradient fallback in
+  the sandbox — no outbound to image.tmdb.org — real poster loads in prod.)
