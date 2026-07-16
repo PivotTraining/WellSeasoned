@@ -303,6 +303,10 @@
   .mf-date{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.04em;color:#F4B733}
   .mf-trailer{position:relative;margin-top:18px;border-radius:16px;overflow:hidden;aspect-ratio:16/9;box-shadow:0 14px 34px rgba(0,0,0,.5);border:1px solid rgba(244,197,66,.3)}
   .mf-trailer iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .mf-poster{position:relative;margin:18px auto 0;max-width:300px;border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.5);border:1px solid rgba(244,197,66,.3)}
+  .mf-poster img{width:100%;display:block}
+  .mf-vote{margin-top:18px;text-align:center}
+  .mf-vote-lab{display:block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(246,236,215,.72);margin-bottom:8px}
   .mf-share{position:absolute;top:12px;right:12px;z-index:2;width:36px;height:36px;border-radius:50%;border:1px solid rgba(244,197,66,.45);
     background:rgba(12,8,4,.6);color:#F4B733;cursor:pointer;display:grid;place-items:center;transition:background .15s;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
   .mf-share:hover{background:rgba(244,197,66,.28)}
@@ -6893,8 +6897,8 @@ function soonCard(c,i){
 }
 /* Excitement vote — only where there's a trailer to judge, so it stays fair.
    Green "Let's Go" / red "Meh"; identity-backed like every other vote. */
-function excitementButtons(c){
-  if(!c.trailer) return '';
+function excitementButtons(c,force){
+  if(!c.trailer && !force) return '';   // the fair-way trailer gate, except a curated marquee can force the hype vote
   var mine=app.excitement[c.id]||null, cnt=app.exciteCounts[c.id]||{excited:0,meh:0};
   return '<div class="excite-row" onclick="event.stopPropagation()">'+
     '<button class="excite-btn go'+(mine==='excited'?' on':'')+'" onclick="excitementVote(\''+c.id+'\',\'excited\')" aria-pressed="'+(mine==='excited')+'">Let’s Go'+(cnt.excited?' <b>'+fmt(cnt.excited)+'</b>':'')+'</button>'+
@@ -6970,17 +6974,21 @@ function openSoonTrailerId(id){ var i=soonIndex(id); if(i>=0)openSoonTrailer(i);
    spotlight treatment: a real embedded trailer, real cast photos, real
    release date, and the existing excitement vote (Let's Go / Meh) reused
    as-is — same honesty rules as everywhere else, nothing invented. To
-   change the feature, edit MARRIED_FEATURE_ID / MARRIED_CAST below. */
-var MARRIED_FEATURE_ID='cs-1522689';
+   change the feature, edit MARRIED_FEATURE_ID / MARRIED_CAST below. (Names kept
+   from the original Tyler Perry feature to avoid churn — the marquee now points
+   at Children of Blood and Bone; no trailer indexed on TMDB yet, so it leads
+   with the poster and the excitement/hype vote is force-shown for this curated
+   marquee.) */
+var MARRIED_FEATURE_ID='cs-621304';
 var MARRIED_CAST=[
-  {name:'Tyler Perry',photo:'/8KU0OizemVLrERXt5HJIa0PAkIN.jpg'},
-  {name:'Taraji P. Henson',photo:'/jUU2X9mDwJaAniEmJOfvImBS9qb.jpg'},
-  {name:'Jill Scott',photo:'/vfq3acT3sWG1b2M4ior10zqXFd1.jpg'},
-  {name:'Richard T. Jones',photo:'/hdko2C45Wr5G03Z8JwGjWMynP84.jpg'},
-  {name:'Tasha Smith',photo:'/viJnHL3BjQ5oqisXklQWGlh29Hx.jpg'},
-  {name:'Michael Jai White',photo:'/YPoHYuzR37wFpPpwEXZYQlhLln.jpg'},
-  {name:'Lamman Rucker',photo:'/97JGsO3FR13MLa3hrs9A0cIzGBo.jpg'},
-  {name:'Sharon Leal',photo:'/3dJCnAZDG2ZN7Hxct8UAdPePpuz.jpg'}
+  {name:'Thuso Mbedu',char:'Zélie',photo:'/pAStLwNMw8Seb0BM4uqrdOvtjK1.jpg'},
+  {name:'Amandla Stenberg',char:'Amari',photo:'/1Kv2sVVUkNSXyvmma8RBAX0CNGA.jpg'},
+  {name:'Damson Idris',char:'Inan',photo:'/y0dcRs4GF6Xx23OxDr1ytc8thlL.jpg'},
+  {name:'Tosin Cole',char:'Tzain',photo:'/8sFFg9Pw2OmAXPr4Lhql8ANzd4e.jpg'},
+  {name:'Viola Davis',char:'Mama Agba',photo:'/xDssw6vpYNRjsybvMPRE30e0dPN.jpg'},
+  {name:'Cynthia Erivo',char:'Admiral Kaea',photo:'/gIAXqZwZCBqkh2ppfAV4xcnMxki.jpg'},
+  {name:'Idris Elba',char:'Lekan',photo:'/be1bVF7qGX91a6c5WeRPs5pKXln.jpg'},
+  {name:'Lashana Lynch',char:'Jumoke',photo:'/ypNxRag9uJ5nzPAN2um3amQK340.jpg'}
 ];
 function paintMarriedFeature(){
   var el=byId('marriedFeature'); if(!el)return;
@@ -6988,19 +6996,21 @@ function paintMarriedFeature(){
   if(!c){ el.style.display='none'; return; }
   el.style.display='';
   var open="go('film','"+c.id+"')";
+  var shareBtn='<button class="mf-share" aria-label="Share" onclick="openShareCardSoon(\''+c.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
+  var hero=c.trailer
+    ? '<div class="mf-trailer"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(c.trailer)+'?rel=0&amp;modestbranding=1" title="'+esc(c.title)+' trailer" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>'+shareBtn+'</div>'
+    : (c.poster?'<div class="mf-poster"><img src="'+esc(c.poster)+'" alt="'+esc(c.title)+' poster" loading="lazy">'+shareBtn+'</div>':'');
   el.innerHTML='<div class="mf-wrap">'+
     '<div class="mf-spark s1"></div><div class="mf-spark s2"></div><div class="mf-spark s3"></div>'+
-    '<span class="mf-ribbon">Feature · Tyler Perry</span>'+
+    '<span class="mf-ribbon">Feature · '+esc(c.dir||'The culture')+'</span>'+
     '<h2 class="mf-ttl">'+esc(c.title)+'</h2>'+
-    '<div class="mf-date">Streaming '+esc(soonDate(c.date))+'</div>'+
-    (c.trailer?'<div class="mf-trailer"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(c.trailer)+'?rel=0&amp;modestbranding=1" title="'+esc(c.title)+' trailer" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>'+
-      '<button class="mf-share" aria-label="Share" onclick="openShareCardSoon(\''+c.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>'+
-    '</div>':'')+
+    '<div class="mf-date">Premieres '+esc(soonDate(c.date))+'</div>'+
+    hero+
     '<div class="mf-cast">'+MARRIED_CAST.map(function(p){
-      return '<div class="mf-cast-card"><span class="mf-cast-av" style="background-image:url(\'https://image.tmdb.org/t/p/w185'+p.photo+'\')"></span><span class="mf-cast-name">'+esc(p.name)+'</span></div>';
+      return '<div class="mf-cast-card"><span class="mf-cast-av" style="background-image:url(\'https://image.tmdb.org/t/p/w185'+p.photo+'\')"></span><span class="mf-cast-name">'+esc(p.name)+'</span>'+(p.char?'<span class="mf-cast-name" style="font-weight:500;opacity:.62;font-size:11px">'+esc(p.char)+'</span>':'')+'</div>';
     }).join('')+'</div>'+
-    excitementButtons(c)+
-    (soonReleased(c)?'':premiereHookHTML(c.id,c.title,c.date,'Netflix'))+
+    '<div class="mf-vote"><span class="mf-vote-lab">How hyped are you?</span>'+excitementButtons(c,true)+'</div>'+
+    (soonReleased(c)?'':premiereHookHTML(c.id,c.title,c.date,''))+
     '<button class="btn btn-ghost mf-more" onclick="'+open+'">More on this title →</button>'+
   '</div>';
 }

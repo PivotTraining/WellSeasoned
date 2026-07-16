@@ -2214,3 +2214,35 @@ shows the honest "🗓 Coming Jan 14, 2027 — not out yet" badge (via
 `node scripts/build-films-json.cjs`. Verified in headless Chromium: entry
 correct, findable in search, film page renders with the cast/director + coming
 badge, zero console errors.
+
+## Home marquee swapped → Children of Blood and Bone + hype voting (2026-07-16)
+Owner: "Remove the Tyler perry movie as the marquee put this one in its place
+and also I need a voting system [for] it." Repointed the home marquee feature
+(`paintMarriedFeature`/`#marriedFeature`) from Why Did I Get Married Again?
+(cs-1522689) to **Children of Blood and Bone** (cs-621304). WDIGMA is NOT
+deleted — just unwired from the marquee (still in COMING_SOON, reachable), same
+pattern as prior feature swaps.
+- **Constants repointed** (identifiers kept as MARRIED_* to avoid churn across
+  refreshExcitement/loadAllExcitement/#marriedFeature refs — a comment flags the
+  rename-of-meaning): `MARRIED_FEATURE_ID='cs-621304'`; `MARRIED_CAST` = the 8
+  real cast with real TMDB profile photos AND character names (Thuso Mbedu/Zélie,
+  Amandla Stenberg/Amari, Damson Idris/Inan, Tosin Cole/Tzain, Viola Davis/Mama
+  Agba, Cynthia Erivo/Admiral Kaea, Idris Elba/Lekan, Lashana Lynch/Jumoke).
+- **No trailer** indexed on TMDB yet (post-production), so the hero leads with
+  the real poster (`.mf-poster`) instead of a trailer iframe; ribbon reads
+  "Feature · <dir>" (Gina Prince-Bythewood), date reads "Premieres <date>"
+  (theatrical, not "Streaming").
+- **Voting system**: reused the existing excitement/hype vote (Let's Go / Meh,
+  `excitement_votes` table + `excitement_scores` view — already live). Since the
+  vote is normally gated on having a trailer ("the fair way"), added a `force`
+  param to `excitementButtons(c,force)` so this ONE curated marquee shows the
+  hype vote without a trailer (the global Coming-Soon gate is unchanged). Framed
+  honestly as anticipation ("How hyped are you?"), not a quality verdict — real
+  backend-persisted votes, nothing fabricated. The #4 premiere email pre-reg
+  hook carries over (platform arg now '' since distribution is unconfirmed).
+- New CSS `.mf-poster`/`.mf-vote`/`.mf-vote-lab`. Verified in headless Chromium:
+  marquee shows the film/dir/date/poster/8 cast+characters/hype vote/premiere
+  hook, no Tyler Perry mention remains, clicking "Let's Go" toggles on and
+  records `app.excitement['cs-621304']='excited'`, zero console errors. (TMDB
+  cast/poster images are blank in the sandbox — no outbound internet — but
+  resolve in production, same limitation as trailers.)
