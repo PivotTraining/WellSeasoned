@@ -2131,3 +2131,34 @@ swaps in place to "✓ You're on the list · Your seat's saved."
   to "The Verdict Drop"; #6 share-after-vote loop (the share-card system already
   exists — wire it to fire post-vote showing the user's verdict). Affiliate layer
   (#5-adjacent) is owner-signup work.
+
+## Growth plan #6 — share-after-vote loop (verdict on the share card) (2026-07-16)
+"Make sharing the growth engine": after someone votes, offer a share card that
+shows THEIR verdict → the card pulls in new visitors → who vote → register →
+share. Reused the existing share-card system (`buildShareCard`/`openShareCard`/
+canvas → PNG + social row) rather than a new one:
+- **The card now stamps the sharer's own verdict** whenever `app.votes[f.id]` is
+  set. Unscored film → the headline becomes "I SAID SEASONED." / "I SENT IT
+  BACK." (was the generic "TWO VERDICTS. CAST YOURS." — still shown when the
+  sharer hasn't voted). Scored film → a "MY VERDICT · SEASONED/SENT IT BACK"
+  line under the tier label. Nudged the ring row up slightly to make room. This
+  means EVERY share of a film the user voted on — from the film-page Share
+  button OR the post-vote moment — carries their verdict, no new code path.
+- **Post-vote capture modal** (#1) gained a "Share your verdict ↗" button
+  alongside "Save my verdict — free" — so the highest-intent moment offers both
+  the register ask AND the share loop. Signed-in / repeat voters reach the same
+  verdict card via the existing film-page Share button.
+- "Nothing fake" held: the card only ever shows real Kitchen/Table numbers (or
+  the honest "cast yours" invite when unscored) plus the user's own real vote —
+  no invented scores.
+- Verified in headless Chromium by instrumenting canvas `fillText`: unscored+for
+  → "I SAID SEASONED."; scored+against → rings + "MY VERDICT · SENT IT BACK";
+  no-vote → "TWO VERDICTS. CAST YOURS."; the post-vote modal shows all three
+  buttons (Save / Share / Not now); rendered card screenshot confirms the "MY
+  VERDICT · SEASONED" line sits cleanly between the tier label and footer; zero
+  console errors.
+- **Growth plan remaining:** only #3 (scroll/exit-intent email capture tied to
+  "The Verdict Drop" newsletter) is left of the product items — #1,2,4,6,7 are
+  now built. #3 needs the newsletter to actually exist (no outbound send yet),
+  so it's a capture-the-interest scaffold until Resend SMTP is live. Affiliate
+  layer + Netflix-gap remain owner-signup work.

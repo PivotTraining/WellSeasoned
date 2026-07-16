@@ -6303,21 +6303,32 @@ function buildShareCard(f,done){
     // verdict block — the three score rings once it has scores, or an
     // intentional "cast yours" call while it's still awaiting the culture.
     var ts2=tableScore(f), os=overallScore(f), otk=overallTier(f);
+    var myV=(app.votes&&app.votes[f.id])||null;   // stamp the sharer's OWN verdict when they've cast one (the share-after-vote loop)
     if(os==null){
-      ctx.fillStyle='#F4B733'; ctx.font='800 50px "Bricolage Grotesque", Inter, sans-serif';
-      ctx.fillText('TWO VERDICTS. CAST YOURS.', W/2, 1104);
-      ctx.fillStyle='rgba(246,236,215,.82)'; ctx.font='600 30px Inter, sans-serif';
-      ctx.fillText('The Kitchen · verified critics of the culture', W/2, 1158);
-      ctx.fillText('The Table · the community that bought the ticket', W/2, 1200);
+      if(myV){
+        ctx.fillStyle=(myV==='for')?'#F4B733':'#E8996A'; ctx.font='800 56px "Bricolage Grotesque", Inter, sans-serif';
+        ctx.fillText(myV==='for'?'I SAID SEASONED.':'I SENT IT BACK.', W/2, 1100);
+        ctx.fillStyle='rgba(246,236,215,.82)'; ctx.font='600 30px Inter, sans-serif';
+        ctx.fillText('Two verdicts on every film — the critics and the culture.', W/2, 1156);
+        ctx.fillText('Cast yours at itswellseasoned.com', W/2, 1198);
+      } else {
+        ctx.fillStyle='#F4B733'; ctx.font='800 50px "Bricolage Grotesque", Inter, sans-serif';
+        ctx.fillText('TWO VERDICTS. CAST YOURS.', W/2, 1104);
+        ctx.fillStyle='rgba(246,236,215,.82)'; ctx.font='600 30px Inter, sans-serif';
+        ctx.fillText('The Kitchen · verified critics of the culture', W/2, 1158);
+        ctx.fillText('The Table · the community that bought the ticket', W/2, 1200);
+      }
     } else {
-      scRing(ctx, W/2, 1090, 92, os, otk);
-      scRing(ctx, W/2-300, 1090, 64, f.k, tier(f.k));
-      scRing(ctx, W/2+300, 1090, 64, ts2, tier(ts2));
+      scRing(ctx, W/2, 1078, 92, os, otk);
+      scRing(ctx, W/2-300, 1078, 64, f.k, tier(f.k));
+      scRing(ctx, W/2+300, 1078, 64, ts2, tier(ts2));
       ctx.fillStyle='rgba(246,236,215,.8)'; ctx.font='700 26px "DM Mono", monospace';
-      ctx.fillText('THE KITCHEN', W/2-300, 1196);
-      ctx.fillText('THE TABLE', W/2+300, 1196);
+      ctx.fillText('THE KITCHEN', W/2-300, 1184);
+      ctx.fillText('THE TABLE', W/2+300, 1184);
       ctx.fillStyle='#F4B733'; ctx.font='800 34px "Bricolage Grotesque", Inter, sans-serif';
-      ctx.fillText(tierLabelKey(otk).toUpperCase(), W/2, 1222);
+      ctx.fillText(tierLabelKey(otk).toUpperCase(), W/2, 1210);
+      if(myV){ ctx.fillStyle=(myV==='for')?'#F4B733':'#E8996A'; ctx.font='700 27px "DM Mono", monospace';
+        ctx.fillText('MY VERDICT · '+(myV==='for'?'SEASONED':'SENT IT BACK'), W/2, 1258); }
     }
     // footer
     ctx.fillStyle='rgba(246,236,215,.6)'; ctx.font='500 28px "DM Mono", monospace';
@@ -8997,7 +9008,9 @@ function showPostVoteCapture(f,side){
       '<div style="text-align:center;min-width:88px">'+auraRing(ts,tsTier,60)+'<div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:6px">The Table</div><div style="font-size:12px;color:var(--ink-2);margin-top:2px">'+tSub+'</div></div>'+
     '</div>'+
     '<p style="text-align:center;color:var(--ink-2);font-size:13.5px;line-height:1.5;margin:2px 0 14px">'+gap+'</p>'+
-    '<div class="film-actions" style="margin-top:2px"><button class="btn btn-gold" onclick="closeModal();openAuth(\'signup\')">Save my verdict — free</button><button class="btn btn-ghost" onclick="closeModal()">Not now</button></div>'+
+    '<div class="film-actions" style="margin-top:2px"><button class="btn btn-gold" onclick="closeModal();openAuth(\'signup\')">Save my verdict — free</button>'+
+      '<button class="btn btn-ghost" onclick="closeModal();openShareCard(\''+esc(f.id)+'\')">Share your verdict ↗</button>'+
+      '<button class="btn btn-ghost" onclick="closeModal()">Not now</button></div>'+
     '<p class="m-alt" style="margin-top:10px">One tap. Your verdict &amp; My Plate follow you on every device.</p>');
   track('post_vote_capture_shown',{film:f.id,side:side});
 }
