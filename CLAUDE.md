@@ -1953,3 +1953,38 @@ Neighbor), and more.
 Verified in headless Chromium: 1104 FILMS, all new ids present, F1/Wild Robot/
 House of Dynamite render with real cast + pinned posters, film pages open,
 zero console errors.
+
+## Catalog sweep batch 2: closer-bar rescope + 152 films 2009–2023 (2026-07-16)
+Owner: "add the closer bar if we can pull some artwork and if they had
+prominent roles for OUR FILMS. if not just add them to all films. continue."
+- **Closer-bar rescope** (the 8 flagged in batch 1): checked each film's pinned
+  poster + role prominence. Kept `scope:'ours'` for 6 where the Black lead is
+  featured on the poster AND has a lead/co-lead role: Captain America: Brave
+  New World (Mackie IS Cap), Back in Action (Foxx co-lead), Wicked +
+  Wicked: For Good (Erivo/Elphaba), A House of Dynamite (Idris Elba, plays the
+  President, on poster), The Union (Halle Berry co-lead). **Blink Twice** kept
+  `'ours'` and re-pinned to the official Naomi Ackie poster
+  (`6rHTnmIr0F6Vy3nCsNYhQpYOVse`) — she's the lead, Zoë Kravitz directs, and
+  real art of her exists. **F1** moved to `scope:'all'` (All Films only) — every
+  F1 poster is Brad Pitt; Damson Idris is a genuine co-lead but the marketing
+  never features him prominently, so "Our Films" art would misrepresent it.
+  (`scope:'all'` = shows only under the All Films toggle; a film with NO scope
+  field defaults to `'ours'` per the `if(!f.scope)f.scope='ours'` line, so the
+  non-ours value must be an explicit `'all'`.)
+- **152 more films added (2009–2023 tier)** — the rest of the sweep. Same
+  process: real TMDB data (id/year/dir/cast/poster/backdrop/synopsis), `k`/`t`
+  null, 0 votes, `reviews:[]`, `scope:'ours'`, posters pinned, backdrops baked,
+  era set by decade. Dramas/comedies/thrillers/biopics/docs across the full
+  span: Precious, For Colored Girls, Pariah (already had some), Beasts of the
+  Southern Wild, Belle, Mandela, Selma-era, Dope, Straight Outta Compton (some
+  pre-existing), Roxanne Roxanne, Mudbound, Widows, Green Book, Us, Queen &
+  Slim-era, Ma Rainey, One Night in Miami, Judas-era, Passing, King Richard,
+  The Woman King-adjacent, Till, Nanny, American Fiction, Rye Lane, and many
+  Nollywood/UK/African + documentaries.
+- **Skipped (nothing fake)**: Mooz-lum (2010) and Gone Too Far! (2013) — not on
+  TMDB, no real data to bake. Deferred.
+- Catalog 1104 → **1256** titles; ran `node scripts/build-films-json.cjs`.
+  Sweep total added this session: **199 films** (47 + 152). Verified in
+  headless Chromium: FILMS parses (1256), new entries present with real cast/
+  pinned posters, F1 scope='all', Emergency resolves to the right RJ Cyler
+  film, film pages render, zero console errors.
