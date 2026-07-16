@@ -2047,3 +2047,36 @@ at the end of a vote).
   (Amazon Associates, CJ/Fandango, FlexOffers, Skimlinks/Sovrn auto-linker) is
   owner-signup work; Netflix has NO affiliate program (matters for the Sept 9
   Netflix anchor — that's sponsorship/Amazon-adjacent money, not affiliate).
+
+## Growth plan #2 — "Pull up a seat at The Table" identity + verdicts vs. the room (2026-07-16)
+Second item from the owner's growth plan: kill the generic "Join" label and
+make membership feel like an identity (joining the culture's verdict), and
+give registered users a running list of their verdicts + where they land vs.
+the room. Built on the EXISTING `renderYou()`/`voteBlock` (the You page already
+had a hero, stats, taste block, plate, and a bare votes list) rather than a new
+page.
+- **Identity rename** (display-only; view id stays `join`, routing untouched):
+  nav link "Join" → **"The Table"**; header signup CTA "Join" → **"Take a
+  seat"**; the `#/join` hero eyebrow/headline → **"Membership / Pull up a seat
+  at The Table."** with a new lead ("This isn't a newsletter — it's the
+  culture's verdict…"). The post-vote capture's "Save my verdict" already opens
+  the same signup ("Join the table").
+- **Verdicts vs. the room** — `voteBlock` now renders, per verdict, a room chip:
+  the real Table % + "with the room" (green) / "against the grain" (paprika),
+  or "Table still counting" when a film is below quorum (honest — no comparison
+  against a number that isn't real). Header renamed "Your votes" → "Your
+  verdicts" with a summary stat: "You side with the culture on X of Y scored
+  verdicts" (only counts films with a real Table score). Agreement = whether the
+  room's majority side (`tableScore>=50` ⇒ seasoned) matches the user's side.
+  `TABLE_QUORUM` is 1, so a user's own vote generally makes the film scored.
+- New `.vr-room` CSS (agree/against/pending variants) + a mobile
+  `flex-wrap` rule so the chip drops below the title cleanly < 640px.
+- Verified in headless Chromium (desktop + mobile): nav "The Table", CTA "Take
+  a seat", join hero renders, and a signed-in user with 3 seeded votes shows the
+  correct chips (80% with the room, 15%/60% against the grain) + "1 of 3"
+  summary, zero console errors. Gotcha noted: `render()` sets `data-view` on
+  `document.body`, so `querySelector('[data-view="join"]')` matches BODY first —
+  use `section[data-view="join"]` in tests.
+- **Still open in the plan:** #7 anon→registered conversion tile in The Pulse;
+  #4 Sept 9 / Odyssey pre-registration hooks; #3 scroll/exit-intent email
+  capture for "The Verdict Drop"; #6 share-after-vote loop.

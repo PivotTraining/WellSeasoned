@@ -1343,6 +1343,11 @@
   .vote-row:hover{border-color:var(--gold-ink)}
   .vote-row .vr-ttl{font-weight:700;font-size:14.5px}
   .vote-row .vr-yr{font-size:12.5px;color:var(--ink-2)}
+  .vote-row .vr-room{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:99px;white-space:nowrap}
+  .vote-row .vr-room.agree{background:rgba(87,99,42,.16);color:#57632A}
+  .vote-row .vr-room.against{background:rgba(196,69,31,.14);color:var(--paprika)}
+  .vote-row .vr-room.pending{background:rgba(140,130,110,.14);color:var(--ink-3)}
+  @media(max-width:640px){.vote-row{flex-wrap:wrap;gap:7px}.vote-row .vr-room{order:5}.vote-row>span[style*="flex:1"]{display:none}}
   .plate-remove{background:none;border:1px solid var(--line-strong);border-radius:99px;font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer;padding:5px 11px}
   .plate-actions{display:flex;gap:7px;align-items:center;margin-top:8px;justify-content:center}
   .plate-watch{background:var(--gold);color:#241703;border-radius:99px;font-size:12px;font-weight:800;padding:6px 12px;text-decoration:none}
@@ -1698,7 +1703,7 @@
           <a data-nav="vault" onclick="closeMoreNav();go('vault')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg>The Vault</a>
         </div>
       </div>
-      <a data-nav="join" onclick="go('join')" tabindex="0">Join</a>
+      <a data-nav="join" onclick="go('join')" tabindex="0">The Table</a>
     </nav>
     <div class="right">
       <button type="button" id="mobileSearchBtn" class="mobile-search-btn" onclick="toggleMobileSearch()" aria-label="Search films &amp; shows" aria-expanded="false" aria-controls="searchInput">
@@ -1869,7 +1874,7 @@
   <!-- ============ MEMBERSHIP ============ -->
   <section class="view" data-view="join" aria-label="Membership">
     <div class="wrap">
-      <div class="browse-head"><span class="eyebrow">Pull up a chair</span><h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Join the table.</h1></div>
+      <div class="browse-head"><span class="eyebrow">Membership</span><h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Pull up a seat at The Table.</h1><p class="hero-lead" style="margin-top:8px;max-width:60ch">This isn't a newsletter — it's the culture's verdict. Save your votes, track where you land against the room, and get picks made for how you actually watch.</p></div>
       <div class="plans">
         <div class="plan">
           <h3>At the Table</h3><div class="p-price">Free</div>
@@ -10501,12 +10506,24 @@ function plateBlock(plateFilms){
 }
 function voteBlock(voteIds){
   if(!voteIds.length)return '';
+  // Each verdict is shown next to where the room landed — the "where you stand
+  // vs. the culture" the identity is built on. Honest: only films that have
+  // cleared the Table quorum get an agreement read; the rest say "still counting"
+  // rather than compare against a number that isn't real yet.
+  var withRoom=0, rated=0;
   var rows=voteIds.map(function(id){var f=find(id);if(!f)return '';var side=app.votes[id];
     var lab=side==='for'?'<span class="stance for">Seasoned</span>':'<span class="stance against">Sent it back</span>';
+    var ts=tableScore(f), roomHTML;
+    if(ts==null){ roomHTML='<span class="vr-room pending">Table still counting</span>'; }
+    else{
+      var agree=((ts>=50)===(side==='for')); rated++; if(agree)withRoom++;
+      roomHTML='<span class="vr-room '+(agree?'agree':'against')+'">The Table '+ts+'% · '+(agree?'with the room':'against the grain')+'</span>';
+    }
     return '<div class="vote-row" onclick="go(\'film\',\''+f.id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
-      '<span class="vr-ttl">'+esc(f.title)+'</span><span class="vr-yr">'+f.year+'</span><span style="flex:1"></span>'+lab+'</div>';
+      '<span class="vr-ttl">'+esc(f.title)+'</span><span class="vr-yr">'+f.year+'</span>'+roomHTML+'<span style="flex:1"></span>'+lab+'</div>';
   }).join('');
-  return '<div class="you-sec"><h2>Your votes</h2><div class="vote-list">'+rows+'</div></div>';
+  var sub=rated?'<p class="you-sub" style="margin:-2px 0 12px">You side with the culture on <b>'+withRoom+'</b> of <b>'+rated+'</b> scored verdicts.</p>':'';
+  return '<div class="you-sec"><h2>Your verdicts</h2>'+sub+'<div class="vote-list">'+rows+'</div></div>';
 }
 function connectBlock(){
   var on=!!TMDB_KEY;
@@ -11271,7 +11288,7 @@ function initials(name){
 function renderAuthSlot(){
   byId('authSlot').innerHTML = app.signedIn
     ? '<div class="avatar" role="button" tabindex="0" aria-label="Your account, open You page" onclick="go(\'you\')" onkeydown="if(event.key===\'Enter\')go(\'you\')">'+initials(app.name)+'</div>'
-    : '<button class="btn btn-ghost btn-sm" onclick="openAuth(\'signin\')">Sign in</button><button class="btn btn-gold btn-sm" onclick="openAuth(\'signup\')" style="margin-left:8px">Join</button>';
+    : '<button class="btn btn-ghost btn-sm" onclick="openAuth(\'signin\')">Sign in</button><button class="btn btn-gold btn-sm" onclick="openAuth(\'signup\')" style="margin-left:8px">Take a seat</button>';
   refreshAdminUI();   // admin links follow the owner login in/out
   renderNotifBell();  // bell follows sign-in state too
 }
