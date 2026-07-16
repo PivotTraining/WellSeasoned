@@ -1922,3 +1922,34 @@ straight from the Pulse user directory (no application needed):
   critic + Invite, critic row shows Remove; clicking Make critic POSTs
   verify_critic with the right p_email, the row flips to a Critic badge on
   refresh; Commenters filter narrows to comments>0; zero console errors.
+
+## Catalog sweep: 47 Black-led films 2023–2026 added (2026-07-16)
+Owner: "do a sweep. What movies starring in lead roles since 2009 are we
+missing?" then "go" (add them). Ran parallel research agents across eras
+(2009→2026), deduped ~290 candidates against the catalog, found ~204 missing.
+This entry is the FIRST batch: the 2024–2026 tier (most-searched-now titles)
+— 47 real films added, each verified against TMDB (id/year/dir/cast/poster/
+backdrop/overview all real), `k`/`t` null, `votes:{for:0,against:0}`,
+`reviews:[]`, `scope:'ours'`, `type:'movie'` (or `'doc'`), posters pinned in
+`WS_POSTERS` (new entries — auto-hydrate could mismatch same-title films),
+backdrops baked. Synopses are the real TMDB overviews (trimmed), nothing
+fabricated. Catalog 1057 → 1104; ran `node scripts/build-films-json.cjs`.
+Includes: F1, Wicked / Wicked: For Good, A House of Dynamite, The Wild Robot,
+A Quiet Place: Day One, Rebel Ridge, Sinners-era 2025 titles (Him, Opus, G20,
+Straw-adjacent), Beverly Hills Cop: Axel F, The Deliverance, Nickel-Boys-era
+2024 dramas, Nollywood (Everybody Loves Jenifa, House of Ga'a, Lisabi), docs
+(Dahomey, Piece by Piece, Luther: Never Too Much, Sly Lives!, The Perfect
+Neighbor), and more.
+- **Skipped (nothing fake)**: Man on Fire (2026 Yahya remake) and Number One
+  on the Call Sheet — neither is on TMDB yet, so no real data to bake; deferred.
+- **Closer-bar flags** (Black lead but not Black-authored — owner's call, same
+  as lioness/Odyssey): F1 (Damson Idris co-lead, Brad Pitt leads), Wicked/
+  Wicked: For Good (Erivo is Elphaba but ensemble musical), A House of Dynamite
+  (Idris Elba in a Bigelow ensemble), Back in Action (Foxx + Diaz), Captain
+  America: Brave New World, Blink Twice, The Union. All added as `'ours'` per
+  catalog norm; flag to owner if any should be pulled.
+- **Still to add** (deferred, ~157 more): the 2009–2023 tier (154 titles) +
+  a handful of 2025-26 docs. Same verify-against-TMDB process, next batch.
+Verified in headless Chromium: 1104 FILMS, all new ids present, F1/Wild Robot/
+House of Dynamite render with real cast + pinned posters, film pages open,
+zero console errors.
