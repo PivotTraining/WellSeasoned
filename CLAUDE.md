@@ -2095,3 +2095,39 @@ plan's exact mocked numbers → renders **10.4% · 72 of 693 · Goal: 25%**, zer
 console errors. FOLLOW-UP (not built — needs owner SQL): true week-over-week
 TREND requires storing a periodic snapshot (a small table + cron), a
 stop-and-confirm backend change; the tile is a live snapshot for now.
+
+## Growth plan #4 — premiere pre-registration hooks (Sept 9 / upcoming) (2026-07-16)
+"Weaponize the Sept 9 spike now": capture emails against the Why Did I Get
+Married Again? premiere (Netflix, Sep 9 2026) — and every upcoming title —
+before the film drops. Built `premiereHookHTML(id,title,date,where)` + handlers
+(`premiereRegister`/`premiereRemind`/`premiereDone`, index.html), an inline
+"attaches-to-content" capture block (NOT a modal, NOT the existing .ics device
+reminder — this is EMAIL capture): eyebrow "🔔 Premieres <date> · <where>",
+"Be first on <title>", and either an email form (anon) or a one-tap "Remind me
+on premiere day" (signed-in, uses their account email). Submit → `submitSignup`
+with source `premiere_<id>` (reuses the `signups` table, ZERO schema change) +
+a `track('premiere_intent'/'premiere_register')` interest signal, then the block
+swaps in place to "✓ You're on the list · Your seat's saved."
+- **Wired into two surfaces**: the Coming Soon detail page (`renderSoonDetail`,
+  for any not-yet-released title) and the home marquee feature
+  (`paintMarriedFeature`, WDIGMA — passes the verified "Netflix"). Both gated on
+  `!soonReleased(c)` so a title that has already premiered shows no hook (a
+  released film's Table/Kitchen vote + the post-vote capture take over).
+- **Duplicate-id safe**: the same title can be mounted on both the (hidden) home
+  view and the visible detail page at once, so handlers scope to the clicked
+  button's own `.premiere-hook` via `closest()` rather than a global input id.
+- **The Odyssey** is already in its theatrical window (out now), so it's covered
+  by the #1 post-vote capture, not a pre-reg hook — pre-registration only makes
+  sense before release.
+- New `.premiere-hook` CSS — a solid cream panel (legible on both the light
+  detail page and the dark married-feature card), gold border, mobile
+  full-width form. Verified in headless Chromium: home hook renders "🔔
+  PREMIERES SEP 9, 2026 · NETFLIX" + email form; submit POSTs
+  `{email,source:"premiere_cs-1522689"}` and swaps to the confirmation;
+  signed-in shows "Remind me on premiere day" (no input) and POSTs the account
+  email; a released title (Ride or Die, dated in the past) shows NO hook; zero
+  console errors.
+- **Growth plan remaining after this:** #3 scroll/exit-intent email capture tied
+  to "The Verdict Drop"; #6 share-after-vote loop (the share-card system already
+  exists — wire it to fire post-vote showing the user's verdict). Affiliate layer
+  (#5-adjacent) is owner-signup work.
