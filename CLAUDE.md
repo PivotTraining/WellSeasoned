@@ -2162,3 +2162,37 @@ canvas → PNG + social row) rather than a new one:
   now built. #3 needs the newsletter to actually exist (no outbound send yet),
   so it's a capture-the-interest scaffold until Resend SMTP is live. Affiliate
   layer + Netflix-gap remain owner-signup work.
+
+## Growth plan #3 — "The Verdict Drop": off-page-load email capture (2026-07-16)
+Final product item of the growth plan: move email capture OFF page-load (no
+on-load popup — hurts UX and premium ad networks like Mediavine penalize it) to
+**real scroll-depth OR desktop exit-intent**, tied to the named asset **"The
+Verdict Drop"** (release-day breakdowns, "the culture's verdict before everyone
+else"). Rebranded the existing post-vote email banner (`showEmailNudge`) to The
+Verdict Drop and added two triggers (`maybeVerdictDrop`/`armVerdictDrop`, armed
+once at boot):
+- **Scroll depth** — fires once the visitor passes ~55% of a scrollable page
+  (guarded `h>200` so short pages don't false-fire).
+- **Exit-intent** (desktop) — cursor leaves the top edge of the viewport
+  (`mouseout`, `clientY<=0`, no relatedTarget). Mobile has no exit-intent, so
+  scroll-depth covers it there.
+- **Shares the `ws_email_nudge` once-ever flag** with the post-vote banner so
+  the two never double-show; never fires for signed-in users; deferred while the
+  stronger post-vote capture owns the session (`ws_pvcapture`).
+- Submit → `submitSignup(email,'verdict_drop')` (reuses the `signups` table, no
+  schema change) + `track('verdict_drop_shown')`. **Honest**: it builds the real
+  list for a real planned newsletter — the "we'll be in touch" copy doesn't claim
+  a send that isn't wired yet (Resend SMTP still pending; when it's live the
+  owner emails the `verdict_drop` list).
+- Verified in headless Chromium: NO banner on load; scroll past 55% → "🔔 The
+  Verdict Drop" banner; submit POSTs `{source:"verdict_drop"}` and closes;
+  doesn't reappear (once-ever); exit-intent shows it; signed-in users get
+  nothing; zero console errors.
+- **Growth plan status: the product side is now COMPLETE** — #1 post-vote
+  capture, #2 seat-at-the-table identity + verdicts-vs-room, #3 Verdict Drop
+  capture, #4 premiere pre-reg hooks, #6 share-after-vote loop, #7 conversion
+  tile. #5 (return-visit loop) is served by the Verdict Drop newsletter itself.
+  Remaining is all owner action: Resend SMTP (to actually send the Drop), and
+  the affiliate signups (Amazon Associates / CJ-Fandango / FlexOffers /
+  Skimlinks-Sovrn) — Netflix has NO affiliate program, so the Sept 9 anchor
+  monetizes via sponsorship/Amazon-adjacent, not click-through.

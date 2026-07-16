@@ -9035,16 +9035,49 @@ function showEmailNudge(){
   if(byId('emailNudge')) return;
   var el=document.createElement('div');
   el.className='email-nudge'; el.id='emailNudge';
-  el.innerHTML='<div class="en-copy"><b>Want the occasional update?</b><span>New drops, features, launches — no account needed.</span></div>'+
+  el.innerHTML='<div class="en-copy"><b>🔔 The Verdict Drop</b><span>Get the culture’s verdict first — release-day breakdowns, before everyone else.</span></div>'+
     '<div class="en-form"><input id="enEmail" type="email" placeholder="you@email.com" aria-label="Email" onkeydown="if(event.key===\'Enter\')doEmailNudge()">'+
-    '<button class="btn btn-gold btn-sm" onclick="doEmailNudge()">Notify me</button></div>'+
+    '<button class="btn btn-gold btn-sm" onclick="doEmailNudge()">Get the Drop</button></div>'+
     '<button class="en-close" aria-label="Dismiss" onclick="closeEmailNudge()">✕</button>';
   document.body.appendChild(el);
+  track('verdict_drop_shown',{});
 }
 function closeEmailNudge(){ var el=byId('emailNudge'); if(el)el.remove(); }
 function doEmailNudge(){
   var e=byId('enEmail')?byId('enEmail').value.trim():'';
-  submitSignup(e,'post_vote',function(ok){ if(ok)closeEmailNudge(); });
+  submitSignup(e,'verdict_drop',function(ok){ if(ok)closeEmailNudge(); });
+}
+/* Growth plan #3: capture the email OFF page-load — on real scroll depth or
+   desktop exit-intent — tied to the named asset "The Verdict Drop" (the
+   post-vote banner is rebranded to the same asset above). No on-load popup
+   (hurts UX + premium ad networks like Mediavine penalize it). Shows at most
+   once ever, SHARING the ws_email_nudge flag with the post-vote banner so the
+   two never double-show; never for signed-in users; deferred while the stronger
+   post-vote capture owns the session. Honest: it's building the real list for a
+   real planned newsletter — submitSignup's "we'll be in touch" copy doesn't
+   claim a send that isn't wired yet (Resend SMTP still pending). */
+function maybeVerdictDrop(){
+  if(app.signedIn||!sbConfigured()) return;
+  if(byId('emailNudge')) return;
+  var shown=false; try{ shown=localStorage.getItem('ws_email_nudge')==='1'; }catch(e){}
+  if(shown) return;
+  try{ if(sessionStorage.getItem('ws_pvcapture')==='1') return; }catch(e){}
+  try{ localStorage.setItem('ws_email_nudge','1'); }catch(e){}
+  showEmailNudge();
+}
+var _vdropArmed=false;
+function armVerdictDrop(){
+  if(_vdropArmed) return; _vdropArmed=true;
+  // desktop exit-intent: the cursor leaves the top edge of the viewport
+  document.addEventListener('mouseout',function(e){
+    if(e.clientY<=0 && !e.relatedTarget && !e.toElement) maybeVerdictDrop();
+  });
+  // real scroll depth: once they've read past ~55% of the page
+  window.addEventListener('scroll',function(){
+    var st=window.pageYOffset||document.documentElement.scrollTop||0;
+    var h=(document.documentElement.scrollHeight-window.innerHeight)||1;
+    if(h>200 && st/h>0.55) maybeVerdictDrop();
+  },{passive:true});
 }
 /* Owner-picked standout read for this film — surfaced as a pull-quote near
    the top of the film page (and, across films, on the home page). Nothing
@@ -11657,6 +11690,8 @@ setInterval(function(){ if(haveSession()&&!sessionFresh())ensureFreshIdentity();
 if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_route0.view,_route0.arg); }
 /* bring the catalog to life from the backend when configured */
 loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores(); loadAllExcitement();
+/* arm the off-page-load email capture (scroll-depth + exit-intent) */
+armVerdictDrop();
 </script>
 <!-- Vercel Web Analytics (cookieless, privacy-friendly). Enable Web Analytics in
      Vercel → Project → Analytics; until then this 404s harmlessly. -->
