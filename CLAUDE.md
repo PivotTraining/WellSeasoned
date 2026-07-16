@@ -2080,3 +2080,18 @@ page.
 - **Still open in the plan:** #7 anon→registered conversion tile in The Pulse;
   #4 Sept 9 / Odyssey pre-registration hooks; #3 scroll/exit-intent email
   capture for "The Verdict Drop"; #6 share-after-vote loop.
+
+## Growth plan #7 — anon→registered conversion tile in The Pulse (2026-07-16)
+"The one number that matters" from the growth plan: anonymous → registered
+conversion, watched like a scoreboard (plan cites ~10%, 72 of 693; goal 25%).
+Added a prominent hero tile at the very top of the Pulse stats
+(`loadPulseStats`), above People/Traffic/Votes — `convTile(email,total)` renders
+`users_email/users_total` as a % plus the raw "X of Y identities" and a labeled
+"Goal: 25%" line. **No backend change** — `admin_dashboard_stats` already
+returns `users_email` + `users_total`, so it's a pure client-side ratio of two
+real counts (no projection/fabrication). New `.stat-tile-hero` CSS (dark
+gold-bordered stage tile, full-width). Verified in headless Chromium with the
+plan's exact mocked numbers → renders **10.4% · 72 of 693 · Goal: 25%**, zero
+console errors. FOLLOW-UP (not built — needs owner SQL): true week-over-week
+TREND requires storing a periodic snapshot (a small table + cron), a
+stop-and-confirm backend change; the tile is a live snapshot for now.

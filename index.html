@@ -423,6 +423,10 @@
   .stat-tile{flex:1 1 120px;min-width:110px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--shadow-1)}
   .stat-tile b{display:block;font-family:var(--display);font-size:26px;font-weight:800;line-height:1.05;color:var(--ink)}
   .stat-tile span{display:block;margin-top:3px;font-size:11px;color:var(--ink-3);font-weight:600}
+  .stat-tile-hero{flex:1 1 100%;background:linear-gradient(135deg,#241606,#0f0a04);border-color:var(--gold-ink)}
+  .stat-tile-hero b{color:#F4B733;font-size:38px}
+  .stat-tile-hero span{color:#E7D6AE;font-size:12.5px}
+  .stat-tile-hero .sth-goal{display:block;margin-top:5px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#C6A24E;font-weight:700}
   .stat-refresh{align-self:flex-start}
   /* The Pulse — full dashboard */
   .pulse-dir-head{display:flex;align-items:baseline;gap:12px;margin:26px 0 6px;flex-wrap:wrap}
@@ -7333,6 +7337,17 @@ function renderCuratePage(tab){
    directly, so this is the only in-site way to see them. Degrades gracefully
    if the RPC isn't deployed yet (shows a one-line "run the SQL" hint). */
 function statTile(n,label){ return '<div class="stat-tile"><b>'+(n==null?'—':fmt(n))+'</b><span>'+esc(label)+'</span></div>'; }
+/* The one number that matters (growth plan #7): anonymous → registered
+   conversion. Registered = users with a real email; total = every identity
+   (anon voters included). Honest — a straight ratio of the two real counts,
+   no projection. The 25% goal line is the owner's own target, labeled as a
+   goal, not a claim. */
+function convTile(email,total){
+  if(email==null||total==null||!total) return '<div class="stat-tile stat-tile-hero"><b>—</b><span>Anon → registered — run the stats function to see it</span></div>';
+  var pct=Math.round(email/total*1000)/10;
+  return '<div class="stat-tile stat-tile-hero"><b>'+pct+'%</b><span>Anonymous → registered · '+fmt(email)+' of '+fmt(total)+' identities'+
+    '<span class="sth-goal">Goal: 25%</span></span></div>';
+}
 function loadAdminStats(){
   var el=byId('curStats'); if(!el)return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
@@ -7412,6 +7427,8 @@ function loadPulseStats(){
         el.innerHTML='<div class="cur-stats-note">Stats aren’t live yet — run <code>admin_dashboard_stats</code> from <code>backend/schema.sql</code> in the Supabase SQL editor.</div>'; return;
       }
       el.innerHTML=
+        '<div class="stat-group"><div class="stat-head">The number that matters</div><div class="stat-row">'+
+          convTile(s.users_email,s.users_total)+'</div></div>'+
         '<div class="stat-group"><div class="stat-head">People</div><div class="stat-row">'+
           statTile(s.users_total,'Total users')+statTile(s.users_email,'Registered (email)')+
           statTile(s.users_anon,'Anonymous')+statTile(s.users_new_7d,'New · 7d')+
