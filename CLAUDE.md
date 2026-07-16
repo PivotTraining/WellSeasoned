@@ -2246,3 +2246,23 @@ pattern as prior feature swaps.
   records `app.excitement['cs-621304']='excited'`, zero console errors. (TMDB
   cast/poster images are blank in the sandbox — no outbound internet — but
   resolve in production, same limitation as trailers.)
+
+## Children of Blood and Bone — real trailer added to the marquee (2026-07-16)
+Owner: "Make sure the trailer or clip is there." TMDB had no video indexed, so
+sourced it via web search + verified each candidate through YouTube's oEmbed
+(title + channel) before using anything — same bar as the WDIGMA trailer:
+- `-2ad68XAKjg` (cited as "official trailer") → **401, embedding disabled** — unusable.
+- `EYJShB8rt1w` (full CinemaCon trailer) → embeddable but on a **re-uploader**
+  channel ("Movie Trailer Titan"), not official — risks takedown, rejected.
+- `fWeYTa3Q6Y0` → **official Paramount Pictures Australia** "Title Reveal" —
+  real, official channel, embeddable. **Chosen** (the honest, stable source; the
+  full CinemaCon trailer played exclusively at CinemaCon and isn't posted in full
+  on an official public channel).
+Set `trailer:"fWeYTa3Q6Y0"` on the `cs-621304` COMING_SOON entry. The marquee
+(`paintMarriedFeature`) auto-switched from the poster hero to the embedded
+`youtube-nocookie` player, and the cs-621304 Coming Soon detail page now shows
+the play button + excitement vote via the normal trailer gate too. Verified in
+headless Chromium: marquee iframe src correct, poster fallback gone, hype vote +
+share still present, detail page play button + 2 excite buttons, zero console
+errors. (The clip can't actually play inside the sandbox — no outbound to
+youtube — a test-env limit, not a code issue; the id is a verified-real embed.)
