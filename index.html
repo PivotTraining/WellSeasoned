@@ -51,7 +51,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   @media (hover:hover) and (pointer:fine){ body{background-attachment:fixed} }
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:auto}   /* NOT smooth: on a route-based SPA it made every page-nav scrollTo(0) glide up from the previous position, so films opened at the bottom. In-page smooth scrolls (rails, shopScrollGrid) set their own behavior explicitly. */
   body{background-color:var(--paper);background-image:radial-gradient(150% 90% at 50% -18%,#FBF3DF 0,rgba(251,243,223,0) 55%),radial-gradient(120% 70% at 100% 0,rgba(228,155,11,.10) 0,rgba(228,155,11,0) 42%),linear-gradient(180deg,#F5EAD2 0,var(--paper) 460px);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
   button{font-family:inherit}
@@ -6213,6 +6213,12 @@ function render(view,arg){
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
+  // Reset to the top AFTER the view's content is in the DOM. The pre-render
+  // scrollTo above runs while the new view is still empty and gets undone by the
+  // fade transition / late layout, which left film pages opening at the previous
+  // scroll position (the bottom, if you clicked a card far down a long page).
+  window.scrollTo(0,0);
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(function(){ window.scrollTo(0,0); });
   if(view!=='film'&&view!=='legal')applyMetaTags(view);
   track('view',{view:view});
 }
@@ -11893,6 +11899,10 @@ function forgetTmdbKey(){
 }
 
 /* ============ INIT ============ */
+/* Own scroll position ourselves — the browser's automatic scroll restoration on
+   hash navigation was overriding render()'s scrollTo(0), so opening a film from
+   a card far down a long page landed you at the previous (bottom) position. */
+if('scrollRestoration' in history){ try{ history.scrollRestoration='manual'; }catch(e){} }
 applyMeta(); loadState();
 try{ if(!TMDB_KEY) TMDB_KEY=localStorage.getItem('ws_tmdb_key')||''; }catch(e){}
 renderHome(); renderAuthSlot(); hydrateFromTMDB(); authRestore(); ensureIdentity(); refreshAdminUI(); maybeIntro();
