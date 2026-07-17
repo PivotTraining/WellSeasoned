@@ -40,14 +40,17 @@ src/
     campaignGraph.ts           the LangGraph pipeline
     tools/research.ts          lead enrichment (Serper/Apollo/stub)
     scoring.ts                 0-100 lead scoring
+    compliance.ts              pre-send spam/CAN-SPAM gate
+    replies.ts                 objection + suggestion analysis
     abTest.ts                  variant generation + winner analysis
   lib/
     env.ts                     config flags (the gating layer)
     supabase.ts                browser + service-role clients
+    store.ts                   persistence (Supabase or in-memory demo)
     llm.ts                     lazy LLM wrapper
-    runtime.ts                 logging + outreach send
+    runtime.ts                 logging + compliance-gated outreach send
     runCampaign.ts             run the graph over a campaign's leads
-    types.ts                   shared Zod schemas + types
+    types.ts                   shared Zod schemas + lead parsing
 backend/schema.sql             campaigns / leads / agent_logs + RLS
 ```
 
@@ -75,8 +78,23 @@ Add keys to `.env.local` (see `.env.example`). Each flag in
 - **Resend** — set `RESEND_API_KEY` + `OUTREACH_FROM_EMAIL` to send.
 - **Research** — set `SERPER_API_KEY` (and/or `APOLLO_API_KEY`).
 
+## What works today (every button powered)
+
+- **Overview** — live stat tiles + integration status + recent campaigns.
+- **New campaign** — ICP + pasted leads, a **Live Preview** button that runs
+  research → personalize → compliance on a sample lead, and **Launch** which
+  runs the full pipeline and redirects to the campaign.
+- **Campaign detail** — metrics, the per-step agent trace, an **A/B lab**
+  (variant generation via `/api/abtest`) and **Reply insights** (objection
+  analysis via `/api/insights`).
+- **Compliance gate** — every send is checked for opt-out + spam risk first;
+  a failing check blocks the send.
+
+Without keys these run through the stub/in-memory path so the whole flow is
+demonstrable offline; with keys they hit the real providers.
+
 ## Not built in this scaffold
 
-Left as clearly-marked extension points: multi-channel routing
-(LinkedIn/voice), the A/B lab UI, a job queue for large lead lists, and
-LangGraph checkpoint persistence to Supabase.
+Clearly-marked extension points: multi-channel routing (LinkedIn/voice), a
+job queue for large lead lists, statistical A/B winner selection wired to
+live send metrics, and LangGraph checkpoint persistence to Supabase.

@@ -17,6 +17,28 @@ export const LeadSchema = z.object({
 });
 export type Lead = z.infer<typeof LeadSchema>;
 
+/**
+ * Parse a pasted lead list. One lead per line:
+ *   "Company, Contact Name, email@domain.com"  (comma or | separated)
+ * Email is optional and stored in `context` so the send path can find it.
+ */
+export function parseLeads(raw: string): Lead[] {
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [company, contact, email] = line
+        .split(/[,|]/)
+        .map((s) => s.trim());
+      return {
+        company: company || "Unknown company",
+        contact: contact || "there",
+        context: email ? `email: ${email}` : undefined,
+      } satisfies Lead;
+    });
+}
+
 export const EnrichmentSchema = z.object({
   company: z.string(),
   contact: z.string(),

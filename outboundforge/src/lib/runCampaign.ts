@@ -1,17 +1,5 @@
 import { buildCampaignGraph } from "@/agents/campaignGraph";
-import { supabaseAdmin } from "./supabase";
-import type { Lead } from "./types";
-
-/** Load a campaign's leads. Returns [] when Supabase isn't configured. */
-async function getLeads(campaignId: string): Promise<Lead[]> {
-  const db = supabaseAdmin();
-  if (!db) return [];
-  const { data } = await db
-    .from("leads")
-    .select("data")
-    .eq("campaign_id", campaignId);
-  return (data ?? []).map((r) => r.data as Lead);
-}
+import { getLeads, setCampaign } from "./store";
 
 export interface RunSummary {
   campaignId: string;
@@ -21,13 +9,14 @@ export interface RunSummary {
 }
 
 /**
- * Run the multi-agent pipeline over every lead in a campaign. Each lead
- * gets its own graph thread. Safe to call unconfigured — it simply
- * processes zero leads and reports it.
+ * Run the multi-agent pipeline over every lead in a campaign. Each lead gets
+ * its own graph thread. Safe to call unconfigured — it simply processes the
+ * campaign's leads through the stub path and records the trace.
  */
 export async function runCampaign(campaignId: string): Promise<RunSummary> {
   const graph = buildCampaignGraph();
   const leads = await getLeads(campaignId);
+  await setCampaign(campaignId, { status: "running" });
 
   let succeeded = 0;
   let skipped = 0;
@@ -38,10 +27,21 @@ export async function runCampaign(campaignId: string): Promise<RunSummary> {
     else skipped += 1;
   }
 
-  return {
+  const summary: RunSummary = {
     campaignId,
     processed: leads.length,
     succeeded,
     skipped,
   };
+
+  await setCampaign(campaignId, {
+    status: "done",
+    metrics: {
+      processed: summary.processed,
+      sent: summary.succeeded,
+      skipped: summary.skipped,
+    },
+  });
+
+  return summary;
 }

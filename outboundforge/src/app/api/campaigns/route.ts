@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
-import { configured } from "@/lib/env";
-import { supabaseAdmin } from "@/lib/supabase";
+import { ICPSchema, parseLeads } from "@/lib/types";
+import { addLeads, createCampaign, listCampaigns, usingDb } from "@/lib/store";
 import { runCampaign } from "@/lib/runCampaign";
-import { ICPSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const campaigns = await listCampaigns();
+  return NextResponse.json({ campaigns, persisted: usingDb() });
+}
 
 export async function POST(req: Request) {
-  let body: { name?: string; icp?: string };
+  let body: { name?: string; icp?: string; leads?: string };
   try {
     body = await req.json();
   } catch {
@@ -25,33 +29,16 @@ export async function POST(req: Request) {
   }
 
   const icp = ICPSchema.parse({ description: icpText });
-  const id = randomUUID();
-  const campaign = {
-    id,
-    name,
-    icp,
-    status: "draft" as const,
-    metrics: {},
-  };
+  const campaign = await createCampaign({ name, icp });
 
-  // Persist when configured; otherwise return an in-memory campaign so the
-  // scaffold is fully exercisable without a database.
-  const db = supabaseAdmin();
-  if (db && configured.supabaseAdmin) {
-    await db.from("campaigns").insert(campaign);
-  }
+  const leads = parseLeads(body.leads ?? "");
+  await addLeads(campaign.id, leads);
 
-  const summary = await runCampaign(id);
+  const summary = await runCampaign(campaign.id);
 
   return NextResponse.json({
-    campaign: { id, name, status: "running" },
-    summary: {
-      processed: summary.processed,
-      succeeded: summary.succeeded,
-      skipped: summary.skipped,
-    },
-    note: db
-      ? undefined
-      : "Supabase not configured — campaign was not persisted and no leads were processed.",
+    campaign: { id: campaign.id, name, status: "done" },
+    summary,
+    persisted: usingDb(),
   });
 }

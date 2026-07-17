@@ -1,8 +1,8 @@
 import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
-import { llmComplete } from "@/lib/llm";
 import type { Draft, Enrichment, Lead } from "@/lib/types";
 import { researchLead } from "./tools/research";
 import { scoreLead } from "./scoring";
+import { writeDraft } from "./personalize";
 import { logStep, sendOutreach } from "@/lib/runtime";
 
 /**
@@ -33,20 +33,14 @@ async function researchNode(state: CampaignStateT) {
 }
 
 async function personalizeNode(state: CampaignStateT) {
-  const voice = "warm, concise, no fluff";
-  const raw = await llmComplete(
-    `Write a cold outreach email to ${state.lead.contact} at ` +
-      `${state.lead.company}. Brand voice: ${voice}. ` +
-      `Context: ${state.enriched?.summary ?? "n/a"}. ` +
-      `Signals: ${JSON.stringify(state.enriched?.signals ?? [])}. ` +
-      `Return "Subject: ...\\n\\n<body>".`,
-  );
-  const [subjectLine, ...rest] = raw.split("\n");
-  const draft: Draft = {
-    subject: subjectLine.replace(/^subject:\s*/i, "").trim() || "Quick idea",
-    body: rest.join("\n").trim() || raw,
-    channel: "email",
+  const enriched = state.enriched ?? {
+    company: state.lead.company,
+    contact: state.lead.contact,
+    summary: "",
+    signals: [],
+    source: "stub" as const,
   };
+  const draft = await writeDraft(state.lead, enriched);
   await logStep(state.campaignId, "personalize", state.enriched, draft);
   return { draft };
 }

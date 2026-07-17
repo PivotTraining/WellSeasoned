@@ -1,3 +1,4 @@
+import { configured } from "@/lib/env";
 import { llmComplete } from "@/lib/llm";
 import type { Enrichment } from "@/lib/types";
 
@@ -11,6 +12,7 @@ export async function scoreLead(
   historicalWins: string[] = [],
 ): Promise<number> {
   const heuristic = Math.min(100, 40 + enrichment.signals.length * 15);
+  if (!configured.llm) return heuristic;
 
   const out = await llmComplete(
     `Score this lead 0-100 for sales potential. Reply with ONLY the number.\n` +
