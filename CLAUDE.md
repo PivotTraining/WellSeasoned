@@ -2382,3 +2382,32 @@ data flowing first).
   correctly (cuss+sex→Don't Watch With Mama; laughs+lessons/no-sex-kill→Cookout
   Approved + One For The Lesson); unreleased film shows NO row; Key shows the new
   section; zero console errors.
+
+## Film page opens at the top now + "By Vibe" rankings tab (2026-07-16)
+Two owner reports in one turn.
+- **Scroll bug fix:** "every time i click on a film for full profile it opens at
+  the bottom instead of the top." Root cause was NOT missing a scrollTo —
+  `render()` already called it. It was `html{scroll-behavior:smooth}` (global
+  CSS): on a route-based SPA that turns every page-nav `scrollTo(0)` into a
+  visible smooth GLIDE from the previous scroll position, so opening a film from
+  a card far down a long page animated up from the bottom (diagnosed by hooking
+  `window.scrollTo` — saw a 537→0 smooth animation over ~365ms). Also
+  `behavior:'auto'` in the existing call inherits the CSS smooth rather than
+  forcing instant. Fix: base `html{scroll-behavior:auto}` (rails/shopScrollGrid
+  set their own smooth explicitly), plus `history.scrollRestoration='manual'` so
+  the browser stops restoring the old position, plus a post-content `scrollTo(0,0)`
+  + rAF in `render()`. Verified: film opens at Y=0 instantly (was ~1000+).
+- **The Vibe rankings tab** (owner: "We need a section on the rankings page for
+  these elements. Especially the 'Lots of' so people can click the tags and see
+  whats what"). New 4th rank category (`RANK_CAT='vibe'`, `renderVibeRankings`)
+  alongside Films/Actors/Actresses. A "The Lots of" chip row (the 6 mini tags) +
+  a "The badges" row (the 4 composites); tapping one ranks every film by that
+  tag's community vote count (`RANK_TAG`/`setRankTag`), or lists the films that
+  earned a composite (sorted by `compStrength`). New `loadAllMiniTags()` bulk-
+  fetches the public `mini_tag_counts` view once and re-renders. Honest empty
+  state per tag until the room taps. Reuses `.rank-list`/`.rank-row`; new
+  `.vibe-badge` shows the count/earned marker. Needs the `mini_tag_votes`
+  migration live to populate (boards are empty until then, by design). Verified
+  in headless Chromium with seeded counts: correct desc ranking per tag, "Don't
+  Watch With Mama" lists only qualifying films, chips switch boards, 🫦 renders,
+  zero console errors.

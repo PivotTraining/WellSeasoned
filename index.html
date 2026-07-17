@@ -1121,6 +1121,12 @@
   .mt-composite.mt-warm{background:rgba(228,155,11,.16);color:var(--gold-ink);border:1px solid rgba(228,155,11,.42)}
   .mt-composite.mt-cool{background:rgba(87,99,42,.15);color:#57632A;border:1px solid rgba(87,99,42,.4)}
   .lp-mt .lp-mt-em{font-size:22px;width:34px;text-align:center;display:inline-block}
+  /* The Vibe rankings tab */
+  .mt-rank-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+  .mt-rank-h{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--ink-2);margin:8px 0 12px}
+  .vibe-badge{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}
+  .vibe-badge.mt-hot{color:var(--paprika)} .vibe-badge.mt-warm{color:var(--gold-ink)} .vibe-badge.mt-cool{color:#57632A}
+  .vibe-badge b{font-family:var(--mono);font-size:16px}
   .pr-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-3)}
   .kidok{color:var(--herb-ink);font-weight:600;font-size:12.5px}
   /* Real, TMDB-sourced age-approval badge — separate from the pepper-row
@@ -10131,13 +10137,15 @@ var VAULT=[
 /* Films ranked by the seasoning the culture votes them — the most seasoned first. */
 var RANK_BY='season';   // season | table | kitchen
 var RANK_N=100;         // chart depth: 10 | 50 | 100 | 0 (= all)
-var RANK_CAT='films';   // films | actor | actress
+var RANK_CAT='films';   // films | actor | actress | vibe
+var RANK_TAG='laugh';   // which mini-tag/composite the "By Vibe" board ranks by
 function rankValue(f){ return RANK_BY==='table'?tableScore(f) : (RANK_BY==='kitchen'?f.k : overallScore(f)); }
 function setRankBy(v){ RANK_BY=v; renderRanked(); }
 function setRankN(n){ RANK_N=n; renderRanked(); }
 function setRankCat(c){ RANK_CAT=c; renderRanked(); }
+function setRankTag(k){ RANK_TAG=k; renderVibeRankings(); }
 function rankTabs(){
-  return '<div class="rank-cats">'+[['films','Films'],['actor','Top Actors'],['actress','Top Actresses']].map(function(o){
+  return '<div class="rank-cats">'+[['films','Films'],['vibe','By Vibe'],['actor','Top Actors'],['actress','Top Actresses']].map(function(o){
     return '<button class="rank-cat'+(RANK_CAT===o[0]?' on':'')+'" onclick="setRankCat(\''+o[0]+'\')">'+o[1]+'</button>';
   }).join('')+'</div>';
 }
@@ -10591,6 +10599,7 @@ function doDeleteArticle(slug){
 }
 function renderRanked(){
   if(RANK_CAT==='actor'||RANK_CAT==='actress'){ renderPeople(RANK_CAT); return; }
+  if(RANK_CAT==='vibe'){ renderVibeRankings(); return; }
   var byLabel={season:'The Seasoning (overall)',table:'The Table (audience vote)',kitchen:'The Kitchen (critics)'}[RANK_BY];
   var list=FILMS.filter(function(f){ return !f.noart && scopeMatch(f); });
   var scored=list.filter(function(f){ return rankValue(f)!=null; });
@@ -10620,6 +10629,70 @@ function renderRanked(){
   }
   byId('rankedContent').innerHTML=head+body;
   animateAura(byId('rankedContent'));
+}
+
+/* ============ THE VIBE — rank films by the culture's "Lots of…" tags ============
+   Tap a raw tag ("Lots of laughs") or an earned badge ("Don't Watch With Mama")
+   and the films most-voted for it climb the board. Data is the community mini-tag
+   votes (mini_tag_counts view); honest empty state until the room taps. */
+var _miniAllLoaded=false;
+function loadAllMiniTags(force){
+  if(!sbConfigured())return;
+  if(_miniAllLoaded&&!force)return;
+  _miniAllLoaded=true;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/mini_tag_counts?select=film_slug,tag,count',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows)){ _miniAllLoaded=false; return; }
+        rows.forEach(function(x){ var c=app.miniTagCounts[x.film_slug]||(app.miniTagCounts[x.film_slug]={}); c[x.tag]=x.count||0; });
+        var on=document.querySelector('.view.on');
+        if(on&&on.getAttribute('data-view')==='ranked'&&RANK_CAT==='vibe') renderVibeRankings();
+      }).catch(function(){ _miniAllLoaded=false; });
+  }catch(e){ _miniAllLoaded=false; }
+}
+function compStrength(f,comp){ var c=miniCounts(f.id), s=0; comp.needs.forEach(function(t){ s+=c[t]||0; }); return s; }
+function vibeRow(f,sel,isComp,rank){
+  var badge;
+  if(isComp){ var comp=MINI_COMPOSITES.filter(function(c){return c.k===sel;})[0]; badge='<span class="vibe-badge mt-'+comp.cls+'">'+comp.emoji+' earned</span>'; }
+  else { var t=MINI_TAGS.filter(function(x){return x.k===sel;})[0], n=miniCounts(f.id)[sel]||0; badge='<span class="vibe-badge">'+t.emoji+' <b>'+fmt(n)+'</b></span>'; }
+  return '<li class="rank-row" tabindex="0" role="button" aria-label="'+esc(f.title)+'" onclick="go(\'film\',\''+f.id+'\')" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
+    '<span class="rank-num">'+rank+'</span>'+
+    '<span class="rank-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+(f.poster?'<img src="'+f.poster+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</span>'+
+    '<span class="rank-main"><span class="rank-title">'+esc(f.title)+'</span><span class="rank-sub">'+f.year+' &middot; '+esc(effGenre(f))+'</span></span>'+
+    '<span class="rank-marks">'+badge+'</span></li>';
+}
+function renderVibeRankings(){
+  var sel=RANK_TAG, isComp=MINI_COMPOSITES.some(function(c){return c.k===sel;});
+  var tagChips=MINI_TAGS.map(function(t){ return '<button class="chip'+(sel===t.k?' on':'')+'" onclick="setRankTag(\''+t.k+'\')">'+t.emoji+' '+esc(t.lab)+'</button>'; }).join('');
+  var compChips=MINI_COMPOSITES.map(function(c){ return '<button class="chip'+(sel===c.k?' on':'')+'" onclick="setRankTag(\''+c.k+'\')">'+c.emoji+' '+esc(c.lab)+'</button>'; }).join('');
+  var rows, titleBit;
+  if(isComp){
+    var comp=MINI_COMPOSITES.filter(function(c){return c.k===sel;})[0];
+    rows=FILMS.filter(function(f){ return !f.noart && miniComposites(f.id).some(function(x){return x.k===sel;}); });
+    rows.sort(function(a,b){ return compStrength(b,comp)-compStrength(a,comp); });
+    titleBit=comp.emoji+' '+comp.lab;
+  } else {
+    var tag=MINI_TAGS.filter(function(t){return t.k===sel;})[0]||MINI_TAGS[0];
+    rows=FILMS.filter(function(f){ return !f.noart && (miniCounts(f.id)[sel]||0)>0; });
+    rows.sort(function(a,b){ return (miniCounts(b.id)[sel]||0)-(miniCounts(a.id)[sel]||0); });
+    titleBit=tag.emoji+' '+tag.lab;
+  }
+  var head='<div class="browse-head"><span class="eyebrow">Voted by the culture</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">The Vibe</h1>'+
+    '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:62ch">What the culture says a movie’s really on. Tap a tag — the films most-voted for it climb the board. Not our labels; the room’s.</p></div>'+
+    rankTabs()+
+    '<div class="mt-rank-chips"><span class="flabel">The “Lots of”</span>'+tagChips+'</div>'+
+    '<div class="mt-rank-chips"><span class="flabel">The badges</span>'+compChips+'</div>';
+  var body;
+  if(rows.length){
+    body='<div class="mt-rank-h">Ranked by <b>'+titleBit+'</b> · '+fmt(rows.length)+' film'+(rows.length===1?'':'s')+'</div>'+
+      '<ol class="rank-list">'+rows.slice(0,100).map(function(f,i){return vibeRow(f,sel,isComp,i+1);}).join('')+'</ol>';
+  } else {
+    body='<div class="empty"><h3>Nothing tagged '+titleBit+' yet.</h3><p>This board fills in as the culture taps. Open any film and tag what it’s got — it climbs here.</p><button class="btn btn-gold" onclick="go(\'browse\')">Go tag some films</button></div>';
+  }
+  byId('rankedContent').innerHTML=head+body;
+  animateAura(byId('rankedContent'));
+  loadAllMiniTags();   // pull real counts (once); re-renders here when they land
 }
 
 /* ============ TOP ACTORS / ACTRESSES — voted up/down by the culture ============ */
