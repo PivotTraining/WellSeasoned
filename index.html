@@ -1097,6 +1097,22 @@
   .pr-lab{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
   .pep-chip{display:inline-flex;align-items:center;gap:4px;background:var(--inset);border:1px solid var(--line);border-radius:99px;padding:3px 10px 3px 5px;font-size:12px;font-weight:600;color:var(--ink)}
   .cert-chip{font-family:var(--mono);font-weight:700;font-size:11px;border:1.5px solid var(--ink-3);border-radius:5px;padding:2px 7px;color:var(--ink-2)}
+  /* mini tags — "what you're in for", voted by the culture */
+  .mini-tags{margin:0 0 18px}
+  .mt-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:2px 0 8px}
+  .mt-lab{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+  .mt-sub{font-size:12px;color:var(--ink-3)}
+  .mt-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .mt-chip{display:inline-flex;align-items:center;gap:5px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;transition:border-color .12s,background .12s}
+  .mt-chip:hover{border-color:var(--gold-ink)}
+  .mt-chip.on{background:rgba(228,155,11,.16);border-color:var(--gold-ink);color:var(--gold-ink)}
+  .mt-chip b{font-family:var(--mono);font-weight:800;font-size:12px;opacity:.85}
+  .mt-composites{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .mt-composite{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:6px 13px;font-weight:800;font-size:13.5px;letter-spacing:.01em}
+  .mt-composite.mt-hot{background:rgba(196,69,31,.16);color:var(--paprika);border:1px solid rgba(196,69,31,.4)}
+  .mt-composite.mt-warm{background:rgba(228,155,11,.16);color:var(--gold-ink);border:1px solid rgba(228,155,11,.42)}
+  .mt-composite.mt-cool{background:rgba(87,99,42,.15);color:#57632A;border:1px solid rgba(87,99,42,.4)}
+  .lp-mt .lp-mt-em{font-size:22px;width:34px;text-align:center;display:inline-block}
   .pr-note{font-family:var(--mono);font-size:9.5px;color:var(--ink-3)}
   .kidok{color:var(--herb-ink);font-weight:600;font-size:12.5px}
   /* Real, TMDB-sourced age-approval badge — separate from the pepper-row
@@ -6098,13 +6114,13 @@ function cardPreviewOut(el){
    the same account reads the same stance on every device). app.tally[id]=
    {for,against} overrides seed. app.comments[id]=[...] are reads added on
    this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}, myWatch:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}, miniTags:{}, miniTagCounts:{}, myWatch:{}};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
     localStorage.setItem(STORE_KEY, JSON.stringify({
       signedIn:app.signedIn, name:app.name, email:app.email, userId:app.userId, plate:app.plate, taughtThis:app.taughtThis,
-      taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, tallyV:2, comments:app.comments, personVotes:app.personVotes, excitement:app.excitement
+      taste:app.taste, scope:app.scope, zip:app.zip, sound:app.sound, curation:app.curation, votes:app.votes, tally:app.tally, tallyV:2, comments:app.comments, personVotes:app.personVotes, excitement:app.excitement, miniTags:app.miniTags
     }));
   }catch(e){/* storage unavailable — run in-memory */}
 }
@@ -6116,7 +6132,7 @@ function loadState(){
     app.signedIn=!!s.signedIn; app.name=s.name||''; app.email=s.email||''; app.userId=s.userId||''; app.plate=s.plate||[];
     app.taughtThis=!!s.taughtThis; app.taste=s.taste||null;
     app.scope=s.scope||'ours'; app.zip=s.zip||''; app.sound=(s.sound!==false); if(s.curation){app.curation={scope:s.curation.scope||{},featured:s.curation.featured||[],hidden:s.curation.hidden||[],classic:s.curation.classic||{},flagged:s.curation.flagged||[],genre:s.curation.genre||{}};}
-    app.votes=s.votes||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{}; app.excitement=s.excitement||{};
+    app.votes=s.votes||{}; app.comments=s.comments||{}; app.personVotes=s.personVotes||{}; app.excitement=s.excitement||{}; app.miniTags=s.miniTags||{};
     // tallyV:2 marks caches written AFTER the fake seed tallies were purged.
     // Older caches were poisoned by the seeds (e.g. black-panther "5,120") and
     // must be dropped once — the live vote_counts pull rebuilds them for real.
@@ -8066,6 +8082,93 @@ function cardPeppers(f){
   if(sp.s){out+=pepperSVG('#C4302B',13);lab.push('sexual content');}
   return out?'<span class="card-peppers" title="Content: '+lab.join(', ')+'">'+out+'</span>':'';
 }
+/* ============ MINI TAGS — "what you're in for", voted by the culture ============
+   Six raw element tags people tap on a film they've seen. Enough taps on the
+   right combo earns a COMPOSITE badge (e.g. "Don't Watch With Mama") — the badge
+   is COMPUTED from real votes, never assigned, so it holds the "nothing fake"
+   line. Counts come from the public mini_tag_counts view; a visitor's own taps
+   live in app.miniTags (localStorage), same model as the excitement vote. */
+var MINI_TAGS=[
+  {k:'cuss',  lab:"Lots of cussin'", emoji:'🤬'},
+  {k:'sex',   lab:'Lots of sex',     emoji:'🔥'},
+  {k:'kill',  lab:'Lots of killing', emoji:'💀'},
+  {k:'laugh', lab:'Lots of laughs',  emoji:'😂'},
+  {k:'tears', lab:'Lots of tears',   emoji:'😭'},
+  {k:'lesson',lab:'Lots of lessons', emoji:'🎓'}
+];
+/* Composites: shown only when every `needs` tag has cleared quorum AND no `not`
+   tag has. Order = display priority. */
+var MINI_COMPOSITES=[
+  {k:'nomama',   lab:"Don't Watch With Mama", emoji:'🙅🏾‍♀️', cls:'hot',  needs:['cuss','sex'], not:[]},
+  {k:'cookout',  lab:'Cookout Approved',      emoji:'🍗',    cls:'warm', needs:['laugh'],      not:['sex','kill']},
+  {k:'tissues',  lab:'Bring Tissues',         emoji:'😭',    cls:'cool', needs:['tears'],      not:[]},
+  {k:'forlesson',lab:'One For The Lesson',    emoji:'🎓',    cls:'cool', needs:['lesson'],     not:['sex']}
+];
+var MINI_QUORUM=3;   // taps needed before a tag "counts" — no fabricated signal from one click
+function miniCounts(slug){ return app.miniTagCounts[slug]||{}; }
+function miniTagOn(slug,tag){ return (miniCounts(slug)[tag]||0)>=MINI_QUORUM; }
+function miniComposites(slug){
+  return MINI_COMPOSITES.filter(function(c){
+    var need=c.needs.length && c.needs.every(function(t){return miniTagOn(slug,t);});
+    var clean=(c.not||[]).every(function(t){return !miniTagOn(slug,t);});
+    return need && clean;
+  });
+}
+function miniTagRow(f){
+  if(upcomingSoonEntry(f)) return '';   // not out yet — you can't tag what nobody's seen
+  var slug=f.id, cnts=miniCounts(slug), mine=app.miniTags[slug]||{};
+  var comps=miniComposites(slug);
+  var compHTML=comps.length?'<div class="mt-composites">'+comps.map(function(c){
+    return '<span class="mt-composite mt-'+c.cls+'">'+c.emoji+' '+esc(c.lab)+'</span>';}).join('')+'</div>':'';
+  var chips=MINI_TAGS.map(function(t){
+    var n=cnts[t.k]||0, on=!!mine[t.k];
+    return '<button class="mt-chip'+(on?' on':'')+'" onclick="miniTagVote(\''+slug+'\',\''+t.k+'\')" aria-pressed="'+on+'">'+
+      t.emoji+' '+esc(t.lab)+(n?' <b>'+fmt(n)+'</b>':'')+'</button>';
+  }).join('');
+  return '<div class="mini-tags" id="miniTags-'+esc(slug)+'">'+compHTML+
+    '<div class="mt-head"><span class="mt-lab">What you’re in for</span><span class="mt-sub">Tap what it’s got — the culture decides</span></div>'+
+    '<div class="mt-chips">'+chips+'</div></div>';
+}
+function miniTagVote(slug,tag){
+  var mine=app.miniTags[slug]||(app.miniTags[slug]={});
+  var cnts=app.miniTagCounts[slug]||(app.miniTagCounts[slug]={});
+  if(mine[tag]){ delete mine[tag]; cnts[tag]=Math.max(0,(cnts[tag]||0)-1); syncMiniTag(slug,tag,true); }
+  else { mine[tag]=true; cnts[tag]=(cnts[tag]||0)+1; syncMiniTag(slug,tag,false); track('mini_tag',{film:slug,tag:tag}); }
+  saveState();
+  var el=byId('miniTags-'+slug); if(el){ var f=find(slug); if(f) el.outerHTML=miniTagRow(f); }
+}
+/* Persist one row per (film, tag, identity) — forge-proof via user_id = auth.uid(),
+   same path as film/excitement votes. No-op when unconfigured (taps still work
+   locally so the scaffold is usable before the table is live). */
+function syncMiniTag(slug,tag,remove){
+  if(!SUPABASE_URL||!SUPABASE_KEY) return;
+  ensureIdentityThen(function(){
+    try{
+      if(remove){
+        fetch(SUPABASE_URL+'/rest/v1/mini_tag_votes?film_slug=eq.'+encodeURIComponent(slug)+'&tag=eq.'+encodeURIComponent(tag)+'&user_id=eq.'+encodeURIComponent(myUid()),
+          {method:'DELETE',headers:sbVoteHeaders()}).catch(function(){});
+      } else {
+        fetch(SUPABASE_URL+'/rest/v1/mini_tag_votes?on_conflict=film_slug,tag,user_id',{
+          method:'POST',
+          headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body:JSON.stringify({film_slug:slug,tag:tag,device_id:wsDevice(),user_id:myUid()})
+        }).catch(function(){});
+      }
+    }catch(e){}
+  });
+}
+/* Pull live tag counts for one film and repaint its row. */
+function loadMiniTags(slug){
+  if(!sbConfigured())return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/mini_tag_counts?film_slug=eq.'+encodeURIComponent(slug)+'&select=tag,count',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows))return;
+        var c={}; rows.forEach(function(x){ c[x.tag]=x.count||0; }); app.miniTagCounts[slug]=c;
+        var el=byId('miniTags-'+slug); if(el&&_activeFilm===slug){ var f=find(slug); if(f) el.outerHTML=miniTagRow(f); }
+      }).catch(function(){});
+  }catch(e){}
+}
 var _activeFilm=null;   // which film the film view currently shows; async loaders must match it
 function renderFilm(id){
   if(id&&id.indexOf('cs-')===0){ return renderSoonDetail(id); }   // upcoming films get their own room
@@ -8136,6 +8239,7 @@ function renderFilm(id){
       '<p class="film-syn">'+esc(f.syn)+'</p>'+
       '<div id="ageRatingWrap">'+ageRatingHTML(f)+'</div>'+
       pepperRow(f)+
+      miniTagRow(f)+
       castCrewHTML(f)+
       '<div class="tag-row">'+tags+'</div>'+
     '</div>'+
@@ -8161,7 +8265,7 @@ function renderFilm(id){
       )+
       '</div>'+
     '</div>';
-  applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id); loadMyWatch(f.id);
+  applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id); loadMyWatch(f.id); loadMiniTags(f.id);
   hydrateFilmMedia(f).then(function(changed){
     if(!changed)return;
     var on=document.querySelector('.view.on');
@@ -11071,6 +11175,10 @@ function legendPanelHTML(){
       '<div class="lp-row">'+pepperSVG('#E07B1A',26)+'<div><b>Violence</b><span>Violent or intense content</span></div></div>'+
       '<div class="lp-row">'+pepperSVG('#C4302B',26)+'<div><b>Sexual / adult content</b><span>Nudity or mature scenes</span></div></div>'+
       '<div class="lp-note" style="font-size:11px;color:var(--ink-3);margin-top:2px">Estimated from ratings &amp; content keywords — not a scene-by-scene guide.</div>'+
+    '</div>'+
+    '<div class="lp-sec"><span class="lp-lab">The mini tags &middot; what you’re in for</span>'+
+      MINI_TAGS.map(function(t){ return '<div class="lp-row lp-mt"><span class="lp-mt-em">'+t.emoji+'</span><div><b>'+esc(t.lab)+'</b></div></div>'; }).join('')+
+      '<div class="lp-note" style="font-size:11px;color:var(--ink-3);margin-top:4px">Voted by the culture, not a machine. Stack the right ones and a film earns a badge like <b>🙅🏾‍♀️ Don’t Watch With Mama</b> or <b>🍗 Cookout Approved</b>.</div>'+
     '</div>';
 }
 function toggleLegend(){

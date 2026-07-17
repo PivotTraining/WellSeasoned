@@ -2344,3 +2344,41 @@ restore it to the marquee (id 'cs-621304') once its full official trailer drops.
 Verified in headless Chromium: title/ribbon(Elegance Bratton)/date(Sep 3 2026)/
 trailer iframe(ej8pjisr0Pc)/6 cast+chars/hype vote/premiere hook all correct,
 no old-feature mentions, zero console errors.
+
+## Mini tags — "what you're in for", voted by the culture (2026-07-16)
+Owner idea: tag movies by real elements ("Lots of cussin'", "Lots of sex",
+"Lots of killing", "Lots of laughs", "Lots of tears", "Lots of lessons"), couple
+them into filters, and — the unlock — composite badges like **"Don't Watch With
+Mama."** Confirmed with owner it does NOT replace anything in the Key (scores/
+seasoning tiers/peppers all stay); it's a new 4th Key section. Built the
+FOUNDATION this pass (tagging + composites + Key + backend SQL); the stacked
+tag FILTER on Browse/Serve-me-something is the next slice (it needs the vote
+data flowing first).
+- **Two layers.** Six raw element tags (`MINI_TAGS`, tap-to-vote chips on the
+  film page) + composites (`MINI_COMPOSITES`) that are **computed** from the
+  votes, never assigned: a composite shows only when every `needs` tag has
+  cleared `MINI_QUORUM` (3 taps) AND no `not` tag has. "Don't Watch With Mama" =
+  cuss+sex both high; "Cookout Approved" = laughs, no sex/kill; "Bring Tissues"
+  = tears; "One For The Lesson" = lessons, no sex. Honest — only real taps earn
+  a badge, holding the "nothing fake" line while being the screenshottable part.
+- **Same vote model as excitement.** `miniTagVote`/`syncMiniTag`/`loadMiniTags`;
+  counts from the public `mini_tag_counts` view, a visitor's own taps in
+  `app.miniTags` (localStorage). Works locally/optimistically before the table
+  is live (the scaffold is usable now), persists once configured.
+- **Gated to released films** (`upcomingSoonEntry` check) — you can't tag what
+  nobody's seen, same gate as the verdict vote.
+- **Backend** (`backend/schema.sql`, marked NOT YET LIVE): `mini_tag_votes`
+  table (unique `(film_slug,tag,user_id)`, forge-proof `user_id=auth.uid()`,
+  RLS: public read / owner-identity insert-update-delete) + `mini_tag_counts`
+  view. Owner pastes the block into the Supabase SQL editor once (same pending-
+  migration pattern as the other RPCs); until then taps work locally only.
+- **Key** gained a 4th section ("The mini tags · what you're in for") listing the
+  six + a note about the composite badges. Nothing existing removed. NOTE: the
+  auto-estimated "peppers" (Language/Violence/Sexual) now overlap the community-
+  voted cuss/kill/sex tags — the owner may retire the peppers once tag coverage
+  builds, their call (not done here).
+- Verified in headless Chromium: 6 chips render on a released film with header;
+  tap toggles on + increments + persists to app.miniTags; composites compute
+  correctly (cuss+sex→Don't Watch With Mama; laughs+lessons/no-sex-kill→Cookout
+  Approved + One For The Lesson); unreleased film shows NO row; Key shows the new
+  section; zero console errors.

@@ -764,3 +764,34 @@ begin
 end $$;
 revoke all on function public.admin_user_directory(text) from public;
 grant execute on function public.admin_user_directory(text) to anon, authenticated;
+
+-- ============================================================================
+-- MINI TAGS — community "what you're in for" tags (2026-07-16)  [NOT YET LIVE]
+-- Paste this block into the Supabase SQL editor once. Same forge-proof model as
+-- excitement_votes: one row per (film, tag, identity), user_id = auth.uid().
+-- ============================================================================
+create table if not exists public.mini_tag_votes (
+  id uuid primary key default gen_random_uuid(),
+  film_slug  text not null,
+  tag        text not null,
+  device_id  text,
+  user_id    uuid default auth.uid(),
+  created_at timestamptz default now(),
+  unique (film_slug, tag, user_id)
+);
+alter table public.mini_tag_votes enable row level security;
+-- read counts are public (all roles); a tap is owned by the caller's identity
+drop policy if exists mt_read on public.mini_tag_votes;
+create policy mt_read   on public.mini_tag_votes for select using (true);
+drop policy if exists mt_insert on public.mini_tag_votes;
+create policy mt_insert on public.mini_tag_votes for insert to anon, authenticated with check (user_id = auth.uid());
+drop policy if exists mt_update on public.mini_tag_votes;
+create policy mt_update on public.mini_tag_votes for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists mt_delete on public.mini_tag_votes;
+create policy mt_delete on public.mini_tag_votes for delete using (user_id = auth.uid());
+-- aggregate the client reads: per (film, tag) tap count
+create or replace view public.mini_tag_counts as
+  select film_slug, tag, count(*)::int as count
+  from public.mini_tag_votes
+  group by film_slug, tag;
+grant select on public.mini_tag_counts to anon, authenticated;
