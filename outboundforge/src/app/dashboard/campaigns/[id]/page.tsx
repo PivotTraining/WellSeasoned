@@ -24,7 +24,6 @@ export default async function CampaignDetail({
   if (!campaign) notFound();
 
   const logs = await listLogs(id);
-
   const m = campaign.metrics;
   const stats = [
     { label: "Processed", value: m.processed ?? 0 },
@@ -33,49 +32,51 @@ export default async function CampaignDetail({
   ];
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       <Link
         href="/dashboard/campaigns"
-        className="text-sm text-zinc-400 hover:text-white"
+        className="text-sm text-muted hover:text-ink"
       >
         ← Campaigns
       </Link>
 
-      <div className="mb-6 mt-2 flex items-center gap-3">
-        <h1 className="text-3xl font-bold">{campaign.name}</h1>
+      <div className="mb-1 mt-3 flex items-center gap-3">
+        <h1 className="text-2xl font-semibold text-ink">{campaign.name}</h1>
         <Badge tone={campaign.status === "done" ? "green" : "amber"}>
           {campaign.status}
         </Badge>
       </div>
-      <p className="mb-8 text-sm text-zinc-400">{campaign.icp.description}</p>
+      <p className="mb-6 text-sm text-body">{campaign.icp.description}</p>
 
-      <div className="mb-8 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-3 gap-4">
         {stats.map((s) => (
-          <Card key={s.label} className="py-5">
-            <div className="text-3xl font-bold">{s.value}</div>
-            <div className="mt-1 text-sm text-zinc-400">{s.label}</div>
+          <Card key={s.label}>
+            <div className="tnum text-3xl font-semibold text-ink">
+              {s.value.toLocaleString()}
+            </div>
+            <div className="mt-1 text-sm text-muted">{s.label}</div>
           </Card>
         ))}
       </div>
 
-      <Card className="mb-8">
-        <h2 className="mb-4 text-lg font-semibold">Agent trace</h2>
+      <Card className="mb-6">
+        <h2 className="mb-4 font-semibold text-ink">Agent trace</h2>
         {logs.length === 0 ? (
-          <p className="text-sm text-zinc-500">
-            No steps logged. Add leads on launch to populate the pipeline
-            trace (research → personalize → outreach).
+          <p className="text-sm text-muted">
+            No steps logged. Launch a campaign with leads to populate the
+            pipeline trace (research → personalize → outreach).
           </p>
         ) : (
           <ol className="space-y-2">
             {logs.map((log) => (
               <li
                 key={log.id}
-                className="flex items-start gap-3 rounded-md border border-forge-line bg-forge-bg p-3 text-sm"
+                className="flex items-start gap-3 rounded-lg border border-forge-line bg-forge-bg p-3 text-sm"
               >
                 <Badge tone={STEP_TONE[log.step] ?? "neutral"}>
                   {log.step}
                 </Badge>
-                <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre-wrap break-words text-xs text-zinc-400">
+                <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre-wrap break-words text-xs text-body">
                   {JSON.stringify(log.output, null, 0).slice(0, 400)}
                 </pre>
               </li>
@@ -84,15 +85,22 @@ export default async function CampaignDetail({
         )}
       </Card>
 
-      <Card className="mb-8">
-        <h2 className="mb-4 text-lg font-semibold">A/B lab</h2>
-        <ABLab />
-      </Card>
-
-      <Card>
-        <h2 className="mb-4 text-lg font-semibold">Reply insights</h2>
-        <ReplyInsights />
-      </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <h2 className="mb-1 font-semibold text-ink">A/B lab</h2>
+          <p className="mb-4 text-xs text-muted">
+            Generate subject/CTA variants to test.
+          </p>
+          <ABLab />
+        </Card>
+        <Card>
+          <h2 className="mb-1 font-semibold text-ink">Reply insights</h2>
+          <p className="mb-4 text-xs text-muted">
+            Extract objections and copy suggestions from replies.
+          </p>
+          <ReplyInsights />
+        </Card>
+      </div>
     </div>
   );
 }

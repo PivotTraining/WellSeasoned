@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -65,29 +66,30 @@ export default function NewCampaign() {
   const canLaunch = name.trim() && icp.trim() && !launching;
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <h1 className="mb-2 text-3xl font-bold">Launch AI SDR Campaign</h1>
-      <p className="mb-8 text-sm text-zinc-400">
+    <div>
+      <h1 className="mb-1 text-2xl font-semibold text-ink">
+        Launch AI SDR campaign
+      </h1>
+      <p className="mb-6 text-sm text-muted">
         Describe your ideal customer, drop in leads, and the agent pipeline
-        will research → personalize → run compliance → queue outreach.
+        runs research → personalize → compliance → outreach.
       </p>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-4">
           <div>
-            <label className="mb-1 block text-sm text-zinc-400">
+            <label className="mb-1 block text-sm font-medium text-ink">
               Campaign name
             </label>
-            <input
+            <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Q3 fintech founders"
-              className="w-full rounded-lg border border-forge-line bg-forge-panel p-3 text-sm outline-none focus:border-forge-accent"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-zinc-400">
-              Ideal Customer Profile
+            <label className="mb-1 block text-sm font-medium text-ink">
+              Ideal customer profile
             </label>
             <Textarea
               value={icp}
@@ -97,9 +99,9 @@ export default function NewCampaign() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-zinc-400">
+            <label className="mb-1 block text-sm font-medium text-ink">
               Leads{" "}
-              <span className="text-zinc-600">
+              <span className="font-normal text-muted">
                 — one per line: Company, Contact, email
               </span>
             </label>
@@ -120,23 +122,18 @@ export default function NewCampaign() {
               disabled={!canPreview}
               className="flex-1"
             >
-              {previewing ? "Generating…" : "Live Preview"}
+              {previewing ? "Generating…" : "Live preview"}
             </Button>
-            <Button
-              size="md"
-              onClick={launch}
-              disabled={!canLaunch}
-              className="flex-1"
-            >
-              {launching ? "Deploying agents…" : "Launch Campaign"}
+            <Button onClick={launch} disabled={!canLaunch} className="flex-1">
+              {launching ? "Deploying agents…" : "Launch campaign"}
             </Button>
           </div>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-bad">{error}</p>}
         </div>
 
         <Card>
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Live preview</h3>
+            <h3 className="font-semibold text-ink">Live preview</h3>
             {preview && (
               <div className="flex items-center gap-2">
                 <Badge tone="accent">Lead score {preview.score}</Badge>
@@ -148,37 +145,40 @@ export default function NewCampaign() {
           </div>
 
           {!preview && (
-            <p className="text-sm text-zinc-500">
-              Add an ICP and hit <strong>Live Preview</strong> to see a sample
-              personalized email, its lead score, and the compliance verdict —
-              the same steps the pipeline runs, without sending.
+            <p className="text-sm text-muted">
+              Add an ICP and hit <strong className="text-body">Live
+              preview</strong> to see a sample personalized email, its lead
+              score, and the compliance verdict — the same steps the pipeline
+              runs, without sending.
             </p>
           )}
 
           {preview && (
             <div className="space-y-4 text-sm">
               <div>
-                <div className="mb-1 text-xs uppercase tracking-wide text-zinc-500">
+                <div className="mb-1 text-xs uppercase tracking-wide text-muted">
                   Subject
                 </div>
-                <div className="font-medium">{preview.draft.subject}</div>
+                <div className="font-medium text-ink">
+                  {preview.draft.subject}
+                </div>
               </div>
               <div>
-                <div className="mb-1 text-xs uppercase tracking-wide text-zinc-500">
+                <div className="mb-1 text-xs uppercase tracking-wide text-muted">
                   Body
                 </div>
-                <pre className="whitespace-pre-wrap break-words rounded-md border border-forge-line bg-forge-bg p-3 text-zinc-300">
+                <pre className="whitespace-pre-wrap break-words rounded-lg border border-forge-line bg-forge-bg p-3 text-body">
                   {preview.draft.body}
                 </pre>
               </div>
-              <div className="text-xs text-zinc-500">
+              <div className="text-xs text-muted">
                 Research source: {preview.enriched.source} · Spam risk:{" "}
                 {preview.compliance.score < 0
                   ? "n/a"
                   : `${preview.compliance.score}/10`}
               </div>
               {preview.compliance.reasons.length > 0 && (
-                <ul className="list-disc space-y-1 pl-5 text-xs text-amber-300/80">
+                <ul className="list-disc space-y-1 pl-5 text-xs text-warn">
                   {preview.compliance.reasons.map((r, i) => (
                     <li key={i}>{r}</li>
                   ))}

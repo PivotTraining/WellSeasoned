@@ -3,10 +3,18 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
+html,
 body {
-  background: #09090b;
-  color: #fafafa;
+  background: #f6f9fc;
+  color: #425466;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Stripe-ish numeric feel for metric figures. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }

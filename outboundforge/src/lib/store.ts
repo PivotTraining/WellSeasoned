@@ -156,3 +156,45 @@ export async function listLogs(campaignId: string): Promise<LogRow[]> {
   }
   return mem().logs.filter((l) => l.campaign_id === campaignId);
 }
+
+// --- Demo-only sample data (in-memory store only) ---------------------------
+
+const SAMPLE = [
+  { name: "Fintech Founders — Q3", icp: "Seed-stage fintech founders, US, post-raise", daysAgo: 12, processed: 96 },
+  { name: "Series A Ops Leaders", icp: "Series A ops/RevOps leaders at 50-200p SaaS", daysAgo: 10, processed: 64 },
+  { name: "DevTools ICs → Champions", icp: "Senior engineers at dev-tools companies", daysAgo: 8, processed: 128 },
+  { name: "Healthcare CTOs", icp: "CTOs at digital-health startups, HIPAA-aware", daysAgo: 6, processed: 52 },
+  { name: "Ecomm Growth Leads", icp: "Head of Growth at DTC brands >$5M GMV", daysAgo: 4, processed: 110 },
+  { name: "Agency Founders", icp: "Founders of 10-40p marketing agencies", daysAgo: 3, processed: 78 },
+  { name: "Fractional CFOs", icp: "Fractional CFOs serving seed/Series A startups", daysAgo: 1, processed: 44 },
+];
+
+/** Seed labeled sample campaigns so the dashboard has data. Demo store only. */
+export async function seedSampleData(): Promise<number> {
+  const store = mem();
+  for (const s of SAMPLE) {
+    const created = new Date();
+    created.setUTCDate(created.getUTCDate() - s.daysAgo);
+    const sent = Math.round(s.processed * 0.66);
+    const skipped = s.processed - sent;
+    const replied = Math.round(sent * 0.07);
+    store.campaigns.unshift({
+      id: randomUUID(),
+      user_id: null,
+      name: s.name,
+      icp: { description: s.icp },
+      status: "done",
+      metrics: { processed: s.processed, sent, skipped, replied },
+      created_at: created.toISOString(),
+    });
+  }
+  return SAMPLE.length;
+}
+
+export async function clearSampleData(): Promise<void> {
+  const store = mem();
+  store.campaigns = [];
+  store.leads = [];
+  store.logs = [];
+  store.seq = 1;
+}

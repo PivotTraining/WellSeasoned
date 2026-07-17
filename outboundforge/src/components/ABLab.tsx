@@ -40,29 +40,29 @@ export function ABLab() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+        <label className="mb-1 block text-xs uppercase tracking-wide text-muted">
           Base subject
         </label>
         <input
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="w-full rounded-lg border border-forge-line bg-forge-bg p-2.5 text-sm outline-none focus:border-forge-accent"
+          className="w-full rounded-lg border border-forge-line bg-white p-2.5 text-sm text-ink outline-none focus:border-brand"
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+        <label className="mb-1 block text-xs uppercase tracking-wide text-muted">
           Base body
         </label>
         <Textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          className="h-24 bg-forge-bg"
+          className="h-24"
         />
       </div>
       <Button onClick={run} disabled={pending || !body.trim()}>
         {pending ? "Generating variants…" : "Generate A/B variants"}
       </Button>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-bad">{error}</p>}
 
       {variants.length > 0 && (
         <div className="space-y-3">
@@ -71,9 +71,9 @@ export function ABLab() {
               key={i}
               className="rounded-md border border-forge-line bg-forge-bg p-3"
             >
-              <div className="mb-1 text-xs text-zinc-500">Variant {i + 1}</div>
+              <div className="mb-1 text-xs text-muted">Variant {i + 1}</div>
               <div className="mb-1 text-sm font-medium">{v.subject}</div>
-              <p className="whitespace-pre-wrap text-sm text-zinc-400">
+              <p className="whitespace-pre-wrap text-sm text-body">
                 {v.body}
               </p>
             </div>

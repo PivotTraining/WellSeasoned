@@ -6,12 +6,12 @@ type Size = "md" | "lg";
 const base =
   "inline-flex items-center justify-center rounded-lg font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none";
 const variants: Record<Variant, string> = {
-  primary: "bg-forge-accent text-black hover:bg-orange-400",
-  ghost: "border border-forge-line text-white hover:bg-forge-panel",
+  primary: "bg-brand text-white shadow-sm hover:bg-brand-hover",
+  ghost: "border border-forge-line bg-white text-ink hover:bg-forge-bg",
 };
 const sizes: Record<Size, string> = {
   md: "h-9 px-4 text-sm",
-  lg: "h-11 px-6 text-base",
+  lg: "h-11 px-6 text-[15px]",
 };
 
 export interface ButtonProps
