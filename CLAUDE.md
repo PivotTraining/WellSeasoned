@@ -2323,3 +2323,24 @@ into `api/films.json`, so the sitemap/OG surface exposed a crawlable
   and the orphaned `sample-bland` was pruned from `api/films.json` → 1258 → 1257.
 - Verified: FILMS.length 1257, 0 noart entries, counter renders "1,257 Films &
   shows", films.json 1257 with no sample-bland, zero console errors.
+
+## Marquee swapped again → By Any Means (real full trailer) (2026-07-16)
+Owner: "Children of the bone looks weak. We should wait until a official trailer
+what can or should we replace it with" → chose **By Any Means**. CoBaB only had
+a short official Title Reveal (no full trailer on any official channel yet), so
+the poster-led hero read weak. Repointed `MARRIED_FEATURE_ID` → `cs-1380417`
+(By Any Means, Sep 3 2026, dir. Elegance Bratton). Researched the field first:
+the only near-term Black-led COMING_SOON titles with a real trailer were By Any
+Means and Why Did I Get Married Again? (both oEmbed-verified — By Any Means is
+an OFFICIAL Paramount **full** trailer `ej8pjisr0Pc`, WDIGMA an official Netflix
+teaser). By Any Means won on: full official trailer (not a teaser), genuine
+"our film" (Black director + Yahya Abdul-Mateen II leads as a young Black FBI
+agent, Giancarlo Esposito as real civil-rights figure Vernon Dahmer), soonest
+date. `MARRIED_CAST` curated Black-forward (Yahya/Nicole Beharie/Giancarlo/
+LisaGay Hamilton/LaChanze + co-lead Wahlberg) with real TMDB photos + character
+names. Since the entry already has a trailer, the marquee auto-leads with the
+embedded clip (no poster fallback). CoBaB stays in the catalog + Coming Soon;
+restore it to the marquee (id 'cs-621304') once its full official trailer drops.
+Verified in headless Chromium: title/ribbon(Elegance Bratton)/date(Sep 3 2026)/
+trailer iframe(ej8pjisr0Pc)/6 cast+chars/hype vote/premiere hook all correct,
+no old-feature mentions, zero console errors.

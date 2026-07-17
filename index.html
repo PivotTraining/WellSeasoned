@@ -6970,19 +6970,20 @@ function openSoonTrailerId(id){ var i=soonIndex(id); if(i>=0)openSoonTrailer(i);
    as-is — same honesty rules as everywhere else, nothing invented. To
    change the feature, edit MARRIED_FEATURE_ID / MARRIED_CAST below. (Names kept
    from the original Tyler Perry feature to avoid churn — the marquee now points
-   at Children of Blood and Bone; no trailer indexed on TMDB yet, so it leads
-   with the poster and the excitement/hype vote is force-shown for this curated
-   marquee.) */
-var MARRIED_FEATURE_ID='cs-621304';
+   at By Any Means (cs-1380417), which has a real OFFICIAL Paramount trailer, so
+   it leads with the embedded clip. Cast row is curated Black-forward — Yahya
+   Abdul-Mateen II leads as Wayne Strider, with Giancarlo Esposito as the real
+   civil-rights figure Vernon Dahmer — with co-lead Mark Wahlberg included.
+   Children of Blood and Bone stays in the catalog + Coming Soon; restore it to
+   the marquee (id 'cs-621304') once its full official trailer drops.) */
+var MARRIED_FEATURE_ID='cs-1380417';
 var MARRIED_CAST=[
-  {name:'Thuso Mbedu',char:'Zélie',photo:'/pAStLwNMw8Seb0BM4uqrdOvtjK1.jpg'},
-  {name:'Amandla Stenberg',char:'Amari',photo:'/1Kv2sVVUkNSXyvmma8RBAX0CNGA.jpg'},
-  {name:'Damson Idris',char:'Inan',photo:'/y0dcRs4GF6Xx23OxDr1ytc8thlL.jpg'},
-  {name:'Tosin Cole',char:'Tzain',photo:'/8sFFg9Pw2OmAXPr4Lhql8ANzd4e.jpg'},
-  {name:'Viola Davis',char:'Mama Agba',photo:'/xDssw6vpYNRjsybvMPRE30e0dPN.jpg'},
-  {name:'Cynthia Erivo',char:'Admiral Kaea',photo:'/gIAXqZwZCBqkh2ppfAV4xcnMxki.jpg'},
-  {name:'Idris Elba',char:'Lekan',photo:'/be1bVF7qGX91a6c5WeRPs5pKXln.jpg'},
-  {name:'Lashana Lynch',char:'Jumoke',photo:'/ypNxRag9uJ5nzPAN2um3amQK340.jpg'}
+  {name:'Yahya Abdul-Mateen II',char:'Wayne Strider',photo:'/79VdVjUoiYGcgjOT9UmE5XIpoZM.jpg'},
+  {name:'Nicole Beharie',photo:'/7ZgUAk3hkCrWSfjLYvnbKdyaNiN.jpg'},
+  {name:'Giancarlo Esposito',char:'Vernon Dahmer',photo:'/rcXnr82TwDzU4ZGdBeNXfG0ZQnZ.jpg'},
+  {name:'LisaGay Hamilton',photo:'/bqfowff4gF0cGaQ1c7F89HAL3DH.jpg'},
+  {name:'LaChanze',photo:'/u1JSaJ3joDqiNXXa1Dy73PSwpqv.jpg'},
+  {name:'Mark Wahlberg',char:'Gregory Scarpa',photo:'/1Oc3XSLyb8hxmjmlgFENu582Kqw.jpg'}
 ];
 function paintMarriedFeature(){
   var el=byId('marriedFeature'); if(!el)return;
