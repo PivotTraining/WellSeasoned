@@ -2411,3 +2411,21 @@ Two owner reports in one turn.
   in headless Chromium with seeded counts: correct desc ranking per tag, "Don't
   Watch With Mama" lists only qualifying films, chips switch boards, 🫦 renders,
   zero console errors.
+
+## Mobile header + tabbar cleanup (2026-07-16)
+Owner: "The mobile header display can be better" + "remove vault, soon, shop and
+put kids in there" (the bottom tabbar).
+- **Header overflow fixed:** on phones the row was 97px wider than the viewport
+  (`.right` was 244px — the mobile search icon PLUS two auth buttons "Sign in" +
+  "Take a seat"). Fix (CSS, `@media max-width:520px`): collapse the signed-out
+  auth slot to a single "Take a seat" CTA (`#authSlot .btn-ghost{display:none}` —
+  its signup modal already links returning users to Sign in), shrink the mark
+  (46→36px), tighten wordmark/gaps. A `@media max-width:360px` step shaves a hair
+  more (badge 30, word 16, wrap padding 12). Result: 0 overflow at 360–430px
+  (every mainstream phone); 320px down to a negligible 9px (was 37). Signed-in
+  state (avatar) unaffected.
+- **Tabbar** (`.tabbar`): removed Soon / Vault / Shop, added **Kids** (friendly
+  smiley line-icon) after Browse → a cleaner 6-tab bar: Home · Browse · Kids ·
+  Rankings · Theaters · You (was 8). Removed items stay reachable via the footer
+  link row (not orphaned). Verified: Kids tab routes to `#/kids` and shows
+  `.active`; tabbar fits with 0 overflow down to 320px; zero console errors.
