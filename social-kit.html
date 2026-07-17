@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Well Seasoned · Social Kit</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  /* Well Seasoned brand tokens — the design's design-system variables resolved to
+     the real site palette (The Kitchen = warm gold/paprika accent, The Table =
+     green accent-2, cream/brown neutrals). */
+  :root{
+    --font-heading:"Bricolage Grotesque","Inter",sans-serif;
+    --font-body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    --color-text:#201e1d;
+    --color-accent-200:#F4E3BE; --color-accent-300:#F0C878; --color-accent-400:#E7A73C;
+    --color-accent-500:#E49B0B; --color-accent-600:#B04A1C; --color-accent-700:#8A5A0C; --color-accent-800:#5E3A0A;
+    --color-accent-2-200:#DEE9C6; --color-accent-2-300:#B9CB8C; --color-accent-2-400:#93AC5C;
+    --color-accent-2-600:#586E2E; --color-accent-2-800:#2E3A16;
+    --color-neutral-100:#F5EFE1; --color-neutral-300:#E4D7BF; --color-neutral-400:#BBAA88;
+    --color-neutral-500:#9C8D70; --color-neutral-600:#7C6D54; --color-neutral-700:#5B4A34; --color-neutral-800:#3A2E1E;
+    --color-divider:rgba(122,82,6,.28);
+    --shadow-sm:0 2px 8px rgba(40,22,6,.12);
+    --shadow-md:0 10px 30px rgba(40,22,6,.22);
+    --shadow-lg:0 20px 60px rgba(20,12,4,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0}
+  .frame { position:absolute; top:0; left:0; width:1080px; height:1920px; transform:scale(0.3333); transform-origin:top left; overflow:hidden; display:flex; flex-direction:column; }
+  .shot { position:relative; width:360px; height:640px; border-radius:26px; overflow:hidden; box-shadow: var(--shadow-lg); flex:none; }
+  .lockup { font-family:var(--font-heading); font-size:40px; line-height:1; }
+  .kick { font-size:24px; letter-spacing:0.22em; text-transform:uppercase; font-weight:700; }
+  .foot { position:absolute; left:80px; right:80px; bottom:74px; display:flex; align-items:center; justify-content:space-between; font-size:26px; }
+  /* poster drop zones (owner adds real, verified art) */
+  .img-slot{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:64px;
+    background:linear-gradient(135deg,#3a2c1a,#171009); color:rgba(245,234,216,.5); font-family:var(--font-heading); font-size:30px; line-height:1.3; }
+</style>
+</head>
+<body>
+<div style="min-height:100vh; background:#e7dcc7; padding:64px 72px 120px; font-family:var(--font-body); color:var(--color-text)">
+
+  <header style="max-width:1100px; margin:0 0 12px">
+    <div style="font-family:var(--font-heading); font-size:22px; letter-spacing:0.24em; text-transform:uppercase; color:var(--color-accent-700)">Well Seasoned · Social Kit</div>
+    <h1 style="font-family:var(--font-heading); font-size:58px; line-height:1.04; margin:10px 0 14px; max-width:16ch">Rated by the culture, posted for the culture.</h1>
+    <p style="font-size:19px; max-width:64ch; color:var(--color-neutral-700); margin:0">Seven Instagram Stories (1080×1920) and three Threads posts. Frames are live at full resolution — drop real poster art onto any tile, edit any line in place. Film spotlights <strong>tease the verdict on purpose</strong> to pull people to the site.</p>
+  </header>
+
+  <!-- ══════════ INSTAGRAM STORIES ══════════ -->
+  <div style="display:flex; align-items:center; gap:16px; margin:46px 0 22px">
+    <span style="font-family:var(--font-heading); font-size:30px">Instagram Stories</span>
+    <span style="height:2px; flex:1; background:var(--color-divider); max-width:520px"></span>
+    <span style="font-size:15px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600)">1080 × 1920</span>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:52px 44px; align-items:flex-start">
+
+    <!-- STORY 01 — Manifesto -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 01</span><span style="font-size:13px; color:var(--color-neutral-600)">Manifesto · brand</span></div>
+      <div class="shot">
+        <div class="frame" style="background:radial-gradient(120% 90% at 50% 0%, #4a2c14 0%, #2e2b25 62%); color:#f5ead8; padding:82px 80px">
+          <div class="lockup">Well Seasoned</div>
+          <div class="kick" style="color:var(--color-accent-300); margin-top:220px">Two verdicts · one seal</div>
+          <h2 style="font-family:var(--font-heading); font-size:104px; line-height:0.98; margin:26px 0 0">The critics and the culture, on the same film.</h2>
+          <p style="font-size:34px; line-height:1.5; margin-top:44px; color:#e9dcc7; max-width:22ch">The Kitchen is verified critics of the culture. The Table is everyone who bought the ticket. No studio thumb on the scale.</p>
+          <div class="foot" style="color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Link sticker → itswellseasoned.com. Poll sticker: “Critics or the cookout — who do you trust?” <span style="color:var(--color-accent-700)">#WellSeasoned #RatedByTheCulture #BlackFilm</span></div>
+    </div>
+
+    <!-- STORY 02 — How to read a score -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 02</span><span style="font-size:13px; color:var(--color-neutral-600)">Explainer</span></div>
+      <div class="shot">
+        <div class="frame" style="background:#f5ead8; color:#201e1d; padding:82px 80px">
+          <div class="lockup" style="color:var(--color-accent-700)">Well Seasoned</div>
+          <div class="kick" style="color:var(--color-neutral-600); margin-top:70px">How to read a score</div>
+          <div style="display:flex; flex-direction:column; gap:30px; margin-top:52px">
+            <div style="background:var(--color-accent-600); color:#fff2eb; border-radius:32px; padding:40px 46px; display:flex; align-items:center; justify-content:space-between"><div><div style="font-size:28px; letter-spacing:0.14em; text-transform:uppercase">The Kitchen</div><div style="font-size:26px; opacity:.85">verified critics of the culture</div></div><div style="font-family:var(--font-heading); font-size:118px; line-height:1">94</div></div>
+            <div style="background:var(--color-accent-2-600); color:#f0fae1; border-radius:32px; padding:40px 46px; display:flex; align-items:center; justify-content:space-between"><div><div style="font-size:28px; letter-spacing:0.14em; text-transform:uppercase">The Table</div><div style="font-size:26px; opacity:.85">everyone who bought the ticket</div></div><div style="font-family:var(--font-heading); font-size:118px; line-height:1">91</div></div>
+          </div>
+          <p style="font-size:34px; line-height:1.45; margin-top:52px; max-width:24ch">When they agree, it earns <strong>the seal</strong>. When they split, that gap tells you something.</p>
+          <div class="foot"><span style="color:var(--color-neutral-600)">itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-700)">@Wellseasonedreviews</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Quiz sticker: “Which number do you check first?” Save this to your highlight “How it works.” <span style="color:var(--color-accent-700)">#TwoVerdicts #FilmTwitter</span></div>
+    </div>
+
+    <!-- STORY 03 — The Gap -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 03</span><span style="font-size:13px; color:var(--color-neutral-600)">The gap · engagement</span></div>
+      <div class="shot">
+        <div class="frame" style="background:#2e2b25; color:#f5ead8; padding:82px 80px">
+          <div class="lockup">Well Seasoned</div>
+          <div class="kick" style="color:var(--color-accent-300); margin-top:120px">The gap is the conversation</div>
+          <div style="display:flex; align-items:baseline; gap:28px; margin-top:40px; font-family:var(--font-heading); line-height:0.9">
+            <span style="font-size:190px; color:var(--color-accent-400)">94</span>
+            <span style="font-size:120px; color:var(--color-neutral-500)">/</span>
+            <span style="font-size:190px; color:var(--color-accent-2-400)">61</span>
+          </div>
+          <div style="display:flex; gap:60px; font-size:26px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-400); margin-top:14px"><span>The Kitchen</span><span style="margin-left:auto">The Table</span></div>
+          <p style="font-size:36px; line-height:1.45; margin-top:56px; max-width:22ch">Critics loved the craft. The room walked out arguing. So — where do <em>you</em> land?</p>
+          <div style="margin-top:30px; display:inline-block; background:var(--color-accent-500); color:#2e2b25; font-family:var(--font-heading); font-size:34px; padding:22px 42px; border-radius:999px">Cast your verdict ↗</div>
+          <div class="foot" style="color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Swap in a real split from the site. Slider sticker “Rate it yourself” + link to the film. <span style="color:var(--color-accent-700)">#ThePeoplesCut</span></div>
+    </div>
+
+    <!-- STORY 04 — Lanterns / Coming Soon -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 04</span><span style="font-size:13px; color:var(--color-neutral-600)">Coming soon · Lanterns</span></div>
+      <div class="shot">
+        <div class="frame" style="background:#221f1a; color:#f5ead8; padding:0">
+          <div style="position:absolute; inset:0"><div class="img-slot"><span>Drop the Lanterns poster / still</span></div></div>
+          <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,18,14,0.72) 0%, rgba(20,18,14,0.1) 34%, rgba(20,18,14,0.2) 60%, rgba(20,18,14,0.92) 100%); pointer-events:none"></div>
+          <div style="position:absolute; inset:0; padding:82px 80px; display:flex; flex-direction:column; pointer-events:none">
+            <div class="lockup">Well Seasoned</div>
+            <div style="margin-top:26px; align-self:flex-start; background:var(--color-accent-500); color:#211a12; font-family:var(--font-heading); font-size:28px; letter-spacing:0.06em; padding:14px 30px; border-radius:999px">🔥 THE STOVE IS ON</div>
+            <div style="margin-top:auto">
+              <div class="kick" style="color:var(--color-accent-300)">Coming soon</div>
+              <h2 style="font-family:var(--font-heading); font-size:118px; line-height:0.96; margin:14px 0 0">Lanterns</h2>
+              <p style="font-size:34px; line-height:1.45; margin-top:26px; max-width:24ch; color:#eaddc8">Aaron Pierre in the series the culture's already tracking. Watch the trailer, mark your calendar — then come back and cast the first verdict.</p>
+              <div style="margin-top:26px; display:inline-block; border:3px solid var(--color-accent-300); color:var(--color-accent-300); font-family:var(--font-heading); font-size:30px; padding:16px 34px; border-radius:999px">Verdict pending</div>
+            </div>
+            <div class="foot" style="position:static; margin-top:44px; color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Countdown sticker to release. Link → the film's page. Verify cast/title before posting. <span style="color:var(--color-accent-700)">#Lanterns #AaronPierre #ComingSoon</span></div>
+    </div>
+
+    <!-- STORY 05 — The Seal / Why Did I Get Married -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 05</span><span style="font-size:13px; color:var(--color-neutral-600)">The seal · spotlight</span></div>
+      <div class="shot">
+        <div class="frame" style="background:#f5ead8; color:#201e1d; padding:78px 80px">
+          <div class="lockup" style="color:var(--color-accent-700)">Well Seasoned</div>
+          <div style="display:flex; gap:40px; align-items:flex-start; margin-top:48px">
+            <div style="width:300px; height:432px; border-radius:24px; overflow:hidden; flex:none; box-shadow:var(--shadow-md)"><div class="img-slot"><span>Drop the poster</span></div></div>
+            <div style="padding-top:8px">
+              <div style="width:210px; height:210px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; box-shadow:0 0 0 10px #f5ead8, 0 0 0 16px var(--color-accent-600)"><div style="font-size:26px; letter-spacing:0.18em">EARNED</div><div style="font-family:var(--font-heading); font-size:56px; line-height:0.95; margin-top:2px">The Seal</div></div>
+            </div>
+          </div>
+          <h2 style="font-family:var(--font-heading); font-size:76px; line-height:0.98; margin:44px 0 0">Why Did I Get Married</h2>
+          <p style="font-size:33px; line-height:1.45; margin-top:22px; max-width:26ch">The Kitchen and The Table landed in the same place. That's when a film earns the seal — and this one did.</p>
+          <p style="font-size:30px; margin-top:20px; color:var(--color-accent-700); font-weight:700">See where it landed → itswellseasoned.com</p>
+          <div class="foot"><span style="color:var(--color-neutral-600)">itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-700)">@Wellseasonedreviews</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Tease, don't spoil: link → the film page so they check the seal themselves. Confirm exact title/year on the site, and only post the seal once a film has genuinely earned it. <span style="color:var(--color-accent-700)">#EarnedTheSeal</span></div>
+    </div>
+
+    <!-- STORY 06 — Fightland / New on the stove -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 06</span><span style="font-size:13px; color:var(--color-neutral-600)">Independent · Fightland</span></div>
+      <div class="shot">
+        <div class="frame" style="background:#211f1a; color:#f5ead8; padding:0">
+          <div style="position:absolute; inset:0"><div class="img-slot"><span>Drop the Fightland poster / still</span></div></div>
+          <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,18,14,0.78) 0%, rgba(20,18,14,0.12) 40%, rgba(20,18,14,0.94) 100%); pointer-events:none"></div>
+          <div style="position:absolute; inset:0; padding:82px 80px; display:flex; flex-direction:column; pointer-events:none">
+            <div class="lockup">Well Seasoned</div>
+            <div class="kick" style="color:var(--color-accent-2-300); margin-top:22px">New on the stove</div>
+            <div style="margin-top:auto">
+              <h2 style="font-family:var(--font-heading); font-size:112px; line-height:0.96; margin:0">Fightland</h2>
+              <p style="font-size:35px; line-height:1.45; margin-top:26px; max-width:23ch; color:#eaddc8">Independent. Unbought. Exactly the kind of film this table was built to show up for.</p>
+              <p style="font-size:31px; margin-top:22px; font-family:var(--font-heading); color:var(--color-accent-300)">The verdict's live — go see where it landed ↗</p>
+            </div>
+            <div class="foot" style="position:static; margin-top:44px; color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Great slot for filmmaker submissions. “Made something? Submit your film.” Confirm title/details before posting. <span style="color:var(--color-accent-700)">#IndependentFilm #SubmitYourFilm</span></div>
+    </div>
+
+    <!-- STORY 07 — CTA / The Table -->
+    <div style="width:360px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-2-200); color:var(--color-accent-2-800); padding:4px 10px; border-radius:999px">IG STORY 07</span><span style="font-size:13px; color:var(--color-neutral-600)">CTA · sign up</span></div>
+      <div class="shot">
+        <div class="frame" style="background:radial-gradient(130% 80% at 20% 8%, #6d7c52 0%, #56633f 70%); color:#f0fae1; padding:82px 80px">
+          <div class="lockup">Well Seasoned</div>
+          <div style="position:absolute; right:-90px; top:520px; width:520px; height:520px; border-radius:999px; background:rgba(255,255,255,0.08)"></div>
+          <div class="kick" style="color:var(--color-accent-2-200); margin-top:190px">Membership · free</div>
+          <h2 style="font-family:var(--font-heading); font-size:114px; line-height:0.96; margin:24px 0 0">Pull up a seat at The Table.</h2>
+          <p style="font-size:35px; line-height:1.48; margin-top:40px; max-width:22ch; position:relative">Save your votes. Track where you land against the room. Get picks made for how you actually watch.</p>
+          <div style="margin-top:46px; display:inline-block; background:#f5ead8; color:#3d472b; font-family:var(--font-heading); font-size:38px; padding:24px 48px; border-radius:999px; box-shadow:var(--shadow-md)">Create your free account →</div>
+          <div class="foot" style="color:#dfe8cb"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading)">@Wellseasonedreviews</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Link sticker → create account. Pin to your profile highlight “Join the Table.” <span style="color:var(--color-accent-700)">#PullUpASeat #TheTable</span></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ THREADS ══════════ -->
+  <div style="display:flex; align-items:center; gap:16px; margin:72px 0 22px">
+    <span style="font-family:var(--font-heading); font-size:30px">Threads</span>
+    <span style="height:2px; flex:1; background:var(--color-divider); max-width:520px"></span>
+    <span style="font-size:15px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600)">Copy · three voices</span>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:34px; align-items:flex-start">
+
+    <!-- THREAD A — site voice -->
+    <div style="width:600px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-neutral-300); color:var(--color-neutral-800); padding:4px 10px; border-radius:999px">THREAD A</span><span style="font-size:13px; color:var(--color-neutral-600)">Site voice</span></div>
+      <div style="background:#faf5ec; border-radius:24px; padding:30px 32px; box-shadow:var(--shadow-md)">
+        <div style="display:flex; gap:14px; align-items:center; margin-bottom:16px">
+          <div style="width:48px; height:48px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; font-family:var(--font-heading); font-size:24px; display:flex; align-items:center; justify-content:center">W</div>
+          <div style="line-height:1.2"><div style="font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px">Well Seasoned <span style="color:var(--color-accent-600)">✔</span></div><div style="font-size:15px; color:var(--color-neutral-600)">@Wellseasonedreviews · 2h</div></div>
+        </div>
+        <p style="font-size:19px; line-height:1.6; margin:0">Two numbers on every film. The Kitchen — verified critics of the culture. The Table — everybody who actually bought the ticket.<br><br>When they agree, it earns the seal. When they split? That's the whole conversation.<br><br>Built for the culture, rated by the culture. → itswellseasoned.com</p>
+        <div style="display:flex; gap:34px; margin-top:20px; color:var(--color-neutral-500); font-size:15px">♡ &nbsp; 💬 &nbsp; ↻ &nbsp; ➤</div>
+      </div>
+    </div>
+
+    <!-- THREAD B — punchy / meme -->
+    <div style="width:600px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-neutral-300); color:var(--color-neutral-800); padding:4px 10px; border-radius:999px">THREAD B</span><span style="font-size:13px; color:var(--color-neutral-600)">Punchier / meme-aware</span></div>
+      <div style="background:#faf5ec; border-radius:24px; padding:30px 32px; box-shadow:var(--shadow-md)">
+        <div style="display:flex; gap:14px; align-items:center; margin-bottom:16px">
+          <div style="width:48px; height:48px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; font-family:var(--font-heading); font-size:24px; display:flex; align-items:center; justify-content:center">W</div>
+          <div style="line-height:1.2"><div style="font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px">Well Seasoned <span style="color:var(--color-accent-600)">✔</span></div><div style="font-size:15px; color:var(--color-neutral-600)">@Wellseasonedreviews · 5h</div></div>
+        </div>
+        <p style="font-size:19px; line-height:1.6; margin:0">a critic gave it a 34. the whole cookout gave it a 96.<br><br>somebody's lying and it's not the cookout 🍿<br><br>two scores. one seal. no studio thumb on the scale. pull up a seat → itswellseasoned.com</p>
+        <div style="display:flex; gap:34px; margin-top:20px; color:var(--color-neutral-500); font-size:15px">♡ &nbsp; 💬 &nbsp; ↻ &nbsp; ➤</div>
+      </div>
+    </div>
+
+    <!-- THREAD C — editorial -->
+    <div style="width:600px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-neutral-300); color:var(--color-neutral-800); padding:4px 10px; border-radius:999px">THREAD C</span><span style="font-size:13px; color:var(--color-neutral-600)">Editorial / elevated</span></div>
+      <div style="background:#faf5ec; border-radius:24px; padding:30px 32px; box-shadow:var(--shadow-md)">
+        <div style="display:flex; gap:14px; align-items:center; margin-bottom:16px">
+          <div style="width:48px; height:48px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; font-family:var(--font-heading); font-size:24px; display:flex; align-items:center; justify-content:center">W</div>
+          <div style="line-height:1.2"><div style="font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px">Well Seasoned <span style="color:var(--color-accent-600)">✔</span></div><div style="font-size:15px; color:var(--color-neutral-600)">@Wellseasonedreviews · 1d</div></div>
+        </div>
+        <p style="font-size:19px; line-height:1.6; margin:0">Criticism lived at the kitchen table long before it reached a masthead.<br><br>Well Seasoned puts both on the record: verified critics of the culture, beside the room that bought the ticket. Same film, two honest verdicts — and the gap between them treated as the point, not the problem.<br><br>A seat that's earned, never bought.</p>
+        <div style="display:flex; gap:34px; margin-top:20px; color:var(--color-neutral-500); font-size:15px">♡ &nbsp; 💬 &nbsp; ↻ &nbsp; ➤</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Full-resolution export: click any story tile to blow it up to true 1080×1920,
+     then screenshot it (real brand fonts load in your browser). Click to close. -->
+<div id="exportOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,14,6,.88); z-index:100; overflow:auto; padding:28px 18px; text-align:center">
+  <div style="color:#f5ead8; font-family:var(--font-body); font-size:14px; margin-bottom:14px">Full 1080 × 1920 — screenshot this frame to post, then click anywhere to close</div>
+  <div id="exportHost" style="display:inline-block"></div>
+</div>
+<script>
+  document.getElementById('exportOverlay').addEventListener('click', function(){ this.style.display='none'; });
+  document.querySelectorAll('.shot').forEach(function(shot){
+    shot.style.cursor='zoom-in';
+    shot.addEventListener('click', function(){
+      var frame = shot.querySelector('.frame').cloneNode(true);
+      frame.style.transform = 'none';
+      frame.style.position = 'relative';
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'width:1080px; height:1920px; position:relative; border-radius:26px; overflow:hidden; box-shadow:0 30px 90px rgba(0,0,0,.6); margin:0 auto';
+      wrap.appendChild(frame);
+      var host = document.getElementById('exportHost'); host.innerHTML = ''; host.appendChild(wrap);
+      document.getElementById('exportOverlay').style.display = 'block';
+      window.scrollTo(0,0);
+    });
+  });
+</script>
+</body>
+</html>

@@ -2429,3 +2429,30 @@ put kids in there" (the bottom tabbar).
   Rankings · Theaters · You (was 8). Removed items stay reachable via the footer
   link row (not orphaned). Verified: Kids tab routes to `#/kids` and shows
   `.active`; tabbar fits with 0 overflow down to 320px; zero console errors.
+
+## Social kit page — imported Claude Design "Well Seasoned Social" (2026-07-16)
+Owner asked to import a Claude Design project (`Well Seasoned Social.dc.html`) via
+the design MCP and implement it. Pulled the design with `DesignSync get_file`
+(the Vercel/Netlify import path needs a `claudeusercontent.com` bundle URL, which
+the editor URL isn't). Implemented it as a self-contained static page,
+`social-kit.html` (served at itswellseasoned.com/social-kit.html, `noindex`, not
+nav-linked). It's a marketing asset board: **7 Instagram Stories (1080×1920)** —
+Manifesto, How-to-read-a-score, The Gap, Lanterns (coming soon), The Seal
+spotlight, Fightland (independent), CTA/The Table — plus **3 Threads posts**
+(site voice / punchy / editorial) and per-story sticker+hashtag kits. Faithful
+to the design 1:1: kept its exact markup/copy, just resolved the design-system
+tokens (`--color-accent-*` = The Kitchen gold/paprika, `--color-accent-2-*` =
+The Table green, neutrals = cream/brown) to the real WS palette and loaded the
+site's real fonts (Bricolage Grotesque / Inter / Instrument Serif via Google
+Fonts). Claude-Design runtime bits removed: `<x-dc>`/`<helmet>`/`support.js`/
+`_ds_bundle.js` dropped, `<image-slot>` → labeled "drop the poster" placeholder
+tiles, `<sc-if>` caption kits always shown. Added a click-to-expand that blows
+any story tile up to true 1080×1920 in the browser (real fonts) for
+screenshot-to-post. "Nothing fake" note: the scores (94/91, 94/61) and the
+"Why Did I Get Married earned the seal" are illustrative TEMPLATE examples — the
+caption kits already say to swap in a real split, confirm title/year, and only
+post the seal once a film has genuinely earned it (I strengthened the Story 05
+caption to say so). Verified in headless Chromium: 7 story frames + 3 threads
+render with correct brand colors, click-to-expand opens a 1080×1920 frame, zero
+console errors (fonts fall back to system in the sandbox — no outbound internet —
+but load real in production).
