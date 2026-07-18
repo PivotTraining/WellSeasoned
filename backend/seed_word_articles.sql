@@ -238,7 +238,47 @@ The moonwalk, remember, was an illusion of physics: a man moving forward by givi
  'The Founder', null,
  'https://itswellseasoned.com/word/michael-billion-dollar-reckoning.jpg', 'center',
  'article', true,
- '2026-07-14 18:00:00+00', '2026-07-14 18:00:00+00')
+ '2026-07-14 18:00:00+00', '2026-07-14 18:00:00+00'),
+
+-- 8) COVER STORY — the founder's why, data-backed (2026-07-18) --------------
+('the-count-was-never-neutral',
+ 'The Count Was Never Neutral',
+ $d$Hollywood budgets our films a quarter less, hands them to a critic pool that is 82% white, and calls the smaller return proof. This is why we built a different scale.$d$,
+ $md$On the night of March 24, 2002, Halle Berry stood at a podium in a wet-eyed rush and said the thing everyone in the room wanted to be true. "This moment is so much bigger than me," she told them — for Dorothy Dandridge, for Lena Horne, for Diahann Carroll, and "for every nameless, faceless woman of color that now has a chance, because this door tonight has been opened." She was the first Black woman ever named Best Actress. That same night, a few feet and one category away, Denzel Washington became only the second Black man to win Best Actor — thirty-eight years after Sidney Poitier was the first. Two trophies in one evening. It was supposed to mean the dam had finally broken.
+
+It didn't. As I write this, nearly a quarter-century later, Halle Berry is still the only one. Not one of a handful. Not the first of many. The only Black woman to win Best Actress in the near-century the award has existed. Set that number down on the table and just look at it for a second. One.
+
+I want to be careful here, because this is the exact kind of number that gets waved around to mean whatever the person waving it already believed. So let me say plainly what it is not. It is not a verdict on talent. Nobody with working eyes and a functioning memory of the last thirty years of performances believes the problem is that the talent ran out.
+
+## The math they don't read out loud
+
+The problem is upstream of the stage, in the room where budgets are set. In 2021 McKinsey — not an activist group, a management-consulting firm that gets paid to find money — put real figures on it. Films with a Black lead or co-lead are budgeted, on average, **24% less** than films without one. That gap nearly **doubles** when two or more Black people are working behind the camera as writer, director, or producer. Ninety-two percent of the film executives making those calls are white — a whiter leadership than finance or energy — and fewer than 6% of the industry's writers, directors, and producers are Black.
+
+Now here is the part that turns underfunding into robbery. These films *make money.* Per dollar spent, Black-led projects routinely out-earn the field — and McKinsey estimated the industry leaves **more than $10 billion a year** on the table by refusing to fund, market, and distribute them like the propositions they keep proving to be. UCLA's researchers found nearly half of films with a lead of color were made for under $10 million, while white-male-led films were the least likely to be starved that way and the most likely to be handed a $50 million-plus tentpole. Stardom is not a gift the universe confers. It is a budget line — the marketing spend, the wide release, the second and third at-bat that turn a good actor into a name. They simply, persistently, decline to sign that check for us.
+
+> One Black woman has won Best Actress in a hundred years. That is not a talent problem. That is a budget.
+
+## The score was never a mirror
+
+And then comes the second theft, the quiet one. You take a film, you under-fund it, you release it small — and when it earns small, a number gets bolted onto it. A Tomatometer. A Metascore. A "consensus." That number then gets passed around the industry as if it fell out of the sky, neutral and objective, the market's honest read on quality.
+
+It isn't neutral. It's a room's taste, and we know exactly who is in the room. When USC Annenberg actually counted, 82% of film reviews were written by white critics, and 63.9% by white men specifically. Among Rotten Tomatoes' *top* critics — the ones weighted heaviest in the score everyone quotes — 88.8% were white. The "objective" consensus on whether our stories land is, overwhelmingly, the opinion of people our stories were not made for, rendered as a single authoritative digit. That digit then feeds the next decision: the marketing, the awards campaign, the greenlight. The scorecard doesn't just describe the disadvantage. It launders it and passes it forward.
+
+> They underfund the film, starve the marketing, hand it to a room that doesn't look like the audience, and call the smaller number proof.
+
+## Why this site exists
+
+I got tired of arguing with a single number. So we built two.
+
+The Kitchen is verified critics — people who carry the context a story is actually asking to be read in. The Table is the room itself: the audience, counted honestly, one identity to one vote, nothing seeded, nothing bought. And the seal only lands when both of them agree. We don't split the score to be clever. We split it because a single blended number was never built to measure us — it was built by a narrow room, for a narrow room, and handed to everyone else as the truth. Two honest numbers, side by side, make the disagreement visible instead of burying it. That visibility is the whole product.
+
+> We didn't build a second opinion. We built the first honest one.
+
+That door Halle Berry said had been opened — it was never locked from our side. The talent was always here, in surplus, in plain view. What stood in the doorway was a budget somebody wouldn't approve and a scoreboard somebody else got to keep. I can't set a studio's budget. But I can refuse to let its scoreboard be the last word on what we're worth, and I can build a place where the count is kept in the open, by the people the films were made for. Twenty-four years and one name. We intend to make it impossible to keep the count that quiet again.$md$,
+ 'The Founder', 'moonlight',
+ 'https://itswellseasoned.com/word/the-count-was-never-neutral.jpg', 'center',
+ 'editorial', true,
+ '2026-07-18 12:00:00+00', '2026-07-18 12:00:00+00')
 
 on conflict (slug) do nothing;
 
@@ -253,3 +293,4 @@ update public.articles set subject='Ryan Coogler, Michael B. Jordan' where slug=
 update public.articles set subject='Nia Long, Larenz Tate' where slug='the-case-for-black-romance';
 update public.articles set subject='Sanaa Lathan, Omar Epps' where slug='the-cookout-canon';
 update public.articles set subject='Julie Dash' where slug='streaming-keeps-losing-our-movies';
+update public.articles set subject='Halle Berry, Denzel Washington, Sidney Poitier' where slug='the-count-was-never-neutral';

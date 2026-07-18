@@ -7069,6 +7069,11 @@ var MARRIED_CAST=[
 ];
 function paintMarriedFeature(){
   var el=byId('marriedFeature'); if(!el)return;
+  // Marquee retired from home 2026-07-18 (owner request) — the data/cast/handlers
+  // below are kept intact so it's a one-line revival (delete this guard) if a new
+  // title warrants it. Hidden here so no caller (renderHome or excitement sync)
+  // can resurface it.
+  el.style.display='none'; return;
   var c=findSoon(MARRIED_FEATURE_ID);
   if(!c){ el.style.display='none'; return; }
   el.style.display='';
@@ -7996,11 +8001,11 @@ function paintCatalogCount(){
    promo content so it shows regardless of DB state; the card opens the real
    article. Update these four fields when a new piece should lead the home. */
 var LEAD_STORY={
-  slug:'michael-billion-dollar-reckoning',
-  eyebrow:'The Balcony · The Big Read',
-  title:'A Billion Dollars, and the Death of an Excuse',
-  dek:'“Michael” is the first biopic in history to cross a billion dollars — and nearly two-thirds of it came from the overseas audiences Hollywood swore didn’t exist for Black stories.',
-  image:'/word/michael-billion-dollar-reckoning.jpg'
+  slug:'the-count-was-never-neutral',
+  eyebrow:'The Balcony · Why We Built This',
+  title:'The Count Was Never Neutral',
+  dek:'Hollywood budgets our films a quarter less, hands them to a critic pool that’s 82% white, and calls the smaller return proof. This is why we built a different scale.',
+  image:'/word/the-count-was-never-neutral.jpg'
 };
 function paintLeadStory(){
   var s=byId('leadStory'); if(!s)return;

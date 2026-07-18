@@ -2480,3 +2480,54 @@ section visible, correct copy/dates, both cards, click routes to
 `#/film/insecure`, grid stacks to 1 col on mobile (358px, no overflow),
 reduced-motion disables the sweep/sparkles, zero console errors. Backdrops
 render dark in the sandbox (no outbound to image.tmdb.org) — real in prod.
+
+## The Balcony: founder's manifesto cover + home lead swap (2026-07-18)
+Owner: "write about why we created this. How the industry has robbed and
+pillaged black talent from their earning power due to somewhat the ratings
+system and lack of desire to make black actors and actresses stars. Only if
+its true and back it up with data." Verified the thesis against real sources
+before writing (web-checked, not from memory) and told the owner which parts
+hold: budget robbery is documented/quantified, the star-making gap is real
+(worst for Black women), and the ratings-system claim is true but structural
+(not a quantifiable dollar theft) — reframed accordingly so nothing is
+overclaimed. Article `the-count-was-never-neutral` ("The Count Was Never
+Neutral") added to `backend/seed_word_articles.sql` as the NEWEST piece → it's
+the cover of The Balcony. Bylined "The Founder," first-person, NYMag/VF
+longform voice: delayed lead on Halle Berry's 2002 Best Actress win (+ Denzel
+same night, 38 yrs after Poitier), gut-punch that she's STILL the only Black
+Best Actress winner ~24 yrs later, then the data spine, then the "why this
+site exists" turn, closing by circling back to the door. Every figure real +
+sourced: McKinsey 2021 (Black-led films budgeted 24% less, ~doubles with 2+
+Black creatives behind camera; $10B+/yr left on table; 92% of execs white,
+<6% of writers/directors/producers Black), UCLA 2025 (BIPOC leads far likelier
+to be sub-$10M, white-male leads likeliest to headline $50M+), USC Annenberg
+(82% of reviews by white critics, 63.9% white men, RT top critics 88.8%
+white). Three `> ` pull quotes (render as `.read-pq`). `subject` = Halle
+Berry, Denzel Washington, Sidney Poitier (featured-people chips). `film_slug`
+= moonlight.
+- **Hero art**: house photo-treatment (`scratchpad/gen_hero.js`, Playwright →
+  1600×1067 landscape JPG) over the real iconic Moonlight beach-silhouette
+  TMDB backdrop (id 376867, `/A9KPbYTQvWsp51Lgz85ukVkFrKf.jpg`) — the perfect
+  visual thesis (a ~$1.5M film that won Best Picture and the industry still
+  read the wrong name). Clean warm grade + vignette + light grain, matching
+  the other `/word/*.jpg` heroes. Committed to `word/the-count-was-never-
+  neutral.jpg`, referenced as `https://itswellseasoned.com/word/...` in the
+  seed.
+- **Home lead swapped**: `LEAD_STORY` repointed from the Michael piece to this
+  one (eyebrow "The Balcony · Why We Built This"). Michael article untouched in
+  the seed — just no longer the home lead.
+- **By Any Means marquee removed** from home (owner request): `paintMarriedFeature`
+  now hides `#marriedFeature` and early-returns, so no caller (renderHome or the
+  excitement-sync sites) can resurface it. Data/cast/handlers kept intact for a
+  one-line revival, same unwire-don't-delete pattern as the debate box.
+- **NOT AUTO-PUBLISHED**: same as the other Balcony pieces — this env can't auth
+  to `publish_article`, so the article is delivered in the SQL seed for the owner
+  to run once in the Supabase SQL editor (requires the magazine kind/subject
+  columns, already live). The home lead banner shows regardless (baked
+  `LEAD_STORY`); the article body opens once the seed is run. Art deploys with
+  the push so hero URLs resolve.
+- Verified: seed validates against throwaway Postgres 16 (8 rows, this piece
+  newest/cover, kind=editorial, 3 pull quotes, idempotent re-run inserts 0);
+  headless Chromium — home lead shows the new title/eyebrow/art + routes to
+  `#/read/the-count-was-never-neutral`, marquee hidden, read page renders title
+  + 3 `.read-pq` + 3 featured-people chips, zero console errors.
