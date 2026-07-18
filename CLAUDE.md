@@ -2456,3 +2456,27 @@ caption to say so). Verified in headless Chromium: 7 story frames + 3 threads
 render with correct brand colors, click-to-expand opens a 1080×1920 frame, zero
 console errors (fonts fall back to system in the sandbox — no outbound internet —
 but load real in production).
+
+## Home "Ten years on" spotlight — Insecure & Atlanta (2026-07-18)
+Owner: "Any shows that's off air celebrating ten years?" → "Let's do insecure
+and Atlanta. Something dope looking." Built `#tenYears`/`paintTenYears()`
+(`TEN_YEARS` data object, `.ty-*` CSS), a dark anniversary stage card on the
+home page (called from `renderHome()` right after `paintMarriedFeature()`,
+sits after the marquee, before the Bracket teaser). Reuses the established
+spotlight visual bar — dark stage card, rotating gold conic sweep
+(`emmySpin`), shimmering gold-foil eyebrow (`emmyShine`), twinkling sparkles
+(`emmyTwinkle`) — same chrome as the Emmy/lead-story/married-feature units.
+Eyebrow "Ten years on · Class of 2016", serif headline "Insecure & Atlanta
+turned 10.", then two backdrop show-cards (real TMDB backdrops:
+Insecure `jS2R26p1S7JQtSCo4MjA9El45A8`, Atlanta `vN84JlTvOZvZzxi0D2SJQNFvtjS`)
+each with a "10 years" gold pill + real premiere date (Insecure Oct 9 2016 ·
+HBO; Atlanta Sep 6 2016 · FX) linking straight to the catalog page
+(`go('film','insecure')`/`'atlanta'`). Closes with an honest note referencing
+the REAL 10th-anniversary Insecure celebration Issa Rae announced (2026) —
+nothing fabricated, no fake scores (both shows keep their existing catalog
+data; this is a milestone callout, not a verdict). To change honorees edit
+`TEN_YEARS.shows`. Verified in headless Chromium desktop + mobile (390px):
+section visible, correct copy/dates, both cards, click routes to
+`#/film/insecure`, grid stacks to 1 col on mobile (358px, no overflow),
+reduced-motion disables the sweep/sparkles, zero console errors. Backdrops
+render dark in the sandbox (no outbound to image.tmdb.org) — real in prod.
