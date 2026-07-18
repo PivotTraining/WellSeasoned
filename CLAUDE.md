@@ -2448,7 +2448,7 @@ Fonts). Claude-Design runtime bits removed: `<x-dc>`/`<helmet>`/`support.js`/
 `_ds_bundle.js` dropped, `<image-slot>` → labeled "drop the poster" placeholder
 tiles, `<sc-if>` caption kits always shown. Added a click-to-expand that blows
 any story tile up to true 1080×1920 in the browser (real fonts) for
-screenshot-to-post. "Nothing fake" note: the scores (94/91, 94/61) and the
+screenshot-to-post. Real film art was later wired into the 3 film-spotlight stories (Lanterns backdrop / WDIGMA poster / Fightland poster, all verified live) and the Manifesto got the real salt-shaker brand mark as a hero; the other three explainers (How-to-read / The Gap / CTA) were deliberately kept as clean graphic cards — stronger that way, and a real film behind The Gap would fabricate its illustrative split. "Nothing fake" note: the scores (94/91, 94/61) and the
 "Why Did I Get Married earned the seal" are illustrative TEMPLATE examples — the
 caption kits already say to swap in a real split, confirm title/year, and only
 post the seal once a film has genuinely earned it (I strengthened the Story 05
