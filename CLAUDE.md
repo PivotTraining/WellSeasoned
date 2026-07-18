@@ -2531,3 +2531,20 @@ Berry, Denzel Washington, Sidney Poitier (featured-people chips). `film_slug`
   headless Chromium — home lead shows the new title/eyebrow/art + routes to
   `#/read/the-count-was-never-neutral`, marquee hidden, read page renders title
   + 3 `.read-pq` + 3 featured-people chips, zero console errors.
+
+## The Balcony: "The Count Was Never Neutral" rewritten in real longform voice (2026-07-18)
+Owner: the first draft "wrote with so much AI wiring style and not New York
+Times or Vanity Fair." Correct. Rewrote the body to strip the tells — dropped
+the throat-clearing ("I want to be careful here"), the tidy tricolons, the
+signposted `##` subheads (0 now, VF-style single-arc flow), and the little
+summary sentences that explain the piece as you read it. Data is woven in as
+marshaled evidence, not a labeled stat dump. Same verified facts intact
+(McKinsey 24%/$10B/92%/<6%, UCLA sub-$10M vs $50M, USC Annenberg 82%/64%/~90%,
+Halle Berry sole Best Actress winner + Denzel 2nd/38-yr Poitier gap), same
+delayed lead on the 2002 Berry moment (rendered with real texture now — the
+roll call, the crooked-cop line), same 3 `> ` pull quotes, same title/dek/hero/
+slug. Body 5268 chars. Validated against throwaway Postgres 16 (newest/cover,
+3 pull quotes, 0 subheads, old tell gone). Note: since the owner may have
+already run the prior seed, the mobile publish path uses an UPSERT (`on
+conflict (slug) do update`) so it overwrites any stale row with the new prose;
+the committed seed keeps its `do nothing` idempotency for the full-file re-run.
