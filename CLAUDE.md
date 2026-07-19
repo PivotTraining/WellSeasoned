@@ -2661,3 +2661,14 @@ underneath; new framing/skin on top:
   mean, always in-group warmth. Explanation + "See <film> →" link unchanged.
 - Verified in headless Chromium: foil brand, tier chip (Gold·🔥), stakes flip on
   answer, praise/roast + explanation + film link render, zero console errors.
+
+## Card Check: rotating daily category + flip reveal (2026-07-18)
+Owner: "you choose" then "maybe it rotates." Made the rotation the feature (over
+a dedicated page, kept in back pocket). Each of the 28 `TRIVIA` questions got a
+`cat` (Oscar History / Behind the Camera / On TV / On the Big Screen); the card
+eyebrow now reads "Today · <category>" so the daily flavor is visible and rotates
+as the day-indexed question rotates (verified: 6 consecutive days cycle through
+categories). Also added a physical **card flip** on answer (`.cc-flip` →
+`ccFlip` rotateY(360deg), added in `answerTrivia` after repaint, reduced-motion
+safe). Foil brand is "Card Check". Verified in headless Chromium: category
+eyebrow rotates by day, flip class applies on answer, zero console errors.

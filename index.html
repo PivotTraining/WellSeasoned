@@ -975,6 +975,9 @@
     background:linear-gradient(105deg,transparent 40%,rgba(244,197,66,.10) 50%,transparent 60%);transform:rotate(8deg);animation:ccShine 7s ease-in-out infinite}
   @keyframes ccShine{0%,100%{opacity:0;transform:translateX(-30%) rotate(8deg)}45%{opacity:1}60%{opacity:1;transform:translateX(240%) rotate(8deg)}100%{opacity:0}}
   @media(prefers-reduced-motion:reduce){ .cc-card::before{animation:none;opacity:0} }
+  .cc-card.cc-flip{animation:ccFlip .62s ease}
+  @keyframes ccFlip{0%{transform:perspective(1100px) rotateY(0)}100%{transform:perspective(1100px) rotateY(360deg)}}
+  @media(prefers-reduced-motion:reduce){ .cc-card.cc-flip{animation:none} }
   .cc-card>*{position:relative;z-index:1}
   .cc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;margin-bottom:14px;
     border-bottom:1px solid rgba(244,197,66,.16)}
@@ -7268,34 +7271,34 @@ function paintWeekTable(){
    only your own result. `film` links a correct answer into the catalog when the
    title exists, turning a right answer into a nudge toward the film page. */
 var TRIVIA=[
-  {q:'Which film made Halle Berry the first Black woman to win the Best Actress Oscar?',opts:['Monster’s Ball','Introducing Dorothy Dandridge','Their Eyes Were Watching God','Losing Isaiah'],a:0,why:'Berry won for “Monster’s Ball” (2001) — still the only Black woman ever to win Best Actress.'},
-  {q:'Who directed “Black Panther” (2018)?',opts:['Ava DuVernay','Ryan Coogler','Barry Jenkins','F. Gary Gray'],a:1,why:'Ryan Coogler co-wrote and directed it — the first superhero film nominated for Best Picture.',film:'black-panther'},
-  {q:'Jordan Peele won his Oscar for “Get Out” in which category?',opts:['Best Director','Best Picture','Best Original Screenplay','Best Editing'],a:2,why:'He became the first Black winner of Best Original Screenplay.',film:'getout'},
-  {q:'Which 2016 film won Best Picture at the 2017 Academy Awards?',opts:['Hidden Figures','Fences','Moonlight','Lion'],a:2,why:'“Moonlight” won — after the infamous envelope mix-up with “La La Land.”',film:'moonlight'},
-  {q:'Who created and stars in the HBO series “Insecure”?',opts:['Issa Rae','Robin Thede','Quinta Brunson','Yvonne Orji'],a:0,why:'Issa Rae built it from her web series “Awkward Black Girl.”',film:'insecure'},
-  {q:'Spike Lee’s 1989 film set on the hottest day in a Brooklyn neighborhood is…',opts:['Crooklyn','Jungle Fever','Do the Right Thing','Clockers'],a:2,why:'“Do the Right Thing” — a landmark of American cinema.'},
-  {q:'Who created and stars in the FX series “Atlanta”?',opts:['Lena Waithe','Donald Glover','Jerrod Carmichael','LaKeith Stanfield'],a:1,why:'Donald Glover created it and plays Earn Marks.',film:'atlanta'},
-  {q:'Who was the first Black man to win the Best Actor Oscar?',opts:['Sidney Poitier','James Earl Jones','Harry Belafonte','Paul Robeson'],a:0,why:'Poitier won for “Lilies of the Field” (1963) — the only Black Best Actor winner for 38 years.'},
-  {q:'Who directed “Selma” (2014)?',opts:['Kasi Lemmons','Gina Prince-Bythewood','Ava DuVernay','Dee Rees'],a:2,why:'Ava DuVernay directed the Dr. King voting-rights drama.'},
-  {q:'“A Different World” was a spinoff of which sitcom?',opts:['Good Times','The Cosby Show','The Jeffersons','227'],a:1,why:'It followed Denise Huxtable to the fictional HBCU Hillman College.'},
-  {q:'Who directed “Boyz n the Hood” (1991)?',opts:['John Singleton','Mario Van Peebles','the Hughes Brothers','Bill Duke'],a:0,why:'Singleton became the first Black person — and youngest ever — nominated for Best Director.'},
-  {q:'Denzel Washington won the Best Actor Oscar for which film?',opts:['Malcolm X','Training Day','The Hurricane','Glory'],a:1,why:'He won Best Actor for “Training Day” (2001); his earlier win for “Glory” was Supporting.'},
-  {q:'In “Coming to America,” Prince Akeem hails from which fictional nation?',opts:['Wakanda','Zamunda','Genovia','Nambia'],a:1,why:'Eddie Murphy’s Akeem leaves Zamunda to find a bride in Queens.'},
-  {q:'Mahershala Ali won his first Oscar for which film?',opts:['Green Book','Moonlight','True Detective','Hidden Figures'],a:1,why:'He won Best Supporting Actor for “Moonlight” (2016), then a second for “Green Book.”',film:'moonlight'},
-  {q:'Who played Cookie Lyon on the series “Empire”?',opts:['Taraji P. Henson','Regina King','Angela Bassett','Nia Long'],a:0,why:'Taraji P. Henson’s Cookie became one of TV’s most iconic characters.'},
-  {q:'Whoopi Goldberg earned her first Oscar nomination for which Alice Walker adaptation?',opts:['Beloved','The Color Purple','The Women of Brewster Place','Sarafina!'],a:1,why:'“The Color Purple” (1985) earned her a Best Actress nomination.'},
-  {q:'Regina King won an Academy Award for which 2018 film?',opts:['If Beale Street Could Talk','The Harder They Fall','One Night in Miami','Watchmen'],a:0,why:'She won Best Supporting Actress for Barry Jenkins’ “If Beale Street Could Talk.”',film:'beale'},
-  {q:'“Moonlight” was adapted from a play by whom?',opts:['August Wilson','Tarell Alvin McCraney','Suzan-Lori Parks','Lynn Nottage'],a:1,why:'From McCraney’s “In Moonlight Black Boys Look Blue.”',film:'moonlight'},
-  {q:'Who directed the 2018 satire “Sorry to Bother You”?',opts:['Boots Riley','Jordan Peele','Terence Nance','Rick Famuyiwa'],a:0,why:'It was rapper Boots Riley’s directorial debut.'},
-  {q:'“In Living Color” was created by whom?',opts:['the Wayans by way of Keenen Ivory Wayans','Robert Townsend','Eddie Murphy','Arsenio Hall'],a:0,why:'Keenen Ivory Wayans created the sketch series that launched many careers.'},
-  {q:'Julie Dash’s 1991 “Daughters of the Dust” was historic as the first…',opts:['film shot entirely in the Gullah language','feature by a Black American woman in wide US theatrical release','film to win the Palme d’Or','Black indie to gross $100M'],a:1,why:'It was the first feature directed by a Black American woman to get general US theatrical release.'},
-  {q:'Viola Davis won her Academy Award for which film?',opts:['The Help','Doubt','Fences','Ma Rainey’s Black Bottom'],a:2,why:'She won Best Supporting Actress for “Fences” (2016).'},
-  {q:'Who directed “Love & Basketball” (2000)?',opts:['Gina Prince-Bythewood','Kasi Lemmons','Darnell Martin','Sanaa Hamri'],a:0,why:'It was Gina Prince-Bythewood’s feature directorial debut.'},
-  {q:'Which actor starred as the vampire hunter Blade?',opts:['Wesley Snipes','Michael Jai White','Ving Rhames','Omar Epps'],a:0,why:'Wesley Snipes led the “Blade” trilogy that helped kick off the modern Marvel era.'},
-  {q:'The HBO series “The Wire” is set in which city?',opts:['Philadelphia','Baltimore','Newark','Detroit'],a:1,why:'David Simon’s series is set in Baltimore.'},
-  {q:'Who wrote and directed the 2025 vampire film “Sinners”?',opts:['Ryan Coogler','Jordan Peele','Nia DaCosta','Gerard McMurray'],a:0,why:'Coogler’s original, un-franchised swing set in the 1932 Mississippi Delta.',film:'sinners'},
-  {q:'“The Fresh Prince of Bel-Air” premiered in which year?',opts:['1988','1990','1992','1994'],a:1,why:'It premiered on NBC in 1990, starring Will Smith.'},
-  {q:'Who directed the Best Picture winner “12 Years a Slave” (2013)?',opts:['Steve McQueen','Antoine Fuqua','Steve Spielberg','John Ridley'],a:0,why:'Steve McQueen directed; John Ridley won for the adapted screenplay.'}
+  {q:'Which film made Halle Berry the first Black woman to win the Best Actress Oscar?',opts:['Monster’s Ball','Introducing Dorothy Dandridge','Their Eyes Were Watching God','Losing Isaiah'],a:0,why:'Berry won for “Monster’s Ball” (2001) — still the only Black woman ever to win Best Actress.',cat:'Oscar History'},
+  {q:'Who directed “Black Panther” (2018)?',opts:['Ava DuVernay','Ryan Coogler','Barry Jenkins','F. Gary Gray'],a:1,why:'Ryan Coogler co-wrote and directed it — the first superhero film nominated for Best Picture.',film:'black-panther',cat:'Behind the Camera'},
+  {q:'Jordan Peele won his Oscar for “Get Out” in which category?',opts:['Best Director','Best Picture','Best Original Screenplay','Best Editing'],a:2,why:'He became the first Black winner of Best Original Screenplay.',film:'getout',cat:'Oscar History'},
+  {q:'Which 2016 film won Best Picture at the 2017 Academy Awards?',opts:['Hidden Figures','Fences','Moonlight','Lion'],a:2,why:'“Moonlight” won — after the infamous envelope mix-up with “La La Land.”',film:'moonlight',cat:'Oscar History'},
+  {q:'Who created and stars in the HBO series “Insecure”?',opts:['Issa Rae','Robin Thede','Quinta Brunson','Yvonne Orji'],a:0,why:'Issa Rae built it from her web series “Awkward Black Girl.”',film:'insecure',cat:'On TV'},
+  {q:'Spike Lee’s 1989 film set on the hottest day in a Brooklyn neighborhood is…',opts:['Crooklyn','Jungle Fever','Do the Right Thing','Clockers'],a:2,why:'“Do the Right Thing” — a landmark of American cinema.',cat:'On the Big Screen'},
+  {q:'Who created and stars in the FX series “Atlanta”?',opts:['Lena Waithe','Donald Glover','Jerrod Carmichael','LaKeith Stanfield'],a:1,why:'Donald Glover created it and plays Earn Marks.',film:'atlanta',cat:'On TV'},
+  {q:'Who was the first Black man to win the Best Actor Oscar?',opts:['Sidney Poitier','James Earl Jones','Harry Belafonte','Paul Robeson'],a:0,why:'Poitier won for “Lilies of the Field” (1963) — the only Black Best Actor winner for 38 years.',cat:'Oscar History'},
+  {q:'Who directed “Selma” (2014)?',opts:['Kasi Lemmons','Gina Prince-Bythewood','Ava DuVernay','Dee Rees'],a:2,why:'Ava DuVernay directed the Dr. King voting-rights drama.',cat:'Behind the Camera'},
+  {q:'“A Different World” was a spinoff of which sitcom?',opts:['Good Times','The Cosby Show','The Jeffersons','227'],a:1,why:'It followed Denise Huxtable to the fictional HBCU Hillman College.',cat:'On TV'},
+  {q:'Who directed “Boyz n the Hood” (1991)?',opts:['John Singleton','Mario Van Peebles','the Hughes Brothers','Bill Duke'],a:0,why:'Singleton became the first Black person — and youngest ever — nominated for Best Director.',cat:'Behind the Camera'},
+  {q:'Denzel Washington won the Best Actor Oscar for which film?',opts:['Malcolm X','Training Day','The Hurricane','Glory'],a:1,why:'He won Best Actor for “Training Day” (2001); his earlier win for “Glory” was Supporting.',cat:'Oscar History'},
+  {q:'In “Coming to America,” Prince Akeem hails from which fictional nation?',opts:['Wakanda','Zamunda','Genovia','Nambia'],a:1,why:'Eddie Murphy’s Akeem leaves Zamunda to find a bride in Queens.',cat:'On the Big Screen'},
+  {q:'Mahershala Ali won his first Oscar for which film?',opts:['Green Book','Moonlight','True Detective','Hidden Figures'],a:1,why:'He won Best Supporting Actor for “Moonlight” (2016), then a second for “Green Book.”',film:'moonlight',cat:'Oscar History'},
+  {q:'Who played Cookie Lyon on the series “Empire”?',opts:['Taraji P. Henson','Regina King','Angela Bassett','Nia Long'],a:0,why:'Taraji P. Henson’s Cookie became one of TV’s most iconic characters.',cat:'On TV'},
+  {q:'Whoopi Goldberg earned her first Oscar nomination for which Alice Walker adaptation?',opts:['Beloved','The Color Purple','The Women of Brewster Place','Sarafina!'],a:1,why:'“The Color Purple” (1985) earned her a Best Actress nomination.',cat:'On the Big Screen'},
+  {q:'Regina King won an Academy Award for which 2018 film?',opts:['If Beale Street Could Talk','The Harder They Fall','One Night in Miami','Watchmen'],a:0,why:'She won Best Supporting Actress for Barry Jenkins’ “If Beale Street Could Talk.”',film:'beale',cat:'Oscar History'},
+  {q:'“Moonlight” was adapted from a play by whom?',opts:['August Wilson','Tarell Alvin McCraney','Suzan-Lori Parks','Lynn Nottage'],a:1,why:'From McCraney’s “In Moonlight Black Boys Look Blue.”',film:'moonlight',cat:'On the Big Screen'},
+  {q:'Who directed the 2018 satire “Sorry to Bother You”?',opts:['Boots Riley','Jordan Peele','Terence Nance','Rick Famuyiwa'],a:0,why:'It was rapper Boots Riley’s directorial debut.',cat:'Behind the Camera'},
+  {q:'“In Living Color” was created by whom?',opts:['the Wayans by way of Keenen Ivory Wayans','Robert Townsend','Eddie Murphy','Arsenio Hall'],a:0,why:'Keenen Ivory Wayans created the sketch series that launched many careers.',cat:'On TV'},
+  {q:'Julie Dash’s 1991 “Daughters of the Dust” was historic as the first…',opts:['film shot entirely in the Gullah language','feature by a Black American woman in wide US theatrical release','film to win the Palme d’Or','Black indie to gross $100M'],a:1,why:'It was the first feature directed by a Black American woman to get general US theatrical release.',cat:'On the Big Screen'},
+  {q:'Viola Davis won her Academy Award for which film?',opts:['The Help','Doubt','Fences','Ma Rainey’s Black Bottom'],a:2,why:'She won Best Supporting Actress for “Fences” (2016).',cat:'Oscar History'},
+  {q:'Who directed “Love & Basketball” (2000)?',opts:['Gina Prince-Bythewood','Kasi Lemmons','Darnell Martin','Sanaa Hamri'],a:0,why:'It was Gina Prince-Bythewood’s feature directorial debut.',cat:'Behind the Camera'},
+  {q:'Which actor starred as the vampire hunter Blade?',opts:['Wesley Snipes','Michael Jai White','Ving Rhames','Omar Epps'],a:0,why:'Wesley Snipes led the “Blade” trilogy that helped kick off the modern Marvel era.',cat:'On the Big Screen'},
+  {q:'The HBO series “The Wire” is set in which city?',opts:['Philadelphia','Baltimore','Newark','Detroit'],a:1,why:'David Simon’s series is set in Baltimore.',cat:'On TV'},
+  {q:'Who wrote and directed the 2025 vampire film “Sinners”?',opts:['Ryan Coogler','Jordan Peele','Nia DaCosta','Gerard McMurray'],a:0,why:'Coogler’s original, un-franchised swing set in the 1932 Mississippi Delta.',film:'sinners',cat:'Behind the Camera'},
+  {q:'“The Fresh Prince of Bel-Air” premiered in which year?',opts:['1988','1990','1992','1994'],a:1,why:'It premiered on NBC in 1990, starring Will Smith.',cat:'On TV'},
+  {q:'Who directed the Best Picture winner “12 Years a Slave” (2013)?',opts:['Steve McQueen','Antoine Fuqua','Steve Spielberg','John Ridley'],a:0,why:'Steve McQueen directed; John Ridley won for the adapted screenplay.',cat:'Behind the Camera'}
 ];
 /* "Culture Card" framing — the playful stakes of a Black Card Revoked night:
    get it right, your card's good; miss it, catch a little warm ribbing. Lines
@@ -7339,6 +7342,8 @@ function answerTrivia(i){
   try{ if(typeof track==='function') track('trivia_answer',{correct:correct,idx:((triviaDayNo()%TRIVIA.length)+TRIVIA.length)%TRIVIA.length}); }catch(e){}
   if(correct){ try{ sfx&&sfx('for'); }catch(e){} }
   paintTrivia();
+  // the card rotates to reveal the result
+  try{ var c=document.querySelector('#dailyTrivia .trv-card'); if(c){ c.classList.add('cc-flip'); } }catch(e){}
 }
 function paintTrivia(){
   var el=byId('dailyTrivia'); if(!el) return;
@@ -7368,7 +7373,7 @@ function paintTrivia(){
       '<span class="cc-brand">Card Check</span>'+
       '<span class="cc-tier">'+esc(tier)+(streak>0?' · 🔥 '+streak:'')+'</span>'+
     '</div>'+
-    '<div class="trv-head"><span class="trv-eyebrow">Daily · The Culture Card</span>'+
+    '<div class="trv-head"><span class="trv-eyebrow">Today · '+esc(q.cat||'The Culture')+'</span>'+
       '<span class="cc-stakes">'+(answered?(saved.correct?'✓ Card’s good':'✗ Card flagged'):'Answer to keep your card')+'</span></div>'+
     '<h3 class="trv-q">'+esc(q.q)+'</h3>'+
     '<div class="trv-opts">'+opts+'</div>'+
