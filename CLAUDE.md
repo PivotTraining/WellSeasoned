@@ -2548,3 +2548,45 @@ slug. Body 5268 chars. Validated against throwaway Postgres 16 (newest/cover,
 already run the prior seed, the mobile publish path uses an UPSERT (`on
 conflict (slug) do update`) so it overwrites any stale row with the new prose;
 the committed seed keeps its `do nothing` idempotency for the full-file re-run.
+
+## Installable PWA — "Get the app" without an app store (2026-07-18)
+Owner: "Time to build an app for it." Shipped the foundation every app path
+shares — turned the live site into a real installable PWA on the existing
+single-file codebase (no dev accounts, no store review, deploys today). The
+App Store / Google Play wrapper (Capacitor around this same PWA) is the clean
+phase 2 whenever the owner sets up an Apple Developer account ($99/yr) + Google
+Play account ($25 one-time); a full native React Native/Flutter rewrite was
+explicitly advised against (two codebases forever, betrays the lean single-file
+architecture).
+- **`manifest.webmanifest`** (root) — name/short_name/description, `start_url:
+  /?src=pwa`, `display:standalone`, `orientation:portrait`, theme `#E49B0B`,
+  splash bg `#EFE2C6` (matches the paper app bg, no load flash), 3 icons
+  (192 any, 512 any, 512 maskable).
+- **Icons** (`brand/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`,
+  `apple-touch-180.png`) — generated from the real brand salt-shaker mark
+  (`scratchpad/gen_icons.js`, Playwright): rounded tile for the "any" purpose,
+  full-bleed dark-bg + safe-zone shaker for maskable/apple. No new art invented.
+- **`sw.js`** service worker — deliberately conservative so "every push
+  deploys" and "nothing fake" both hold: navigations are NETWORK-FIRST (live
+  deploy shows instantly online; cached shell is only the offline fallback,
+  refreshed on every successful navigation); only SAME-ORIGIN static assets
+  (brand icons, /word art) are cached stale-while-revalidate; `/api/*` is never
+  cached; cross-origin (Supabase votes/auth, TMDB, YouTube, Google Fonts) is
+  never intercepted, so scores/votes/auth are always live. `skipWaiting` +
+  `clients.claim`; versioned cache (`ws-cache-v1`) cleared on activate.
+- **Head**: `<link rel="manifest">`, `mobile-web-app-capable`,
+  `apple-mobile-web-app-capable`, status-bar-style `default` (NOT
+  black-translucent — that underlaps iOS status bar and would crowd the fixed
+  header), `apple-mobile-web-app-title`, apple-touch-icon → the new 180.
+- **Install prompt** (`.pwa-install`, inline ES5 near `</body>`) — subtle,
+  once-ever (localStorage `ws_pwa_dismissed`), never shown when already
+  installed (`display-mode:standalone`). Android/desktop: captures
+  `beforeinstallprompt`, shows an "Install" button that fires the native prompt
+  (tracks `pwa_prompt`/`pwa_installed`). iOS (no beforeinstallprompt): shows
+  add-to-home-screen instructions instead. Sits above the mobile tabbar via
+  safe-area + `--tab-h`.
+- Verified in headless Chromium (iPhone UA): manifest linked + fetches (3
+  icons, standalone), apple meta present, service worker registers → active →
+  precaches the shell + icons + manifest, iOS install banner renders with the
+  correct copy, zero real console errors (only the sandbox's aborted-font
+  requests). Maskable icon eyeballed (gold shaker, dark bg, within safe zone).

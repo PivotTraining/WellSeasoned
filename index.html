@@ -23,7 +23,13 @@
 <!-- Favicon: gold seasoning dot on paper -->
 <link rel="icon" href="/brand/ws-favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/brand/ws-favicon-512.png" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="/brand/ws-favicon-512.png">
+<link rel="apple-touch-icon" href="/brand/apple-touch-180.png">
+<!-- Installable PWA -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Well Seasoned">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1744,6 +1750,25 @@
     *{animation:none!important;transition:none!important}
     html{scroll-behavior:auto}
   }
+  /* Install-the-app prompt (PWA) — subtle, dismissible, once-ever */
+  .pwa-install{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
+    z-index:1200;display:none;align-items:center;gap:12px;max-width:520px;margin:0 auto;
+    background:linear-gradient(150deg,#241809,#140c05);color:var(--on-dark);
+    border:1px solid rgba(244,183,51,.4);border-radius:16px;padding:12px 14px;
+    box-shadow:0 18px 44px -18px rgba(0,0,0,.7)}
+  .pwa-install.show{display:flex;animation:pwaUp .4s ease}
+  @keyframes pwaUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .pwa-install img{width:42px;height:42px;border-radius:10px;flex:none}
+  .pwa-install .pwa-txt{flex:1;min-width:0}
+  .pwa-install .pwa-txt b{display:block;font-family:var(--display);font-weight:700;font-size:14.5px;color:#fff;line-height:1.2}
+  .pwa-install .pwa-txt span{font-size:12px;color:rgba(246,236,215,.72);line-height:1.35}
+  .pwa-install .pwa-go{flex:none;background:var(--gold);color:#241703;font-weight:800;font-size:13px;
+    border:0;border-radius:999px;padding:9px 15px;cursor:pointer;font-family:var(--sans)}
+  .pwa-install .pwa-x{flex:none;background:transparent;border:0;color:rgba(246,236,215,.6);
+    font-size:20px;line-height:1;cursor:pointer;padding:4px 6px}
+  @media(min-width:640px){ .pwa-install{bottom:16px} }
+  /* nudge above the mobile tabbar when it's showing */
+  @media(max-width:640px){ .pwa-install{bottom:calc(env(safe-area-inset-bottom,0px) + var(--tab-h) + 10px)} }
 </style>
 </head>
 <body>
@@ -12080,6 +12105,56 @@ if(!checkRecoveryHash() && !checkAdminHash()){ var _route0=parseHash(); render(_
 loadBackendCuration(); loadAllBackendVotes(); loadKitchenScores(); loadAllExcitement();
 /* arm the off-page-load email capture (scroll-depth + exit-intent) */
 armVerdictDrop();
+</script>
+<!-- Installable PWA: register the service worker + a subtle, once-ever
+     "install the app" prompt (native prompt on Android/desktop, add-to-home-
+     screen instructions on iOS where there's no beforeinstallprompt). -->
+<script>
+(function(){
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
+  }
+  function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null;} }
+  function standalone(){ return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true; }
+  function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream; }
+  var deferred=null, el=null;
+  function build(mode){
+    if(el||standalone()||ls('ws_pwa_dismissed')) return;
+    el=document.createElement('div'); el.className='pwa-install';
+    var sub=mode==='ios'
+      ? 'Tap the Share button, then “Add to Home Screen.”'
+      : 'Opens full-screen, works offline — no app store needed.';
+    el.innerHTML='<img src="/brand/icon-192.png" alt="">'+
+      '<div class="pwa-txt"><b>Get the Well Seasoned app</b><span>'+sub+'</span></div>'+
+      (mode==='ios'?'':'<button class="pwa-go" type="button">Install</button>')+
+      '<button class="pwa-x" type="button" aria-label="Dismiss">×</button>';
+    document.body.appendChild(el);
+    setTimeout(function(){ if(el) el.classList.add('show'); },30);
+    var go=el.querySelector('.pwa-go');
+    if(go) go.addEventListener('click',function(){
+      if(!deferred) return;
+      deferred.prompt();
+      deferred.userChoice.then(function(c){
+        try{ if(typeof track==='function') track('pwa_prompt',{outcome:(c&&c.outcome)||'unknown'}); }catch(e){}
+        close();
+      });
+    });
+    el.querySelector('.pwa-x').addEventListener('click',function(){ ls('ws_pwa_dismissed','1'); close(); });
+  }
+  function close(){ if(el){ el.classList.remove('show'); var e=el; el=null; setTimeout(function(){ if(e&&e.parentNode) e.parentNode.removeChild(e); },300); } }
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); deferred=e;
+    setTimeout(function(){ build('prompt'); },3500);
+  });
+  window.addEventListener('appinstalled',function(){
+    try{ if(typeof track==='function') track('pwa_installed',{}); }catch(e){}
+    ls('ws_pwa_dismissed','1'); close();
+  });
+  // iOS has no beforeinstallprompt — offer add-to-home-screen guidance instead
+  if(isIOS()&&!standalone()){ setTimeout(function(){ build('ios'); },4500); }
+})();
 </script>
 <!-- Vercel Web Analytics (cookieless, privacy-friendly). Enable Web Analytics in
      Vercel → Project → Analytics; until then this 404s harmlessly. -->
