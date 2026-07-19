@@ -2672,3 +2672,21 @@ categories). Also added a physical **card flip** on answer (`.cc-flip` →
 `ccFlip` rotateY(360deg), added in `answerTrivia` after repaint, reduced-motion
 safe). Foil brand is "Card Check". Verified in headless Chromium: category
 eyebrow rotates by day, flip class applies on answer, zero console errors.
+
+## Guardrail: stay film + review focused, not an entertainment zeitgeist (2026-07-18)
+Owner: "Lets ensure the page is still movie focused and review focused. So lets
+not make it like some zeitgeist of entertainment." Correct check — recent
+engagement additions (Card Check trivia, Ten Years spotlight, Bracket teaser)
+had crept ABOVE the actual review core on the home page, so a visitor scrolled
+past two games and a nostalgia unit before reaching the films + the voting
+ballot. Realigned the home order (markup only — every section is painted by id
+in renderHome, so DOM order is free to change): **This Week at The Table (the
+voting/review act) + the film grid now lead**, right under "How to read a
+score"; Ten Years, the Bracket teaser, and Card Check moved BELOW the mosaic as
+supporting "dessert." Verified order: teach → weekTable → mosaic → tenYears →
+dailyTrivia. **Standing principle for future features:** the site is a film & TV
+REVIEW platform (dual verdict: The Kitchen + The Table). The catalog, verdicts,
+and voting are the front door; games/spotlights/quizzes are supporting units
+that stay below the core and must always tie back to a real film/review (e.g.
+Card Check answers link "See <film> →"). Don't add general pop-culture/celebrity/
+non-film content, and don't let engagement features outrank the review loop.

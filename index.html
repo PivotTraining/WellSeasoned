@@ -1952,14 +1952,18 @@
           <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
           <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
         </div>
+        <!-- The review act comes first: this week's ballot, then the films. The site
+             is a film & TV review platform — voting + the catalog lead; games and
+             spotlights stay BELOW the film grid, supporting and never the front door. -->
+        <section id="weekTable" class="week-table" style="display:none"></section>
         <div id="debateBox" class="debate-box" style="display:none"></div>
         <div id="marriedFeature" class="married-feat" style="display:none"></div>
+        <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
+        <div id="mosaic" class="mosaic"></div>
+        <!-- Engagement/spotlight units — dessert, below the core film grid. -->
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
         <section id="dailyTrivia" class="trivia" style="display:none"></section>
-        <section id="weekTable" class="week-table" style="display:none"></section>
-        <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
-        <div id="mosaic" class="mosaic"></div>
       </div>
 
       <section class="shelf" id="forYouSection" style="display:none">
