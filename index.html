@@ -965,6 +965,35 @@
   .wt-sub{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-top:6px;max-width:66ch}
   .wt-count{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;
     color:var(--gold-ink);background:rgba(228,155,11,.13);border:1px solid rgba(228,155,11,.30);border-radius:999px;padding:6px 13px}
+  /* HOME daily trivia — one verified question a day, streak-tracked */
+  .trivia{margin:6px 0 26px}
+  .trv-card{position:relative;overflow:hidden;background:linear-gradient(150deg,#241809,#15100a);
+    border:1px solid rgba(244,197,66,.26);border-radius:var(--r-xl);padding:24px 26px;box-shadow:0 20px 50px -24px rgba(0,0,0,.6)}
+  .trv-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .trv-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-soft)}
+  .trv-streak.sm{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold-soft);background:rgba(244,197,66,.14);
+    border:1px solid rgba(244,197,66,.3);border-radius:999px;padding:3px 10px}
+  .trv-q{font-family:var(--serif);font-weight:400;font-size:clamp(21px,2.8vw,29px);line-height:1.15;color:#F4ECD8;margin:12px 0 18px;letter-spacing:.2px}
+  .trv-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .trv-opt{text-align:left;font-family:var(--sans);font-size:14.5px;font-weight:600;color:#F0E7D2;cursor:pointer;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:13px 15px;transition:background .15s,border-color .15s,transform .1s}
+  .trv-opt:hover:not([disabled]){background:rgba(244,197,66,.14);border-color:rgba(244,197,66,.5)}
+  .trv-opt:active:not([disabled]){transform:translateY(1px)}
+  .trv-opt[disabled]{cursor:default}
+  .trv-opt.correct{background:rgba(111,176,106,.20);border-color:rgba(111,176,106,.6);color:#CDE9C9}
+  .trv-opt.wrong{background:rgba(219,107,65,.18);border-color:rgba(219,107,65,.55);color:#F2C9B6}
+  .trv-opt.dim{opacity:.5}
+  .trv-mk{font-weight:800;margin-left:4px}
+  .trv-reveal{margin-top:16px;font-size:14.5px;line-height:1.55;color:#E7DCC4;padding:13px 15px;border-radius:12px;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+  .trv-reveal.ok{border-color:rgba(111,176,106,.4)} .trv-reveal.no{border-color:rgba(219,107,65,.4)}
+  .trv-reveal b{color:#fff}
+  .trv-filmlink{color:var(--gold-soft);font-weight:700;cursor:pointer;white-space:nowrap}
+  .trv-filmlink:hover{text-decoration:underline}
+  .trv-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+  .trv-streak{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--gold-soft)}
+  .trv-next{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+  @media(max-width:560px){ .trv-opts{grid-template-columns:1fr} .trv-card{padding:20px 18px} }
   /* honest empty-state invite inside the film-page Table panel */
   .tbl-invite{margin:10px 0 4px;padding:12px 14px;border-radius:var(--r);
     background:linear-gradient(135deg,rgba(228,155,11,.12),rgba(190,59,24,.08));
@@ -1910,6 +1939,7 @@
         <div id="marriedFeature" class="married-feat" style="display:none"></div>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
+        <section id="dailyTrivia" class="trivia" style="display:none"></section>
         <section id="weekTable" class="week-table" style="display:none"></section>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
@@ -7215,6 +7245,89 @@ function paintWeekTable(){
   '</div>'+
   '<div class="grid-cards wt-grid">'+ids.map(cardHTML).join('')+'</div>';
 }
+/* ============ DAILY TRIVIA — Black film & TV ============
+   One question a day, the SAME question for everyone (indexed by the calendar
+   day so it rotates daily and repeats only after the whole bank cycles). Every
+   question and answer is a real, verified fact — same "nothing fake" bar as the
+   rest of the site. State (today's answer + a return-streak) lives in
+   localStorage; there are NO fabricated "% of the room got it right" stats —
+   only your own result. `film` links a correct answer into the catalog when the
+   title exists, turning a right answer into a nudge toward the film page. */
+var TRIVIA=[
+  {q:'Which film made Halle Berry the first Black woman to win the Best Actress Oscar?',opts:['Monster’s Ball','Introducing Dorothy Dandridge','Their Eyes Were Watching God','Losing Isaiah'],a:0,why:'Berry won for “Monster’s Ball” (2001) — still the only Black woman ever to win Best Actress.'},
+  {q:'Who directed “Black Panther” (2018)?',opts:['Ava DuVernay','Ryan Coogler','Barry Jenkins','F. Gary Gray'],a:1,why:'Ryan Coogler co-wrote and directed it — the first superhero film nominated for Best Picture.',film:'black-panther'},
+  {q:'Jordan Peele won his Oscar for “Get Out” in which category?',opts:['Best Director','Best Picture','Best Original Screenplay','Best Editing'],a:2,why:'He became the first Black winner of Best Original Screenplay.',film:'getout'},
+  {q:'Which 2016 film won Best Picture at the 2017 Academy Awards?',opts:['Hidden Figures','Fences','Moonlight','Lion'],a:2,why:'“Moonlight” won — after the infamous envelope mix-up with “La La Land.”',film:'moonlight'},
+  {q:'Who created and stars in the HBO series “Insecure”?',opts:['Issa Rae','Robin Thede','Quinta Brunson','Yvonne Orji'],a:0,why:'Issa Rae built it from her web series “Awkward Black Girl.”',film:'insecure'},
+  {q:'Spike Lee’s 1989 film set on the hottest day in a Brooklyn neighborhood is…',opts:['Crooklyn','Jungle Fever','Do the Right Thing','Clockers'],a:2,why:'“Do the Right Thing” — a landmark of American cinema.'},
+  {q:'Who created and stars in the FX series “Atlanta”?',opts:['Lena Waithe','Donald Glover','Jerrod Carmichael','LaKeith Stanfield'],a:1,why:'Donald Glover created it and plays Earn Marks.',film:'atlanta'},
+  {q:'Who was the first Black man to win the Best Actor Oscar?',opts:['Sidney Poitier','James Earl Jones','Harry Belafonte','Paul Robeson'],a:0,why:'Poitier won for “Lilies of the Field” (1963) — the only Black Best Actor winner for 38 years.'},
+  {q:'Who directed “Selma” (2014)?',opts:['Kasi Lemmons','Gina Prince-Bythewood','Ava DuVernay','Dee Rees'],a:2,why:'Ava DuVernay directed the Dr. King voting-rights drama.'},
+  {q:'“A Different World” was a spinoff of which sitcom?',opts:['Good Times','The Cosby Show','The Jeffersons','227'],a:1,why:'It followed Denise Huxtable to the fictional HBCU Hillman College.'},
+  {q:'Who directed “Boyz n the Hood” (1991)?',opts:['John Singleton','Mario Van Peebles','the Hughes Brothers','Bill Duke'],a:0,why:'Singleton became the first Black person — and youngest ever — nominated for Best Director.'},
+  {q:'Denzel Washington won the Best Actor Oscar for which film?',opts:['Malcolm X','Training Day','The Hurricane','Glory'],a:1,why:'He won Best Actor for “Training Day” (2001); his earlier win for “Glory” was Supporting.'},
+  {q:'In “Coming to America,” Prince Akeem hails from which fictional nation?',opts:['Wakanda','Zamunda','Genovia','Nambia'],a:1,why:'Eddie Murphy’s Akeem leaves Zamunda to find a bride in Queens.'},
+  {q:'Mahershala Ali won his first Oscar for which film?',opts:['Green Book','Moonlight','True Detective','Hidden Figures'],a:1,why:'He won Best Supporting Actor for “Moonlight” (2016), then a second for “Green Book.”',film:'moonlight'},
+  {q:'Who played Cookie Lyon on the series “Empire”?',opts:['Taraji P. Henson','Regina King','Angela Bassett','Nia Long'],a:0,why:'Taraji P. Henson’s Cookie became one of TV’s most iconic characters.'},
+  {q:'Whoopi Goldberg earned her first Oscar nomination for which Alice Walker adaptation?',opts:['Beloved','The Color Purple','The Women of Brewster Place','Sarafina!'],a:1,why:'“The Color Purple” (1985) earned her a Best Actress nomination.'},
+  {q:'Regina King won an Academy Award for which 2018 film?',opts:['If Beale Street Could Talk','The Harder They Fall','One Night in Miami','Watchmen'],a:0,why:'She won Best Supporting Actress for Barry Jenkins’ “If Beale Street Could Talk.”',film:'beale'},
+  {q:'“Moonlight” was adapted from a play by whom?',opts:['August Wilson','Tarell Alvin McCraney','Suzan-Lori Parks','Lynn Nottage'],a:1,why:'From McCraney’s “In Moonlight Black Boys Look Blue.”',film:'moonlight'},
+  {q:'Who directed the 2018 satire “Sorry to Bother You”?',opts:['Boots Riley','Jordan Peele','Terence Nance','Rick Famuyiwa'],a:0,why:'It was rapper Boots Riley’s directorial debut.'},
+  {q:'“In Living Color” was created by whom?',opts:['the Wayans by way of Keenen Ivory Wayans','Robert Townsend','Eddie Murphy','Arsenio Hall'],a:0,why:'Keenen Ivory Wayans created the sketch series that launched many careers.'},
+  {q:'Julie Dash’s 1991 “Daughters of the Dust” was historic as the first…',opts:['film shot entirely in the Gullah language','feature by a Black American woman in wide US theatrical release','film to win the Palme d’Or','Black indie to gross $100M'],a:1,why:'It was the first feature directed by a Black American woman to get general US theatrical release.'},
+  {q:'Viola Davis won her Academy Award for which film?',opts:['The Help','Doubt','Fences','Ma Rainey’s Black Bottom'],a:2,why:'She won Best Supporting Actress for “Fences” (2016).'},
+  {q:'Who directed “Love & Basketball” (2000)?',opts:['Gina Prince-Bythewood','Kasi Lemmons','Darnell Martin','Sanaa Hamri'],a:0,why:'It was Gina Prince-Bythewood’s feature directorial debut.'},
+  {q:'Which actor starred as the vampire hunter Blade?',opts:['Wesley Snipes','Michael Jai White','Ving Rhames','Omar Epps'],a:0,why:'Wesley Snipes led the “Blade” trilogy that helped kick off the modern Marvel era.'},
+  {q:'The HBO series “The Wire” is set in which city?',opts:['Philadelphia','Baltimore','Newark','Detroit'],a:1,why:'David Simon’s series is set in Baltimore.'},
+  {q:'Who wrote and directed the 2025 vampire film “Sinners”?',opts:['Ryan Coogler','Jordan Peele','Nia DaCosta','Gerard McMurray'],a:0,why:'Coogler’s original, un-franchised swing set in the 1932 Mississippi Delta.',film:'sinners'},
+  {q:'“The Fresh Prince of Bel-Air” premiered in which year?',opts:['1988','1990','1992','1994'],a:1,why:'It premiered on NBC in 1990, starring Will Smith.'},
+  {q:'Who directed the Best Picture winner “12 Years a Slave” (2013)?',opts:['Steve McQueen','Antoine Fuqua','Steve Spielberg','John Ridley'],a:0,why:'Steve McQueen directed; John Ridley won for the adapted screenplay.'}
+];
+function triviaDayNo(){ try{ var d=new Date(); d.setHours(0,0,0,0); return Math.floor(d.getTime()/86400000); }catch(e){ return 0; } }
+function triviaToday(){ var n=TRIVIA.length; return TRIVIA[((triviaDayNo()%n)+n)%n]; }
+function triviaGet(){ try{ return JSON.parse(localStorage.getItem('ws_trivia')||'null'); }catch(e){ return null; } }
+function triviaStreak(){ try{ return parseInt(localStorage.getItem('ws_trivia_streak')||'0',10)||0; }catch(e){ return 0; } }
+function answerTrivia(i){
+  var day=triviaDayNo(), saved=triviaGet();
+  if(saved&&saved.day===day) return;            // already answered today
+  var q=triviaToday(), correct=(i===q.a);
+  var last=parseInt(localStorage.getItem('ws_trivia_lastday')||'0',10)||0;
+  var streak=(last===day-1)?triviaStreak()+1:1; // consecutive days played
+  try{ localStorage.setItem('ws_trivia',JSON.stringify({day:day,pick:i,correct:correct}));
+       localStorage.setItem('ws_trivia_streak',String(streak));
+       localStorage.setItem('ws_trivia_lastday',String(day)); }catch(e){}
+  try{ if(typeof track==='function') track('trivia_answer',{correct:correct,idx:((triviaDayNo()%TRIVIA.length)+TRIVIA.length)%TRIVIA.length}); }catch(e){}
+  if(correct){ try{ sfx&&sfx('for'); }catch(e){} }
+  paintTrivia();
+}
+function paintTrivia(){
+  var el=byId('dailyTrivia'); if(!el) return;
+  if(!TRIVIA||!TRIVIA.length){ el.style.display='none'; return; }
+  el.style.display='';
+  var q=triviaToday(), day=triviaDayNo(), saved=triviaGet();
+  var answered=!!(saved&&saved.day===day), streak=triviaStreak();
+  var opts=q.opts.map(function(o,i){
+    if(answered){
+      var cls='trv-opt '+(i===q.a?'correct':(i===saved.pick?'wrong':'dim'));
+      var mk=(i===q.a?' <span class="trv-mk">✓</span>':(i===saved.pick?' <span class="trv-mk">✗</span>':''));
+      return '<button class="'+cls+'" disabled>'+esc(o)+mk+'</button>';
+    }
+    return '<button class="trv-opt" onclick="answerTrivia('+i+')">'+esc(o)+'</button>';
+  }).join('');
+  var foot='';
+  if(answered){
+    var film=q.film&&find(q.film);
+    var filmLink=film?' <a class="trv-filmlink" onclick="go(\'film\',\''+esc(film.id)+'\')">See “'+esc(film.title)+'” →</a>':'';
+    foot='<div class="trv-reveal '+(saved.correct?'ok':'no')+'"><b>'+(saved.correct?'Correct! 🎉':'Not quite —')+'</b> '+esc(q.why)+filmLink+'</div>'+
+      '<div class="trv-foot"><span class="trv-streak">🔥 '+streak+'-day streak</span><span class="trv-next">New question tomorrow</span></div>';
+  }
+  el.innerHTML='<div class="trv-card">'+
+    '<div class="trv-head"><span class="trv-eyebrow">Daily Trivia · Know the culture</span>'+(streak>1&&!answered?'<span class="trv-streak sm">🔥 '+streak+'</span>':'')+'</div>'+
+    '<h3 class="trv-q">'+esc(q.q)+'</h3>'+
+    '<div class="trv-opts">'+opts+'</div>'+
+    foot+
+  '</div>';
+}
 /* Add-to-calendar (.ics) for an upcoming film's release date — cross-platform,
    no third party. Downloads an event the user's calendar app imports. */
 function icsEsc(s){ return String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n'); }
@@ -8130,6 +8243,7 @@ function renderHome(){
   byId('mosaic').innerHTML=focus.map(cardHTML).join('');
   paintMarriedFeature();
   paintTenYears();
+  paintTrivia();
   paintWeekTable();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=

@@ -2619,3 +2619,24 @@ real data first: 808 real votes across 288 films (~1-2 each), 22 comments, so
   data); film Table panel shows the invite at 0 votes (numbers hidden) and
   flips to real numbers once votes exist; zero console errors. Nothing fake —
   every number is the live Supabase tally.
+
+## Daily Trivia — Black film & TV (2026-07-18)
+Owner: "Lets do a trivia question everyday on black movies and tv shows." Built
+`#dailyTrivia`/`paintTrivia()`/`answerTrivia()` + a `TRIVIA` bank (28 questions),
+a home section above the weekly ballot. One question a day, the SAME for everyone
+(indexed by calendar day: `TRIVIA[triviaDayNo()%len]`, days-since-epoch at local
+midnight), rotating daily and repeating only after the full bank cycles. Every
+question + answer is a real verified fact (nothing fake) — Halle Berry/Monster's
+Ball, Coogler/Black Panther, Poitier first Best Actor, Moonlight→McCraney play,
+etc. On answer: correct option turns green + your wrong pick red, an explanation
+shows, and a correct answer whose film is in the catalog gets a "See <title> →"
+link (nudges to the film page → vote). State in localStorage (`ws_trivia` day+
+pick, `ws_trivia_streak`/`ws_trivia_lastday` for a consecutive-days-played 🔥
+streak); persists for the day (re-answer is a no-op). NO fabricated "% of the
+room got it right" — only your own result; `track('trivia_answer',...)` logs real
+analytics. `.trv-*` CSS (dark card, brand gold, serif question, 2-col options →
+1-col mobile). Verified in headless Chromium: renders today's Q, wrong-answer path
+highlights correct+wrong and shows explanation+film link+streak, persists across
+reload, zero console errors. To grow the bank just append verified entries to
+`TRIVIA`; a future real "community got it right %" would need a backend answers
+table (owner SQL) — deliberately left local/honest for now.
