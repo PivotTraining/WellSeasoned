@@ -2640,3 +2640,24 @@ highlights correct+wrong and shows explanation+film link+streak, persists across
 reload, zero console errors. To grow the bank just append verified entries to
 `TRIVIA`; a future real "community got it right %" would need a backend answers
 table (owner SQL) — deliberately left local/honest for now.
+
+## Daily Trivia restyled → "The Culture Card" (Black Card Revoked energy) (2026-07-18)
+Owner: "Almost in the style of black card revoked." Reframed the daily trivia as
+a **Culture Card** check — the playful "know it or your card's on notice" stakes
+of a Black Card Revoked night, evoking the vibe WITHOUT copying the trademark
+(our own name/treatment). Same verified-fact bank + daily rotation + streak logic
+underneath; new framing/skin on top:
+- **Black-card treatment** (`.cc-card`): near-black metal gradient, gold-foil
+  "THE CULTURE CARD" wordmark (shimmer via `emmyShine`), a diagonal light-sweep
+  (`ccShine`, reduced-motion safe), a top divider, and a **card-standing chip**
+  (tier by streak: New Member → Good Standing(3) → Gold(7) → Platinum(14) →
+  Certified(30), with 🔥 N).
+- **Stakes copy**: eyebrow "Daily Card Check", a stakes tag that reads "Answer to
+  keep your card" → "✓ Card's good" / "✗ Card flagged" after answering.
+- **Celebrate/roast lines** (`CC_PRAISE`/`CC_ROAST`, day-seeded so stable per
+  day): correct → warm praise ("The elders approve.", "Certified. Pull up a
+  chair."); wrong → affectionate family-reunion ribbing ("Auntie just shook her
+  head.", "The cookout committee is reviewing your application. 👀") — never
+  mean, always in-group warmth. Explanation + "See <film> →" link unchanged.
+- Verified in headless Chromium: foil brand, tier chip (Gold·🔥), stakes flip on
+  answer, praise/roast + explanation + film link render, zero console errors.

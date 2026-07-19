@@ -969,7 +969,21 @@
   .trivia{margin:6px 0 26px}
   .trv-card{position:relative;overflow:hidden;background:linear-gradient(150deg,#241809,#15100a);
     border:1px solid rgba(244,197,66,.26);border-radius:var(--r-xl);padding:24px 26px;box-shadow:0 20px 50px -24px rgba(0,0,0,.6)}
-  .trv-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  /* "Culture Card" — a black-card / member-card treatment */
+  .cc-card{background:linear-gradient(150deg,#141310 0%,#0d0b09 55%,#191510 100%);border-color:rgba(244,197,66,.34)}
+  .cc-card::before{content:"";position:absolute;top:-40%;left:-30%;width:70%;height:180%;pointer-events:none;
+    background:linear-gradient(105deg,transparent 40%,rgba(244,197,66,.10) 50%,transparent 60%);transform:rotate(8deg);animation:ccShine 7s ease-in-out infinite}
+  @keyframes ccShine{0%,100%{opacity:0;transform:translateX(-30%) rotate(8deg)}45%{opacity:1}60%{opacity:1;transform:translateX(240%) rotate(8deg)}100%{opacity:0}}
+  @media(prefers-reduced-motion:reduce){ .cc-card::before{animation:none;opacity:0} }
+  .cc-card>*{position:relative;z-index:1}
+  .cc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;margin-bottom:14px;
+    border-bottom:1px solid rgba(244,197,66,.16)}
+  .cc-brand{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    background:linear-gradient(90deg,#F7D77A,#E49B0B,#F7D77A);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 5s linear infinite}
+  .cc-tier{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;color:#C9B98F;
+    background:rgba(244,197,66,.10);border:1px solid rgba(244,197,66,.28);border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .cc-stakes{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--gold-soft);white-space:nowrap}
+  .trv-head{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:1}
   .trv-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-soft)}
   .trv-streak.sm{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold-soft);background:rgba(244,197,66,.14);
     border:1px solid rgba(244,197,66,.3);border-radius:999px;padding:3px 10px}
@@ -7283,6 +7297,32 @@ var TRIVIA=[
   {q:'“The Fresh Prince of Bel-Air” premiered in which year?',opts:['1988','1990','1992','1994'],a:1,why:'It premiered on NBC in 1990, starring Will Smith.'},
   {q:'Who directed the Best Picture winner “12 Years a Slave” (2013)?',opts:['Steve McQueen','Antoine Fuqua','Steve Spielberg','John Ridley'],a:0,why:'Steve McQueen directed; John Ridley won for the adapted screenplay.'}
 ];
+/* "Culture Card" framing — the playful stakes of a Black Card Revoked night:
+   get it right, your card's good; miss it, catch a little warm ribbing. Lines
+   are chosen by the day seed so they stay put all day (not reshuffling on every
+   repaint). Kept affectionate, never mean — it's family-reunion energy. */
+var CC_PRAISE=[
+  'Card renewed. You know the culture. 🖤',
+  'Certified. Pull up a chair.',
+  'That’s a grown-folks answer. Respect.',
+  'The elders approve. Go ahead.',
+  'Solid. Your card stays platinum.'
+];
+var CC_ROAST=[
+  'Mmm. We’re gonna let that one slide… this time.',
+  'The cookout committee is reviewing your application. 👀',
+  'Auntie just shook her head.',
+  'That’s a strike. Card’s on probation.',
+  'See somebody at the next family reunion about that one.'
+];
+function ccPick(arr){ var n=arr.length; return arr[((triviaDayNo()%n)+n)%n]; }
+function cardTier(streak){
+  if(streak>=30) return 'Certified';
+  if(streak>=14) return 'Platinum';
+  if(streak>=7)  return 'Gold';
+  if(streak>=3)  return 'Good Standing';
+  return 'New Member';
+}
 function triviaDayNo(){ try{ var d=new Date(); d.setHours(0,0,0,0); return Math.floor(d.getTime()/86400000); }catch(e){ return 0; } }
 function triviaToday(){ var n=TRIVIA.length; return TRIVIA[((triviaDayNo()%n)+n)%n]; }
 function triviaGet(){ try{ return JSON.parse(localStorage.getItem('ws_trivia')||'null'); }catch(e){ return null; } }
@@ -7318,11 +7358,18 @@ function paintTrivia(){
   if(answered){
     var film=q.film&&find(q.film);
     var filmLink=film?' <a class="trv-filmlink" onclick="go(\'film\',\''+esc(film.id)+'\')">See “'+esc(film.title)+'” →</a>':'';
-    foot='<div class="trv-reveal '+(saved.correct?'ok':'no')+'"><b>'+(saved.correct?'Correct! 🎉':'Not quite —')+'</b> '+esc(q.why)+filmLink+'</div>'+
-      '<div class="trv-foot"><span class="trv-streak">🔥 '+streak+'-day streak</span><span class="trv-next">New question tomorrow</span></div>';
+    var verdict=saved.correct?ccPick(CC_PRAISE):ccPick(CC_ROAST);
+    foot='<div class="trv-reveal '+(saved.correct?'ok':'no')+'"><b>'+esc(verdict)+'</b> '+esc(q.why)+filmLink+'</div>'+
+      '<div class="trv-foot"><span class="trv-next">'+(saved.correct?'Card renewed':'Redeem it')+' tomorrow</span></div>';
   }
-  el.innerHTML='<div class="trv-card">'+
-    '<div class="trv-head"><span class="trv-eyebrow">Daily Trivia · Know the culture</span>'+(streak>1&&!answered?'<span class="trv-streak sm">🔥 '+streak+'</span>':'')+'</div>'+
+  var tier=cardTier(streak);
+  el.innerHTML='<div class="trv-card cc-card">'+
+    '<div class="cc-top">'+
+      '<span class="cc-brand">The Culture Card</span>'+
+      '<span class="cc-tier">'+esc(tier)+(streak>0?' · 🔥 '+streak:'')+'</span>'+
+    '</div>'+
+    '<div class="trv-head"><span class="trv-eyebrow">Daily Card Check</span>'+
+      '<span class="cc-stakes">'+(answered?(saved.correct?'✓ Card’s good':'✗ Card flagged'):'Answer to keep your card')+'</span></div>'+
     '<h3 class="trv-q">'+esc(q.q)+'</h3>'+
     '<div class="trv-opts">'+opts+'</div>'+
     foot+
