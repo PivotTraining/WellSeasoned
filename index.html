@@ -7365,10 +7365,10 @@ function paintTrivia(){
   var tier=cardTier(streak);
   el.innerHTML='<div class="trv-card cc-card">'+
     '<div class="cc-top">'+
-      '<span class="cc-brand">The Culture Card</span>'+
+      '<span class="cc-brand">Card Check</span>'+
       '<span class="cc-tier">'+esc(tier)+(streak>0?' · 🔥 '+streak:'')+'</span>'+
     '</div>'+
-    '<div class="trv-head"><span class="trv-eyebrow">Daily Card Check</span>'+
+    '<div class="trv-head"><span class="trv-eyebrow">Daily · The Culture Card</span>'+
       '<span class="cc-stakes">'+(answered?(saved.correct?'✓ Card’s good':'✗ Card flagged'):'Answer to keep your card')+'</span></div>'+
     '<h3 class="trv-q">'+esc(q.q)+'</h3>'+
     '<div class="trv-opts">'+opts+'</div>'+
