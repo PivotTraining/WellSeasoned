@@ -2590,3 +2590,32 @@ architecture).
   precaches the shell + icons + manifest, iOS install banner renders with the
   correct copy, zero real console errors (only the sandbox's aborted-font
   requests). Maskable icon eyeballed (gold shaker, dark bg, within safe zone).
+
+## "This Week at The Table" ballot + honest empty states (2026-07-18)
+Owner wanted films to feel less empty ("filling up the voting to some degree").
+Held the "nothing fake" line — NO seeded/fabricated votes (the just-published
+manifesto literally promises "nothing seeded, nothing bought"). Grounded it in
+real data first: 808 real votes across 288 films (~1-2 each), 22 comments, so
+~77% of the catalog shows a real zero. Two honest fixes shipped:
+- **#1 `#weekTable`/`paintWeekTable()`/`weekBallot()`** — "This Week at The
+  Table," a home section above the mosaic that CONCENTRATES real voting instead
+  of diluting it: features the same weekly-seeded ~12 titles to everyone
+  (HOME_SEED, holds all week then rotates), biased to lead with titles that
+  already carry real votes so the ballot looks alive, padded with recognizable
+  ours titles. Reuses `cardHTML` (so each card has the existing inline
+  quick-vote buttons + real Table score) in a `.grid-cards` grid. A gold pill
+  shows the REAL aggregate ("N verdicts cast on this week's ballot" — summed
+  live `f.votes`, honest; "ballot's open" when zero). Auto-repaints when
+  `loadAllBackendVotes()` → `rerenderActive()` → `renderHome()` lands real
+  counts. `.wt-*` CSS.
+- **#2 honest empty state on the film-page Table panel** — a 0-vote film used
+  to show a dead "0 seasoned / 0 sent back." Wrapped the tally/splitbar/meta in
+  `#tblNumbers` and added `#tblInvite` ("🍽️ The table's set. Be the first to
+  call it — your verdict opens the room."); `renderVotes` toggles invite-vs-
+  numbers on `total`. `tblCountText` 0-state → "Be the first at the table."
+  `.tbl-invite` CSS (warm gold callout).
+- Verified in headless Chromium: ballot renders 12 cards with inline vote
+  buttons + real scores, count pill sums real votes ("79 verdicts…" with mock
+  data); film Table panel shows the invite at 0 votes (numbers hidden) and
+  flips to real numbers once votes exist; zero console errors. Nothing fake —
+  every number is the live Supabase tally.

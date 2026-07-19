@@ -957,6 +957,18 @@
     border-radius:12px;padding:10px 14px;display:inline-block}
   @media(prefers-reduced-motion:reduce){ .ty-wrap::after{animation:none} .ty-spark{animation:none} }
   @media(max-width:640px){ .ty-wrap{padding:24px 20px} .ty-shows{grid-template-columns:1fr} }
+  /* HOME "This Week at The Table" — the weekly ballot that concentrates voting */
+  .week-table{margin:6px 0 30px}
+  .wt-head{margin-bottom:16px}
+  .wt-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-ink)}
+  .wt-h{font-family:var(--display);font-weight:800;font-size:clamp(22px,3vw,31px);margin-top:4px;letter-spacing:-.01em}
+  .wt-sub{color:var(--ink-2);font-size:14.5px;line-height:1.5;margin-top:6px;max-width:66ch}
+  .wt-count{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;
+    color:var(--gold-ink);background:rgba(228,155,11,.13);border:1px solid rgba(228,155,11,.30);border-radius:999px;padding:6px 13px}
+  /* honest empty-state invite inside the film-page Table panel */
+  .tbl-invite{margin:10px 0 4px;padding:12px 14px;border-radius:var(--r);
+    background:linear-gradient(135deg,rgba(228,155,11,.12),rgba(190,59,24,.08));
+    border:1px solid rgba(228,155,11,.30);color:var(--gold-deep);font-weight:600;font-size:14px;line-height:1.45}
   .cul-talk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
   .cul-talk-card{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-2);cursor:pointer;transition:transform .16s,box-shadow .16s;padding:14px}
   .cul-talk-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
@@ -1898,6 +1910,7 @@
         <div id="marriedFeature" class="married-feat" style="display:none"></div>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
+        <section id="weekTable" class="week-table" style="display:none"></section>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
       </div>
@@ -7161,6 +7174,47 @@ function paintTenYears(){
     (d.note?'<p class="ty-note">✨ '+esc(d.note)+'</p>':'')+
   '</div>';
 }
+/* "This Week at The Table" — a rotating ballot that CONCENTRATES real voting.
+   The Table's 800-odd real votes are spread so thin across 1,200+ titles that
+   no single page looks alive; featuring the same ~12 titles to everyone for a
+   week pools the votes where they show. Weekly-seeded (HOME_SEED, same weekly
+   rotation as the home shelves) so it holds steady all week then rotates.
+   Biased to titles that ALREADY have real votes so the ballot leads with
+   genuine activity — NOTHING is seeded or faked; every count is the live
+   Supabase tally, and titles at zero just wear the honest invite state. */
+function weekBallot(){
+  function ok(f){ return f && !f.noart && homeOurs(f) && !upcomingSoonEntry(f); }
+  function nv(f){ return (f.votes.for||0)+(f.votes.against||0); }
+  // lead with real activity: up to 8 titles that already carry votes
+  var voted=seededShuffle(FILMS.filter(function(f){return ok(f)&&nv(f)>0;}).map(function(f){return f.id;}),HOME_SEED).slice(0,8);
+  var pick=voted.slice();
+  // round it out with recognizable titles (some may be at zero — they get the invite)
+  var prom=['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'];
+  seededShuffle(prom,(HOME_SEED+3)>>>0).forEach(function(id){ if(ok(find(id))&&pick.indexOf(id)<0&&pick.length<12) pick.push(id); });
+  if(pick.length<12){
+    var pad=seededShuffle(FILMS.filter(ok).map(function(f){return f.id;}),(HOME_SEED+9)>>>0);
+    for(var i=0;i<pad.length&&pick.length<12;i++){ if(pick.indexOf(pad[i])<0) pick.push(pad[i]); }
+  }
+  return seededShuffle(pick,(HOME_SEED+5)>>>0).slice(0,12);   // mix activity + recognizable in display order
+}
+function paintWeekTable(){
+  var el=byId('weekTable'); if(!el)return;
+  var ids=weekBallot();
+  if(!ids.length){ el.style.display='none'; return; }
+  el.style.display='';
+  var total=0;
+  ids.forEach(function(id){ var f=find(id); if(f) total+=(f.votes.for||0)+(f.votes.against||0); });
+  var tally=total
+    ? fmt(total)+' verdict'+(total===1?'':'s')+' cast on this week’s ballot'
+    : 'The ballot’s open — be the first to weigh in';
+  el.innerHTML='<div class="wt-head">'+
+    '<span class="wt-eyebrow">The ballot · This week</span>'+
+    '<h2 class="wt-h">This Week at The Table</h2>'+
+    '<p class="wt-sub">The room’s voting on these right now. Add yours — every verdict here is real, counted one person at a time.</p>'+
+    '<span class="wt-count">'+esc(tally)+'</span>'+
+  '</div>'+
+  '<div class="grid-cards wt-grid">'+ids.map(cardHTML).join('')+'</div>';
+}
 /* Add-to-calendar (.ics) for an upcoming film's release date — cross-platform,
    no third party. Downloads an event the user's calendar app imports. */
 function icsEsc(s){ return String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n'); }
@@ -8076,6 +8130,7 @@ function renderHome(){
   byId('mosaic').innerHTML=focus.map(cardHTML).join('');
   paintMarriedFeature();
   paintTenYears();
+  paintWeekTable();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+
@@ -8396,9 +8451,12 @@ function renderFilm(id){
         : '<p class="p-sub">The People\u2019s Cut. Did it earn a seat at the table?</p>'+
         '<div class="vote-btns"><button class="vbtn for" id="btnFor" onclick="castVote(\''+f.id+'\',\'for\')">It\u2019s Seasoned</button>'+
         '<button class="vbtn against" id="btnAgainst" onclick="castVote(\''+f.id+'\',\'against\')">Send It Back</button></div>'+
-        '<div class="tally"><span class="n for" id="forNum">'+fmt(f.votes.for)+'</span> seasoned <span style="flex:1"></span> sent back <span class="n against" id="againstNum">'+fmt(f.votes.against)+'</span></div>'+
-        '<div class="splitbar"><div class="sb-for" id="sbFor"></div><div class="sb-against" id="sbAgainst"></div></div>'+
-        '<div class="split-meta"><span id="pctFor"></span><span id="totalVotes"></span></div>'+
+        '<div class="tbl-invite" id="tblInvite" style="display:none">🍽️ The table’s set. Be the first to call it — your verdict opens the room.</div>'+
+        '<div id="tblNumbers">'+
+          '<div class="tally"><span class="n for" id="forNum">'+fmt(f.votes.for)+'</span> seasoned <span style="flex:1"></span> sent back <span class="n against" id="againstNum">'+fmt(f.votes.against)+'</span></div>'+
+          '<div class="splitbar"><div class="sb-for" id="sbFor"></div><div class="sb-against" id="sbAgainst"></div></div>'+
+          '<div class="split-meta"><span id="pctFor"></span><span id="totalVotes"></span></div>'+
+        '</div>'+
         '<div class="cbox"><input id="cName" placeholder="Your name (optional)" aria-label="Your name">'+
           '<textarea id="cText" placeholder="Say your piece. Why is it seasoned, or why\u2019d you send it back?" aria-label="Your comment"></textarea>'+
           '<div class="cbox-row"><span class="cbox-hint" id="stanceHint">Pick a side above, then post.</span><button class="btn btn-gold btn-sm" onclick="postComment(\''+f.id+'\')">Post your read</button></div></div>'+
@@ -8458,7 +8516,7 @@ function splitFlagHTML(f){
 /* The Table's count line, quorum-aware: shows how close the room is to a score */
 function tblCountText(f){
   var tot=f.votes.for+f.votes.against;
-  if(!tot) return 'Be the first';
+  if(!tot) return 'Be the first at the table';
   if(tot<TABLE_QUORUM) return fmt(tot)+' voted · '+(TABLE_QUORUM-tot)+' more to score it';
   return fmt(tot)+' voted';
 }
@@ -8491,6 +8549,10 @@ function ensureComments(f){ if(!f._comments){ f._comments=(app.comments[f.id]||[
 function renderVotes(f){
   if(!byId('forNum')) return;   // unreleased film → verdict vote panel isn't rendered
   var total=f.votes.for+f.votes.against, pf=total?Math.round(f.votes.for/total*100):0;
+  // empty table reads as an open invitation, not a dead 0 / 0
+  var inv=byId('tblInvite'), nums=byId('tblNumbers');
+  if(inv) inv.style.display = total? 'none':'';
+  if(nums) nums.style.display = total? '':'none';
   byId('forNum').textContent=fmt(f.votes.for); byId('againstNum').textContent=fmt(f.votes.against);
   byId('sbFor').style.width=pf+'%'; byId('sbAgainst').style.width=(total?100-pf:0)+'%';
   byId('pctFor').textContent=total?(pf+'% seasoned'):'Be the first to weigh in';
