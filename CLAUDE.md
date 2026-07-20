@@ -2740,3 +2740,19 @@ untouched:
   capability is attached, Archive → upload to App Store Connect. Android is
   the identical process via `npx cap add android`, held off until a Google
   Play Developer account exists.
+
+## iOS: cloud build path (Codemagic) — local Mac disk space blocked (2026-07-20)
+Owner's Mac has only ~427MB free (228GB drive, 98% full) — not enough for
+Xcode's 15-40GB install, so the local `npx cap open ios` path from the
+previous entry is blocked. Added `codemagic.yaml` (repo root) — a verified
+(fetched Codemagic's current docs before writing, not from memory) CI config
+that builds `app/`'s iOS project on a cloud Mac and pushes straight to
+TestFlight via an App Store Connect API key integration, no local Xcode or
+disk space needed at all. `app/README.md` gained a "Cloud build" section with
+the exact setup steps (create the API key in App Store Connect, connect it in
+Codemagic's UI, trigger a build). Integration key name in the yaml
+(`well_seasoned_asc`) must match whatever the owner names it in Codemagic's
+UI — flagged in both the yaml comment and the README. YAML validated
+(`python3 -c "import yaml"` parses clean). Local Xcode path from the prior
+entry is still valid/preferred once the owner frees disk space or uses a
+different Mac — this is an alternate unblock, not a replacement.

@@ -83,3 +83,28 @@ node gen_native_assets.js
 The same wrapper works for Google Play with `npx cap add android` — holding
 off until there's a Google Play Developer account ($25 one-time) to attach it
 to. Say the word and it's the same process as iOS above.
+
+## Cloud build (no local Xcode / disk space needed)
+
+If your Mac can't spare the ~15–40GB Xcode needs, `codemagic.yaml` (repo root)
+is a ready-to-go [Codemagic](https://codemagic.io) config that builds this
+exact `app/` project on a cloud Mac and uploads straight to TestFlight — no
+local Xcode, CocoaPods, or disk space required. Setup (all done at
+codemagic.io / appstoreconnect.apple.com in a browser, no terminal):
+
+1. **Create an App Store Connect API key** — App Store Connect → **Users and
+   Access → Integrations → App Store Connect API** → **+** → name it, give it
+   **App Manager** access, download the `.p8` file (only downloadable once —
+   keep it safe), and note the **Issuer ID** and **Key ID** shown on the page.
+2. **Sign up at codemagic.io** and connect this GitHub repo
+   (`PivotTraining/WellSeasoned`) as an app.
+3. In Codemagic → **Team settings → Integrations → Developer Portal → Manage
+   keys** → add the API key from step 1, and name it `well_seasoned_asc`
+   (or update the `integrations.app_store_connect` line in `codemagic.yaml`
+   to whatever name you give it).
+4. Back on the app page in Codemagic, select the **`ios-workflow`** and
+   **Start new build**. It'll install dependencies, build, sign, and push a
+   build to TestFlight automatically.
+5. Check **App Store Connect → TestFlight** in a few minutes — the build
+   should appear there, ready to install via the TestFlight app or submit
+   for review.
