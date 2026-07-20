@@ -108,3 +108,15 @@ codemagic.io / appstoreconnect.apple.com in a browser, no terminal):
 5. Check **App Store Connect → TestFlight** in a few minutes — the build
    should appear there, ready to install via the TestFlight app or submit
    for review.
+
+### Fix: "No matching profiles found" on first build
+
+The `environment.ios_signing` shortcut only looks for an *existing*
+certificate/provisioning profile — it won't create one, so a brand-new
+Apple Developer account (nothing registered yet) hits "No matching
+profiles found for bundle identifier..." on the very first build.
+`codemagic.yaml` now uses the explicit signing steps instead
+(`keychain initialize` → `app-store-connect fetch-signing-files --create`
+→ `keychain add-certificates` → `xcode-project use-profiles`), which
+generates the App Store distribution certificate + profile automatically
+the first time it runs. Subsequent builds reuse them.

@@ -16,10 +16,8 @@ workflows:
     integrations:
       app_store_connect: well_seasoned_asc   # rename to match the key name you create in Codemagic's UI
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.wellseasoned.app
       vars:
+        BUNDLE_ID: "com.wellseasoned.app"
         XCODE_WORKSPACE: "app/ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
       node: latest
@@ -34,6 +32,20 @@ workflows:
         script: |
           cd app/ios/App
           pod install
+      - name: Set up keychain
+        script: keychain initialize
+      # This is the step that actually CREATES the App Store distribution
+      # certificate + provisioning profile the first time — the shortcut
+      # `environment.ios_signing` block only looks for an EXISTING one, which
+      # is why a brand-new Apple Developer account hits "no matching profiles
+      # found." --create tells it to generate what's missing.
+      - name: Fetch signing files (create if missing)
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Add certificates to keychain
+        script: keychain add-certificates
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
       - name: Build ipa for distribution
