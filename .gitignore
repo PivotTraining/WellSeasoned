@@ -13,3 +13,16 @@ Thumbs.db
 .env
 .env.*
 scratchpad/
+
+# Native app wrapper (app/) — installed deps + Xcode/Gradle build output.
+# Source config (capacitor.config.json, Info.plist, AppDelegate.swift, the
+# generated icon/splash assets) stays committed; only regenerable junk is
+# ignored, same convention as node_modules anywhere else.
+app/node_modules/
+app/ios/App/Pods/
+app/ios/App/build/
+app/ios/DerivedData/
+app/android/.gradle/
+app/android/app/build/
+app/android/build/
+app/android/local.properties

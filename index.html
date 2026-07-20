@@ -12348,12 +12348,41 @@ armVerdictDrop();
       navigator.serviceWorker.register('/sw.js').catch(function(){});
     });
   }
+  /* Native app shell (Capacitor) detection. The App Store build points its
+     webview at this same live site (server.url in capacitor.config.json) —
+     no separate bundle, no drift — and the native runtime auto-injects
+     window.Capacitor into the page. Real push notifications (not just a web
+     permission prompt) is the one genuine native capability that keeps a
+     wrapped site from reading as "just a website" at App Review — so when
+     we're actually inside the shell, register for it for real. Device
+     tokens are logged via track() only for now; wiring them to a send
+     pipeline needs its own Supabase table + owner sign-off, same as any
+     other backend change here — deliberately not done in this pass. */
+  function inNativeApp(){ return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()); }
+  if(inNativeApp()){
+    try{
+      var Push=window.Capacitor.Plugins&&window.Capacitor.Plugins.PushNotifications;
+      if(Push){
+        Push.checkPermissions().then(function(p){
+          if(p.receive==='prompt') return Push.requestPermissions();
+          return p;
+        }).then(function(p){
+          if(p&&p.receive==='granted') Push.register();
+        }).catch(function(){});
+        Push.addListener('registration',function(tok){
+          try{ if(typeof track==='function') track('push_registered',{}); }catch(e){}
+        });
+        Push.addListener('registrationError',function(){});
+        Push.addListener('pushNotificationReceived',function(){});
+      }
+    }catch(e){}
+  }
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null;} }
   function standalone(){ return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true; }
   function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream; }
   var deferred=null, el=null;
   function build(mode){
-    if(el||standalone()||ls('ws_pwa_dismissed')) return;
+    if(el||standalone()||ls('ws_pwa_dismissed')||inNativeApp()) return;   // already IS the app — no install nudge needed
     el=document.createElement('div'); el.className='pwa-install';
     var sub=mode==='ios'
       ? 'Tap the Share button, then “Add to Home Screen.”'

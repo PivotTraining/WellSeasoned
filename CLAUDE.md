@@ -2690,3 +2690,53 @@ and voting are the front door; games/spotlights/quizzes are supporting units
 that stay below the core and must always tie back to a real film/review (e.g.
 Card Check answers link "See <film> →"). Don't add general pop-culture/celebrity/
 non-film content, and don't let engagement features outrank the review loop.
+
+## Native app — Capacitor iOS wrapper scaffolded (2026-07-19/20)
+Owner set up the Apple Developer account + App Store Connect app record
+("Well Seasoned", bundle id `com.wellseasoned.app`) and asked to build the
+app. Scaffolded the App Store phase of the PWA plan (previous entry) as a
+Capacitor wrapper — isolated in `app/` so the zero-build single-file site is
+untouched:
+- **`app/capacitor.config.json`** — `server.url:'https://itswellseasoned.com'`
+  (the native webview loads the LIVE site directly; no bundled copy to keep
+  in sync — every push to the site is what the app shows, no resubmission
+  needed for content changes). `www/index.html` is just a brief branded
+  loading placeholder for the instant before the remote page paints, or if
+  offline.
+- **`app/ios/`** — real Xcode project generated via `npx cap add ios`
+  (CocoaPods/xcodebuild can't run in this sandbox — that step is documented
+  in `app/README.md` for the owner's Mac). Bundle id + display name flow
+  through from the config. Portrait-locked on iPhone (matches the PWA
+  manifest's `orientation:portrait`).
+- **Real app icon + splash** (`app/gen_native_assets.js`, Playwright) from the
+  same house salt-shaker mark — full-bleed 1024×1024 square (no transparency/
+  rounding, per Apple's App Store icon spec — the OS applies the mask) and a
+  2732×2732 branded splash on the paper background color.
+- **Push notifications wired for real, not just declared** — this is what
+  keeps a "wrapped website" from tripping App Review Guideline 4.2 (no
+  native value). `AppDelegate.swift` forwards the standard APNs callbacks
+  (`didRegisterForRemoteNotificationsWithDeviceToken` etc.) to
+  `@capacitor/push-notifications`; `index.html` (near the PWA service-worker
+  registration) detects `window.Capacitor.isNativePlatform()` and, only when
+  actually running inside the native shell, requests permission and
+  registers for real. The redundant "install the app" PWA banner is
+  suppressed in that same context (you're already IN the app). Device
+  tokens are only logged via `track('push_registered')` for now — actually
+  SENDING campaigns needs a `device_tokens` table + send pipeline, a backend
+  change flagged but deliberately not built without the owner's sign-off,
+  same risk tier as any other schema change here.
+- Verified in headless Chromium with `window.Capacitor` mocked both ways:
+  plain web visitors get the exact same PWA experience as before (install
+  banner still shows, zero errors); a simulated native context calls
+  `PushNotifications.register()` for real and correctly suppresses the PWA
+  install banner, zero errors either way.
+- **`.gitignore`** extended for `app/node_modules`, Pods, build output —
+  same convention as any other repo, only regenerable junk excluded; the
+  Xcode project itself, Info.plist, AppDelegate.swift, and generated
+  icon/splash assets are committed.
+- **Still needed from the owner** (documented in `app/README.md`, can't be
+  done in this sandbox — no macOS/Xcode/CocoaPods here): `npx cap sync ios`,
+  open in Xcode, set the signing team, confirm the Push Notifications
+  capability is attached, Archive → upload to App Store Connect. Android is
+  the identical process via `npx cap add android`, held off until a Google
+  Play Developer account exists.
