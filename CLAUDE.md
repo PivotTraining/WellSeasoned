@@ -2756,3 +2756,20 @@ UI — flagged in both the yaml comment and the README. YAML validated
 (`python3 -c "import yaml"` parses clean). Local Xcode path from the prior
 entry is still valid/preferred once the owner frees disk space or uses a
 different Mac — this is an alternate unblock, not a replacement.
+
+## Fix: comedy specials flooding Documentaries/Shorts (2026-07-20)
+Owner: "too many comedies are in documentaries and short films." Root cause:
+`isDoc()`/`isShort()` had no exclusion for stand-up specials, which routinely
+carry `genre:'Documentary'` + a `Documentary` tag on TMDB (a filmed special
+IS shot documentary-style) and often run under 40 minutes — so they flooded
+both the Documentaries shelf/filter and the Shorts shelf/filter, which
+already have their own dedicated home (the Stand-Up shelf/`tags` filter).
+Fix: both functions now exclude anything tagged `Stand-Up` first. Verified
+against the actual catalog data (Node, same eval-FILMS technique as
+`build-films-json.cjs`): docs 162→98 (0 comedy-genre remaining, was 64),
+shorts 19→9 (0 comedy-genre remaining, was 10). One straggler (`Kevin Hart:
+What Now?`) was missing the `Stand-Up` tag entirely — added it directly.
+Both `contentMatch()` (Browse filter chips) and the home shelves
+(`docSection`/`shortSection`) reuse these same two functions, so the fix
+covers both surfaces. Verified in headless Chromium: doc/short rails render
+real content only, zero console errors.

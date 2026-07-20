@@ -5034,7 +5034,7 @@ var FILMS=[
    syn:'Following a series of drug deals and murders, three criminals -- Fantasia, Ray Malcolm and Pluto -- travel from Los Angeles to Houston, finally arriving in a small Arkansas town to go into hiding. Two detectives from the LAPD, who',tags:['Crime','Drama','Thriller'],votes:{for:0,against:0},reviews:[]},
   {id:'kevin-hart-what-now',title:'Kevin Hart: What Now?',year:2016,rt:'1h 36m',genre:'Comedy',k:null,t:null,scope:'ours',type:'movie',grad:'linear-gradient(160deg,#231a4d,#0b0820)',
    dir:'Leslie Small',cast:['Kevin Hart','Halle Berry','Don Cheadle','Ed Helms'],moods:['Playful','Contemplative'],era:'2010s',where:['Netflix','Prime','Peacock','Tubi','Rent'],
-   syn:'Comedian Kevin Hart performs in front of a crowd of 50,000 people at Philadelphia\'s outdoor venue, Lincoln Financial Field.',tags:['Comedy','Documentary','TV Movie'],votes:{for:0,against:0},reviews:[]},
+   syn:'Comedian Kevin Hart performs in front of a crowd of 50,000 people at Philadelphia\'s outdoor venue, Lincoln Financial Field.',tags:['Stand-Up','Comedy','Documentary','TV Movie'],votes:{for:0,against:0},reviews:[]},
   {id:'hurricane-season',title:'Hurricane Season',year:2010,rt:'1h 43m',genre:'Drama',k:null,t:null,scope:'ours',type:'movie',grad:'linear-gradient(160deg,#8a6d2a,#2e2109)',
    dir:'Tim Story',cast:['Forest Whitaker','Taraji P. Henson','Bonnie Hunt','Isaiah Washington'],moods:['Contemplative'],era:'2010s',where:['Prime','Peacock','Tubi','Rent'],
    syn:'Based on true events amid the wreckage and chaos dealt by Hurricane Katrina; one basketball coach in Marrero, Louisiana just will not give up. Coach Al Collins, gathers other players from hard-hit schools and builds a team actuall',tags:['Drama'],votes:{for:0,against:0},reviews:[]},
@@ -10256,8 +10256,14 @@ function homeOurs(f){ return !isHidden(f) && effScope(f)==='ours'; }
 function rtMinutes(f){ var s=f.rt||''; var h=/(\d+)\s*h/.exec(s), m=/(\d+)\s*m/.exec(s); return (h?parseInt(h[1],10)*60:0)+(m?parseInt(m[1],10):0); }
 /* Format categories — derived so existing titles qualify without editing them.
    A doc is anything genre/tagged Documentary; a short is a film 40 min or under. */
-function isDoc(f){ return f.fmt==='doc' || effGenre(f)==='Documentary' || (f.tags&&f.tags.indexOf('Documentary')>=0); }
-function isShort(f){ if(f.type==='tv')return false; if(f.fmt==='short')return true; var mins=rtMinutes(f); return mins>0 && mins<=40; }
+/* Stand-up specials get tagged 'Documentary' on TMDB (a filmed set IS shot
+   documentary-style) and often run under 40 minutes — without this guard
+   they flooded the Documentaries/Shorts shelves and Browse filters with
+   comedy specials that already have their own home (the Stand-Up shelf/
+   filter). Excluding Stand-Up here keeps those two sections to real
+   documentary films and real short films. */
+function isDoc(f){ if(f.tags&&f.tags.indexOf('Stand-Up')>=0) return false; return f.fmt==='doc' || effGenre(f)==='Documentary' || (f.tags&&f.tags.indexOf('Documentary')>=0); }
+function isShort(f){ if(f.type==='tv')return false; if(f.tags&&f.tags.indexOf('Stand-Up')>=0) return false; if(f.fmt==='short')return true; var mins=rtMinutes(f); return mins>0 && mins<=40; }
 function isSport(f){ return f.tags&&f.tags.indexOf('Sports')>=0; }
 function contentMatch(f){
   var t=FILTERS.type;
