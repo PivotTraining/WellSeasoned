@@ -2773,3 +2773,29 @@ Both `contentMatch()` (Browse filter chips) and the home shelves
 (`docSection`/`shortSection`) reuse these same two functions, so the fix
 covers both surfaces. Verified in headless Chromium: doc/short rails render
 real content only, zero console errors.
+
+## Home featured carousel refresh + a real data fix (2026-07-20)
+Owner: "Refresh the content on the site." Audited the home page for staleness
+rather than guess at scope. Found two real, concrete issues:
+- **`FEATURED` had two now-FALSE claims**: "Survival of the Thickest" and "All
+  the Queen's Men" both read "New season · Just dropped" — but those seasons
+  dropped 2026-07-02 and 2026-06-10 respectively (18 and 40+ days before
+  today), so the copy had become inaccurate by implication, a real "nothing
+  fake" issue, not just staleness. Fixed: Queen's Men retired from the
+  carousel (no strong evergreen claim to make); Thickest reworded to
+  "Final season · Streaming now" (accurate, doesn't imply recency it no
+  longer has).
+- **`diarra-from-detroit`'s `where` field was wrong** — listed `'Prime
+  Video'`, but the show has never been on Prime Video (S1 was BET+, now
+  moving to Paramount+ as BET+ shuts down). Verified via web search
+  (multiple trade pieces) and fixed to `'Paramount+'`.
+- **Added a genuinely fresh, verified pick**: Diarra from Detroit Season 2
+  premieres 2026-07-29 on Paramount+ (confirmed via Deadline/TVInsider/
+  ComingSoon.net) — added to `FEATURED` with the same premiere/until
+  countdown pattern as Lanterns/Fightland, real TMDB backdrop pinned
+  (id 247796, verified single unambiguous match, backdrop URL returns 200).
+- Coming Soon itself was already fine — `soonReleased()` already filters
+  past-dated entries automatically, so nothing there needed fixing.
+- Verified in headless Chromium: `featSlides()` returns the corrected 5-slide
+  list in order, Diarra's countdown copy is exactly right, the stale/false
+  labels are gone, zero console errors.
