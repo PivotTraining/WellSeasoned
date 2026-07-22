@@ -2881,3 +2881,50 @@ has `until` dates). Found and fixed 5 more:
   (`pageerror`); all console noise was expected network/resource-load
   artifacts from the local test harness (no serverless functions, no
   outbound internet), not real bugs.
+
+## Film Events — real festival listings + home spotlight (2026-07-20)
+Owner: "What film events are coming up? We should have somewhere bottom tab
+for that and or highlight the most major one in the next 60 days and how to
+go." Researched real, verified events before building anything (same bar as
+everything else): confirmed via official sources — **BlackStar Film
+Festival** (Aug 6-9, 2026, Philadelphia + online, 15th year, 91 films,
+tickets at blackstarprojects.org/festival/passes) and **HollyShorts Film
+Festival** (Aug 13-23, 2026, LA, Oscar-qualifying, 430 films,
+hollyshorts.com). Checked others: ABFF already happened (May 27-31, past);
+Urbanworld's dates conflict between sources (Oct 14-18 vs Nov 4-8) and both
+fall outside the 60-day window regardless, so left out rather than guess.
+- **`EVENTS`** array (real entries only, each needs a verified official
+  source before being added — same convention as the catalog) +
+  `upcomingEvents()`/`eventDateRange()`/`eventDaysAway()` helpers.
+- **`#/events`** page (`renderEvents()`) — lists every real upcoming event as
+  a dark card (date badge, dates/city/mode, blurb, real ticket link). Footer-
+  linked and in the desktop "More ▾" dropdown alongside Theaters/Soon/Couch/
+  Vault.
+- **Home spotlight** (`#eventSpotlight`/`paintEventSpotlight()`) — "highlight
+  the most major one... and how to go": picks the soonest event within 60
+  days (picks `upcomingEvents()[0]`; BlackStar is both soonest and the
+  flagship right now, so no separate importance-ranking was needed). Dark
+  stage spotlight reusing the established visual language (`emmySpin`/
+  `emmyShine`/`emmyTwinkle`), a real "In N days" countdown, real ticket CTA,
+  and a link to the full events page. Placed in the "dessert" tier below the
+  core film grid, same tier as Ten Years/Bracket/Card Check, per the
+  standing "stay review-focused" guardrail.
+- **Deliberately NOT added to the mobile bottom tabbar** — that tabbar is a
+  fixed 6 slots with no overflow, and was intentionally slimmed from 8 down
+  to 6 two sessions ago specifically to declutter it; a 7th icon would
+  reverse that. Reachable instead via the desktop "More ▾" dropdown + footer
+  link (same discoverability tier as Theaters/Coming Soon/Vault/Couch) and
+  the home spotlight. Flagged to the owner as a deliberate call, not a
+  silent omission — a literal 7th tab is one line to add if still wanted
+  after hearing the tradeoff.
+- Caught and fixed a mistake during the build: initially wrote a fabricated
+  TMDB image path as the BlackStar spotlight backdrop (there is no TMDB
+  entry for a real-world festival) — caught before shipping and removed;
+  the spotlight/cards degrade gracefully to the plain dark panel when no
+  real art exists, same pattern as event/slide entries elsewhere on the site
+  with no confirmed image.
+- Verified real URLs resolve (200): blackstarprojects.org/festival/passes,
+  hollyshorts.com. Verified in headless Chromium: home spotlight shows
+  BlackStar with correct "In 15 days" + real date range + real ticket link;
+  `#/events` lists both real events with correct dates; both nav entries
+  (More dropdown, footer) present; zero console errors.

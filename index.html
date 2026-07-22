@@ -957,6 +957,38 @@
     border-radius:12px;padding:10px 14px;display:inline-block}
   @media(prefers-reduced-motion:reduce){ .ty-wrap::after{animation:none} .ty-spark{animation:none} }
   @media(max-width:640px){ .ty-wrap{padding:24px 20px} .ty-shows{grid-template-columns:1fr} }
+  /* HOME film-events spotlight — the nearest real, attendable festival */
+  .ev-spot{margin:0 0 26px}
+  .evs-wrap{position:relative;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--r-xl);
+    background:linear-gradient(150deg,#1a1408,#0d0a05);box-shadow:0 24px 56px -20px rgba(0,0,0,.55);min-height:260px}
+  .evs-wrap::after{content:"";position:absolute;top:50%;left:20%;width:150%;height:150%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
+    background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpin 17s linear infinite}
+  .evs-spark{position:absolute;z-index:1;width:5px;height:5px;border-radius:50%;background:#F4C542;box-shadow:0 0 8px 2px rgba(244,197,66,.7);animation:emmyTwinkle 3.4s ease-in-out infinite}
+  .evs-spark.s1{top:24px;right:36px} .evs-spark.s2{top:70px;right:80px;animation-delay:1.1s} .evs-spark.s3{bottom:34px;right:130px;animation-delay:2.1s}
+  .evs-copy{position:relative;z-index:2;flex:1 1 56%;padding:34px 38px;display:flex;flex-direction:column;justify-content:center}
+  .evs-eyebrow{font-family:var(--mono);font-weight:700;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+    background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
+  .evs-h{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.6vw,40px);line-height:1.06;margin-top:10px;color:#F4ECD8}
+  .evs-meta{font-family:var(--mono);font-size:12.5px;color:var(--gold-soft);margin-top:8px}
+  .evs-blurb{color:#D8C9A8;font-size:14.5px;line-height:1.6;margin-top:10px;max-width:52ch}
+  .evs-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .evs-cta .btn-ghost.light{border-color:rgba(255,255,255,.3);color:#F4ECD8}
+  .evs-media{position:relative;z-index:1;flex:1 1 44%;background-size:cover;background-position:center;min-height:220px;
+    background-color:#241b0d}
+  .evs-media::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#1a1408 0%,rgba(26,20,8,.3) 24%,transparent 60%)}
+  @media(prefers-reduced-motion:reduce){ .evs-wrap::after{animation:none} .evs-spark{animation:none} }
+  @media(max-width:760px){ .evs-wrap{flex-direction:column} .evs-media{min-height:180px} .evs-copy{padding:24px 22px} }
+  /* FILM EVENTS page grid */
+  .ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-top:24px}
+  .ev-card{position:relative;overflow:hidden;border-radius:var(--r-lg);padding:22px 22px 24px;min-height:220px;
+    background:linear-gradient(150deg,#1a1408,#0d0a05);background-size:cover;background-position:center;
+    color:#F4ECD8;display:flex;flex-direction:column;box-shadow:var(--shadow-2)}
+  .ev-when{align-self:flex-start;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:#241703;background:linear-gradient(90deg,#F4C542,#E7A21B);padding:4px 10px;border-radius:999px;margin-bottom:14px}
+  .ev-name{font-family:var(--display);font-weight:800;font-size:21px;line-height:1.15}
+  .ev-meta{font-family:var(--mono);font-size:11.5px;color:var(--gold-soft);margin-top:6px}
+  .ev-blurb{font-size:13.5px;color:#D8C9A8;line-height:1.55;margin-top:10px;flex:1}
+  .ev-card .btn{margin-top:16px;align-self:flex-start}
   /* HOME "This Week at The Table" — the weekly ballot that concentrates voting */
   .week-table{margin:6px 0 30px}
   .wt-head{margin-bottom:16px}
@@ -1876,6 +1908,7 @@
           <a data-nav="soon" onclick="closeMoreNav();go('soon')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Coming Soon</a>
           <a data-nav="couch" onclick="closeMoreNav();go('couch')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 3l-5 4-5-4"/></svg>On The Couch</a>
           <a data-nav="vault" onclick="closeMoreNav();go('vault')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/></svg>The Vault</a>
+          <a data-nav="events" onclick="closeMoreNav();go('events')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>Film Events</a>
         </div>
       </div>
       <a data-nav="join" onclick="go('join')" tabindex="0">The Table</a>
@@ -1961,6 +1994,7 @@
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
         <!-- Engagement/spotlight units — dessert, below the core film grid. -->
+        <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
         <section id="dailyTrivia" class="trivia" style="display:none"></section>
@@ -2102,6 +2136,11 @@
   <!-- ============ THE VAULT ============ -->
   <section class="view" data-view="vault" aria-label="The Vault">
     <div class="wrap" id="vaultContent"></div>
+  </section>
+
+  <!-- ============ FILM EVENTS ============ -->
+  <section class="view" data-view="events" aria-label="Film Events">
+    <div class="wrap" id="eventsContent"></div>
   </section>
 
   <!-- ============ RANKINGS ============ -->
@@ -2274,7 +2313,7 @@
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('pulse')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Pulse</a></span></span>
+    <span><a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('events')" style="cursor:pointer">Film Events</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('pulse')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Pulse</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
@@ -6292,7 +6331,7 @@ function loadState(){
 }
 
 /* ============ ROUTER ============ */
-var NAV_MORE_VIEWS=['theaters','soon','couch','vault'];
+var NAV_MORE_VIEWS=['theaters','soon','couch','vault','events'];
 function setActiveNav(view){
   document.querySelectorAll('[data-nav]').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-nav')===view);
@@ -6302,7 +6341,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -6354,6 +6393,7 @@ function render(view,arg){
   else if(view==='submit')renderSubmit();
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
+  else if(view==='events')renderEvents();
   // Reset to the top AFTER the view's content is in the DOM. The pre-render
   // scrollTo above runs while the new view is still empty and gets undone by the
   // fade transition / late layout, which left film pages opening at the previous
@@ -8298,6 +8338,7 @@ function renderHome(){
     }).join('');
   byId('mosaic').innerHTML=focus.map(cardHTML).join('');
   paintMarriedFeature();
+  paintEventSpotlight();
   paintTenYears();
   paintTrivia();
   paintWeekTable();
@@ -10465,6 +10506,87 @@ function sampleShowtimes(f,zip){
     '<a class="btn btn-gold btn-sm" href="'+fUrl+'" target="_blank" rel="noopener noreferrer">Find showtimes on Fandango ↗</a>'+
     '<a class="btn btn-ghost btn-sm" href="'+gUrl+'" target="_blank" rel="noopener noreferrer">Google showtimes ↗</a></div>'+
     '<div class="st-note" style="margin-top:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Powered by Fandango. Showtimes and seats are handled on Fandango’s site.</span></div></div>';
+}
+
+/* ============ FILM EVENTS ============ */
+/* Real, verified festivals/events only — each entry needs a real official
+   source before it's added here, same "nothing fake" bar as everything
+   else. Dates confirmed via official festival sites/press as of 2026-07-20.
+   Extend this array as new real events are confirmed; nothing is generated
+   or guessed. */
+var EVENTS=[
+  {id:'blackstar-2026',name:'BlackStar Film Festival',start:'2026-08-06',end:'2026-08-09',
+   city:'Philadelphia, PA',mode:'In-person + online',
+   blurb:'The flagship festival for Black, Brown, and Indigenous cinema — its 15th year, 91 films from 30+ countries, screenings, conversations, and community across Broad Street.',
+   url:'https://blackstarprojects.org/festival/passes',cta:'Get passes'},
+  {id:'hollyshorts-2026',name:'HollyShorts Film Festival',start:'2026-08-13',end:'2026-08-23',
+   city:'Los Angeles, CA',mode:'In-person',
+   blurb:'An Oscar-qualifying short-film festival at TCL Chinese Theatres and Ovation Hollywood — 430 films from filmmakers around the world, real ground for the next generation of Black shorts.',
+   url:'https://www.hollyshorts.com/',cta:'Get tickets'}
+];
+function upcomingEvents(){
+  var now=Date.now();
+  return EVENTS.filter(function(e){ return Date.parse(e.end||e.start)>=now; })
+    .sort(function(a,b){ return Date.parse(a.start)-Date.parse(b.start); });
+}
+function eventDateRange(e){
+  var opt={month:'short',day:'numeric'};
+  var s=new Date(e.start+'T00:00:00'), en=e.end?new Date(e.end+'T00:00:00'):null;
+  if(!en || e.start===e.end) return s.toLocaleDateString('en-US',opt)+', '+s.getFullYear();
+  var sameMonth=s.getMonth()===en.getMonth()&&s.getFullYear()===en.getFullYear();
+  return sameMonth
+    ? s.toLocaleDateString('en-US',{month:'short'})+' '+s.getDate()+'–'+en.getDate()+', '+en.getFullYear()
+    : s.toLocaleDateString('en-US',opt)+' – '+en.toLocaleDateString('en-US',opt)+', '+en.getFullYear();
+}
+function eventDaysAway(e){
+  var d=Math.ceil((Date.parse(e.start)-Date.now())/86400000);
+  if(d<0) return 'Happening now';
+  if(d===0) return 'Starts today';
+  if(d===1) return 'Starts tomorrow';
+  return 'In '+d+' days';
+}
+function renderEvents(){
+  var head='<button class="backbtn" onclick="go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
+    '<div class="browse-head"><span class="eyebrow">Real festivals, real dates</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Film Events</h1>'+
+    '<p style="color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:56ch">Where the culture shows up in person. Verified festivals only — nothing guessed, nothing invented.</p></div>';
+  var up=upcomingEvents();
+  var cards=up.map(function(e){
+    var bg=e.backdrop?' style="background-image:linear-gradient(90deg,rgba(9,6,3,.92),rgba(9,6,3,.55) 55%,rgba(9,6,3,.2)),url(\''+esc(e.backdrop)+'\')"':'';
+    return '<div class="ev-card"'+bg+'>'+
+      '<span class="ev-when">'+esc(eventDaysAway(e))+'</span>'+
+      '<h2 class="ev-name">'+esc(e.name)+'</h2>'+
+      '<div class="ev-meta">'+esc(eventDateRange(e))+' · '+esc(e.city)+' · '+esc(e.mode)+'</div>'+
+      '<p class="ev-blurb">'+esc(e.blurb)+'</p>'+
+      '<a class="btn btn-gold btn-sm" href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+esc(e.cta)+' ↗</a>'+
+    '</div>';
+  }).join('');
+  byId('eventsContent').innerHTML=head+'<div class="ev-grid">'+(cards||'<p class="empty-note">Nothing confirmed on the calendar right now — check back soon.</p>')+'</div>';
+}
+/* Home spotlight: the single soonest real event within reach — "highlight the
+   most major one and how to go." Picks upcomingEvents()[0] (closest start
+   date); with BlackStar and HollyShorts both real right now, BlackStar wins
+   as both the soonest AND the flagship — no separate "importance" ranking
+   needed while the list stays this short. */
+function paintEventSpotlight(){
+  var el=byId('eventSpotlight'); if(!el) return;
+  var up=upcomingEvents().filter(function(e){ return (Date.parse(e.start)-Date.now())<=60*86400000; });
+  var e=up[0];
+  if(!e){ el.style.display='none'; return; }
+  el.style.display='';
+  var bg=e.backdrop?' style="background-image:url(\''+esc(e.backdrop)+'\')"':'';
+  el.innerHTML='<div class="evs-wrap">'+
+    '<div class="evs-spark s1"></div><div class="evs-spark s2"></div><div class="evs-spark s3"></div>'+
+    '<div class="evs-copy">'+
+      '<span class="evs-eyebrow">Film Events · '+esc(eventDaysAway(e))+'</span>'+
+      '<h2 class="evs-h">'+esc(e.name)+'</h2>'+
+      '<p class="evs-meta">'+esc(eventDateRange(e))+' · '+esc(e.city)+'</p>'+
+      '<p class="evs-blurb">'+esc(e.blurb)+'</p>'+
+      '<div class="evs-cta"><a class="btn btn-gold" href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+esc(e.cta)+' ↗</a>'+
+      '<button class="btn btn-ghost light" onclick="go(\'events\')">All film events →</button></div>'+
+    '</div>'+
+    '<div class="evs-media"'+bg+'></div>'+
+  '</div>';
 }
 
 /* ============ THE VAULT ============ */
