@@ -3025,3 +3025,23 @@ all 5 translate-based sweeps to it; the 4 inset-based ones stay on plain
 transform matrix matches the static base matrix exactly (translate offset
 preserved, only rotation progressing), zero console errors. CSS-only, no
 markup/JS change.
+
+## Follow-up: background-attachment:fixed removed (still glitching after the sweep fix) (2026-07-22)
+Owner reported the home background was "still acting up" after the
+emmySpinCenter fix above. That fix was real (verified via computed-style
+matrix) but evidently not the whole story. Second, more likely culprit:
+`body{background-attachment:fixed}` (desktop-only, day-one rule) pins the
+page's own radial-gradient background in place while content scrolls over
+it — on a page with ~7 large blurred `box-shadow` "stage cards" (a count
+that's grown a lot this week: Lead story, Ten Years, Events, Card Check, This
+Week at The Table, etc.), this is a textbook cause of visible scroll-time
+tearing/flicker in Chrome and Safari: the browser has to repaint the fixed
+background on every scroll frame while also recomputing all those shadows,
+and drops frames under the load. Removed the rule entirely — the gradient
+now scrolls normally with the page. Purely a decorative top-of-page glow, so
+the visual loss is negligible; the scroll-smoothness gain is real. CSS-only.
+If this still doesn't fully resolve it, the next things to check are: (1)
+hard-refresh/clear cache, since the earlier sweep-transform fix needs the
+new deploy to actually load; (2) which specific element glitches — a video
+or screen recording from the owner would pin it down far faster than more
+blind fixes.
