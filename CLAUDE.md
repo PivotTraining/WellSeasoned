@@ -2829,3 +2829,35 @@ current docs/discussions before writing (not from memory):
   order these are likely to surface, so the owner doesn't need a round-trip
   per error.
 - Validated: Info.plist parses (`plistlib`), codemagic.yaml parses (`yaml`).
+
+## Overnight QA sweep: more baked-in "just dropped" staleness + safety check (2026-07-20)
+Owner asked me to work ahead overnight. Extended the FEATURED-carousel fix from
+earlier tonight — grepped every `syn:` (synopsis) field across the whole
+catalog for the same class of bug: time-relative claims baked into a
+PERMANENT field with no expiry mechanism (worse than FEATURED, which at least
+has `until` dates). Found and fixed 5 more:
+- `they-took-my-daughter` — synopsis literally said "Just dropped,
+  exclusively on Starz." Removed; `where`/tags already convey platform.
+- `survival-of-the-thickest` / `all-the-queens-men` — synopsis (not just the
+  FEATURED eyebrow fixed earlier) also said "Season 3/5 just dropped."
+  Reworded to evergreen ("The third and final season." / "Now in its fifth
+  season.").
+- `the-chi` / `raising-kanan` — synopsis said "Season 8/5 ... is airing now."
+  Verified both are STILL technically airing today (The Chi S8 finale Jul 26;
+  Raising Kanan S5 ends Aug 7) but same structural risk — reworded to
+  evergreen ("Its eighth and final season." / "Its fifth and final season.")
+  before they go stale in a couple weeks like the others already had.
+- Swept for other time-relative phrasing ("now streaming," "recently,"
+  "this season," etc.) — remaining hits were all in-story plot language
+  ("recently divorced," "recently-deceased"), not publication-timing claims.
+  No further action needed.
+- **Safety-relevant check**: cross-referenced every `isKidFriendly()`-tagged
+  title (Family/Animation tag, feeds the Kids section) against `WS_SPICE`
+  mature-content flags (sexual content flag, or R/TV-MA/NC-17 cert) — zero
+  matches. Kids section confirmed clean, no fix needed.
+- Browser sweep across 18 routes (home, browse, kids, rankings, Balcony,
+  shop, couch, soon, theaters, join, bracket, + 6 individual film pages
+  including everything touched tonight) — zero real JS exceptions
+  (`pageerror`); all console noise was expected network/resource-load
+  artifacts from the local test harness (no serverless functions, no
+  outbound internet), not real bugs.
