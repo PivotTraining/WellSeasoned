@@ -232,6 +232,26 @@ In progress:
   reset email end-to-end.
 
 Open/backlog:
+- **Black-filmmaker YouTube shorts catalog** (2026-07-20, owner: "there is a
+  budding catalog of short films on youtube from black filmmakers. go after
+  the top viewed films over 100k views"). Agreed standard with owner:
+  press-cited view counts only (no live YouTube API access in this
+  environment — JS-rendered page, can't scrape a real count directly), page
+  format = the existing Pumzi/Hair Love short-film pattern with a large
+  embedded player since the whole film IS the YouTube video. Research so far
+  (multiple search angles: general virality, DUST, ARRAY/Ava DuVernay,
+  Wikipedia sweep, individual creator searches): real candidates exist and
+  verify fine on authenticity (e.g. "The Blackening" 2018 — Comedy Central
+  Originals' official channel, confirmed via oEmbed, real Black creators
+  Dewayne Perkins/Chioke Nassor/3Peat — but no citable count for the SHORT
+  itself, only for the later feature's trailer) but a PRECISE, CITABLE
+  YouTube-alone view count over 100k for an individual short is proving
+  genuinely hard to surface via search (e.g. Kelly Fyffe-Marshall's
+  TIFF-winning "Black Bodies" only has a citable ~20k combined across three
+  platforms, well under the bar). Diminishing returns on further blind
+  search — the fast unblock is the owner naming specific channels/creators
+  they've actually been seeing, so verification can be targeted instead of
+  exploratory.
 - Prerender/OG for crawlers (per-film share previews server-side).
 - Data hygiene: a handful of pre-integrity test votes may remain.
 - Vercel Web Analytics dashboard toggle (owner action).
