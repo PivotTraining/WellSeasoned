@@ -9414,7 +9414,7 @@ function doApply(role){
   var bio=byId('caBio')?byId('caBio').value.trim():'';
   var socials=byId('caSocials')?byId('caSocials').value.trim():'';
   if(!e||e.indexOf('@')<1){ toast('Enter a valid email.'); return; }
-  var body={name:name||null,email:e,outlet:outlet||null,work_url:work||null,user_id:app.userId||null,role:role,
+  var body={name:name||null,email:e,outlet:outlet||null,work_url:work||null,role:role,
     bio:bio||null,socials:socials||null,avatar_url:_contribAvatar||null};
   var finish=function(already){
     try{ localStorage.setItem('ws_applied_'+role,e); }catch(_){}
@@ -9434,14 +9434,29 @@ function doApply(role){
     if(document.querySelector('.view.on')&&document.querySelector('.view.on').getAttribute('data-view')==='you')renderYou();
   };
   if(!sbConfigured()){ finish(false); return; }
-  fetch(SUPABASE_URL+'/rest/v1/critic_applications',{method:'POST',headers:sbHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-    body:JSON.stringify(body)})
-    .then(function(r){
-      if(r.ok){ finish(false); }
-      else if(r.status===409){ finish(true); }
-      else { toast('Could not submit — try again.'); }
-    })
-    .catch(function(){ toast('Network error — try again.'); });
+  /* Bug fixed 2026-07-20: this used to fire with the bare anon key and a
+     possibly-stale app.userId, which fails a foreign-key check
+     (critic_applications.user_id -> profiles) whenever that id's profile
+     row isn't there yet — and the old handler treated EVERY 409 (including
+     that failure) as "you already applied," so real applications were
+     silently dropped while the applicant saw a false success message.
+     Now mirrors submitFilm's proven pattern: mint/refresh a real identity
+     first, send its JWT, and only the DB's actual unique-email violation
+     (23505) counts as "already applied" — anything else, including a
+     dangling user_id (23503), surfaces as a real error to retry. */
+  ensureIdentityThen(function(){
+    body.user_id=myUid();
+    fetch(SUPABASE_URL+'/rest/v1/critic_applications',{method:'POST',headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify(body)})
+      .then(function(r){
+        if(r.ok){ finish(false); return; }
+        r.json().then(function(err){
+          if(r.status===409&&err&&err.code==='23505'){ finish(true); }
+          else { toast('Could not submit — try again in a moment.'); }
+        }).catch(function(){ toast('Could not submit — try again in a moment.'); });
+      })
+      .catch(function(){ toast('Network error — try again.'); });
+  });
 }
 /* live application status for the signed-in member (feeds the You page) */
 function loadMyApplication(){

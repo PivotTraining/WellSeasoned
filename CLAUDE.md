@@ -2939,3 +2939,41 @@ Monáe, Mykelti Williamson, Erika Alexander, Xavier Mills. `id:'is-god-is-
 2026'`, real poster pinned in WS_POSTERS, backdrop baked, `k`/`t` null,
 `votes:0`, `reviews:[]` — nothing fake. Catalog 1257 → 1258; ran
 `node scripts/build-films-json.cjs`.
+
+## Fix: critic/writer applications silently failing (2026-07-20)
+Owner: "I also don't think im seeing all application submissions either."
+Root-caused by comparing `doApply` (critic/writer applications) against its
+proven sibling `submitFilm` (film submissions, documented reliable) rather
+than guessing — found a real structural gap: `submitFilm` mints/refreshes a
+real identity first (`ensureIdentityThen`) and writes with the caller's
+session JWT (`sbVoteHeaders`) plus a matching `user_id` (`myUid()`);
+`doApply` did none of that — it wrote with the bare anon key
+(`sbHeaders()`, no JWT) and a possibly-stale `app.userId` captured at form-
+open time.
+Verified live against production (two diagnostic curl POSTs to
+`critic_applications`, using an unmistakable
+`[DIAGNOSTIC TEST - DELETE ME]` name so they're safe to spot and delete):
+sending a `user_id` without a matching session JWT returns **409** with
+Postgres error code **23503 — a foreign-key violation** (`user_id` doesn't
+reference an existing `profiles` row), NOT a duplicate-email conflict. But
+the old client code treated **every** 409 as "you already applied" and
+showed the applicant a false success message ("You're already in review")
+— so real applications were being silently dropped while the applicant
+walked away thinking they were done. This is almost certainly why some
+submissions never reached the inbox.
+**Fix**: `doApply` now mirrors `submitFilm`'s exact working pattern
+(`ensureIdentityThen` → real JWT via `sbVoteHeaders` → fresh `user_id` via
+`myUid()` set at write time, not form-open time), and the response handler
+now inspects the actual Postgres error `code` — only `23505` (a genuine
+unique-constraint duplicate) shows "already in review"; anything else,
+including the `23503` FK violation that was silently eating submissions,
+now surfaces as a real "Could not submit — try again" so the applicant
+knows to retry. Verified in headless Chromium across all three real
+response shapes (success / true duplicate / the broken-FK case) — each
+shows the correct outcome, real JWT confirmed on every request, zero
+console errors.
+**Cleanup needed**: the second diagnostic curl test (verifying the
+null-user_id path still works) legitimately inserted one real row into the
+live `critic_applications` table — name `[DIAGNOSTIC TEST - DELETE ME]`,
+email `diagnostic-test-doApply-nulluid@itswellseasoned-test.invalid`. Owner
+should delete it from Curate → Applications.
