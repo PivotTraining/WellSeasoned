@@ -3000,3 +3000,28 @@ that one existing action — no new backend. Degrades gracefully with the same
 headless Chromium (mocked `admin_user_directory` with 2 critics + 1 non-critic
 member): tab renders, count reads "2 critics", only the two `is_critic:true`
 rows show, Remove button present, zero real console errors.
+
+## Fix: home background "glitching" — spotlight sweep transform bug (2026-07-22)
+Owner: "the background is glitching on homepage." Root cause: five dark
+"stage card" spotlight sweeps (`.lead-inner::after`, `.ty-wrap::after`,
+`.evs-wrap::after` on home; `.shop-hero::after`, `.word-cover::after`
+elsewhere) center themselves with a base `transform:translate(-50%,-50%)`,
+then animate on the shared `emmySpin` keyframe, which only defines
+`to{transform:rotate(360deg)}` — dropping the translate entirely. Animating
+between mismatched transform function lists (`translate(...)` → bare
+`rotate(...)`) forces the browser to matrix-decompose every frame, which
+visibly wobbles the glow mid-spin and then **snaps/pops at every loop
+restart** (every 15–18s per element) — three of these run simultaneously on
+home (Lead story banner, Ten Years spotlight, Events spotlight), which reads
+exactly as "the background glitching." The other spin users
+(`.mf-wrap`/`.feat-car`/`.plan.feature`/dead `.emmy-car-wrap`) center via
+`inset:-60%` instead of `top/left/transform`, so they had no base transform
+to lose and never had this bug.
+Fix: new `@keyframes emmySpinCenter{to{transform:translate(-50%,-50%)
+rotate(360deg)}}` — keeps the translate in both the base rule and the
+keyframe so only rotate ever animates, no decomposition, no snap. Repointed
+all 5 translate-based sweeps to it; the 4 inset-based ones stay on plain
+`emmySpin`, unchanged. Verified in headless Chromium: computed `::after`
+transform matrix matches the static base matrix exactly (translate offset
+preserved, only rotation progressing), zero console errors. CSS-only, no
+markup/JS change.

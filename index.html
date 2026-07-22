@@ -530,7 +530,7 @@
     padding:46px 48px;box-shadow:0 30px 70px rgba(0,0,0,.5)}
   .shop-hero::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);
     pointer-events:none;background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.13) 87%,transparent 95%);
-    animation:emmySpin 15s linear infinite}
+    animation:emmySpinCenter 15s linear infinite}
   .sh-copy{position:relative;z-index:1;flex:1 1 52%}
   .sh-eyebrow{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.28em;text-transform:uppercase;
     background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
@@ -812,7 +812,7 @@
     padding:44px 46px;box-shadow:0 30px 70px rgba(0,0,0,.5);cursor:pointer}
   .word-cover::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);
     pointer-events:none;background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.13) 87%,transparent 95%);
-    animation:emmySpin 15s linear infinite}
+    animation:emmySpinCenter 15s linear infinite}
   .wcov-copy{position:relative;z-index:1;flex:1 1 52%}
   .wcov-eyebrow{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.28em;text-transform:uppercase;
     background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
@@ -915,7 +915,7 @@
   .lead-inner{position:relative;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--r-xl);
     background:linear-gradient(150deg,#241809,#110a04);box-shadow:0 30px 70px rgba(0,0,0,.5);cursor:pointer;color:inherit;min-height:360px}
   .lead-inner::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
-    background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpin 16s linear infinite}
+    background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpinCenter 16s linear infinite}
   .lead-copy{position:relative;z-index:2;flex:1 1 47%;padding:46px 48px;display:flex;flex-direction:column;justify-content:center}
   .lead-media{position:relative;z-index:1;flex:1 1 53%;background-size:cover;background-position:center 28%;min-height:360px}
   .lead-media::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#1a1108 0%,rgba(26,17,8,.35) 24%,transparent 60%)}
@@ -933,7 +933,7 @@
   .ty-wrap{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:34px 34px 30px;
     background:linear-gradient(150deg,#1f1526,#0e0713);box-shadow:0 30px 70px rgba(0,0,0,.5)}
   .ty-wrap::after{content:"";position:absolute;top:50%;left:50%;width:170%;height:170%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
-    background:conic-gradient(from 0deg,transparent 0 76%,rgba(244,197,66,.13) 86%,transparent 94%);animation:emmySpin 18s linear infinite}
+    background:conic-gradient(from 0deg,transparent 0 76%,rgba(244,197,66,.13) 86%,transparent 94%);animation:emmySpinCenter 18s linear infinite}
   .ty-wrap>*{position:relative;z-index:2}
   .ty-spark{position:absolute;z-index:1;width:5px;height:5px;border-radius:50%;background:#F4C542;box-shadow:0 0 8px 2px rgba(244,197,66,.7);animation:emmyTwinkle 3.2s ease-in-out infinite}
   .ty-spark.s1{top:22px;right:40px} .ty-spark.s2{top:64px;right:88px;animation-delay:1.1s} .ty-spark.s3{bottom:40px;left:44px;animation-delay:2s}
@@ -962,7 +962,7 @@
   .evs-wrap{position:relative;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--r-xl);
     background:linear-gradient(150deg,#1a1408,#0d0a05);box-shadow:0 24px 56px -20px rgba(0,0,0,.55);min-height:260px}
   .evs-wrap::after{content:"";position:absolute;top:50%;left:20%;width:150%;height:150%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
-    background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpin 17s linear infinite}
+    background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpinCenter 17s linear infinite}
   .evs-spark{position:absolute;z-index:1;width:5px;height:5px;border-radius:50%;background:#F4C542;box-shadow:0 0 8px 2px rgba(244,197,66,.7);animation:emmyTwinkle 3.4s ease-in-out infinite}
   .evs-spark.s1{top:24px;right:36px} .evs-spark.s2{top:70px;right:80px;animation-delay:1.1s} .evs-spark.s3{bottom:34px;right:130px;animation-delay:2.1s}
   .evs-copy{position:relative;z-index:2;flex:1 1 56%;padding:34px 38px;display:flex;flex-direction:column;justify-content:center}
@@ -1094,6 +1094,14 @@
   .emmy-car-wrap::after{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.16) 10deg,transparent 26deg,transparent 334deg);
     animation:emmySpin 8s linear infinite;pointer-events:none;mix-blend-mode:screen;z-index:0}
   @keyframes emmySpin{to{transform:rotate(360deg)}}
+  /* Same sweep, for elements whose base transform is translate(-50%,-50%)
+     (centered via top/left rather than inset). emmySpin alone drops that
+     translate at its "to" keyframe, so the browser has to matrix-decompose
+     between translate(-50%,-50%) and a bare rotate(360deg) every cycle —
+     visibly wobbles mid-spin and pops/snaps back at each loop restart. This
+     variant keeps the translate in both the base rule and the keyframe so
+     only rotate ever animates. */
+  @keyframes emmySpinCenter{to{transform:translate(-50%,-50%) rotate(360deg)}}
   .emmy-car-spark{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,230,170,.9),transparent 70%);pointer-events:none;z-index:0;opacity:0;animation:emmyTwinkle 2.6s ease-in-out infinite}
   .emmy-car-spark.s1{top:14%;left:12%;width:5px;height:5px;animation-delay:.2s}
   .emmy-car-spark.s2{top:24%;right:16%;width:4px;height:4px;animation-delay:1.1s}
