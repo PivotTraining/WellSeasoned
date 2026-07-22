@@ -2928,3 +2928,14 @@ fall outside the 60-day window regardless, so left out rather than guess.
   BlackStar with correct "In 15 days" + real date range + real ticket link;
   `#/events` lists both real events with correct dates; both nav entries
   (More dropdown, footer) present; zero console errors.
+
+## "Is God Is" (2026) added to the catalog (2026-07-20)
+Owner: "add 'Is God Is (2026)' to the films." Verified via TMDB (id 1380316,
+released 2026-05-14) — the film adaptation of Aleshea Harris's Obie
+Award-winning play, and she wrote AND directed it herself (a real rarity).
+Unambiguously Black-led: Aleshea Harris (writer/director), all-star cast
+Kara Young, Mallori Johnson, Vivica A. Fox, Sterling K. Brown, Janelle
+Monáe, Mykelti Williamson, Erika Alexander, Xavier Mills. `id:'is-god-is-
+2026'`, real poster pinned in WS_POSTERS, backdrop baked, `k`/`t` null,
+`votes:0`, `reviews:[]` — nothing fake. Catalog 1257 → 1258; ran
+`node scripts/build-films-json.cjs`.
