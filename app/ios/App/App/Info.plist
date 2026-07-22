@@ -43,5 +43,12 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- The app only uses standard HTTPS (the webview loading itswellseasoned.com,
+	     Capacitor's own plugin traffic) — no custom/non-exempt encryption. Declaring
+	     this upfront skips Apple's "export compliance" question that otherwise blocks
+	     the FIRST TestFlight build from becoming testable until answered manually in
+	     App Store Connect. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

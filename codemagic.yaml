@@ -11,7 +11,7 @@
 workflows:
   ios-workflow:
     name: Well Seasoned — iOS
-    max_build_duration: 60
+    max_build_duration: 90   # first run creates cert/profile + cold CocoaPods cache — give it headroom
     instance_type: mac_mini_m2
     integrations:
       app_store_connect: well_seasoned_asc   # rename to match the key name you create in Codemagic's UI
@@ -32,6 +32,13 @@ workflows:
         script: |
           cd app/ios/App
           pod install
+      # Auto-increments the build number every run using Codemagic's own build
+      # counter (no Apple lookup needed) — avoids "this build number has
+      # already been used" if a build is ever re-run for the same version.
+      - name: Set the build number
+        script: |
+          cd app/ios/App
+          agvtool new-version -all $BUILD_NUMBER
       - name: Set up keychain
         script: keychain initialize
       # This is the step that actually CREATES the App Store distribution

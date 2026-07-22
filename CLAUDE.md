@@ -2799,3 +2799,33 @@ rather than guess at scope. Found two real, concrete issues:
 - Verified in headless Chromium: `featSlides()` returns the corrected 5-slide
   list in order, Diarra's countdown copy is exactly right, the stale/false
   labels are gone, zero console errors.
+
+## iOS build: hardened against the next likely Codemagic failures (2026-07-20)
+Owner got stuck on Codemagic again (no error text given, went to sleep) —
+worked ahead autonomously rather than wait, researching and fixing the most
+likely NEXT failure points after the signing fix, all verified against
+current docs/discussions before writing (not from memory):
+- **API key role was wrong in the original instructions.** Told the owner
+  to create the key with "App Manager" access — verified that's insufficient:
+  creating a NEW certificate/profile (what our `fetch-signing-files --create`
+  step does) requires **Admin** access; App Manager can only use
+  already-existing signing files. Since Apple doesn't allow changing a key's
+  role after creation, this needs a revoke-and-recreate. Documented as the
+  most likely next blocker in `app/README.md`, with the wrong-role error
+  pattern described (often reads like a permissions/403, easy to mistake for
+  the earlier profile error).
+- **Export compliance**, proactively fixed rather than just documented:
+  `app/ios/App/App/Info.plist` now declares `ITSAppUsesNonExemptEncryption:
+  false` (accurate — HTTPS only, no custom encryption), so a build doesn't
+  get stuck un-testable in App Store Connect pending a manual answer.
+- **Build number collisions**, proactively fixed: `codemagic.yaml` now
+  auto-increments the build number every run via Codemagic's own counter
+  (`agvtool new-version -all $BUILD_NUMBER`, verified syntax) — no Apple
+  lookup needed, reruns can never collide.
+- `max_build_duration` bumped 60→90 min (first run does real cert/profile
+  creation + cold CocoaPods cache, verified `mac_mini_m2` is still the
+  correct/current free-tier instance type).
+- `app/README.md` restructured into a numbered troubleshooting list in the
+  order these are likely to surface, so the owner doesn't need a round-trip
+  per error.
+- Validated: Info.plist parses (`plistlib`), codemagic.yaml parses (`yaml`).

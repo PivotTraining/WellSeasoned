@@ -94,8 +94,9 @@ codemagic.io / appstoreconnect.apple.com in a browser, no terminal):
 
 1. **Create an App Store Connect API key** — App Store Connect → **Users and
    Access → Integrations → App Store Connect API** → **+** → name it, give it
-   **App Manager** access, download the `.p8` file (only downloadable once —
-   keep it safe), and note the **Issuer ID** and **Key ID** shown on the page.
+   **Admin** access (see the note below — App Manager is NOT enough for this
+   setup), download the `.p8` file (only downloadable once — keep it safe),
+   and note the **Issuer ID** and **Key ID** shown on the page.
 2. **Sign up at codemagic.io** and connect this GitHub repo
    (`PivotTraining/WellSeasoned`) as an app.
 3. In Codemagic → **Team settings → Integrations → Developer Portal → Manage
@@ -109,14 +110,79 @@ codemagic.io / appstoreconnect.apple.com in a browser, no terminal):
    should appear there, ready to install via the TestFlight app or submit
    for review.
 
-### Fix: "No matching profiles found" on first build
+### Troubleshooting, in the order you're likely to hit them
+
+**1. "No matching profiles found for bundle identifier ... and distribution
+type 'app_store'"**
 
 The `environment.ios_signing` shortcut only looks for an *existing*
 certificate/provisioning profile — it won't create one, so a brand-new
-Apple Developer account (nothing registered yet) hits "No matching
-profiles found for bundle identifier..." on the very first build.
-`codemagic.yaml` now uses the explicit signing steps instead
-(`keychain initialize` → `app-store-connect fetch-signing-files --create`
-→ `keychain add-certificates` → `xcode-project use-profiles`), which
-generates the App Store distribution certificate + profile automatically
-the first time it runs. Subsequent builds reuse them.
+Apple Developer account (nothing registered yet) hits this on the very
+first build. Fixed already: `codemagic.yaml` uses the explicit signing
+steps instead (`keychain initialize` → `app-store-connect
+fetch-signing-files --create` → `keychain add-certificates` →
+`xcode-project use-profiles`), which generates the App Store distribution
+certificate + profile automatically the first time it runs. Subsequent
+builds reuse them — this step only does real work once.
+
+**2. The API key needs Admin, not App Manager**
+
+This is the one most likely to bite next if the key was created with
+**App Manager** access (which is what a lot of guides — including an
+earlier version of this one — suggest for a simpler "upload-only" setup).
+**Creating a NEW certificate/profile requires Admin access** on the API
+key; App Manager can only use signing files that already exist. Since our
+`fetch-signing-files --create` step needs to create them the first time,
+an App Manager key will fail (often with a permissions/403-style error
+from the `app-store-connect` step, sometimes worded as if the resource
+"doesn't exist" rather than a clear permissions message — easy to
+mistake for the profile error above).
+
+Fix: Apple doesn't allow changing a key's role after creation, so —
+1. App Store Connect → **Users and Access → Integrations → App Store
+   Connect API** → find the key → **Revoke** it.
+2. Create a **new** key with **Admin** access, download its `.p8` file
+   immediately.
+3. In Codemagic → **Team settings → Integrations → Developer Portal →
+   Manage keys**, add the new key (same name, `well_seasoned_asc`, or
+   update the value in `codemagic.yaml` to match) — this replaces the old
+   one, no other config changes needed.
+4. Re-run the build.
+
+**3. Missing export compliance (blocks the build from becoming testable
+in TestFlight)**
+
+Apple asks every app whether it uses encryption subject to U.S. export
+documentation. Left unanswered, a build uploads fine but sits in App
+Store Connect unable to be added to a TestFlight test group until someone
+manually answers the question in the UI. Already fixed proactively:
+`app/ios/App/App/Info.plist` now declares
+`ITSAppUsesNonExemptEncryption: false` (accurate — the app only uses
+standard HTTPS via the webview and Capacitor's own plugin traffic, no
+custom encryption), which answers the question at build time and skips
+the manual step entirely.
+
+**4. "This build number has already been used"**
+
+Apple requires every TestFlight/App Store upload to have a build number
+higher than the last one, even across failed attempts. Already handled:
+`codemagic.yaml` auto-increments the build number every run using
+Codemagic's own build counter (`agvtool new-version -all $BUILD_NUMBER`)
+— no manual bumping needed, and reruns can never collide.
+
+**5. Build times out**
+
+First run creates a certificate/profile from scratch and starts from a
+cold CocoaPods cache, so it can legitimately take longer than a typical
+rebuild. `max_build_duration` is set to 90 minutes to give it room —
+if it still times out, that's likely a real hang (check the log for which
+step it stalled on) rather than needing more time.
+
+**6. The App ID was never fully registered**
+
+If the "Register an App ID" flow in the Apple Developer portal was
+started but not finished (no final **Continue → Register** click), there's
+nothing in Certificates, Identifiers & Profiles for Codemagic to attach a
+profile to — same symptom as #1. Check **Apple Developer → Certificates,
+Identifiers & Profiles → Identifiers** and confirm `com.wellseasoned.app`
+is actually listed there.
