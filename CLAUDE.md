@@ -2977,3 +2977,26 @@ null-user_id path still works) legitimately inserted one real row into the
 live `critic_applications` table — name `[DIAGNOSTIC TEST - DELETE ME]`,
 email `diagnostic-test-doApply-nulluid@itswellseasoned-test.invalid`. Owner
 should delete it from Curate → Applications.
+
+## Curate: new "Critics" tab — a findable roster of everyone seated (2026-07-22)
+Owner: "I want to see the people I moved over to critic and that doesnt show
+on a list." Real gap: Curate's Applications tab only lists people who
+*applied*; a member promoted directly from The Pulse's "Make critic" button
+(no application involved) never appeared on any admin list — the only way to
+confirm they were seated was Pulse's Critics filter chip buried in the full
+user directory table. Added a dedicated `['critics','Critics']` tab to
+`CUR_TABS`/`renderCuratePage`/`curShowTab` (index.html), between Applications
+and Film submissions. `loadCurCritics()` calls the same owner-gated
+`admin_user_directory` RPC The Pulse already uses (needed for email — the
+public `profiles` table doesn't expose it, and email is required to reuse
+`verify_critic` for removal), filters to `is_critic:true` client-side.
+`curCriticRowHTML()` shows avatar/name/outlet/email/seated-date + real
+review/vote/comment counts (reuses the existing `.cr-row`/`.cr-body` CSS from
+Critic posts — no new styles needed), with a Remove button that calls the
+existing `pulseRemoveCritic(email)` (same `verify_critic(p_on:false)` RPC
+already used by Pulse/the inbox) and refreshes the list. Read-only aside from
+that one existing action — no new backend. Degrades gracefully with the same
+"run the SQL" hint if `admin_user_directory` isn't deployed yet. Verified in
+headless Chromium (mocked `admin_user_directory` with 2 critics + 1 non-critic
+member): tab renders, count reads "2 critics", only the two `is_critic:true`
+rows show, Remove button present, zero real console errors.

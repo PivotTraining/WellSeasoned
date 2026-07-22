@@ -7834,7 +7834,7 @@ function curSetFilter(v){ CUR_FILTER=v; CUR_SHOWN=120; renderCurPageList(); }
 function curMore(){ CUR_SHOWN+=200; renderCurPageList(); }
 function curPageQ(){ var el=byId('curPageSearch'); return el?el.value:''; }
 var CUR_TAB='catalog';
-var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['subs','Film submissions'],['sugg','Suggestions'],['reviews','Critic posts']];
+var CUR_TABS=[['catalog','Catalog'],['apps','Applications'],['critics','Critics'],['subs','Film submissions'],['sugg','Suggestions'],['reviews','Critic posts']];
 function renderCuratePage(tab){
   var w=byId('curPageWrap'); if(!w)return;
   if(!isOwner()){ w.innerHTML='<div class="browse-head"><h1>Curate</h1><p class="hero-lead" style="margin-top:8px">Owner only. Sign in as <b>'+esc(OWNER_EMAIL)+'</b> to curate.</p><button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openAuth(\'signin\')">Sign in</button></div>'; return; }
@@ -7859,6 +7859,11 @@ function renderCuratePage(tab){
         '<button class="btn btn-ghost btn-sm" onclick="copyApplyLink(\'writer\')">Copy Word link</button></div>'+
       '<div class="inbox-tools"><button class="btn btn-ghost btn-sm" onclick="inboxLoad()">\u21bb Refresh</button><span id="inboxCount" class="inbox-count"></span></div>'+
       '<div id="inboxList" class="inbox-list"><p class="hero-lead">Loading\u2026</p></div>'+
+    '</div>'+
+    '<div id="curTabCritics" style="display:none">'+
+      '<div class="inbox-tools"><span class="ish-lab" style="flex:1">Everyone with a critic seat right now — seated via an application, or moved over directly from The Pulse.</span>'+
+        '<button class="btn btn-ghost btn-sm" onclick="loadCurCritics()">↻ Refresh</button><span id="curCriticsCount" class="inbox-count"></span></div>'+
+      '<div class="cur-list" id="curCriticsList"><p class="hero-lead">Loading…</p></div>'+
     '</div>'+
     '<div id="curTabSubs" style="display:none">'+
       '<div class="curp-count" id="curSubsCount"></div>'+
@@ -7927,11 +7932,13 @@ function loadAdminStats(){
 function curShowTab(tab){
   byId('curTabCatalog').style.display=(tab==='catalog')?'':'none';
   byId('curTabApps').style.display=(tab==='apps')?'':'none';
+  byId('curTabCritics').style.display=(tab==='critics')?'':'none';
   byId('curTabSubs').style.display=(tab==='subs')?'':'none';
   byId('curTabSugg').style.display=(tab==='sugg')?'':'none';
   byId('curTabReviews').style.display=(tab==='reviews')?'':'none';
   if(tab==='catalog')renderCurPageList();
   else if(tab==='apps')inboxLoad();
+  else if(tab==='critics')loadCurCritics();
   else if(tab==='subs')adminSubs();
   else if(tab==='sugg')adminSuggestions();
   else if(tab==='reviews')loadCurReviews();
@@ -8107,6 +8114,46 @@ function pulseInvite(email){
     'We’d love to seat you as a verified critic, where your reviews move the official Kitchen score. If you’re in, just reply to this email and we’ll set you up.\n\n'+
     'Welcome to the table.\n— Well Seasoned\nhttps://itswellseasoned.com';
   window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+}
+/* Curate ▸ Critics tab — a plain roster of everyone currently seated as a
+   critic, whether they got there via an application (Applications tab only
+   shows applicants, so a directly-promoted critic from The Pulse never
+   appeared anywhere) or via pulseMakeCritic. Sources the same owner-gated
+   admin_user_directory RPC The Pulse uses (it already carries email, which
+   the profiles table itself doesn't expose — needed for the Remove action,
+   which reuses the same verify_critic RPC as everywhere else). */
+var _curCritics=null;
+function loadCurCritics(){
+  var el=byId('curCriticsList'); if(!el)return;
+  el.innerHTML='<p class="hero-lead">Loading…</p>';
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_user_directory',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      var el=byId('curCriticsList'); if(!el)return;
+      if(!res.ok||!Array.isArray(res.d)){
+        el.innerHTML='<div class="cur-stats-note">The user directory isn’t live yet — run the <code>admin_user_directory</code> block from <code>backend/schema.sql</code> in the Supabase SQL editor, then reload.</div>';
+        var c=byId('curCriticsCount'); if(c)c.textContent=''; return;
+      }
+      _curCritics=res.d.filter(function(u){ return u.is_critic; });
+      renderCurCriticsList();
+    })
+    .catch(function(){ var el=byId('curCriticsList'); if(el)el.innerHTML='<p class="empty-note">Couldn’t load critics right now.</p>'; });
+}
+function curCriticRowHTML(u){
+  var av=u.avatar_url?'<div class="ic-av" style="background-image:url(\''+esc(u.avatar_url)+'\')"></div>':'<div class="ic-av ic-av-none">'+esc((u.name||'?').slice(0,1).toUpperCase())+'</div>';
+  return '<div class="cr-row">'+av+
+    '<div class="cr-body">'+
+      '<div class="cr-head">'+esc(u.name||'Unnamed')+'</div>'+
+      '<div class="cr-byline">'+esc(u.critic_outlet||'Independent')+' &middot; '+esc(u.email||'')+' &middot; seated '+_pulseFmtDate(u.created_at)+'</div>'+
+      '<p class="cr-quote cr-empty">'+(u.reviews||0)+' Kitchen review'+(u.reviews===1?'':'s')+' &middot; '+(u.votes||0)+' votes &middot; '+(u.comments||0)+' comments</p>'+
+    '</div>'+
+    '<button class="btn btn-ghost btn-sm" onclick="pulseRemoveCritic(\''+esc(u.email||'')+'\');setTimeout(loadCurCritics,400)">Remove</button>'+
+  '</div>';
+}
+function renderCurCriticsList(){
+  var el=byId('curCriticsList'); if(!el||!_curCritics)return;
+  var c=byId('curCriticsCount'); if(c)c.textContent=_curCritics.length+' critic'+(_curCritics.length===1?'':'s');
+  el.innerHTML=_curCritics.length?_curCritics.map(curCriticRowHTML).join(''):'<p class="empty-note">No one’s seated as a critic yet.</p>';
 }
 function renderCurPageList(){
   var el=byId('curPageList'); if(!el)return;
