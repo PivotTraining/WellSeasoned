@@ -3213,3 +3213,39 @@ owner as possibly a WebKit compositing/paint-cache artifact rather than a
 code bug — asked them to fully quit and reopen Safari (not just the tab) and
 hard-refresh, then confirm whether the flex fix alone resolved what they were
 seeing.
+
+## Home "background glitching" — WebKit overflow-clip fix (attempt 3) (2026-07-23)
+Owner reported the home background still glitching after the emmySpinCenter
+and background-attachment fixes — screenshot (desktop Safari) showed the
+Balcony lead-story card's Moonlight hero rendering as a small detached box
+with a large photographic image bleeding across the viewport behind it. Could
+not reproduce in Chromium (renders pixel-correct) and the bleed image matches
+no asset in the codebase, which pointed at a WebKit-engine-specific bug rather
+than bad layout or bad image data. Confirmed the live deploy was current (not
+stale) before proceeding.
+Root cause hypothesis (matches the symptom class exactly — a photographic
+child spilling past its rounded container ONLY in Safari): the home spotlight/
+carousel containers (`.lead-inner`, `.feat-car`, `.ty-wrap`, `.evs-wrap`) all
+use `overflow:hidden` + `border-radius` to clip either an animated
+conic-gradient `::after` sweep or, in the carousel's case, a `.feat-track`
+that lays all 5 slides (each a full-width film-backdrop photo) side by side
+and is promoted to its own layer via `will-change:transform`. WebKit has a
+long-standing bug where `overflow:hidden` + `border-radius` fails to clip a
+descendant that's on its own compositing layer — so those off-screen backdrop
+photos can paint across the page. Chromium clips correctly, which is why it
+never reproduced locally.
+Fix: force each clipping container onto its own backing layer with
+`transform:translateZ(0)` (+ `-webkit-` prefix) and `isolation:isolate`, the
+standard remedy for this WebKit clip bug — it makes the container itself
+composited so it clips composited descendants. Deliberately did NOT use the
+`-webkit-mask-image:-webkit-radial-gradient(white,black)` variant of this hack
+(also commonly cited) because a white→black radial mask fades the card edges
+to transparent — a visible corner vignette. `translateZ(0)` is a pure no-op
+where clipping already works (verified in Chromium: lead-media still 602×385
+in place, zero full-screen photo bleed, zero console errors).
+NOTE if this STILL doesn't resolve it for the owner: the decisive next
+diagnostic is the exact URL of the bleeding image — right-click it in Safari →
+"Copy Image Address" — which names the source element in one shot; and whether
+it reproduces in Chrome on the same Mac (Safari-only ⇒ this class of fix;
+every browser ⇒ a data/deploy issue). Re-uploading the featured movie would
+NOT help — it's a CSS clip bug, not corrupt image data.

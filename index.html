@@ -927,7 +927,8 @@
   /* HOME lead story — a dark cinematic banner promoting the cover feature */
   .lead-story{margin:0 0 26px}
   .lead-inner{position:relative;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--r-xl);
-    background:linear-gradient(150deg,#241809,#110a04);box-shadow:0 30px 70px rgba(0,0,0,.5);cursor:pointer;color:inherit;min-height:360px}
+    background:linear-gradient(150deg,#241809,#110a04);box-shadow:0 30px 70px rgba(0,0,0,.5);cursor:pointer;color:inherit;min-height:360px;
+    -webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate}
   .lead-inner::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
     background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpinCenter 16s linear infinite}
   .lead-copy{position:relative;z-index:2;flex:1 1 47%;min-width:0;padding:46px 48px;display:flex;flex-direction:column;justify-content:center}
@@ -945,7 +946,8 @@
   /* HOME ten-years-on spotlight — anniversary stage card (shares emmy chrome) */
   .ten-years{margin:0 0 26px}
   .ty-wrap{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:34px 34px 30px;
-    background:linear-gradient(150deg,#1f1526,#0e0713);box-shadow:0 30px 70px rgba(0,0,0,.5)}
+    background:linear-gradient(150deg,#1f1526,#0e0713);box-shadow:0 30px 70px rgba(0,0,0,.5);
+    -webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate}
   .ty-wrap::after{content:"";position:absolute;top:50%;left:50%;width:170%;height:170%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
     background:conic-gradient(from 0deg,transparent 0 76%,rgba(244,197,66,.13) 86%,transparent 94%);animation:emmySpinCenter 18s linear infinite}
   .ty-wrap>*{position:relative;z-index:2}
@@ -974,7 +976,8 @@
   /* HOME film-events spotlight — the nearest real, attendable festival */
   .ev-spot{margin:0 0 26px}
   .evs-wrap{position:relative;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--r-xl);
-    background:linear-gradient(150deg,#1a1408,#0d0a05);box-shadow:0 24px 56px -20px rgba(0,0,0,.55);min-height:260px}
+    background:linear-gradient(150deg,#1a1408,#0d0a05);box-shadow:0 24px 56px -20px rgba(0,0,0,.55);min-height:260px;
+    -webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate}
   .evs-wrap::after{content:"";position:absolute;top:50%;left:20%;width:150%;height:150%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
     background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpinCenter 17s linear infinite}
   .evs-spark{position:absolute;z-index:1;width:5px;height:5px;border-radius:50%;background:#F4C542;box-shadow:0 0 8px 2px rgba(244,197,66,.7);animation:emmyTwinkle 3.4s ease-in-out infinite}
@@ -1176,7 +1179,8 @@
      two big carousels don't read as two different builds. */
   .feat-wrap{margin:0 0 22px}
   .feat-car{position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid rgba(244,197,66,.28);
-    box-shadow:0 14px 36px rgba(0,0,0,.34),0 0 0 1px rgba(244,197,66,.08) inset,0 0 40px rgba(228,155,11,.1);isolation:isolate}
+    box-shadow:0 14px 36px rgba(0,0,0,.34),0 0 0 1px rgba(244,197,66,.08) inset,0 0 40px rgba(228,155,11,.1);isolation:isolate;
+    -webkit-transform:translateZ(0);transform:translateZ(0)}
   .feat-car::after{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.13) 10deg,transparent 26deg,transparent 334deg);
     animation:emmySpin 10s linear infinite;pointer-events:none;mix-blend-mode:screen;z-index:0}
   .feat-track{position:relative;z-index:1;display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1);will-change:transform}
