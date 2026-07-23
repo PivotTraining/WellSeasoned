@@ -3088,3 +3088,17 @@ as the win-back graphic:
   verified data added to the catalog above.
 Not committed to the repo (marketing assets, not site code) — delivered
 directly to the owner, same convention as the win-back graphic.
+
+## Fix: 72 Hours trailer wasn't wired to the FILMS catalog entry (2026-07-23)
+Caught right after the previous entry (owner asked "do we have a trailer
+attached? Is it featured on page?"). The real, verified trailer
+(`N-J-HR3quc4`) was set on the **COMING_SOON** entry (`cs-949838`) — so it
+plays correctly on the Coming Soon detail page — but the **FILMS** catalog
+entry (`72-hours-2026`) only picks up a trailer via the `WS_TRAILERS[f.id]`
+override map (`applyMeta()`), which I forgot to add an entry to. Result: the
+FEATURED home carousel slide (which reads `f.trailer` off the FILMS entry,
+not the Coming Soon one) had no "▶ Trailer" button, and the film's own detail
+page would have shown none either. Fixed by adding `'72-hours-2026':
+'N-J-HR3quc4'` to `WS_TRAILERS`. Verified in headless Chromium: `find(
+'72-hours-2026').trailer` now resolves, and the FEATURED slide HTML includes
+the real `▶ Trailer` button wired to `openTrailer('72-hours-2026')`.
