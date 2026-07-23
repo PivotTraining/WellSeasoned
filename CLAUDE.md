@@ -3102,3 +3102,20 @@ page would have shown none either. Fixed by adding `'72-hours-2026':
 'N-J-HR3quc4'` to `WS_TRAILERS`. Verified in headless Chromium: `find(
 '72-hours-2026').trailer` now resolves, and the FEATURED slide HTML includes
 the real `▶ Trailer` button wired to `openTrailer('72-hours-2026')`.
+
+## Home FEATURED carousel: Share button added (2026-07-23)
+Owner: "Carousel films need a share button." The home spotlight carousel
+(`.feat-car`/`featSlideHTML`) had a gold CTA + a Trailer button but no way to
+share a slide directly — the film page itself already has one (`renderFilm`'s
+`.film-actions` row), so this closed a real gap on the highest-visibility
+surface on the site. Added a "Share ↗" button to `.feat-cta` next to Trailer
+(`event.stopPropagation()` so it doesn't also trigger the card's own
+navigate-to-film click). New `featShare(id)` mirrors the exact released-vs-
+coming-soon branch the film page's own Share button already uses
+(`upcomingSoonEntry(f)` → `openShareCardSoon` for a title still in its Coming
+Soon window, else `openShareCard` for the real verdict card) — so a slide for
+an unreleased premiere (e.g. 72 Hours) shares the honest "COMING SOON" poster
+card, never a verdict card for a film nobody's voted on yet. Verified in
+headless Chromium: all 5 current FEATURED slides render the button; an
+upcoming title routes to `openShareCardSoon`, a released one to
+`openShareCard`; zero console errors.

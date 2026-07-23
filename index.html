@@ -8292,6 +8292,15 @@ function featSlides(){
   }
   return out;
 }
+/* Same released-vs-coming-soon branch the film page already uses for its
+   own Share button (renderFilm, ~line 8706) — a title still in its Coming
+   Soon window gets the real "COMING SOON" poster card (buildSoonShareCard),
+   never a verdict share card for a film nobody's voted on yet. */
+function featShare(id){
+  var f=find(id); if(!f)return;
+  var soonC=upcomingSoonEntry(f);
+  if(soonC) openShareCardSoon(soonC.id); else openShareCard(f.id);
+}
 function featSlideHTML(f,ey){
   var bg=f.backdrop||'', poster=(typeof servePoster==='function'?servePoster(f):null)||f.poster||'';
   var open="go('film','"+f.id+"')";
@@ -8305,6 +8314,7 @@ function featSlideHTML(f,ey){
       '<p class="feat-syn">'+esc(f.syn)+'</p>'+
       '<div class="feat-cta"><span class="btn btn-gold btn-sm">'+(f.type==='tv'?'See the show →':'See the film →')+'</span>'+
         (f.trailer?'<button class="btn btn-ghost btn-sm light" onclick="event.stopPropagation();openTrailer(\''+f.id+'\')">▶ Trailer</button>':'')+
+        '<button class="btn btn-ghost btn-sm light" onclick="event.stopPropagation();featShare(\''+f.id+'\')">Share ↗</button>'+
       '</div>'+
     '</div>'+
     (poster?'<img class="feat-poster" src="'+poster+'" alt="'+esc(f.title)+' poster" loading="lazy">':'')+
