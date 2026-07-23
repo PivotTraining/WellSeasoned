@@ -3298,3 +3298,51 @@ a normal 271×406), so the image file itself is almost certainly not the cause
 any cached reference to the old one, and if the glitch PERSISTS with a
 different image it definitively proves the cause is data/render state (likely
 the owner's signed-in curation), not the image. Reversible one-line change.
+
+## ROOT CAUSE FOUND AND FIXED: the "background glitching" was a missing position:relative on .ctc-poster (2026-07-23)
+Finally solved after four earlier attempts missed it (emmySpinCenter,
+background-attachment removal, flex min-width:0, spotlight-card translateZ,
+and swapping the Queen & Slim poster — all real hardening, none the cause).
+Owner ran a console diagnostic script that dumped every oversized element on
+the live page; the smoking gun was:
+`<img class="poster-img"> parentClass:"ctc-poster img-ok" size:"2002x506"`.
+
+`.ctc-poster` is the small 56×84px film-thumbnail box in the home
+"What the culture's saying" shelf (`culTalkCardHTML`, fed by
+`loadCulTalk()` — real owner-curated **featured comments**, fetched from
+`comments?featured=is.true`). That shelf hides itself (`display:none`) unless
+there's real featured-comment data, and EVERY automated test this session
+mocked all Supabase REST calls to return `[]` — so this specific component
+never rendered once in any of my headless checks, even though I'd tested the
+main poster grid repeatedly. That's the actual reason four fixes in a row
+missed it: I was testing the wrong element.
+
+Root cause: `.ctc-poster{flex:none;width:56px;height:84px;...}` had **no
+`position` set** (defaults to `static`). `posterInner()` — shared with every
+other poster context on the site — renders `<img class="poster-img">` styled
+`position:absolute;inset:0`. An absolutely-positioned element sizes itself
+against its nearest *positioned* ancestor; skipping a static `.ctc-poster`
+and a static `.cul-talk-card`, it kept climbing the DOM until it found none,
+falling back to the initial containing block — i.e. the viewport. Result: the
+poster image renders full-viewport-sized, top:0/left:0, regardless of which
+film or which image file (fully reproduced and proved with a real headless
+test using a real loaded JPEG: buggy CSS → image renders 1280×900 at
+top:0/left:0 despite `naturalWidth:342`; fixed CSS → same image renders the
+correct 56×84). This is why it was NOT a WebKit-only bug — it's a plain CSS
+positioning bug that hits every engine identically, which is exactly why the
+owner saw it in both Safari and Chrome, and why it followed the film entry
+(Queen & Slim) rather than any specific image file — swapping the poster
+image earlier only proved the file wasn't the cause, which was the correct
+diagnostic step even though the real fix lay elsewhere.
+
+Fix: one line — `.ctc-poster{position:relative;...}`. Verified every other
+`posterInner()` caller site (`.poster` in the main grid, `.room-poster` on
+the film page) already had `position:relative` on its container; `.ctc-poster`
+was the sole exception. Audited via `grep -n "posterInner("` for every call
+site.
+
+Lesson for future debugging on this codebase: when a real, owner-reported
+visual bug won't reproduce in headless tests, check whether the mocked
+Supabase responses are silently hiding the exact component in question —
+`display:none`-until-real-data sections (featured comments, admin stats, etc.)
+are common on this site and a blanket `body:'[]'` mock defeats them all.
