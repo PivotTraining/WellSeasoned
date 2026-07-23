@@ -236,7 +236,7 @@
   .f-in{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14.5px;color:var(--ink);outline:none}
   .f-in:focus{border-color:var(--gold)}
 /* ============ SERVE ME SOMETHING ============ */
-  .serve-chips{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:14px 0 4px}
+  .serve-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0 4px}
   .serve-chip{font-family:inherit;font-weight:800;font-size:14px;padding:13px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;transition:transform .12s,border-color .12s}
   .serve-chip:hover{transform:translateY(-2px);border-color:var(--gold)}
   .serve-spin{display:grid;place-items:center;padding:34px 0 40px}
@@ -276,8 +276,8 @@
   @keyframes introfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){ .ws-intro .seal-anim,.ws-intro h2,.ws-intro p,.ws-intro button{animation:none} }
   /* ============ COMING SOON ============ */
-  .soon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:14px 0 40px}
-  @media (max-width:820px){ .soon-grid{grid-template-columns:repeat(2,1fr);gap:12px} }
+  .soon-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;padding:14px 0 40px}
+  @media (max-width:820px){ .soon-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} }
   .soon-sec-sub{font-size:13px;color:var(--ink-3);margin:0 0 12px}
   .soon-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-2);display:flex;flex-direction:column}
   .soon-poster{aspect-ratio:2/3;background-size:cover;background-position:center;position:relative}
@@ -379,7 +379,7 @@
   .teach p b{color:var(--ink)}
   .teach button{margin-left:auto}
 
-  .mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .mosaic{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
   .mtile{position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;padding:15px;border:1px solid rgba(0,0,0,.07);box-shadow:var(--shadow-2);transition:transform .22s,box-shadow .22s}
   .mtile::after{content:"";position:absolute;inset:0;opacity:.16;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
   .mtile:hover,.mtile:focus-visible{transform:scale(1.03);box-shadow:var(--shadow-3);z-index:4}
@@ -436,7 +436,7 @@
      modals render tiny/off-center */
   .mosaic .card,.grid-cards .card{min-width:0}
   body{overflow-x:clip}
-  .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .grid-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
   /* ============ ADMIN dashboard stats ============ */
   .cur-stats{margin:8px 0 20px;display:flex;flex-direction:column;gap:14px}
   .cur-stats-note{font-size:13px;color:var(--ink-2);background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;line-height:1.5}
@@ -558,7 +558,7 @@
   @media(prefers-reduced-motion:reduce){ .shop-hero::after,.sh-card{animation:none} }
   @media(max-width:720px){ .shop-hero{flex-direction:column-reverse;text-align:center;padding:32px 26px;gap:24px}
     .sh-lead{margin-left:auto;margin-right:auto}.sh-card{width:min(68%,260px);margin:0 auto} }
-  .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:34px 28px;margin-top:10px}
+  .shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 28px;margin-top:10px}
   .shop-card{cursor:pointer;background:transparent;border:0;box-shadow:none;transition:transform .25s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;height:100%}
   .shop-card:hover{transform:translateY(-3px)}
   .shop-card-img{position:relative;aspect-ratio:4/5;border-radius:var(--r-lg);overflow:hidden;background-color:var(--inset);box-shadow:var(--shadow-1);transition:box-shadow .25s}
@@ -594,7 +594,12 @@
   @media(prefers-reduced-motion:reduce){ .shop-card-img-f,.shop-card-img-b{transition:none} }
   @media(max-width:900px){ .shop-grid{gap:26px 18px} }
   @media(max-width:520px){ .shop-grid{grid-template-columns:1fr;gap:26px} .shop-modal{gap:16px} }
-  .card .poster{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-2);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s,filter .24s}
+  .card .poster{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;contain:layout paint;display:flex;align-items:flex-end;padding:12px;box-shadow:var(--shadow-2);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s,filter .24s}
+  /* WebKit belt-and-suspenders: even if the poster box mis-sizes (Safari
+     aspect-ratio-in-grid bug) or fails to clip a composited child, the img
+     can never paint beyond its own box. contain:paint above clips the box;
+     these cap the img itself so a poster can never bleed across the page. */
+  .poster-img{max-width:100%;max-height:100%}
   .card:hover .poster{box-shadow:var(--shadow-3)}
   .card-fmt{position:absolute;top:9px;left:9px;z-index:2;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:999px;color:#fff;background:rgba(18,10,6,.68);backdrop-filter:blur(5px);line-height:1;pointer-events:none}
   .card-fmt.cf-doc{background:rgba(20,58,90,.8)}
@@ -786,7 +791,7 @@
   .artist-lead h1{font-size:clamp(26px,3.6vw,40px);letter-spacing:-.4px;margin:2px 0 6px}
   .artist-meta{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
   .artist-bio{color:var(--ink-2);line-height:1.6;font-size:15px;max-width:680px}
-  .art-films{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:12px}
+  .art-films{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;margin-top:12px}
   .art-film{display:flex;flex-direction:column}
   .art-film.linked .art-film-poster{transition:transform .2s,box-shadow .2s}
   .art-film.linked:hover .art-film-poster{transform:translateY(-4px);box-shadow:var(--shadow-3)}
@@ -842,7 +847,7 @@
   @media(prefers-reduced-motion:reduce){ .word-cover::after,.wcov-imgwrap{animation:none} }
   @media(max-width:720px){ .word-cover{flex-direction:column-reverse;text-align:center;padding:30px 24px;gap:22px}
     .wcov-lead{margin-left:auto;margin-right:auto} .wcov-imgwrap{width:min(64%,260px)} }
-  .word-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px}
+  .word-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:20px}
   .word-card{position:relative;display:block;aspect-ratio:3/4;border-radius:var(--r-lg);overflow:hidden;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.35);transition:transform .2s,box-shadow .2s;color:#F4ECD8}
   .word-card:hover{transform:translateY(-5px);box-shadow:0 22px 46px rgba(0,0,0,.5)}
   .wc-edit{position:absolute;top:10px;right:10px;z-index:3;width:28px;height:28px;border-radius:50%;border:none;background:rgba(20,13,5,.65);color:var(--gold);font-size:13px;cursor:pointer;display:grid;place-items:center}
@@ -859,7 +864,7 @@
   /* Vanity-Fair-style editorial grid (the #/word stories below the cover) —
      landscape image, red kicker, serif headline, small-caps byline, on the
      open page with no boxes. Uses the already-loaded Instrument Serif. */
-  .vf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px 34px;margin-top:30px;padding-top:30px;border-top:1px solid var(--line-strong)}
+  .vf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 34px;margin-top:30px;padding-top:30px;border-top:1px solid var(--line-strong)}
   .vf-card{position:relative;display:flex;flex-direction:column;cursor:pointer;color:inherit}
   .vf-thumb{aspect-ratio:3/2;overflow:hidden;border-radius:3px;background-size:cover;background-position:center;background-color:var(--inset)}
   .vf-thumb-none{background:linear-gradient(135deg,#3a1e0a,#120a03)}
@@ -870,7 +875,7 @@
   .vf-dek{font-size:14.5px;color:var(--ink-2);line-height:1.52;margin-top:10px}
   .vf-byline{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-top:13px}
   .vf-edit{position:absolute;top:9px;right:9px}
-  @media(max-width:900px){ .vf-grid{grid-template-columns:repeat(2,1fr);gap:34px 28px} }
+  @media(max-width:900px){ .vf-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 28px} }
   @media(max-width:560px){ .vf-grid{grid-template-columns:1fr;gap:30px} .vf-thumb{aspect-ratio:16/9} }
   /* GALLERY-DARK tone — scoped to The Word (#/word) only via the body
      data-view marker set in render(). The dark Colman cover banner melts into
@@ -941,7 +946,7 @@
   .lead-cta{display:inline-block;margin-top:24px;align-self:flex-start}
   @media(prefers-reduced-motion:reduce){ .lead-inner::after{animation:none} }
   @media(max-width:760px){ .lead-inner{flex-direction:column-reverse;min-height:0} .lead-media{flex:none;width:100%;min-height:220px} .lead-copy{padding:26px 22px} .lead-media::before{background:linear-gradient(180deg,transparent 60%,rgba(26,17,8,.4))} }
-  @media(max-width:820px){ .word-grid{grid-template-columns:repeat(2,1fr)} .read-hero{height:230px} }
+  @media(max-width:820px){ .word-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .read-hero{height:230px} }
   @media(max-width:520px){ .word-grid{grid-template-columns:1fr} }
   /* HOME ten-years-on spotlight — anniversary stage card (shares emmy chrome) */
   .ten-years{margin:0 0 26px}
@@ -1064,7 +1069,7 @@
   .tbl-invite{margin:10px 0 4px;padding:12px 14px;border-radius:var(--r);
     background:linear-gradient(135deg,rgba(228,155,11,.12),rgba(190,59,24,.08));
     border:1px solid rgba(228,155,11,.30);color:var(--gold-deep);font-weight:600;font-size:14px;line-height:1.45}
-  .cul-talk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
+  .cul-talk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:20px}
   .cul-talk-card{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-2);cursor:pointer;transition:transform .16s,box-shadow .16s;padding:14px}
   .cul-talk-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-3)}
   .ctc-poster{flex:none;width:56px;height:84px;border-radius:8px;background-size:cover;background-position:center;overflow:hidden}
@@ -1073,7 +1078,7 @@
   .ctc-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
   .ctc-name{font-weight:700}
   .ctc-film{color:var(--ink-3)}
-  @media(max-width:820px){ .cul-talk-grid{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:820px){ .cul-talk-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
   @media(max-width:520px){ .cul-talk-grid{grid-template-columns:1fr} }
   /* THE BRACKET */
   .bracket-tree{margin-top:18px;display:flex;flex-direction:column;gap:22px}
@@ -1215,8 +1220,8 @@
     .feat-arw.prev{left:6px}
     .feat-arw.next{right:6px}
   }
-  @media(max-width:900px){ .art-films{grid-template-columns:repeat(4,1fr)} }
-  @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,1fr)} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
+  @media(max-width:900px){ .art-films{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,minmax(0,1fr))} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
   @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
   .film-verdict{display:flex;gap:22px;align-items:center;margin:22px 0 18px;flex-wrap:wrap}
   .verdict-lg{display:flex;align-items:center;gap:14px;background:linear-gradient(155deg,var(--jewel-2),var(--jewel));border:1px solid rgba(228,155,11,.24);border-radius:var(--r-lg);padding:15px 20px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,235,190,.08)}
@@ -1408,7 +1413,7 @@
   /* ============ MEMBERSHIP / ADVERTISE PRICING — dark premium "stage"
      card, same design language as the Emmy carousel, since these are the
      site's two money pages and deserve the most authority, not the least. */
-  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:26px;align-items:start}
+  .plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:26px;align-items:start}
   .plan{position:relative;display:flex;flex-direction:column;padding:28px 24px;border-radius:22px;overflow:hidden;
     background:linear-gradient(165deg,#20140a 0%,#140c05 68%,#0c0703 100%);
     border:1px solid rgba(244,197,66,.22);
@@ -1449,7 +1454,7 @@
   .ad-metric span{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
   .ad-how{margin-top:34px}
   .ad-how-h{font-family:var(--display);font-size:22px;font-weight:800;margin-bottom:16px}
-  .ad-how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .ad-how-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
   .ad-how-step{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px}
   .ad-how-n{font-family:var(--display);font-size:20px;font-weight:800;color:var(--gold-ink);display:block;margin-bottom:4px}
   .ad-how-step b{display:block;font-size:15px;margin-bottom:4px}
@@ -1571,7 +1576,7 @@
   .quiz-opts{display:flex;flex-direction:column;gap:9px;margin:4px 0 8px}
   .quiz-opts button{text-align:left;background:var(--paper);border:1.5px solid var(--line-strong);border-radius:var(--r);padding:13px 15px;cursor:pointer;font:inherit;font-size:15px;font-weight:600;transition:all .14s}
   .quiz-opts button:hover{border-color:var(--gold-ink);transform:translateX(3px)}
-  .quiz-picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 16px}
+  .quiz-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:6px 0 16px}
   .quiz-pick{cursor:pointer}
   .quiz-pick .qp-poster{aspect-ratio:2/3;border-radius:var(--r);display:flex;align-items:flex-end;padding:8px;box-shadow:var(--shadow-2);border:1px solid rgba(0,0,0,.07)}
   .quiz-pick .qp-ttl{font-weight:900;font-size:13px;color:#fff;line-height:.98;text-shadow:0 2px 8px rgba(0,0,0,.5)}
@@ -1810,7 +1815,7 @@
     .email-nudge{bottom:var(--tab-h)}
     /* dock rides above the mobile tab bar, so reserve that too or the key's top clips off-screen */
     .legend-panel{max-height:calc(100vh - var(--tab-h) - 76px);max-height:calc(100dvh - var(--tab-h) - 76px)}
-    .mosaic{grid-template-columns:repeat(4,1fr);gap:12px}
+    .mosaic{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
     .film-hero{grid-template-columns:1fr;gap:18px}
     .film-poster{max-width:220px}
     .detail-cols{grid-template-columns:1fr}
@@ -1833,8 +1838,8 @@
     .brand-word{font-size:18px}
     .brand-tag{font-size:7.5px;letter-spacing:.2em}
     .mtile.big .m-ttl{font-size:28px}
-    .mosaic{grid-template-columns:repeat(3,1fr)}
-    .grid-cards{grid-template-columns:repeat(3,1fr)}
+    .mosaic{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
     .position{padding:28px 22px}
     .verdict-lg{flex:1 1 140px}
     .film-verdict .tbl-flag{width:100%;margin-top:2px}
@@ -1844,8 +1849,8 @@
     .cscores{gap:10px}
   }
   @media (max-width:480px){
-    .mosaic{grid-template-columns:repeat(2,1fr)}
-    .grid-cards{grid-template-columns:repeat(2,1fr)}
+    .mosaic{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @media (max-width:360px){
     /* smallest phones: shave the mark + wordmark so the header row still fits */

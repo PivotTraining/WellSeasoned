@@ -3249,3 +3249,37 @@ diagnostic is the exact URL of the bleeding image — right-click it in Safari �
 it reproduces in Chrome on the same Mac (Safari-only ⇒ this class of fix;
 every browser ⇒ a data/deploy issue). Re-uploading the featured movie would
 NOT help — it's a CSS clip bug, not corrupt image data.
+
+## Home "glitch" SOLVED — it was the Queen & Slim poster, root cause = grid track blowout (2026-07-23)
+Owner copied the exact image address of the bleeding image:
+`image.tmdb.org/t/p/w342/qfIJOmsiBcum6EGosiy5gTF6ihk.jpg` — which is the
+**Queen & Slim** poster (Daniel Kaluuya + Jodie Turner-Smith leaning on a
+chrome-grille car, B&W). That's the "big car photo" that had been filling the
+viewport behind the Balcony lead card in Safari (and matches the owner's
+earlier "mobile still displaying the queen and slim" report). Queen & Slim
+renders on home via `TUBI_IDS` (Free-on-Tubi shelf) and the mosaic.
+Root cause (finally pinned down by analysis, since it never reproduced in
+Chromium): `.poster-img` is `position:absolute;inset:0;width:100%;height:100%`
+— its size is dictated entirely by its `.poster` parent, whose width comes from
+its grid cell. The home grids (`.mosaic`, `.grid-cards`) used
+`grid-template-columns:repeat(N,1fr)`. A bare `1fr` track carries an implicit
+`minmax(auto,1fr)` minimum = the item's min-content size; when that can't be
+satisfied, WebKit lets the tracks **blow out to full width** (a well-documented
+Safari grid bug Chromium doesn't share). A full-width grid cell → a ~1136px-wide
+poster → an `inset:0` img ~1136×1704, i.e. filling and exceeding the viewport,
+with the first mosaic/shelf card (Queen & Slim) painting right behind the lead
+story. That's the whole glitch.
+Fix (canonical, high-confidence): every card/poster grid switched
+`repeat(N,1fr)` → `repeat(N,minmax(0,1fr))` (23 grids, all breakpoints) so
+tracks can shrink below content min-size instead of blowing out. Plus
+belt-and-suspenders on the poster itself: `.card .poster{contain:layout paint}`
+(robustly clips descendants to the box + establishes a containing block, cheap
+— no forced compositing layer, unlike translateZ) and `.poster-img{max-width:
+100%;max-height:100%}`. `minmax(0,1fr)` is a strict no-op wherever the grid
+already fits (verified in Chromium: all 131 home posters unchanged at 271×406,
+grids intact, zero console errors), so there's no risk to the working desktop
+render. This supersedes the three earlier speculative attempts
+(emmySpinCenter / background-attachment / flex min-width:0 / spotlight
+translateZ) — those were real hardening but not the cause; the grid blowout was.
+The prior spotlight-card translateZ fixes (commit 3dffd11) are kept — harmless
+and correct isolation for those dark stage cards.
