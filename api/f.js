@@ -41,6 +41,15 @@ export default function handler(req, res) {
     datePublished: f.y ? String(f.y) : undefined,
     url: pageUrl,
   };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Well Seasoned', item: site + '/' },
+      { '@type': 'ListItem', position: 2, name: 'Browse', item: site + '/#/browse' },
+      { '@type': 'ListItem', position: 3, name: f.t, item: pageUrl },
+    ],
+  };
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
@@ -60,10 +69,13 @@ export default function handler(req, res) {
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
     '<meta name="twitter:image" content="' + esc(img) + '">' +
     '<script type="application/ld+json">' + JSON.stringify(ld) + '</script>' +
+    '<script type="application/ld+json">' + JSON.stringify(breadcrumbLd) + '</script>' +
     '<style>' +
-      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0c0602;color:#F6ECD7;margin:0;padding:32px 20px 60px;max-width:640px;margin-left:auto;margin-right:auto}' +
+      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0c0602;color:#F6ECD7;margin:0;padding:22px 20px 60px;max-width:640px;margin-left:auto;margin-right:auto}' +
       'a{color:#F4B733}' +
-      '.hd{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#F4B733;text-decoration:none;margin-bottom:22px}' +
+      'nav.crumbs{display:flex;flex-wrap:wrap;gap:6px;font-size:12.5px;color:rgba(246,236,215,.55);margin-bottom:22px}' +
+      'nav.crumbs a{color:rgba(246,236,215,.75);text-decoration:none}' +
+      'nav.crumbs a:hover{color:#F4B733}' +
       'img{width:100%;max-width:280px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.5);display:block;margin:0 0 20px}' +
       'h1{font-size:28px;margin:0 0 6px;line-height:1.1}' +
       '.meta{color:rgba(246,236,215,.6);font-size:14px;margin-bottom:16px}' +
@@ -71,7 +83,11 @@ export default function handler(req, res) {
       '.cta{display:inline-block;margin-top:22px;background:#E49B0B;color:#20160B;font-weight:800;padding:13px 26px;border-radius:999px;text-decoration:none;font-size:15px}' +
     '</style>' +
     '</head><body>' +
-    '<a class="hd" href="' + esc(site) + '">Well Seasoned</a>' +
+    '<nav class="crumbs" aria-label="Breadcrumb">' +
+      '<a href="' + esc(site) + '/">Well Seasoned</a><span>/</span>' +
+      '<a href="' + esc(site) + '/#/browse">Browse</a><span>/</span>' +
+      '<span>' + esc(f.t) + '</span>' +
+    '</nav>' +
     (f.p ? '<img src="' + esc(f.p) + '" alt="' + esc(f.t) + ' poster">' : '') +
     '<h1>' + esc(f.t) + '</h1>' +
     '<div class="meta">' + (f.y || '') + (f.tv ? ' · Series' : '') + '</div>' +

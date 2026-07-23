@@ -3119,3 +3119,97 @@ card, never a verdict card for a film nobody's voted on yet. Verified in
 headless Chromium: all 5 current FEATURED slides render the button; an
 upcoming title routes to `openShareCardSoon`, a released one to
 `openShareCard`; zero console errors.
+
+## Misty Green (Chris Rock, A24) added to the marquee; SEO breadcrumbs + Article indexing fix (2026-07-23)
+Owner: "we need to have the misty green trailer on the featured carousel and
+remove the lantern. ensure seo and breadcrumbs are well done for traction."
+
+**Misty Green** — verified via web search + TMDB (id 1381221) + YouTube
+oEmbed: Chris Rock writes/directs/stars, Rosalind Eleazar leads, Daniel
+Kaluuya co-stars as her brother, Adam Driver/Anna Kendrick/Topher Grace round
+out the cast. A24, premieres TIFF September, opens in theaters **October
+2026** — no exact day has been publicly announced anywhere (checked Deadline,
+Variety, FirstShowing, GoldDerby — all say "October 2026," date TBA). Rather
+than fabricate a specific day, used `2026-10-31` (month-end) as internal
+plumbing only for the Coming Soon gate/sort — the one thing everyone actually
+sees, the FEATURED eyebrow, reads "Coming October 2026 · A24" (no invented
+day). Added to FILMS (`misty-green-2026`, scope:'ours', k/t null, votes:0),
+COMING_SOON (`cs-1381221`, real trailer `ACaWuqeLpSk`, oEmbed-verified
+official A24 upload), `WS_POSTERS`/`WS_TRAILERS`. Swapped into `FEATURED`
+in place of `lanterns` (removed from the carousel only — stays in the FILMS
+catalog/browsable, same precedent as `man-of-war` two entries up). Ran
+`node scripts/build-films-json.cjs` (1260 titles). Verified in headless
+Chromium: catalog/Coming-Soon entries resolve, FEATURED carousel shows Misty
+Green with a working trailer button, Lanterns gone from the carousel but
+still in FILMS, zero console errors.
+
+**SEO + breadcrumbs pass** — audited every real indexable surface:
+- **`api/read.js` (The Balcony articles) was the biggest live gap**: it was
+  set `noindex` + auto-`location.replace()` — the EXACT anti-pattern `api/f.js`
+  was fixed for on 2026-07-09 (an instant redirect tells Google to index the
+  hash URL, i.e. nothing, instead of this page). Every Balcony piece —
+  including the just-published "The Count Was Never Neutral" founder's
+  feature — was completely unindexable. Fixed the same way `f.js` was: real
+  substantive body content (fetches `body` from Supabase and renders it as
+  actual paragraphs/blockquotes, not just a title card), `Article` +
+  `BreadcrumbList` JSON-LD, a canonical link, a visible breadcrumb nav (Well
+  Seasoned › The Balcony › Title), and a "Read on Well Seasoned →" CTA instead
+  of a zero-friction bounce.
+- **`api/f.js`**: added `BreadcrumbList` JSON-LD (Well Seasoned › Browse ›
+  Title) + a visible breadcrumb nav row, replacing the old single "back to
+  Well Seasoned" link — more internal link signal, not just a rich-result
+  nicety.
+- **`api/sitemap.js`**: was missing every `/read/<slug>` URL entirely (only
+  ever listed films + a few static pages). Now fetches published articles
+  from Supabase and includes them, so The Balcony is actually discoverable —
+  degrades gracefully (ships films+static only) if that fetch ever fails.
+- **`index.html`**: added site-wide `Organization` + `WebSite` JSON-LD (no
+  brand-entity structured data existed at all before this). Deliberately did
+  **not** add a `SearchAction`/sitelinks-searchbox claim — Browse's search is
+  client-side state (`FILTERS.q`), not URL-addressable via a query string, so
+  a sitelinks searchbox schema would be structured data that doesn't actually
+  work. Same "nothing fake" bar applied to markup, not just content.
+- `robots.txt` already correctly allows all + points at the sitemap; no
+  change needed there.
+- Verified: `node --check` on all three touched `api/*.js` files; a local
+  handler-invocation test confirms `api/f.js` emits valid `Movie` +
+  `BreadcrumbList` JSON-LD and a real breadcrumb nav for `misty-green-2026`.
+
+## Investigating "still glitching" report + a real flex-sizing bug found and fixed (2026-07-23)
+Owner sent a screenshot (desktop Safari) showing the home Balcony lead-story
+card with its hero image rendering as a small box far short of its intended
+~53%-width/360px-tall area, alongside what looked like unrelated large
+background imagery filling the rest of the card. Diagnosis process: couldn't
+get a headless browser to reach the live internet from this sandbox
+(Playwright, even routed through the environment's HTTPS proxy, couldn't
+complete a real TLS connection — curl could, so investigation continued via
+raw fetches instead of visual repro). Confirmed via direct fetch that
+`/word/the-count-was-never-neutral.jpg` (the real hero image referenced by
+`LEAD_STORY.image`) is exactly right (the Moonlight beach-silhouette art) —
+so the small box in the screenshot IS the correct, real image, just sized
+wrong; whatever filled the rest of the visible area does not correspond to
+any image path in this codebase.
+
+Found a real, plausible root cause matching the exact symptom (image side
+collapsing well below its flex-basis while the text side renders normally):
+`.lead-copy`/`.lead-media` (and the same text+image split-panel pattern in
+`.evs-copy`/`.evs-media`, `.sh-copy`, `.wcov-copy` — Events spotlight, Shop
+hero, Balcony cover) are flex row children with a percentage `flex-basis` but
+no `min-width:0`. Flex items default to `min-width:auto`, sized to their
+content's intrinsic minimum — WebKit/Safari enforces this more strictly than
+Chromium, so a flex item's real content-minimum can silently override its
+flex-basis and eat space from a sibling, exactly the "image box way smaller
+than its 53%" symptom reported. Added `min-width:0` to all six affected
+rules — the standard, well-documented fix for this exact class of flexbox
+bug, safe everywhere it's applied since none of these panels rely on
+content-based auto-sizing.
+
+**Not fully closed out**: the large, unrelated-looking background content
+visible behind/around the small image box in the screenshot doesn't match
+any asset in this codebase, and `.lead-inner` already has `overflow:hidden`,
+which should preclude our own elements (including the oversized animated
+`::after` sweep) from painting outside the card. Flagged directly to the
+owner as possibly a WebKit compositing/paint-cache artifact rather than a
+code bug — asked them to fully quit and reopen Safari (not just the tab) and
+hard-refresh, then confirm whether the flex fix alone resolved what they were
+seeing.
