@@ -3045,3 +3045,46 @@ hard-refresh/clear cache, since the earlier sweep-transform fix needs the
 new deploy to actually load; (2) which specific element glitches — a video
 or screen recording from the owner would pin it down far faster than more
 blind fixes.
+
+## New content + homepage shuffle: "72 Hours" (Kevin Hart, Netflix) added (2026-07-23)
+Owner: "Create new content for site, shuffle homepage where applicable." Researched
+real, current Black-led film/TV news before adding anything (web search →
+verify via TMDB/YouTube oEmbed, same bar as always). Found **72 Hours**
+(TMDB id 949838) — Kevin Hart leads, directed by Tim Story (Barbershop, Ride
+Along — a Black director), premieres **2026-07-24 on Netflix** (confirmed via
+press + the trailer living on Netflix's own YouTube channel, oEmbed-verified:
+"72 Hours | Kevin Hart | Official Trailer | Netflix"). Real TMDB poster/
+backdrop pinned in `WS_POSTERS`, real cast/synopsis, `scope:'ours'` (clear
+call — Kevin Hart is the lead, Black director, not a closer-bar case).
+- Added to **FILMS** (`72-hours-2026`, k/t null, votes:0, reviews:[]) so it's
+  in the searchable catalog and eligible for home-mosaic rotation.
+- Added to **COMING_SOON** (`cs-949838`, same id pattern as Children of Blood
+  and Bone) so `upcomingSoonEntry()` gates it correctly — hype vote + "Coming
+  Jul 24" badge instead of a premature verdict vote, until it actually
+  releases tomorrow.
+- **Homepage shuffle**: swapped it into the `FEATURED` home carousel in place
+  of `man-of-war` (the oldest, most generic "Featured · Out now" slot, no
+  longer the freshest thing to lead with) — `ey:'Premieres Jul 24 · Netflix'`
+  (absolute date, not "tomorrow" — holding the July 20 lesson about
+  time-relative copy going stale) → `eyLive:'New on Netflix'` once it drops,
+  retiring itself via `until:'2026-09-07'`. `man-of-war` stays untouched in
+  the FILMS catalog — only removed from the carousel array.
+- Ran `node scripts/build-films-json.cjs` (1259 titles, +1). Verified in
+  headless Chromium: catalog entry, COMING_SOON entry, and the FEATURED
+  carousel slide all resolve correctly with real data, zero console errors.
+
+## Social graphics — explore-the-site + 72 Hours promo (2026-07-23)
+Two Instagram-portrait (1080×1350) graphics built in the established
+spotlight-card house style (dark stage, gold conic glow, Bricolage/
+Instrument Serif/DM Mono), rendered via the same Playwright HTML→PNG pipeline
+as the win-back graphic:
+- `scratchpad/explore-the-site.png` — "Five things worth knowing" tour of
+  real, live features (The Balcony, This Week at The Table, Card Check, the
+  Kids wing, the installable PWA) — no fabricated stats, just what's actually
+  shipped.
+- `scratchpad/promo-72hours.png` — real TMDB still (Kevin Hart + cast) as a
+  full-bleed hero with a dark scrim, real premiere date/cast/director,
+  pointing back to the hype vote on-site. The photo/synopsis are the same
+  verified data added to the catalog above.
+Not committed to the repo (marketing assets, not site code) — delivered
+directly to the owner, same convention as the win-back graphic.
