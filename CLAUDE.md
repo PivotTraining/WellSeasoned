@@ -3283,3 +3283,18 @@ render. This supersedes the three earlier speculative attempts
 translateZ) — those were real hardening but not the cause; the grid blowout was.
 The prior spotlight-card translateZ fixes (commit 3dffd11) are kept — harmless
 and correct isolation for those dark stage cards.
+
+## Queen & Slim poster swapped to an alternate variation (2026-07-23)
+Owner asked to try swapping the Queen & Slim poster to a different TMDB
+variation while chasing the still-unresolved "full-screen Queen & Slim image"
+glitch on their signed-in home page. Swapped `WS_POSTERS['queen-slim']` (and
+the matching `api/films.json` `p` field) from `qfIJOmsiBcum6EGosiy5gTF6ihk.jpg`
+(the B&W car poster) to `ksHdHK17wRKMLkpMH4UslMT1V0p.jpg` — the highest-voted
+alternate official poster (9 votes, the two of them standing in front of a
+garage). Both real, official TMDB art, same 2:3 ratio. Diagnostic value: the
+glitch does NOT reproduce on a clean signed-out headless load (poster renders
+a normal 271×406), so the image file itself is almost certainly not the cause
+(an img can't overflow a correctly-sized grid cell) — but a new URL bypasses
+any cached reference to the old one, and if the glitch PERSISTS with a
+different image it definitively proves the cause is data/render state (likely
+the owner's signed-in curation), not the image. Reversible one-line change.
