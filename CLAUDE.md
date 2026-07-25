@@ -3444,3 +3444,13 @@ posters pinned in `WS_POSTERS`, backdrops baked inline, `k`/`t` null,
 `votes:0`, `reviews:[]` — nothing fake. Catalog 1260 → 1262; ran
 `node scripts/build-films-json.cjs`. Verified in headless Chromium: both
 film pages render with correct titles, zero console errors.
+
+Owner then named a third directly: **Newborn** (`newborn-2026`, movie,
+released Apr 10 2026) — Nate Parker writes/directs/produces, David Oyelowo
+leads as Chris Newborn (a man rebuilding his life after seven years in
+solitary confinement), with Olivia Washington, Barry Pepper, Jimmie Fails.
+Unambiguous Black-led pick, `scope:'ours'`. Verified via TMDB (id 787844):
+real cast/director/synopsis, poster pinned, backdrop baked, `k`/`t` null,
+`votes:0`, `reviews:[]`. Catalog 1262 → 1263; ran
+`node scripts/build-films-json.cjs`. Verified in headless Chromium: film
+page renders with correct title/director, zero console errors.
