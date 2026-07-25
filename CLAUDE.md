@@ -3346,3 +3346,101 @@ visual bug won't reproduce in headless tests, check whether the mocked
 Supabase responses are silently hiding the exact component in question —
 `display:none`-until-real-data sections (featured comments, admin stats, etc.)
 are common on this site and a blanket `body:'[]'` mock defeats them all.
+
+## Vote-invite social graphics + Denzel Bracket promo (2026-07-24)
+Owner: "I want to start pushing individual movies and getting votes. We need
+artwork for social media to invite people to vote and comment. I also want
+artwork for the Best Denzel movie tournament." Built a reusable 1080×1350
+Instagram-portrait template (`gen_batch1.js`-style: Playwright HTML→PNG,
+`page.goto('file://...')` not `setContent()` since `setContent()` loads at
+`about:blank` and blocks `file://` image loads cross-origin — a real gotcha
+worth remembering for any future graphic-gen work) — dark stage, full-bleed
+real film backdrop, bottom gradient scrim, brand badge (needs
+`text-shadow`/`drop-shadow` on the wordmark or it vanishes against bright
+photos — caught and fixed after the first pass), gold eyebrow, "Cast your
+*verdict* on `<Title>`." headline, Kitchen/Table glass-panel cards, gold
+"Vote now →" CTA, itswellseasoned.com line. Delivered directly to the owner
+(marketing assets, not committed to the repo): Sinners, The Woman King, then
+6 more for real current rankings positions 20-25 (Set It Off, Soul Food, The
+Color Purple, Menace II Society, O.J.: Made in America, Juice — ranking
+computed by replicating the site's own `tableScore`/`overallScore` formula
+against a live query of the public `vote_counts`/`kitchen_scores` Supabase
+views) with Seth-Godin-voice captions and real film links. Also delivered the
+Denzel Bracket tournament promo graphic (same house style, Malcolm X hero
+art, 4×2 grid of the 8 real seed-film posters, CTA to `/#/bracket`) — the
+`denzel` bracket (`BRACKETS` array, index.html) started 2026-07-22 with seeds
+training-day/malcolm-x/american-gangster/glory/fences/devil-in-a-blue-dress/
+the-hurricane/he-got-game.
+
+## The long "background glitching" saga — actually solved (2026-07-23/24)
+Multi-day thread (see the several dated entries above: emmySpinCenter,
+background-attachment removal, flex min-width:0, translateZ WebKit-clip fix,
+Queen & Slim poster swap) finally closed. **The real root cause**: `.ctc-poster`
+(the 56×84px mini poster in the home "What the culture's saying" shelf —
+real owner-curated featured comments, `loadCulTalk()` → `comments?featured=
+is.true`) had no `position` set. `posterInner()` (shared by every poster
+context sitewide) renders `<img class="poster-img">` as `position:absolute;
+inset:0`, which needs a positioned ancestor; skipping the static `.ctc-poster`
+it fell back to the viewport as its containing block, so the poster image
+rendered full-screen — reproduced identically in Chrome AND Safari (a plain
+CSS bug, not WebKit-specific, which is why four WebKit-flavored fixes in a
+row didn't help). Broke the case only once the owner pasted the exact
+bleeding image's URL (Queen & Slim's poster), a poster swap PROVED the image
+file wasn't the cause when the bug persisted anyway, and a console
+diagnostic the owner ran named the actual broken parent element
+(`ctc-poster`) — a component every automated test this session had been
+silently hiding by mocking all Supabase calls to `[]`. Fix: one line,
+`.ctc-poster{position:relative;...}`. All four earlier fixes were real,
+legitimate hardening (kept) — just not the cause. **Lesson restated because
+it mattered this much**: `display:none`-until-real-data components are a
+blind spot for any headless test that blanket-mocks Supabase responses.
+
+## The Balcony: "Eight Roles, No Consensus" — Denzel Washington feature (2026-07-25)
+New Balcony piece (`backend/seed_word_articles.sql`) tied to the live Denzel
+Bracket tournament, in the established NYMag/VF longform voice (delayed lead,
+no subheads, 3 pull quotes, real facts as evidence not stat-dumps). Delayed
+lead: Chadwick Boseman's real June 2019 AFI Life Achievement Award speech for
+Denzel, telling the real story of Denzel anonymously funding 9 Howard
+theatre students' (including Boseman's) 1998 British American Drama Academy
+summer at Oxford, arranged via Phylicia Rashad, kept quiet for 20 years —
+verified via web research before writing. Factual spine (also verified): 10
+Oscar nominations, the most of any Black actor in Academy history, against
+only 2 wins (Glory 1990 supporting, Training Day 2002 lead) — used as
+evidence that the "which Denzel role is best" debate is structurally
+unresolvable, tying directly into the site's real Bracket feature without
+reading as an ad. The 8 real bracket seed roles are woven in as the
+supporting evidence for why no consensus forms. Hero art: real TMDB Training
+Day still (id 2034, Denzel as Alonzo) through the house photo-treatment
+pipeline (warm sepia grade, film grain, vignette), committed to
+`word/denzel-eight-roles.jpg`. `subject:'Denzel Washington, Chadwick Boseman,
+Phylicia Rashad'` for the featured-people chips. Validated against a
+throwaway Postgres 16 (9 rows total, idempotent re-run, `kind` check
+constraint satisfied, 3 pull quotes present, 6540-char body). **Not
+auto-published** — same as every other Balcony piece, this environment can't
+auth to the owner-gated `publish_article` RPC; the owner runs
+`seed_word_articles.sql` once in the Supabase SQL editor. The hero art itself
+deploys with the push regardless.
+
+## Catalog sweep: Ride or Die + The Dutchman (2026-07-25)
+Two real, verified 2026 additions found via a general news sweep (not tied to
+a specific owner list this time):
+- **Ride or Die** (`ride-or-die-2026`, TV, Prime Video, premiered Jul 15
+  2026) — Octavia Spencer co-leads (billed #2) opposite Hannah Waddingham in
+  Tessa Coates' action-comedy about two best friends on the run across
+  Europe after one discovers the other is a professional assassin. A
+  "closer than usual bar" case by cast composition (Waddingham/Bill Nighy
+  are the other two leads, neither Black) — included because Octavia is
+  genuinely co-lead billing AND the key art puts her front-and-center at the
+  wheel of the car, not sidelined the way `f1`'s Damson Idris was (that one
+  is `scope:'all'` for exactly the opposite reason — flag to the owner if
+  this call should be revisited).
+- **The Dutchman** (`the-dutchman-2026`, movie, released Jan 2026, dir.
+  Andre Gaines) — Andre Holland leads a modern feature adaptation of Amiri
+  Baraka's 1964 Obie Award-winning play, with Zazie Beetz, Stephen McKinley
+  Henderson, and Aldis Hodge. Unambiguous Black-led/Black-adapted-from
+  pick, `scope:'ours'`.
+Both verified via TMDB (ids 241882 / 1180417): real cast/director/synopsis,
+posters pinned in `WS_POSTERS`, backdrops baked inline, `k`/`t` null,
+`votes:0`, `reviews:[]` — nothing fake. Catalog 1260 → 1262; ran
+`node scripts/build-films-json.cjs`. Verified in headless Chromium: both
+film pages render with correct titles, zero console errors.
