@@ -270,7 +270,35 @@ The door Halle Berry said she’d opened was never locked from our side. The tal
  'The Founder', 'moonlight',
  'https://itswellseasoned.com/word/the-count-was-never-neutral.jpg', 'center',
  'editorial', true,
- '2026-07-18 12:00:00+00', '2026-07-18 12:00:00+00')
+ '2026-07-18 12:00:00+00', '2026-07-18 12:00:00+00'),
+
+-- 9) FEATURE — Denzel Washington, eight roles, no consensus (2026-07-25) -----
+('denzel-eight-roles-no-consensus',
+ 'Eight Roles, No Consensus',
+ $d$The Academy has nominated him ten times and only known what to do with him twice. Maybe the ballot was always the wrong instrument.$d$,
+ $md$Chadwick Boseman had not planned to cry, and he apologized for it anyway, right there on the stage of the Dolby Theatre, dabbing at his eyes while several hundred people in black tie waited him out. It was June of 2019, the night the American Film Institute handed Denzel Washington its Life Achievement Award, and Boseman had been sent up to tell one story. In 1998 he was a theater student at Howard University, broke in the specific, permanent way theater students are broke, when his instructor Phylicia Rashad came to him and eight of his classmates with a fix: a summer at Oxford, the British American Drama Academy, the kind of program that quietly decides who gets a career in classical acting and who doesn't. Someone had agreed to pay for all nine of them. Rashad wouldn't say who. It took Boseman two decades to find out, and when he did, he kept it to himself for most of that time too — until this stage, this microphone, the man himself sitting twenty feet away. "There is no *Black Panther*," Boseman said, voice going, "without Denzel Washington." Washington, watching from his table, did what he does in a scene he isn't supposed to be the center of: he went very still and let someone else finish it.
+
+It is the kind of story that resists being filed anywhere sensible, because it isn't about a performance. Denzel Washington has spent forty-five years making it structurally difficult to answer the question people keep asking him anyway — *which one is the best?* — and the Boseman story is the reason the question refuses to die even when the filmography won't cooperate. The debate isn't a marketing exercise. It's what happens when an actor keeps declining to repeat himself for four decades and the audience, understandably, wants a favorite anyway.
+
+Run the account first, because the number is stranger than the reputation suggests. Ten Academy Award nominations — more than any Black actor in the history of the ceremony — and exactly two wins: Best Supporting Actor for *Glory* in 1990, Best Actor for *Training Day* in 2002. Two-for-ten is not a slump. It is what the ledger looks like when a body of work is too wide for one office to grade on one scale. The Academy nominated him for a Union private who never raises his voice above a whisper and later for a narcotics detective who screams half his lines into a windshield, and it could not decide, across a decade and a half, whether *Malcolm X* or *The Hurricane* or *American Gangster* deserved the same statue it eventually handed a dirty cop. That isn't the Academy being fickle. That's ten different men standing for ten different pieces of one career, and a body only built to award one performance a year.
+
+> Ten nominations, two wins. Not a slump — a body of work too wide for one ballot to grade on one scale.
+
+Put eight of those men in a room and they don't recognize each other. Alonzo Harris, the *Training Day* detective, believes his own corruption is a kind of honesty, the last clean thing about him. Malcolm X believes the opposite of everything, twice, on camera, and asks you to watch him mean it both times. Frank Lucas moves heroin in a mink coat and calls it family business. Colonel Robert Gould Shaw, the *Glory* role that won him his first Oscar, is barely a lead at all — a supporting man who has to be talked into his own courage. Troy Maxson, in *Fences*, spends two hours explaining, brilliantly and unforgivably, why he ruined the people who loved him. Easy Rawlins, in *Devil in a Blue Dress*, solves a mystery by being the only honest man in 1948 Los Angeles. Rubin "Hurricane" Carter spends nineteen years in a cell being innocent so completely it becomes its own kind of performance. Jake Shuttlesworth, in *He Got Game*, is a father trying to buy his way out of prison by selling his son's future, and somehow earns your sympathy for it before the credits roll. Ask ten people which of the eight is the best Denzel Washington performance and you will not get a tiebreak. You will get an argument about which kind of person deserves the word.
+
+That refusal to repeat is, itself, a kind of quiet defiance most people never register as one. A movie star this famous could have spent the last thirty years playing variations on Alonzo — the role was right there, a permission slip the industry would gladly have kept renewing. He went to Shakespeare instead, twice, and to a Broadway stage revival of *A Raisin in the Sun*, and to *Fences* on stage before he'd take it to film, and to *The Tragedy of Macbeth*, a tenth Oscar nomination arriving in his late sixties for a role most leading men that age are no longer offered at all. Range, in Denzel Washington's case, isn't a talent he happens to have. It's a decision he keeps making, film after film, against the much easier version of the same career.
+
+> Ask ten people which of his eight roles is the best, and you won't get a tiebreak. You'll get an argument about which kind of person deserves the word.
+
+Which is what makes the Boseman story the right ending rather than a sentimental detour. Washington never announced the nine tuition checks he wrote for those Howard students in 1998. Rashad asked; he paid; he said nothing for twenty years, and would likely have said nothing for twenty more if Boseman hadn't climbed onto a stage in front of him and forced the accounting into the open. It is the same instinct that keeps him walking away from the role that would have been easiest to keep playing: a discomfort with being reduced to one thing, even a good thing, even a story that makes him look generous. He built a career out of not settling into a type. It turns out he built a life the same way.
+
+> He paid the tuition, told no one for twenty years, and let another actor say it out loud on a stage instead. That's the same instinct that keeps him from repeating a role.
+
+So no, there isn't a correct answer to which performance is his best, and the Academy's own scorecard — ten swings, two connects — is the closest thing to an admission that the question was never going to resolve on a ballot. That's not a flaw in the record. It's the whole point of the record, and it's the reason the argument about him refuses to end at any bar, any awards show, any comment section: eight men, one actor, and a debate that's been running since Glory and shows no sign of a verdict. We built a bracket for exactly this reason — not to settle it, because it can't be settled, but because the argument itself is the tribute. Cast your vote. See if you can make it stick.$md$,
+ 'The Founder', 'training-day',
+ 'https://itswellseasoned.com/word/denzel-eight-roles.jpg', 'center',
+ 'article', true,
+ '2026-07-25 12:00:00+00', '2026-07-25 12:00:00+00')
 
 on conflict (slug) do nothing;
 
@@ -286,3 +314,4 @@ update public.articles set subject='Nia Long, Larenz Tate' where slug='the-case-
 update public.articles set subject='Sanaa Lathan, Omar Epps' where slug='the-cookout-canon';
 update public.articles set subject='Julie Dash' where slug='streaming-keeps-losing-our-movies';
 update public.articles set subject='Halle Berry, Denzel Washington, Sidney Poitier' where slug='the-count-was-never-neutral';
+update public.articles set subject='Denzel Washington, Chadwick Boseman, Phylicia Rashad' where slug='denzel-eight-roles-no-consensus';
