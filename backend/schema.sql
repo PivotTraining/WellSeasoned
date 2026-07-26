@@ -810,8 +810,18 @@ grant select on public.mini_tag_counts to anon, authenticated;
 -- login OR the curation_admin passphrase). Paste this block into the
 -- Supabase SQL editor once, same pending-migration pattern as the blocks
 -- above.
+--
+-- Also returns the commenter's email (via a SECURITY DEFINER join to the
+-- RLS-locked auth.users, same technique admin_user_directory already uses —
+-- note comments.user_id exists live even though it predates this file's
+-- original CREATE TABLE statement above, same documented drift as
+-- critic_applications) and their running total comment count sitewide, so
+-- the owner can email a real thank-you and see how close someone is to the
+-- 100-comment critic-consideration bar without a separate lookup. A silent-
+-- anon commenter with no real account just has a null email — the client
+-- shows "no email on file" rather than guessing one.
 create or replace function public.admin_list_comments(p_secret text default null, p_limit int default 300)
-returns json language plpgsql security definer set search_path = public as $$
+returns json language plpgsql security definer set search_path = public, auth as $$
 declare expected text;
 begin
   select value into expected from public.app_secrets where key = 'curation_admin';
@@ -821,9 +831,12 @@ begin
   end if;
   return coalesce((
     select json_agg(t) from (
-      select id, film_slug, name, stance, body, reported, featured, created_at
-      from public.comments
-      order by created_at desc
+      select c.id, c.film_slug, c.name, c.stance, c.body, c.reported, c.featured, c.created_at,
+             u.email,
+             (select count(*) from public.comments c2 where c2.user_id = c.user_id) as user_comment_count
+      from public.comments c
+      left join auth.users u on u.id = c.user_id
+      order by c.created_at desc
       limit greatest(1, least(coalesce(p_limit, 300), 1000))
     ) t
   ), '[]'::json);

@@ -8134,16 +8134,29 @@ function renderPulseCmtChips(){
   }).join('');
 }
 function setPulseCmtFilter(f){ _pulseCmtFilter=f; renderPulseCmtChips(); renderPulseComments(); }
+/* A commenter earns consideration for a Kitchen critic seat at 100 real
+   comments sitewide (owner's rule, 2026-07-26) — admin_list_comments returns
+   each row's user_comment_count (a real running total, grouped server-side
+   by user_id) so this badge is never guessed or estimated. */
+var COMMENT_CRITIC_GOAL=100;
+function pulseCmtMilestoneHTML(c){
+  if(!c.email||!c.user_comment_count)return '';
+  var n=c.user_comment_count;
+  if(n>=COMMENT_CRITIC_GOAL)return '<span class="pulse-badge crit">🎬 '+n+' comments — critic-eligible</span>';
+  return '<span class="pulse-badge reg" style="background:rgba(228,155,11,.14);color:#a3730a">'+n+'/'+COMMENT_CRITIC_GOAL+' toward a critic seat</span>';
+}
 function pulseCmtRowHTML(c){
   var f=find(c.film_slug);
   var filmLink=f?'<a onclick="go(\'film\',\''+esc(f.id)+'\')">'+esc(f.title)+'</a>':esc(c.film_slug);
   var stance=c.stance==='for'?'<span class="pulse-badge reg" style="background:rgba(60,150,80,.14);color:#2c7a43">Seasoned</span>':(c.stance==='against'?'<span class="pulse-badge anon" style="background:rgba(196,69,31,.14);color:#a3421e">Sent back</span>':'');
   var flags=(c.reported?'<span class="pulse-badge anon">Hidden</span>':'')+(c.featured?'<span class="pulse-badge crit">★ Featured</span>':'');
+  var milestone=pulseCmtMilestoneHTML(c);
   return '<div class="cr-row">'+
     '<div class="ic-av ic-av-none">'+esc((c.name||'?').slice(0,1).toUpperCase())+'</div>'+
     '<div class="cr-body">'+
       '<div class="cr-head">'+esc(c.name||'Anonymous')+' '+stance+' '+flags+'</div>'+
-      '<div class="cr-byline">On '+filmLink+' · '+_pulseFmtDate(c.created_at)+'</div>'+
+      '<div class="cr-byline">On '+filmLink+' · '+_pulseFmtDate(c.created_at)+' · '+(c.email?esc(c.email):'no email on file')+'</div>'+
+      (milestone?'<div style="margin-top:5px">'+milestone+'</div>':'')+
       '<p class="cr-quote">'+esc(c.body||'')+'</p>'+
     '</div>'+
     '<div style="display:flex;flex-direction:column;gap:6px;flex:none">'+
@@ -8151,8 +8164,33 @@ function pulseCmtRowHTML(c){
         ? '<button class="btn btn-ghost btn-sm" onclick="pulseModerateComment('+c.id+',false)">Restore</button>'
         : '<button class="btn btn-ghost btn-sm" onclick="pulseModerateComment('+c.id+',true)">Hide</button>')+
       '<button class="btn btn-ghost btn-sm" onclick="pulseToggleCmtFeatured('+c.id+','+(c.featured?'false':'true')+')">'+(c.featured?'☆ Unfeature':'★ Feature')+'</button>'+
+      (c.email?'<button class="btn btn-gold btn-sm" onclick="pulseThankComment('+c.id+')">🙏 Thank you</button>':'')+
+      (c.email&&c.featured?'<button class="btn btn-ghost btn-sm" onclick="pulseNotifyFeatured('+c.id+')">📣 Notify feature</button>':'')+
     '</div>'+
   '</div>';
+}
+function _pulseCmtById(id){ if(!_pulseComments)return null; for(var i=0;i<_pulseComments.length;i++){ if(_pulseComments[i].id===id)return _pulseComments[i]; } return null; }
+/* Owner-facing mailto nudges — same no-backend-send pattern as pulseInvite/
+   notifyContributor (Resend SMTP still pending, per CLAUDE.md), just a
+   pre-filled draft the owner reviews and sends themselves. */
+function pulseThankComment(id){
+  var c=_pulseCmtById(id); if(!c||!c.email){ toast('No email on file for this commenter.'); return; }
+  var f=find(c.film_slug), n=c.user_comment_count||1;
+  var subj='Thank you for showing up on Well Seasoned';
+  var body='Hi '+(c.name||'there')+',\n\n'+
+    'Just wanted to say thank you for taking the time to comment'+(f?(' on '+f.title):'')+' — that’s exactly the kind of real engagement that makes The Table mean something.\n\n'+
+    'Quick heads up: once you hit 100 comments on the site, you’re in the running for a seat as a verified critic in The Kitchen. You’re at '+n+' right now.\n\n'+
+    'Keep it coming.\n— Well Seasoned\nhttps://itswellseasoned.com';
+  window.location.href='mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+}
+function pulseNotifyFeatured(id){
+  var c=_pulseCmtById(id); if(!c||!c.email){ toast('No email on file for this commenter.'); return; }
+  var f=find(c.film_slug);
+  var subj='Your comment got featured on Well Seasoned';
+  var body='Hi '+(c.name||'there')+',\n\n'+
+    'Your comment'+(f?(' on '+f.title):'')+' just got featured on Well Seasoned — pinned at the top of The Table and pulled into the home shelf. Thank you for putting a real voice on the site.\n\n'+
+    '— Well Seasoned\nhttps://itswellseasoned.com';
+  window.location.href='mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
 function renderPulseComments(){
   var el=byId('pulseComments'); if(!el||!_pulseComments)return;
