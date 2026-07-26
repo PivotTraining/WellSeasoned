@@ -344,6 +344,7 @@ grant execute on function public.verify_critic(text, text, text, boolean) to ano
 -- client's localStorage guard clears too easily).
 drop policy if exists debate_votes_insert on public.debate_votes;
 drop policy if exists debate_votes_update_own on public.debate_votes;
+drop policy if exists debate_votes_delete_own on public.debate_votes;
 create policy debate_votes_insert on public.debate_votes
   for insert to public with check (user_id = auth.uid());
 create policy debate_votes_update_own on public.debate_votes
