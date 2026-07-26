@@ -6379,7 +6379,7 @@ function cardPreviewOut(el){
    the same account reads the same stance on every device). app.tally[id]=
    {for,against} overrides seed. app.comments[id]=[...] are reads added on
    this device, prepended to the seeds. */
-var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}, miniTags:{}, miniTagCounts:{}, myWatch:{}};
+var app={signedIn:false, name:'', email:'', userId:'', plate:[], taughtThis:false, taste:null, scope:'ours', zip:'', sound:true, curation:{scope:{},featured:[],hidden:[],classic:{},flagged:[],genre:{}}, votes:{}, tally:{}, comments:{}, personVotes:{}, excitement:{}, exciteCounts:{}, miniTags:{}, miniTagCounts:{}, myWatch:{}, myCommentCount:null};
 var STORE_KEY='ws_state_v3';
 function saveState(){
   try{
@@ -9535,6 +9535,28 @@ function loadMyVotes(){
       }).catch(function(){});
   }catch(e){}
 }
+/* The You page's "Reads posted" stat used to come straight from app.comments
+   — a purely device-local echo of comments posted from THIS browser
+   (postComment prepends to it, nothing ever populates it from the backend).
+   So a real signed-in account posting from a laptop, then checking You from
+   a phone, saw a different (lower) count there — same class of bug loadMyVotes
+   already fixed for votes, just missing on the comments side. Pulls this
+   identity's real total from the backend (comments.user_id) so the stat
+   reads the same everywhere; app.myCommentCount stays null until this
+   resolves, so renderYou() falls back to the local tally in the meantime
+   instead of flashing a wrong number. */
+function loadMyComments(){
+  if(!sbConfigured())return;
+  var uid=myUid(); if(!uid)return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/comments?user_id=eq.'+encodeURIComponent(uid)+'&select=id',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows))return;
+        app.myCommentCount=rows.length;
+        rerenderActive();
+      }).catch(function(){});
+  }catch(e){}
+}
 /* Real reads from The Table (Supabase), merged under this device's local posts. */
 function loadBackendComments(slug){
   if(!sbConfigured())return;
@@ -11742,6 +11764,10 @@ function renderYou(){
   var plateFilms=app.plate.map(find).filter(Boolean);
   var voteIds=Object.keys(app.votes);
   var reads=0; for(var k in app.comments){ reads+=app.comments[k].length; }
+  // Prefer the real cross-device total from loadMyComments() once it's back —
+  // app.comments alone is just this device's own local echo of what it's
+  // posted, which is why the count used to differ machine to machine.
+  if(app.myCommentCount!=null) reads=app.myCommentCount;
   var av='<div class="you-av">'+initials(app.name)+'</div>';
   if(!app.signedIn){
     el.innerHTML='<div class="you-hero">'+av+'<div><h1>Your table</h1><p class="you-sub">Create a free account to save films, keep your votes across devices, and get picks made for you.</p></div></div>'+
@@ -12233,7 +12259,7 @@ function authApply(session){
     }
   }
   saveState(); renderAuthSlot();
-  if(!app.anon){ loadMyProfile(); loadMyApplication(); loadMyVotes(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
+  if(!app.anon){ loadMyProfile(); loadMyApplication(); loadMyVotes(); loadMyComments(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
 }
 function authClearLocal(){ authSession=null; authStore(null); app.signedIn=false; app.anon=false; app.email=''; app.userId=''; _identityPromise=null; _plateSynced=false; saveState(); renderAuthSlot(); }
 function authBusy(on){ var b=byId('auBtn'); if(b){ b.disabled=on; b.textContent=on?'One moment…':(byId('auName')?'Create account':'Sign in'); } }
@@ -12358,14 +12384,14 @@ function authRestore(){
     if(!anon0){ app.signedIn=true; if(s.user){ var m0=s.user.user_metadata||{}; app.name=app.name||m0.name||''; app.email=s.user.email||''; } }
     renderAuthSlot();
     doTokenRefresh(s.refresh_token).then(function(d){ if(d)authApply(normalizeSession(d)); else authClearLocal(); });
-    if(!anon0){ loadMyProfile(); loadMyApplication(); loadMyVotes(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
+    if(!anon0){ loadMyProfile(); loadMyApplication(); loadMyVotes(); loadMyComments(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
   } else {
     authSession=s;
     var anon=!!(s.user&&s.user.is_anonymous);
     app.anon=anon; app.userId=(s.user&&s.user.id)||'';
     if(!anon){ app.signedIn=true; if(s.user){ var m=s.user.user_metadata||{}; app.name=app.name||m.name||''; app.email=s.user.email||''; } }
     renderAuthSlot();
-    if(!anon){ loadMyProfile(); loadMyApplication(); loadMyVotes(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
+    if(!anon){ loadMyProfile(); loadMyApplication(); loadMyVotes(); loadMyComments(); if(!_plateSynced){ _plateSynced=true; syncPlateFromBackend(); } }
   }
 }
 /* Give every visitor a silent, real identity so votes tie to auth.uid() (forge-proof,
