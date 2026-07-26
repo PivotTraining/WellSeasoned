@@ -3454,3 +3454,56 @@ real cast/director/synopsis, poster pinned, backdrop baked, `k`/`t` null,
 `votes:0`, `reviews:[]`. Catalog 1262 → 1263; ran
 `node scripts/build-films-json.cjs`. Verified in headless Chromium: film
 page renders with correct title/director, zero console errors.
+
+## Pulse: comment moderation + home "cast your first vote" widget (2026-07-26)
+Owner: "I want a way in the pulse to see new comments to be able to
+moderate. Also we should improve the how to vote bar on the home screen or
+something. Too many visitors dont vote at least once."
+
+- **Comment moderation** — new SECURITY DEFINER RPCs (`backend/schema.sql`,
+  marked NOT YET LIVE, same pending-migration pattern as every other admin
+  RPC this session): `admin_list_comments(p_secret,p_limit)` — an owner-
+  gated read of every comment INCLUDING reported ones (the public
+  `comments_read` policy already hides `reported=true` rows from everyone
+  else, so this is the one place the owner can actually see them) — and
+  `admin_moderate_comment(p_secret,p_id,p_reported)`, a two-way flip of that
+  same flag. Deliberately distinct from the existing public `report_comment`
+  RPC, which anyone can call but which only ever sets `reported=true` (a
+  flag, not a moderation tool) — this is the owner-only hide/restore switch.
+  No new table; reuses `comments.reported`/`comments.featured` exactly as
+  they already exist. New "Recent comments" panel on `#/pulse` (below the
+  user directory): search, filter chips (All/Unreviewed/Reported/Featured
+  with live counts), each row showing name/stance/film link/body/timestamp,
+  with Hide/Restore and Feature/Unfeature actions (Feature reuses the
+  existing `set_comment_featured` RPC the film-page ★ toggle already uses —
+  no duplicate logic). Degrades gracefully with the standard "run the SQL"
+  hint if the RPCs aren't deployed yet, same as every other not-yet-live
+  Pulse/Curate panel. Validated the new RPCs against a throwaway Postgres 16
+  (list/hide/restore/unauthorized-reject all correct); verified client-side
+  in headless Chromium with mocked data: renders, filters, and the moderate
+  action fires the right payload and flips the row in place, zero console
+  errors.
+- **Home "cast your first vote" widget** — real gap: every card sitewide
+  already has inline quick-vote buttons (`quickVoteRow`), but the very first
+  thing a new visitor sees under the hero was `.teach`, a purely educational
+  "how to read a score" blurb with no vote action at all — voting required
+  scrolling down to find a card first. Restructured `.teach` into a
+  `.teach-vote` widget (new `voteBarHTML()`/`voteBarPick()`/`voteBarVote()`,
+  index.html) that surfaces ONE real film — specifically the same film
+  `weekBallot()` already leads the "This Week at The Table" ballot with, so
+  it's never a second, disconnected pick — with a poster thumb, title, and
+  big one-tap "It's Seasoned"/"Send It Back" buttons right at the top of the
+  page. The pick is cached per pageview (`_voteBarFilmId`) specifically
+  because `weekBallot()`'s own selection logic favors films that already
+  have votes, so voting through the widget would otherwise nudge the
+  underlying tally and swap the widget to a DIFFERENT film out from under
+  the visitor immediately after they voted — caught and fixed via headless
+  testing before shipping. Reuses the exact same `applyVote`/`track` path
+  every other vote button on the site uses — real, backend-persisted, same
+  post-vote capture flow fires afterward. The original "how to read a
+  score" explainer + its three buttons (See how it works / Find your picks
+  / Serve me something) moved below it as a secondary row, unchanged
+  otherwise. Verified in headless Chromium desktop + mobile: widget renders
+  the real weekly pick, casting a vote updates the same card in place
+  (button goes `.on`, film doesn't swap), zero console errors, zero
+  horizontal overflow at 390px.
