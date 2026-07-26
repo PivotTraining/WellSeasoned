@@ -372,12 +372,28 @@
   .catalog-count b{font-family:var(--display);font-size:23px;font-weight:800;color:var(--gold-ink);letter-spacing:-.01em}
   .catalog-count span{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
   /* teaching strip */
-  .teach{display:flex;align-items:center;gap:18px;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid rgba(40,26,10,.10);border-left:4px solid var(--gold);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:22px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,251,240,.8);flex-wrap:wrap}
+  .teach{display:flex;flex-direction:column;gap:16px;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid rgba(40,26,10,.10);border-left:4px solid var(--gold);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:22px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,251,240,.8)}
   .hero-top .hero-lead{padding-right:8px}
+  .teach-explain{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-top:14px;border-top:1px solid rgba(40,26,10,.10)}
   .teach .verdict{flex:none}
-  .teach p{font-size:14px;color:var(--ink-2);flex:1;min-width:220px}
-  .teach p b{color:var(--ink)}
-  .teach button{margin-left:auto}
+  .teach-explain p{font-size:14px;color:var(--ink-2);flex:1;min-width:220px;margin:0}
+  .teach-explain p b{color:var(--ink)}
+  .teach-explain button:last-child{margin-left:auto}
+  /* cast-your-first-vote widget */
+  .teach-vote{display:flex;flex-direction:column;gap:10px}
+  .vb-eyebrow{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink)}
+  .vb-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .vb-poster{position:relative;flex:none;width:64px;height:96px;border-radius:10px;overflow:hidden;background-size:cover;background-position:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  .vb-poster.noart{display:flex;align-items:center;justify-content:center;background:var(--inset);font-size:22px}
+  .vb-info{flex:1;min-width:200px}
+  .vb-title{font-weight:800;font-size:17px;color:var(--ink);cursor:pointer}
+  .vb-title:hover{text-decoration:underline}
+  .vb-sub{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .vb-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .vb-btn{font-family:inherit;font-size:13.5px;font-weight:800;padding:10px 18px;border-radius:999px;border:1.5px solid rgba(0,0,0,.16);background:transparent;color:var(--ink-2);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .vb-btn.for.on,.vb-btn.for:hover{background:var(--gold);border-color:var(--gold);color:#241703}
+  .vb-btn.against.on,.vb-btn.against:hover{background:var(--paprika);border-color:var(--paprika);color:#fff}
+  @media(max-width:640px){ .vb-btn{flex:1;padding:11px 8px} }
 
   .mosaic{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
   .mtile{position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;padding:15px;border:1px solid rgba(0,0,0,.07);box-shadow:var(--shadow-2);transition:transform .22s,box-shadow .22s}
@@ -2011,10 +2027,13 @@
         <div id="featuredBanner" class="feat-wrap" style="display:none"></div>
         <div id="homeScope" class="scope-wrap"></div>
         <div class="teach">
-          <div class="teach-verdict2" id="teachVerdict"></div>
-          <p><b>How to read a score.</b> The Kitchen number comes from verified critics of the culture. The Table number is the audience. When they agree, it earns the seal. When they split, that gap tells you something.</p>
-          <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
-          <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
+          <div class="teach-vote" id="teachVote"></div>
+          <div class="teach-explain">
+            <div class="teach-verdict2" id="teachVerdict"></div>
+            <p><b>How to read a score.</b> The Kitchen number comes from verified critics of the culture. The Table number is the audience. When they agree, it earns the seal. When they split, that gap tells you something.</p>
+            <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
+            <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
+          </div>
         </div>
         <!-- The review act comes first: this week's ballot, then the films. The site
              is a film & TV review platform — voting + the catalog lead; games and
@@ -7364,6 +7383,52 @@ function paintWeekTable(){
   '</div>'+
   '<div class="grid-cards wt-grid">'+ids.map(cardHTML).join('')+'</div>';
 }
+/* ============ HOME "CAST YOUR FIRST VOTE" WIDGET ============
+   The old teach bar only explained scoring — it never let a visitor vote
+   without scrolling to find a card first. This surfaces one real film
+   (the same weekBallot() pick the ballot below leads with, so it's never a
+   second, disconnected selection) with big one-tap Seasoned/Send It Back
+   buttons right under the hero, so casting a first vote takes zero scrolling
+   and zero hunting for a title. Reuses the exact vote path (applyVote/track)
+   quickVote and castVote already use — real, counted, nothing fake. */
+var _voteBarFilmId=null;
+function voteBarPick(){
+  // Cache the pick so casting a vote (which nudges FILMS' local tally and
+  // therefore weekBallot()'s own ordering) doesn't swap the widget to a
+  // different film out from under the visitor right after they voted.
+  if(_voteBarFilmId){ var cached=find(_voteBarFilmId); if(cached) return cached; }
+  var ids=weekBallot();
+  for(var i=0;i<ids.length;i++){ var f=find(ids[i]); if(f){ _voteBarFilmId=f.id; return f; } }
+  return null;
+}
+function voteBarHTML(){
+  var f=voteBarPick(); if(!f) return '';
+  var v=app.votes[f.id];
+  var media=f.noart
+    ? '<div class="vb-poster noart" onclick="go(\'film\',\''+f.id+'\')">🎬</div>'
+    : '<div class="vb-poster" style="background:'+f.grad+'" onclick="go(\'film\',\''+f.id+'\')">'+(f.poster?'<img class="poster-img" src="'+f.poster+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</div>';
+  return '<span class="vb-eyebrow">New here? Cast your first verdict</span>'+
+    '<div class="vb-row">'+media+
+      '<div class="vb-info">'+
+        '<div class="vb-title" onclick="go(\'film\',\''+f.id+'\')">'+esc(f.title)+'</div>'+
+        '<div class="vb-sub">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'By ':'Dir. ')+esc(f.dir)+' · ':'')+f.year+'</div>'+
+        '<div class="vb-actions">'+
+          '<button class="vb-btn for'+(v==='for'?' on':'')+'" onclick="voteBarVote(event,\''+f.id+'\',\'for\')">It’s Seasoned</button>'+
+          '<button class="vb-btn against'+(v==='against'?' on':'')+'" onclick="voteBarVote(event,\''+f.id+'\',\'against\')">Send It Back</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+function paintVoteBar(){ var el=byId('teachVote'); if(!el)return; el.innerHTML=voteBarHTML(); }
+function voteBarVote(ev,id,side){
+  ev.stopPropagation(); ev.preventDefault();
+  var prev=app.votes[id];
+  if(prev===side){ toast('You already picked '+(side==='for'?'seasoned':'sent back')+'.'); return; }
+  applyVote(id,side); track('vote',{film:id,side:side,src:'votebar'});
+  if(side==='for'){ sprinkle(ev.target); sfx('for'); toast('Seasoned. Your vote counted.'); }
+  else { sfx('against'); toast('Sent it back. Your vote counted.'); }
+  paintVoteBar();
+}
 /* ============ DAILY TRIVIA — Black film & TV ============
    One question a day, the SAME question for everyone (indexed by the calendar
    day so it rotates daily and repeats only after the whole bank cycles). Every
@@ -8023,10 +8088,107 @@ function renderPulse(){
     '<div class="pulse-dir-head"><h2 class="pulse-h2">Registered users</h2><span id="pulseDirCount" class="pulse-count"></span></div>'+
     '<div class="pulse-tools"><input id="pulseSearch" placeholder="Search name, email, outlet…" oninput="renderPulseTable()">'+
       '<div class="pulse-chips" id="pulseChips"></div></div>'+
-    '<div class="pulse-tablewrap"><div id="pulseTable"><p class="hero-lead">Loading users…</p></div></div>';
+    '<div class="pulse-tablewrap"><div id="pulseTable"><p class="hero-lead">Loading users…</p></div></div>'+
+    '<div class="pulse-dir-head" style="margin-top:30px"><h2 class="pulse-h2">Recent comments</h2><span id="pulseCmtCount" class="pulse-count"></span></div>'+
+    '<div class="pulse-tools"><input id="pulseCmtSearch" placeholder="Search name, film, comment…" oninput="renderPulseComments()">'+
+      '<div class="pulse-chips" id="pulseCmtChips"></div></div>'+
+    '<div id="pulseComments" class="cur-list" style="max-height:none"><p class="hero-lead">Loading comments…</p></div>';
   loadPulse();
 }
-function loadPulse(){ loadPulseStats(); loadUserDirectory(); }
+function loadPulse(){ loadPulseStats(); loadUserDirectory(); loadPulseComments(); }
+/* Comment moderation — a live feed of Table comments (newest first) so the
+   owner can catch anything new without a SQL editor. Uses the owner-gated
+   admin_list_comments RPC (bypasses comments_read so reported rows are
+   visible here too, unlike everywhere else on the site). Hide/Restore flips
+   `reported` via admin_moderate_comment — the exact same flag the public
+   comments_read policy already filters on, so "Hide" here is the real
+   moderation action, not a separate soft-delete. Feature/Unfeature reuses
+   the existing set_comment_featured RPC (same one the film-page ★ toggle
+   uses). Degrades gracefully with the same "run the SQL" hint as every
+   other not-yet-deployed admin RPC on this page. */
+var _pulseComments=null, _pulseCmtFilter='all';
+function loadPulseComments(){
+  var el=byId('pulseComments'); if(!el)return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_comments',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_limit:300})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+    .then(function(res){
+      var el=byId('pulseComments'); if(!el)return;
+      if(!res.ok||!Array.isArray(res.d)){
+        el.innerHTML='<div class="cur-stats-note">Comment moderation isn’t live yet — run the <code>admin_list_comments</code> block from <code>backend/schema.sql</code> in the Supabase SQL editor, then reload.</div>';
+        var c=byId('pulseCmtCount'); if(c)c.textContent=''; var ch=byId('pulseCmtChips'); if(ch)ch.innerHTML=''; return;
+      }
+      _pulseComments=res.d; renderPulseCmtChips(); renderPulseComments();
+    })
+    .catch(function(){ var el=byId('pulseComments'); if(el)el.innerHTML='<p class="empty-note">Couldn’t load comments right now.</p>'; });
+}
+function pulseCmtFilters(){
+  if(!_pulseComments)return [];
+  var neww=0,rep=0,feat=0;
+  for(var i=0;i<_pulseComments.length;i++){ var c=_pulseComments[i]; if(c.reported)rep++; else if(c.featured)feat++; else neww++; }
+  return [['all','All',_pulseComments.length],['new','Unreviewed',neww],['reported','Reported',rep],['featured','Featured',feat]];
+}
+function renderPulseCmtChips(){
+  var el=byId('pulseCmtChips'); if(!el)return;
+  el.innerHTML=pulseCmtFilters().map(function(o){
+    return '<button class="chip'+(_pulseCmtFilter===o[0]?' on':'')+'" onclick="setPulseCmtFilter(\''+o[0]+'\')">'+o[1]+' · '+o[2]+'</button>';
+  }).join('');
+}
+function setPulseCmtFilter(f){ _pulseCmtFilter=f; renderPulseCmtChips(); renderPulseComments(); }
+function pulseCmtRowHTML(c){
+  var f=find(c.film_slug);
+  var filmLink=f?'<a onclick="go(\'film\',\''+esc(f.id)+'\')">'+esc(f.title)+'</a>':esc(c.film_slug);
+  var stance=c.stance==='for'?'<span class="pulse-badge reg" style="background:rgba(60,150,80,.14);color:#2c7a43">Seasoned</span>':(c.stance==='against'?'<span class="pulse-badge anon" style="background:rgba(196,69,31,.14);color:#a3421e">Sent back</span>':'');
+  var flags=(c.reported?'<span class="pulse-badge anon">Hidden</span>':'')+(c.featured?'<span class="pulse-badge crit">★ Featured</span>':'');
+  return '<div class="cr-row">'+
+    '<div class="ic-av ic-av-none">'+esc((c.name||'?').slice(0,1).toUpperCase())+'</div>'+
+    '<div class="cr-body">'+
+      '<div class="cr-head">'+esc(c.name||'Anonymous')+' '+stance+' '+flags+'</div>'+
+      '<div class="cr-byline">On '+filmLink+' · '+_pulseFmtDate(c.created_at)+'</div>'+
+      '<p class="cr-quote">'+esc(c.body||'')+'</p>'+
+    '</div>'+
+    '<div style="display:flex;flex-direction:column;gap:6px;flex:none">'+
+      (c.reported
+        ? '<button class="btn btn-ghost btn-sm" onclick="pulseModerateComment('+c.id+',false)">Restore</button>'
+        : '<button class="btn btn-ghost btn-sm" onclick="pulseModerateComment('+c.id+',true)">Hide</button>')+
+      '<button class="btn btn-ghost btn-sm" onclick="pulseToggleCmtFeatured('+c.id+','+(c.featured?'false':'true')+')">'+(c.featured?'☆ Unfeature':'★ Feature')+'</button>'+
+    '</div>'+
+  '</div>';
+}
+function renderPulseComments(){
+  var el=byId('pulseComments'); if(!el||!_pulseComments)return;
+  var q=(byId('pulseCmtSearch')&&byId('pulseCmtSearch').value||'').toLowerCase().trim();
+  var rows=_pulseComments.filter(function(c){
+    if(_pulseCmtFilter==='new'&&(c.reported||c.featured))return false;
+    if(_pulseCmtFilter==='reported'&&!c.reported)return false;
+    if(_pulseCmtFilter==='featured'&&!c.featured)return false;
+    if(q){ var f=find(c.film_slug); var hay=((c.name||'')+' '+(c.body||'')+' '+c.film_slug+' '+(f?f.title:'')).toLowerCase(); if(hay.indexOf(q)<0)return false; }
+    return true;
+  });
+  var cnt=byId('pulseCmtCount'); if(cnt)cnt.textContent=rows.length+' comment'+(rows.length===1?'':'s');
+  el.innerHTML=rows.length?rows.map(pulseCmtRowHTML).join(''):'<p class="empty-note" style="text-align:center">No comments match.</p>';
+}
+function pulseModerateComment(id,reported){
+  if(!sbConfigured())return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_moderate_comment',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_reported:reported})})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(ok){
+      if(!ok){ toast('Couldn’t update — try again.'); return; }
+      if(_pulseComments)_pulseComments.forEach(function(c){ if(c.id===id)c.reported=reported; });
+      toast(reported?'Comment hidden.':'Comment restored.');
+      renderPulseCmtChips(); renderPulseComments();
+    }).catch(function(){ toast('Network error.'); });
+}
+function pulseToggleCmtFeatured(id,on){
+  if(!sbConfigured())return;
+  fetch(SUPABASE_URL+'/rest/v1/rpc/set_comment_featured',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_on:on})})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(ok){
+      if(!ok){ toast('Couldn’t update — try again.'); return; }
+      if(_pulseComments)_pulseComments.forEach(function(c){ if(c.id===id)c.featured=on; });
+      toast(on?'Featured on The Table.':'Unfeatured.');
+      renderPulseCmtChips(); renderPulseComments();
+    }).catch(function(){ toast('Network error.'); });
+}
 function loadPulseStats(){
   var el=byId('pulseStats'); if(!el)return;
   fetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
@@ -8457,6 +8619,7 @@ function renderHome(){
   paintTenYears();
   paintTrivia();
   paintWeekTable();
+  paintVoteBar();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+

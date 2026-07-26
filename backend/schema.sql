@@ -795,3 +795,57 @@ create or replace view public.mini_tag_counts as
   from public.mini_tag_votes
   group by film_slug, tag;
 grant select on public.mini_tag_counts to anon, authenticated;
+
+-- ============================================================================
+-- COMMENT MODERATION — The Pulse (2026-07-26)  [NOT YET LIVE]
+-- Powers a "Recent comments" panel on #/pulse so the owner can see new Table
+-- comments as they land and hide/restore them without touching the SQL
+-- editor. No new table — reuses the existing public.comments (film_slug,
+-- name, stance, body, reported, featured, created_at). The public
+-- comments_read policy already hides any row with reported=true, so
+-- moderation is just flipping that flag; these RPCs add an owner-gated LIST
+-- (bypassing comments_read so reported rows are visible to the owner too)
+-- and a MODERATE action, same auth gate as every other admin RPC here (owner
+-- login OR the curation_admin passphrase). Paste this block into the
+-- Supabase SQL editor once, same pending-migration pattern as the blocks
+-- above.
+create or replace function public.admin_list_comments(p_secret text default null, p_limit int default 300)
+returns json language plpgsql security definer set search_path = public as $$
+declare expected text;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  return coalesce((
+    select json_agg(t) from (
+      select id, film_slug, name, stance, body, reported, featured, created_at
+      from public.comments
+      order by created_at desc
+      limit greatest(1, least(coalesce(p_limit, 300), 1000))
+    ) t
+  ), '[]'::json);
+end $$;
+revoke all on function public.admin_list_comments(text, int) from public;
+grant execute on function public.admin_list_comments(text, int) to anon, authenticated;
+
+-- Sets `reported` directly (true = hide from public reads, false = restore).
+-- Distinct from the public report_comment(p_id) RPC, which anyone can call
+-- but which only ever sets reported=true (a flag, not a moderation tool) —
+-- this is the owner-only two-way switch.
+create or replace function public.admin_moderate_comment(p_secret text, p_id bigint, p_reported boolean)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare expected text; n int;
+begin
+  select value into expected from public.app_secrets where key = 'curation_admin';
+  if lower(coalesce(auth.jwt() ->> 'email','')) <> 'hello@pivottraining.us'
+     and (expected is null or p_secret is distinct from expected) then
+    raise exception 'unauthorized';
+  end if;
+  update public.comments set reported = p_reported where id = p_id;
+  get diagnostics n = row_count;
+  return n > 0;
+end $$;
+revoke all on function public.admin_moderate_comment(text, bigint, boolean) from public;
+grant execute on function public.admin_moderate_comment(text, bigint, boolean) to anon, authenticated;
