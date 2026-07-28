@@ -6897,8 +6897,7 @@ function submitTitleSuggestion(){
 function adminSuggestions(){
   var w=byId('curSuggList'); if(!w)return;
   w.innerHTML='<p class="hero-lead">Loading…</p>';
-  fetch(SUPABASE_URL+'/rest/v1/rpc/list_title_suggestions',{method:'POST',
-    headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/list_title_suggestions',{p_secret:_adminSecretQuiet()})
   .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
   .then(function(res){
     var w=byId('curSuggList'); if(!w)return;
@@ -6920,8 +6919,7 @@ function adminSuggestions(){
   }).catch(function(){ var w=byId('curSuggList'); if(w)w.innerHTML='<p class="empty-note">Could not load suggestions right now.</p>'; });
 }
 function suggStatus(id,st){
-  fetch(SUPABASE_URL+'/rest/v1/rpc/set_title_suggestion_status',{method:'POST',
-    headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_status:st})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/set_title_suggestion_status',{p_secret:_adminSecretQuiet(),p_id:id,p_status:st})
   .then(function(r){ if(r.ok){ toast('Marked '+st+'.'); adminSuggestions(); } else toast('Failed.'); });
 }
 /* ============ SERVE ME SOMETHING ============ */
@@ -8023,7 +8021,7 @@ function convTile(email,total){
 }
 function loadAdminStats(){
   var el=byId('curStats'); if(!el)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{p_secret:_adminSecretQuiet()})
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
     .then(function(res){
       var el=byId('curStats'); if(!el)return;
@@ -8109,7 +8107,7 @@ function loadPulse(){ loadPulseStats(); loadUserDirectory(); loadPulseComments()
 var _pulseComments=null, _pulseCmtFilter='all';
 function loadPulseComments(){
   var el=byId('pulseComments'); if(!el)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_comments',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_limit:300})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_comments',{p_secret:_adminSecretQuiet(),p_limit:300})
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
     .then(function(res){
       var el=byId('pulseComments'); if(!el)return;
@@ -8207,7 +8205,7 @@ function renderPulseComments(){
 }
 function pulseModerateComment(id,reported){
   if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_moderate_comment',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_reported:reported})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_moderate_comment',{p_secret:_adminSecretQuiet(),p_id:id,p_reported:reported})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(ok){
       if(!ok){ toast('Couldn’t update — try again.'); return; }
@@ -8218,7 +8216,7 @@ function pulseModerateComment(id,reported){
 }
 function pulseToggleCmtFeatured(id,on){
   if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/set_comment_featured',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_on:on})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/set_comment_featured',{p_secret:_adminSecretQuiet(),p_id:id,p_on:on})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(ok){
       if(!ok){ toast('Couldn’t update — try again.'); return; }
@@ -8229,7 +8227,7 @@ function pulseToggleCmtFeatured(id,on){
 }
 function loadPulseStats(){
   var el=byId('pulseStats'); if(!el)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_dashboard_stats',{p_secret:_adminSecretQuiet()})
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
     .then(function(res){
       var el=byId('pulseStats'); if(!el)return; var s=res.d;
@@ -8254,7 +8252,7 @@ function loadPulseStats(){
 }
 function loadUserDirectory(){
   var t=byId('pulseTable'); if(!t)return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_user_directory',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_user_directory',{p_secret:_adminSecretQuiet()})
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
     .then(function(res){
       var t=byId('pulseTable'); if(!t)return;
@@ -8339,7 +8337,7 @@ function _pulseRowByEmail(email){ if(!_pulseRows)return null; for(var i=0;i<_pul
 function pulseMakeCritic(email){
   if(!email||!sbConfigured())return;
   var u=_pulseRowByEmail(email), nm=u&&u.name;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{p_secret:_adminSecretQuiet(),p_email:email})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(ok){
       if(ok){ toast('Seated as critic — their reviews now move the Kitchen.'); seatedConfirm('critic',email,nm); loadUserDirectory(); }
@@ -8350,7 +8348,7 @@ function pulseMakeCritic(email){
 function pulseRemoveCritic(email){
   if(!email||!sbConfigured())return;
   if(!window.confirm('Remove this critic? Their seat is revoked and their reviews stop moving the Kitchen score.'))return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{p_secret:_adminSecretQuiet(),p_email:email,p_on:false})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(){ toast('Critic removed. Seat revoked.'); loadUserDirectory(); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
@@ -8379,7 +8377,7 @@ var _curCritics=null;
 function loadCurCritics(){
   var el=byId('curCriticsList'); if(!el)return;
   el.innerHTML='<p class="hero-lead">Loading…</p>';
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_user_directory',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_user_directory',{p_secret:_adminSecretQuiet()})
     .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
     .then(function(res){
       var el=byId('curCriticsList'); if(!el)return;
@@ -9313,8 +9311,7 @@ function seatCritic(){
   if(!sbConfigured()){ toast('Backend not configured.'); return; }
   var email=window.prompt('Critic’s account email (they must join the site first):'); if(!email)return;
   var outlet=window.prompt('Their outlet (optional, e.g. “The Marrow”):')||null;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet})
     .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
     .then(function(ok){ toast(ok?'Critic seated. Their reviews now move the Kitchen.':'No member with that email — they need to create an account first.'); })
     .catch(function(){ toast('Failed — make sure you’re signed in as the owner.'); });
@@ -9328,11 +9325,25 @@ function seatCritic(){
 /* Admin RPCs authorize on the owner's login (JWT sent via sbUserHeaders) OR the
    legacy passphrase — so the owner never has to type a passphrase to review. */
 function _adminSecretQuiet(){ try{ return localStorage.getItem('ws_admin_secret')||''; }catch(e){ return ''; } }
+/* Owner-gated writes (seat/remove critic, feature a comment, publish an
+   article, etc.) need a FRESH JWT — auth.jwt()->>'email' only resolves
+   server-side if the access_token hasn't quietly expired while the tab sat
+   open. A merely-cached "signed in" client flag isn't enough. Mirrors the
+   exact fix already applied to votes (ensureFreshIdentity — see its comment,
+   "the my vote didn't stick bug"): refresh first, THEN fire the write, so a
+   real owner never sees a false "sign in as the owner" error just because
+   time passed since their last click. Every admin RPC call in this file
+   should go through this instead of a bare fetch(). */
+function ownerFetch(url,body){
+  return ensureFreshIdentity().then(function(){
+    return fetch(url,{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify(body)});
+  });
+}
 function inboxLoad(){
   var list=byId('inboxList'); if(!list)return;
   if(!sbConfigured()){ list.innerHTML='<p class="hero-lead">Backend not configured.</p>'; return; }
   list.innerHTML='<p class="hero-lead">Loading…</p>';
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_applications',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet()})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_list_applications',{p_secret:_adminSecretQuiet()})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(rows){
       rows=rows||[];
@@ -9398,7 +9409,7 @@ function inboxCardHTML(a){
 }
 function inboxSetStatus(id,status){
   if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_status:status})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{p_secret:_adminSecretQuiet(),p_id:id,p_status:status})
     .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
     .then(function(){ toast('Updated.'); inboxLoad(); })
     .catch(function(){ toast('Couldn’t update — make sure you’re signed in as the owner.'); });
@@ -9412,11 +9423,11 @@ function inboxSetStatus(id,status){
    application itself. */
 function _syncAppStatus(id,status){
   if(id==null)return;
-  return fetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_status:status})}).catch(function(){});
+  return ownerFetch(SUPABASE_URL+'/rest/v1/rpc/admin_set_application_status',{p_secret:_adminSecretQuiet(),p_id:id,p_status:status}).catch(function(){});
 }
 function inboxSeat(id,email,outlet,name,uid){
   if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{p_secret:_adminSecretQuiet(),p_email:email,p_outlet:outlet||null})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(ok){ if(ok){ _syncAppStatus(id,'seated').then(function(){ inboxLoad(); }); seatedConfirm('critic',email,name); notifyApplicant(uid,'You’re seated as a verified critic in The Kitchen — your reviews now move the official score.'); } else { toast('They need an account with this email first — then seat again.'); } })
     .catch(function(){ toast('Couldn’t seat — make sure you’re signed in as the owner.'); });
@@ -9467,7 +9478,7 @@ function notifyContributor(kind,email,name){
 function inboxRemove(id,email,uid){
   if(!sbConfigured())return;
   if(!window.confirm('Remove this critic? Their seat is revoked and their reviews stop moving the Kitchen score.'))return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_critic',{p_secret:_adminSecretQuiet(),p_email:email,p_on:false})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(){ toast('Critic removed. Seat revoked.'); _syncAppStatus(id,'review').then(function(){ inboxLoad(); }); notifyApplicant(uid,'Your critic seat in The Kitchen has been removed.'); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
@@ -9475,7 +9486,7 @@ function inboxRemove(id,email,uid){
 /* Admin: approve / remove a writer for The Word (mirrors critic seating). */
 function inboxApproveWriter(id,email,name,uid){
   if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:true})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{p_secret:_adminSecretQuiet(),p_email:email,p_on:true})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(ok){ if(ok){ _syncAppStatus(id,'seated').then(function(){ inboxLoad(); }); seatedConfirm('writer',email,name); notifyApplicant(uid,'You’re approved to write for The Balcony — you’ve got a real byline now.'); } else { toast('They need an account with this email first — then approve again.'); } })
     .catch(function(){ toast('Couldn’t approve — make sure you’re signed in as the owner.'); });
@@ -9483,7 +9494,7 @@ function inboxApproveWriter(id,email,name,uid){
 function inboxRemoveWriter(id,email,uid){
   if(!sbConfigured())return;
   if(!window.confirm('Remove this writer? Their byline in The Balcony is revoked.'))return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),body:JSON.stringify({p_secret:_adminSecretQuiet(),p_email:email,p_on:false})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/verify_writer',{p_secret:_adminSecretQuiet(),p_email:email,p_on:false})
     .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); return r.json(); })
     .then(function(){ toast('Writer removed. Byline revoked.'); _syncAppStatus(id,'review').then(function(){ inboxLoad(); }); notifyApplicant(uid,'Your writer byline in The Balcony has been removed.'); })
     .catch(function(){ toast('Couldn’t remove — make sure you’re signed in as the owner.'); });
@@ -9851,8 +9862,7 @@ function publishCuration(){
       sort_order:app.curation.featured.indexOf(f.id), kitchen_score:(f.k==null?null:f.k)};
   }).filter(function(it){ return it.scope!=='ours'||it.featured||it.hidden||it.classic||it.kitchen_score!=null; });
   toast('Publishing '+items.length+' titles…');
-  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_curation',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_items:items})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/publish_curation',{p_secret:_adminSecretQuiet(),p_items:items})
     .then(function(r){ if(r.ok)return r.json(); return r.text().then(function(t){ throw new Error(t); }); })
     .then(function(n){ toast('Published '+n+' titles to the backend.'); })
     .catch(function(e){ toast('Publish failed — make sure you’re signed in as the owner.'); });
@@ -10071,9 +10081,7 @@ function renderComments(f){
    comments policy changed. */
 function toggleCommentFeatured(id,filmId,on){
   if(!sbConfigured())return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/set_comment_featured',{method:'POST',
-    headers:sbUserHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_id:id,p_on:on})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/set_comment_featured',{p_secret:_adminSecretQuiet(),p_id:id,p_on:on})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(ok){
       if(!ok){ toast('Couldn’t update — try again.'); return; }
@@ -11414,16 +11422,14 @@ function doPublishArticle(slug){
     kind:(byId('arKind')||{}).value||'article', subject:(byId('arSubject')||{}).value||'',
     video_url:(byId('arVideo')||{}).value||'' };
   if(slug)art.slug=slug;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_article:art})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{p_secret:_adminSecretQuiet(),p_article:art})
     .then(function(r){ if(!r.ok){ toast('Failed — make sure you’re signed in as the owner.'); return null; } return r.json(); })
     .then(function(ns){ if(ns==null)return; closeModal(); ARTICLES=null; if(_articleBySlug[ns])delete _articleBySlug[ns]; toast('Published to The Balcony.'); go('read', ns); })
     .catch(function(){ toast('Network error — try again.'); });
 }
 function doDeleteArticle(slug){
   if(!window.confirm('Delete this piece?'))return;
-  fetch(SUPABASE_URL+'/rest/v1/rpc/delete_article',{method:'POST',headers:sbUserHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({p_secret:_adminSecretQuiet(),p_slug:slug})})
+  ownerFetch(SUPABASE_URL+'/rest/v1/rpc/delete_article',{p_secret:_adminSecretQuiet(),p_slug:slug})
     .then(function(r){ if(!r.ok){ toast('Failed — make sure you’re signed in as the owner.'); return; } closeModal(); ARTICLES=null; delete _articleBySlug[slug]; toast('Deleted.'); go('word'); })
     .catch(function(){ toast('Network error.'); });
 }
