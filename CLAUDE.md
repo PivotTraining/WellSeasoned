@@ -3507,3 +3507,95 @@ something. Too many visitors dont vote at least once."
   the real weekly pick, casting a vote updates the same card in place
   (button goes `.on`, film doesn't swap), zero console errors, zero
   horizontal overflow at 390px.
+
+## Fix: schema.sql not idempotent — missing drop-policy guard on debate_votes (2026-07-26)
+Owner hit `ERROR: 42710: policy "debate_votes_delete_own" for table
+"debate_votes" already exists` re-pasting `backend/schema.sql` into the
+Supabase SQL editor to publish the new comment-moderation RPCs. Real bug,
+not user error: `debate_votes_delete_own` was the only policy in the whole
+file created without a preceding `drop policy if exists` guard (its two
+siblings right above it both had one). Added the missing guard; verified
+idempotent by running the block twice in a row against a throwaway
+Postgres 16. Swept the rest of the file programmatically (regex diff of
+every `create policy` vs. every `drop policy if exists`) — confirmed this
+was the only gap.
+
+## Pulse comments: contact info + thank-you/feature emails + 100-comment critic tracker (2026-07-26)
+Owner: "let them know when we feature them and also have their contact
+info... a button next to each comment that says thank you so much for
+taking the time to comment. When you get to 100 comments we consider you
+for our critic position."
+- `admin_list_comments` (backend/schema.sql) now also returns each
+  commenter's real email (SECURITY DEFINER join to `auth.users`, same
+  technique `admin_user_directory` already uses) and their running total
+  comment count sitewide (grouped server-side by `user_id` — a real count,
+  never estimated). A comment with no `user_id` (silent-anon, no real
+  account) gets `email:null`; the client shows "no email on file" and hides
+  the email-dependent buttons rather than guessing an address.
+- New progress badge per row on `#/pulse`: "N/100 toward a critic seat"
+  below 100, "N comments — critic-eligible" at or above.
+- Two new mailto actions (same no-backend-send pattern as `pulseInvite`/
+  `notifyContributor` — a pre-filled draft the owner reviews and sends):
+  "🙏 Thank you" on every comment with an email on file (names the film,
+  states the real 100-comment rule and their current count), and
+  "📣 Notify feature" once a comment is marked featured.
+- Validated the updated RPC against a throwaway Postgres 16; verified
+  client-side in headless Chromium (mocked data covering has-email,
+  no-email, and featured/over-100 cases) — correct badges, correct button
+  visibility, zero console errors.
+
+## Fix: "Reads posted" stat differed by device for the same signed-in account (2026-07-26)
+Owner: "So depending on what computer i am using it changes the same user
+signed in voting and comment information." Votes already had `loadMyVotes()`
+reconciling `app.votes` against the backend by `user_id` on every sign-in/
+session-restore, so a real account read the same vote stances everywhere.
+Comments had no equivalent — the You page's "Reads posted" tile summed
+`app.comments`, populated ONLY by `postComment()` on that specific device,
+never by anything from the backend. Same account, two devices, two
+different counts. Added `loadMyComments()` (mirrors `loadMyVotes()` exactly)
+— pulls the real total from `comments?user_id=eq.<uid>`, stored in the new
+`app.myCommentCount`; wired into the same three call sites `loadMyVotes()`
+already uses. `renderYou()` now prefers the real total once it's back,
+falling back to the local tally in the meantime so the stat doesn't blank
+out mid-fetch. Verified in headless Chromium simulating a genuinely fresh
+device (empty localStorage, only a real session) — correctly shows the
+backend's real counts instead of zero, zero console errors.
+
+## Fix: "make sure you're signed in as the owner" on a real, active owner session (2026-07-26)
+Owner: "When i go to seat a critic under Hello@pivottraining.us it says
+make sure i am signed in as the admin what the heck." Root cause: every
+owner-gated admin write built its request headers from whatever
+`access_token` happened to be cached in `authSession` at click time, with
+no freshness check — votes already got this exact fix months ago
+(`ensureFreshIdentity`, "the my vote didn't stick" bug) but it was never
+extended to the 20+ owner-gated RPC call sites (seat/remove critic or
+writer, feature a comment, publish/delete an article, publish curation,
+moderate a comment, etc.). A session left open long enough for the JWT to
+quietly expire — the normal case on a dashboard page like Pulse/Curate that
+isn't reloaded often — still *looks* signed in client-side, but the stale
+token fails `auth.jwt()->>'email'` server-side, so a real, genuinely signed-
+in owner got a confusing "sign in as the owner" error for no visible
+reason. New `ownerFetch(url,body)` (index.html) refreshes the session first
+via the existing `ensureFreshIdentity()` (a no-op if already fresh) THEN
+fires the RPC with a guaranteed-fresh JWT; converted every owner-gated RPC
+call site to use it (`verify_critic`/`verify_writer`, `set_comment_featured`,
+`admin_moderate_comment`, `admin_list_comments`, `admin_dashboard_stats`,
+`admin_user_directory`, `admin_list_applications`,
+`admin_set_application_status`, `list_title_suggestions`,
+`set_title_suggestion_status`, `publish_curation`, `publish_article`,
+`delete_article`). `list_film_submissions`/`set_submission_status`
+deliberately left untouched — gated purely by the legacy passphrase, not a
+JWT, so never exposed to this bug. Verified in headless Chromium: with a
+simulated EXPIRED session, `pulseMakeCritic` now transparently refreshes
+first and the RPC fires with the new token (confirmed via the actual
+Authorization header); with an already-fresh session, no unnecessary
+refresh happens. Full-route sweep signed in as owner across Pulse/Curate/
+Inbox, zero console errors.
+
+**Flagged, not fixed (separate concern, out of scope for this fix):**
+`notify_user` (backend/schema.sql) has no owner/identity check at all —
+any authenticated caller can write a notification into any other user's
+feed by user_id. Low current risk (no UI exposes an arbitrary user_id to
+send to), but worth tightening if that ever changes. Stop-and-confirm with
+the owner before touching it, same risk tier as any other auth-adjacent
+RPC change.
