@@ -1662,11 +1662,20 @@
   .legend-toggle .lt-ic{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--gold);color:#20160B;font-weight:900;font-size:12px;transition:transform .34s cubic-bezier(.34,1.56,.64,1)}
   .legend-dock.open .legend-toggle{transform:scale(.96)}
   .legend-dock.open .lt-ic{transform:rotate(315deg)}   /* ? tips toward the swung-open key */
-  /* Key swings open in an arc from the button corner */
-  .legend-panel{width:296px;max-width:calc(100vw - 36px);max-height:calc(100vh - 92px);max-height:calc(100dvh - 92px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:15px 16px 12px;transform-origin:bottom right;animation:keySwing .4s cubic-bezier(.34,1.5,.5,1) both}
+  /* Key swings open in an arc from the button corner. max-height is capped
+     well short of the viewport (min() of a vh-based ceiling and a flat px
+     cap) so the panel always keeps clear air above it instead of crowding
+     or hiding behind the header — it used to run nearly edge-to-edge
+     top-to-bottom, which read as a full-screen takeover rather than a
+     popover anchored to its own button. The ::after triangle visually
+     tethers the panel to the toggle it opened from, same connector
+     convention as .nav-more-panel. */
+  .legend-panel{position:relative;width:296px;max-width:calc(100vw - 36px);max-height:min(calc(100vh - 140px),560px);max-height:min(calc(100dvh - 140px),560px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:15px 16px 12px;transform-origin:bottom right;animation:keySwing .46s cubic-bezier(.22,1.4,.36,1) both}
+  .legend-panel::after{content:'';position:absolute;bottom:-7px;right:23px;width:13px;height:13px;background:var(--panel);border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 3px 0;transform:rotate(45deg);box-shadow:2px 2px 3px -2px rgba(40,22,6,.15)}
   @keyframes keySwing{
-    0%{opacity:0;transform:translateY(18px) rotate(14deg) scale(.7)}
-    55%{opacity:1;transform:translateY(-5px) rotate(-3deg) scale(1.03)}
+    0%{opacity:0;transform:translateY(14px) rotate(9deg) scale(.72)}
+    50%{opacity:1;transform:translateY(-4px) rotate(-2deg) scale(1.025)}
+    75%{transform:translateY(1px) rotate(.5deg) scale(.995)}
     100%{opacity:1;transform:translateY(0) rotate(0) scale(1)}
   }
   .legend-panel .lp-sec{opacity:0;animation:lpRise .3s ease forwards}
@@ -1683,9 +1692,16 @@
   .kids-key-toggle:hover{transform:translateY(-2px)}
   .kids-key-toggle .kk-ic{font-size:16px;line-height:1}
   .kids-key-dock.open .kids-key-toggle{transform:scale(.96)}
-  .kids-key-panel{width:308px;max-width:calc(100vw - 36px);max-height:calc(100dvh - 92px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+  .kids-key-panel{position:relative;width:308px;max-width:calc(100vw - 36px);max-height:min(calc(100vh - 140px),560px);max-height:min(calc(100dvh - 140px),560px);overflow-y:auto;-webkit-overflow-scrolling:touch;
     background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-3);padding:16px 17px 14px;
-    transform-origin:bottom left;animation:keySwing .4s cubic-bezier(.34,1.5,.5,1) both}
+    transform-origin:bottom left;animation:keySwingLeft .46s cubic-bezier(.22,1.4,.36,1) both}
+  .kids-key-panel::after{content:'';position:absolute;bottom:-7px;left:23px;width:13px;height:13px;background:var(--panel);border-left:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 0 3px;transform:rotate(-45deg);box-shadow:-2px 2px 3px -2px rgba(40,22,6,.15)}
+  @keyframes keySwingLeft{
+    0%{opacity:0;transform:translateY(14px) rotate(-9deg) scale(.72)}
+    50%{opacity:1;transform:translateY(-4px) rotate(2deg) scale(1.025)}
+    75%{transform:translateY(1px) rotate(-.5deg) scale(.995)}
+    100%{opacity:1;transform:translateY(0) rotate(0) scale(1)}
+  }
   .kk-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
   .kk-head b{font-family:var(--display);font-weight:800;font-size:16.5px}
   .kk-intro{font-size:12.5px;line-height:1.5;color:var(--ink-2);margin:6px 0 12px}
@@ -1698,7 +1714,7 @@
   .kk-blurb{font-size:12px;color:var(--ink-2);line-height:1.4;margin-top:2px}
   .kk-note{font-size:11.5px;color:var(--ink-3);line-height:1.45;margin-top:6px}
   @media (prefers-reduced-motion:reduce){ .kids-key-panel{animation:none} .kids-key-toggle{transition:none} }
-  @media (max-width:640px){ .kids-key-dock{left:14px;bottom:calc(var(--tab-h) + 14px)} .kids-key-panel{max-height:calc(100dvh - var(--tab-h) - 76px)} }
+  @media (max-width:640px){ .kids-key-dock{left:14px;bottom:calc(var(--tab-h) + 14px)} .kids-key-panel{max-height:min(calc(100dvh - var(--tab-h) - 76px),520px)} }
   .lp-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-15px;margin:-15px -16px 0;padding:15px 16px 8px;background:var(--panel);z-index:2}
   .lp-head b{font-family:var(--display);font-weight:800;font-size:16px}
   .lp-close{background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:16px;line-height:1}
@@ -1846,7 +1862,7 @@
     .toast-wrap{bottom:calc(var(--tab-h) + 16px)}
     .legend-dock{bottom:calc(var(--tab-h) + 14px);right:14px}
     .email-nudge{bottom:var(--tab-h)}
-    .legend-panel{max-height:calc(100vh - var(--tab-h) - 76px);max-height:calc(100dvh - var(--tab-h) - 76px)}
+    .legend-panel{max-height:min(calc(100vh - var(--tab-h) - 76px),520px);max-height:min(calc(100dvh - var(--tab-h) - 76px),520px)}
   }
   @media (max-width:820px){
     .topnav nav{display:none}
@@ -1862,7 +1878,7 @@
     .legend-dock{bottom:calc(var(--tab-h) + 14px);right:14px}
     .email-nudge{bottom:var(--tab-h)}
     /* dock rides above the mobile tab bar, so reserve that too or the key's top clips off-screen */
-    .legend-panel{max-height:calc(100vh - var(--tab-h) - 76px);max-height:calc(100dvh - var(--tab-h) - 76px)}
+    .legend-panel{max-height:min(calc(100vh - var(--tab-h) - 76px),520px);max-height:min(calc(100dvh - var(--tab-h) - 76px),520px)}
     .mosaic{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
     .film-hero{grid-template-columns:1fr;gap:18px}
     .film-poster{max-width:220px}
