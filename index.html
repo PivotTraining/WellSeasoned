@@ -8168,9 +8168,20 @@ function pulseCmtRowHTML(c){
   '</div>';
 }
 function _pulseCmtById(id){ if(!_pulseComments)return null; for(var i=0;i<_pulseComments.length;i++){ if(_pulseComments[i].id===id)return _pulseComments[i]; } return null; }
-/* Owner-facing mailto nudges — same no-backend-send pattern as pulseInvite/
+/* The owner's own outgoing mail (hello@itswellseasoned.com) lives in Gmail,
+   not the Mac's local Mail app — a bare mailto: link obeys the OS's default
+   handler, which was opening Mail instead. Opening Gmail's own compose URL
+   in a new tab sidesteps the OS handler entirely and always lands in the
+   right inbox. Only used for the OWNER's own sends (thank-you/invite/notify
+   nudges to a critic, applicant, or commenter) — a visitor's own outgoing
+   mail (e.g. the advertiser inquiry mailto) stays a plain mailto: since
+   that should open THEIR mail client, not force Gmail on someone else. */
+function gmailComposeUrl(to,subject,body){
+  return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(to)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+/* Owner-facing mail nudges — same no-backend-send pattern as pulseInvite/
    notifyContributor (Resend SMTP still pending, per CLAUDE.md), just a
-   pre-filled draft the owner reviews and sends themselves. */
+   pre-filled Gmail compose draft the owner reviews and sends themselves. */
 function pulseThankComment(id){
   var c=_pulseCmtById(id); if(!c||!c.email){ toast('No email on file for this commenter.'); return; }
   var f=find(c.film_slug), n=c.user_comment_count||1;
@@ -8179,7 +8190,7 @@ function pulseThankComment(id){
     'Just wanted to say thank you for taking the time to comment'+(f?(' on '+f.title):'')+' — that’s exactly the kind of real engagement that makes The Table mean something.\n\n'+
     'Quick heads up: once you hit 100 comments on the site, you’re in the running for a seat as a verified critic in The Kitchen. You’re at '+n+' right now.\n\n'+
     'Keep it coming.\n— Well Seasoned\nhttps://itswellseasoned.com';
-  window.location.href='mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  window.open(gmailComposeUrl(c.email,subj,body),'_blank');
 }
 function pulseNotifyFeatured(id){
   var c=_pulseCmtById(id); if(!c||!c.email){ toast('No email on file for this commenter.'); return; }
@@ -8188,7 +8199,7 @@ function pulseNotifyFeatured(id){
   var body='Hi '+(c.name||'there')+',\n\n'+
     'Your comment'+(f?(' on '+f.title):'')+' just got featured on Well Seasoned — pinned at the top of The Table and pulled into the home shelf. Thank you for putting a real voice on the site.\n\n'+
     '— Well Seasoned\nhttps://itswellseasoned.com';
-  window.location.href='mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  window.open(gmailComposeUrl(c.email,subj,body),'_blank');
 }
 function renderPulseComments(){
   var el=byId('pulseComments'); if(!el||!_pulseComments)return;
@@ -8364,7 +8375,7 @@ function pulseInvite(email){
     'We’ve noticed how active you’ve been on Well Seasoned'+(tally?(' — '+tally+' comment'+(tally===1?'':'s')+' and counting'):'')+'. That’s exactly the voice The Kitchen is built on.\n\n'+
     'We’d love to seat you as a verified critic, where your reviews move the official Kitchen score. If you’re in, just reply to this email and we’ll set you up.\n\n'+
     'Welcome to the table.\n— Well Seasoned\nhttps://itswellseasoned.com';
-  window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  window.open(gmailComposeUrl(email,subj,body),'_blank');
 }
 /* Curate ▸ Critics tab — a plain roster of everyone currently seated as a
    critic, whether they got there via an application (Applications tab only
@@ -9400,7 +9411,7 @@ function inboxCardHTML(a){
   return '<div class="inbox-card st-'+status+'">'+
     '<div class="ic-top">'+av+
       '<div class="ic-id"><div class="ic-name">'+nm+' <span class="ic-role r-'+role+'">'+lane+'</span></div>'+
-        '<a class="ic-email" href="mailto:'+email+'">'+email+'</a>'+
+        '<a class="ic-email" href="'+gmailComposeUrl(email,'','')+'" target="_blank" rel="noopener">'+email+'</a>'+
         '<div class="ic-when">Applied '+when+'</div></div>'+
       '<span class="ic-status s-'+status+'">'+status+'</span>'+
     '</div>'+ bio + meta +
@@ -9471,7 +9482,7 @@ function notifyContributor(kind,email,name){
       : 'Great news — you’ve been seated as a verified critic in The Kitchen on Well Seasoned. Your reviews now move the official Kitchen score.')+'\n\n'+
     'Next step: sign in at https://itswellseasoned.com with this email, and you’ll be asked to accept a short '+(writer?'writer':'critic')+' agreement — then you’re live.\n\n'+
     'Welcome to the table.\n— Well Seasoned';
-  window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+  window.open(gmailComposeUrl(email,subj,body),'_blank');
 }
 /* Admin: remove a seated critic (un-verify). verify_critic(p_on=false) clears
    is_critic so their reviews stop moving the Kitchen score. */
