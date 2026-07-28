@@ -1816,6 +1816,38 @@
   .legal-back{margin-top:34px;padding-top:18px;border-top:1px solid var(--line)}
 
   /* ============ RESPONSIVE ============ */
+  /* The desktop nav grew to 7 direct links (Home/Browse/Kids/Rankings/The
+     Balcony/Shop/More▾/The Table) + the search box + auth button, and
+     overflows the header on very common laptop widths (1366×768, 1440×900,
+     1536×864 scaled) — verified via scrollWidth: up to 121px of overflow at
+     1366px, clearing only around 1650-1700px. Below that, collapse the
+     search box to the same icon-only mobile pattern already used at
+     ≤820px, which frees enough width to fit the full nav row cleanly. */
+  @media (max-width:1650px){
+    .mobile-search-btn{display:inline-flex}
+    .search{display:none;min-width:0;max-width:none}
+    .search.mob-on{display:flex;position:fixed;top:var(--nav-h);left:12px;right:12px;z-index:90;box-shadow:var(--shadow-3);animation:sugIn .16s ease}
+    .search.mob-on .search-sug{min-width:0}
+  }
+  /* Hiding the search box alone (above) closes the overflow from ~1300px up,
+     but the 7 direct nav links still don't fit between the old ≤820px phone
+     cutoff and ~1250px (verified: still 200px+ of overflow at 1000px even
+     with search gone) — narrow-desktop/tablet widths that are common on
+     smaller laptops and split-screen browsers. Rather than invent a new
+     in-between nav treatment, this reuses the same already-built, already-
+     tested mobile tabbar + nav-hide pattern from the ≤820px block below, just
+     over a wider range — deliberately scoped to ONLY the nav/tabbar swap
+     (not the phone-narrow grid/hero column rules in the ≤820px block, which
+     stay phone-only). */
+  @media (max-width:1250px) and (min-width:821px){
+    .topnav nav{display:none}
+    .tabbar{display:block}
+    main{padding-bottom:calc(var(--tab-h) + 30px)}
+    .toast-wrap{bottom:calc(var(--tab-h) + 16px)}
+    .legend-dock{bottom:calc(var(--tab-h) + 14px);right:14px}
+    .email-nudge{bottom:var(--tab-h)}
+    .legend-panel{max-height:calc(100vh - var(--tab-h) - 76px);max-height:calc(100dvh - var(--tab-h) - 76px)}
+  }
   @media (max-width:820px){
     .topnav nav{display:none}
     .mobile-search-btn{display:inline-flex}
@@ -10230,15 +10262,47 @@ function kidsHeroHTML(){
 // One standout family title, spotlighted big with cinematic art. Weekly-seeded
 // (HOME_SEED) so it holds steady all week for everyone, then rotates — same
 // approach the home shelves use. Real catalog title only, no fabrication.
+//
+// 2026-07-28 fix: this used to just prefer Animation-tagged titles on the
+// theory that Animation is "far more reliably family-safe" than a loosely
+// "Family"-tagged live-action drama. That's not actually true — The Boondocks
+// is Animation-tagged and a real TV-MA satire (confirmed via TMDB's own
+// content_ratings), and it was landing as the featured pick with no age badge
+// anywhere on the card. The real fix: only ever spotlight a title whose
+// ACTUAL resolved certification (ageCert, hydrated live from TMDB, same field
+// ageRatingHTML already uses on the film page) confirms 'kid' tier, and NEVER
+// spotlight one already confirmed 'teen' or 'ya' — genre tags alone are not a
+// safety signal. hydrateKidsCertsOnce() (called from renderKids) proactively
+// resolves certs for the candidate pool so this can actually be checked
+// instead of guessed at.
 function kidsFeatured(all){
   var withArt=all.filter(function(f){ return servePoster(f)||f.backdrop; });
   if(!withArt.length)withArt=all;
-  // Prefer Animation for the big spotlight — it's far more reliably family-safe
-  // than a loosely "Family"-tagged live-action title (which can be a grown-folks
-  // drama). Only fall back to the broader pool if there's no animation to show.
-  var anim=withArt.filter(function(f){ return f.tags&&f.tags.indexOf('Animation')>=0; });
-  var pool=anim.length?anim:withArt;
+  var confirmedKid=withArt.filter(function(f){ return ageTier(f.ageCert)==='kid'; });
+  if(confirmedKid.length) return seededShuffle(confirmedKid,(HOME_SEED+7)>>>0)[0];
+  // No confirmed-kid title yet (certs may still be hydrating) — fall back to
+  // the old Animation-first heuristic, but never among titles already known
+  // to be teen/YA-rated.
+  var notUnsafe=withArt.filter(function(f){ var t=ageTier(f.ageCert); return t!=='teen'&&t!=='ya'; });
+  var anim=notUnsafe.filter(function(f){ return f.tags&&f.tags.indexOf('Animation')>=0; });
+  var pool=anim.length?anim:(notUnsafe.length?notUnsafe:withArt);
   return seededShuffle(pool,(HOME_SEED+7)>>>0)[0]||null;
+}
+/* Proactively resolves real age certs (same lazy per-film hydrateFilmMedia()
+   used on the film page) for the Kids candidate pool, so kidsFeatured() can
+   actually check a real cert instead of only ever seeing one once a visitor
+   happens to open that film's own page first. Same guarded-repaint pattern as
+   hydrateEmmyBackdropsOnce — capped to a reasonable batch, can't loop. */
+var _kidsCertsLoading=false;
+function hydrateKidsCertsOnce(all){
+  if(_kidsCertsLoading||typeof hydrateFilmMedia!=='function')return;
+  var need=all.filter(function(f){ return !f.ageCert; }).slice(0,40);
+  if(!need.length)return;
+  _kidsCertsLoading=true;
+  Promise.all(need.map(function(f){ return hydrateFilmMedia(f); })).then(function(){
+    _kidsCertsLoading=false;
+    var r=parseHash(); if(r.view==='kids') renderKids();
+  });
 }
 function kidsFeaturedHTML(f){
   var bg=f.backdrop||servePoster(f)||'';
@@ -10249,6 +10313,7 @@ function kidsFeaturedHTML(f){
       '<span class="kf-tag">⭐ This week’s family pick</span>'+
       '<h2 class="kf-ttl">'+esc(f.title)+'</h2>'+
       '<div class="kf-meta">'+esc((f.genre||'Family')+yr)+'</div>'+
+      ageRatingHTML(f)+
       (f.syn?'<p class="kf-syn">'+esc(f.syn.slice(0,150))+(f.syn.length>150?'…':'')+'</p>':'')+
       '<span class="kf-cta">Watch with the family →</span>'+
     '</div>'+
@@ -10261,6 +10326,7 @@ function renderKids(){
   var list=all.filter(function(f){ return KIDS_TYPE==='all' || f.type===KIDS_TYPE; })
     .sort(function(a,b){ return b.year-a.year || a.title.localeCompare(b.title); });
   var feat=kidsFeatured(all);
+  hydrateKidsCertsOnce(all);
   var shelfName=(KIDS_TYPE==='tv')?'Family series':(KIDS_TYPE==='movie')?'Family movies':'The whole family shelf';
   el.innerHTML=
     kidsHeroHTML()+
