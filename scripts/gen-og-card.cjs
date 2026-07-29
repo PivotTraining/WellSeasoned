@@ -128,7 +128,8 @@ function cardHTML(f, posterFile) {
     const soonDate = soonM ? soonM[1] : null;
     if (soonDate && new Date(soonDate) > new Date()) {
       const d = new Date(soonDate + 'T12:00:00Z');
-      f.ey = 'In theaters ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+      // A series doesn't open "in theaters" — say what's actually true for it.
+      f.ey = (f.tv ? 'Premieres ' : 'In theaters ') + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
     } else {
       f.ey = 'Two verdicts · One seal';
     }

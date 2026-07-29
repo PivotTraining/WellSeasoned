@@ -3599,3 +3599,58 @@ feed by user_id. Low current risk (no UI exposes an arbitrary user_id to
 send to), but worth tightening if that ever changes. Stop-and-confirm with
 the owner before touching it, same risk tier as any other auth-adjacent
 RPC change.
+
+## The Drop: A Snowfall Saga added + home reordered (carousel up, Balcony down) (2026-07-29)
+Owner: "'The Drop' debuts Sept 8th on FX...we need some artwork on the carousel
+for this. Lets lower the Balcony article somewhere near the lower third, raise
+the carousel to the top with prominence and replace something in the carousel
+with this."
+- **Verified first** (TMDB id 304842 + trades): *The Drop: A Snowfall Saga*,
+  the Snowfall spinoff, FX with next-day Hulu streaming, first air
+  **2026-09-08**, creator **Malcolm Spellman** (TMDB `created_by` is empty —
+  sourced from trades), Gail Bean (Wanda) and Isaiah John (Leon) reprising
+  their Snowfall roles, plus Asante Blackk, Peyton Alex Smith, Mykelti
+  Williamson, Nicki Micheaux. Unambiguous "our show" — no closer-bar call
+  needed. Poster `/7LElTi7Ys1JMDrxRgWpol1g47Vw.jpg` visually confirmed as the
+  real FX/Hulu key art and pinned in `WS_POSTERS`. **TMDB has zero backdrops**
+  for it, so the entry carries `nobd:true` (the flag added during the Thomas
+  Crown work — makes `applyMedia()` skip backdrops permanently so a later
+  hydrate can't quietly re-apply a bad one); the carousel slide rides its
+  poster + gradient, same as `fightland`.
+- Added to **FILMS** (`the-drop-a-snowfall-saga`, k/t null, votes:0,
+  reviews:[]) and to **COMING_SOON** (`cs-304842`, `trailer:null` — no trailer
+  has been posted on an official channel yet; add it when one lands).
+- **Carousel**: replaced `72-hours-2026` in `FEATURED` (the most-spent moment
+  — its `until` was `2026-09-07`, the day before The Drop premieres) with the
+  date-gated pattern: `ey:'Premieres Sep 8 · FX, streams on Hulu'` →
+  `eyLive:'New series · FX, streams on Hulu'` on the day, `until:'2026-10-20'`
+  to auto-retire. 72 Hours stays in the catalog, only unwired from the
+  carousel — same unwire-don't-delete convention as `man-of-war`/`lanterns`.
+- **Home reorder** (markup only — every section paints by id, so DOM order is
+  free): `#featuredBanner` moved to the very top of `.hero`, above `.hero-top`;
+  `#leadStory` (the Balcony banner) moved down into the dessert tier, directly
+  after `#mosaic` and before `#eventSpotlight`. New order: carousel → hero copy
+  → scope → teach/vote bar → This Week at The Table → mosaic → **Balcony lead**
+  → Events → Ten Years → Bracket → Card Check. Still consistent with the
+  "stay review-focused" guardrail: the carousel is real current film/TV, and
+  the voting + catalog still sit above every game/spotlight unit.
+- **`upcomingSoonEntry()` widened to series.** It hard-excluded `type==='tv'`,
+  so an unreleased SHOW would have shown the full "seen it" verdict vote — the
+  exact thing that gate exists to prevent. Dropped the exclusion (the two
+  theatrical-only callers, `ticketBlockHTML` and `renderTheaters`, already gate
+  on `f.type` themselves). Audited the whole catalog first: The Drop is the
+  only TV title with a future-dated COMING_SOON entry, so nothing else changes
+  behavior. Its film page now correctly shows the "🗓 Coming Sep 8, 2026 — not
+  out yet" badge + the hype vote + the premiere email hook, and zero verdict
+  buttons; a released title (Bull Street) is untouched.
+- **OG card** generated (`og/the-drop-a-snowfall-saga.jpg`, registered in
+  `api/og-cards.json`) so a shared `/f/<id>` link previews as the branded
+  1200×630 landscape card instead of a centre-cropped portrait poster. Fixed a
+  real bug in `scripts/gen-og-card.cjs` while doing it: the eyebrow was
+  hardcoded to "In theaters <date>" for any upcoming title, which read "IN
+  THEATERS SEP 8, 2026" on a TV series. Now branches on `f.tv` → "Premieres".
+- Ran `node scripts/build-films-json.cjs` (1264 → 1265). Verified in headless
+  Chromium: home order correct, carousel carries the new slide with the right
+  eyebrow, film page gating correct on both the unreleased series and a
+  released control, zero horizontal overflow at 360/390/768/1280/1920, zero
+  console errors.
