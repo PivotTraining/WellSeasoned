@@ -11,6 +11,7 @@
 // humans get a clear "Open in Well Seasoned" CTA into the full app instead
 // of an instant bounce.
 import films from './films.json' with { type: 'json' };
+import ogCards from './og-cards.json' with { type: 'json' };
 
 function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -27,7 +28,18 @@ export default function handler(req, res) {
   const desc = f.d
     ? f.d + (f.d.length >= 200 ? '…' : '')
     : 'Two verdicts on ' + f.t + '. The Kitchen is verified critics of the culture. The Table is the community that bought the ticket.';
-  const img = f.p || site + '/og.png';
+  /* Link-preview image. Threads/X/Facebook/iMessage all render og:image in a
+     ~1.91:1 LANDSCAPE card, so handing them the raw 2:3 TMDB poster meant
+     every preview got centre-cropped to the poster's middle band — faces
+     sliced off, title treatment cut in half. Prefer a purpose-built 1200x630
+     card (scripts/gen-og-card.cjs) when one has been generated for this
+     title; otherwise fall back to the poster, which still beats nothing.
+     Only declare width/height for the real card — claiming 1200x630 for a
+     portrait poster would make platforms letterbox or mis-crop it. */
+  const hasCard = !!ogCards[id];
+  const img = hasCard
+    ? site + '/og/' + encodeURIComponent(id) + '.jpg'
+    : (f.p || site + '/og.png');
   const hashUrl = site + '/#/film/' + encodeURIComponent(id);
   const pageUrl = site + '/f/' + encodeURIComponent(id);
   const kind = f.tv ? 'series' : 'film';
@@ -64,6 +76,10 @@ export default function handler(req, res) {
     '<meta property="og:title" content="' + esc(title) + '">' +
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:image" content="' + esc(img) + '">' +
+    (hasCard ? '<meta property="og:image:width" content="1200">' +
+               '<meta property="og:image:height" content="630">' +
+               '<meta property="og:image:type" content="image/jpeg">' +
+               '<meta property="og:image:alt" content="' + esc(f.t + (f.y ? ' (' + f.y + ')' : '') + ' on Well Seasoned') + '">' : '') +
     '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="' + esc(title) + '">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
