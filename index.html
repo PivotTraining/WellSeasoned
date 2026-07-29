@@ -1251,6 +1251,27 @@
   @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,minmax(0,1fr))} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
   @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
   .film-verdict{display:flex;gap:22px;align-items:center;margin:22px 0 18px;flex-wrap:wrap}
+  /* COMING SOON stage — takes the verdict-rings slot on unreleased titles.
+     A film nobody has seen has nothing to score, so this carries the premiere
+     date + the hype vote (the one thing you can actually do) instead of three
+     empty rings. Same dark-stage spotlight language as the rest of the site. */
+  .soon-stage{display:flex;align-items:center;gap:clamp(20px,3vw,40px);flex-wrap:wrap;margin:22px 0 18px;
+    padding:clamp(18px,2.2vw,26px) clamp(20px,2.6vw,30px);border-radius:var(--r-lg);
+    background:linear-gradient(135deg,#241a12,#140d08 60%,#0d0806);
+    border:1px solid rgba(244,197,66,.30);
+    box-shadow:0 14px 34px rgba(0,0,0,.34),0 0 0 1px rgba(244,197,66,.07) inset}
+  .ss-copy{flex:1 1 320px;min-width:0}
+  .ss-ey{display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    background:linear-gradient(90deg,#a9720b,#f9dd8b,#a9720b);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:emmyShine 3s linear infinite}
+  .ss-h{display:block;font-family:var(--display);font-weight:800;font-size:clamp(21px,2.3vw,28px);line-height:1.12;color:#FBF3DE;margin:8px 0 7px}
+  .ss-sub{font-size:14px;line-height:1.55;color:rgba(246,236,215,.80);margin:0;max-width:56ch}
+  .ss-vote{flex:0 0 auto;min-width:250px}
+  .ss-lab{display:block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+  .ss-vote .excite-row{margin-top:0}
+  .detail-cols.one-col{grid-template-columns:1fr}
+  @media (prefers-reduced-motion:reduce){ .ss-ey{animation:none} }
+  @media(max-width:640px){ .soon-stage{gap:16px} .ss-vote{min-width:0;width:100%} }
   .verdict-lg{display:flex;align-items:center;gap:14px;background:linear-gradient(155deg,var(--jewel-2),var(--jewel));border:1px solid rgba(228,155,11,.24);border-radius:var(--r-lg);padding:15px 20px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,235,190,.08)}
   .verdict-lg .vl-num{font-weight:900;font-size:44px;line-height:.9;font-variant-numeric:tabular-nums}
   .verdict-lg .vl-meta b{display:block;font-size:15px;color:var(--on-dark)}
@@ -9035,8 +9056,12 @@ function renderFilm(id){
             '<h1>'+esc(f.title)+'</h1>'+
             '<div class="room-meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+effGenre(f)+(f.type==='tv'?' &nbsp;·&nbsp; <strong>Series</strong>':'')+'</div>'+
             (upcomingReleaseDate(f)?'<div class="coming-badge">🗓 Coming '+artDate(upcomingReleaseDate(f))+' — not out yet</div>':'')+
-            '<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
-              '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a></div>'+
+            /* An unreleased title has nowhere to watch — "Rent or buy"/"All
+               options" would send people to a JustWatch search for a film that
+               doesn't exist yet. Row is dropped entirely until it's out; the
+               premiere date above carries the information instead. */
+            (soonC?'':'<div class="room-where"><span class="where-lab">Where to watch</span>'+where+
+              '<a class="svc svc-all" href="'+justWatchUrl(f.title)+'" target="_blank" rel="noopener noreferrer">All options ↗</a></div>')+
             /* Showtimes/tickets live ONLY in the gated ticket block below — it
                shows for films verified against the live TMDB now-playing list,
                so a streaming-only or back-catalog title never gets a showtimes
@@ -9047,13 +9072,32 @@ function renderFilm(id){
           '</div>'+
         '</div>'+
       '</div>'+
-      '<div class="film-verdict">'+
-        '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
-          '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
-        '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+(soonC?'Not out yet':tblCountText(f))+'</span><span id="tblTier">'+(soonC?'':tierChip(ts))+'</span></div></div>'+
-        '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
-        splitFlagHTML(f)+
-      '</div>'+
+      /* Unreleased titles get a COMING SOON treatment, not a hollowed-out
+         version of the released one. Three empty score rings ("Awaiting
+         critics" / "Not out yet" / "Awaiting votes") read as a broken preview
+         of a real film page — nobody has seen the film, so there is nothing to
+         score yet and no honest way to fill them. Instead the same real estate
+         carries the premiere date and the hype vote, which IS the thing you
+         can actually do right now. Released titles are untouched. */
+      (soonC
+        ? '<div class="soon-stage">'+
+            '<div class="ss-copy">'+
+              '<span class="ss-ey">🗓 Premieres '+esc(artDate(soonC.date))+'</span>'+
+              '<b class="ss-h">The verdict opens on premiere day.</b>'+
+              '<p class="ss-sub">Nobody has seen it yet — not the critics, not the table. The Kitchen and The Table both open the day it drops. For now, the trailer’s the only evidence.</p>'+
+            '</div>'+
+            '<div class="ss-vote">'+
+              '<span class="ss-lab">Seen the trailer? Tell the table:</span>'+
+              excitementButtons(soonC,true)+
+            '</div>'+
+          '</div>'
+        : '<div class="film-verdict">'+
+            '<div class="verdict-lg">'+auraRing(f.k,tier(f.k),72,true)+'<div class="vl-meta"><b>The Kitchen</b><span>'+(f.reviews.length?f.reviews.length+' verified critics':'Awaiting critics')+'</span>'+tierChip(f.k)+'</div>'+
+              '<button class="info-btn" aria-label="What is the Kitchen score" onclick="openTeach()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button></div>'+
+            '<div class="verdict-lg"><span id="tblRing">'+auraRing(ts,tier(ts),72,true)+'</span><div class="vl-meta"><b>The Table</b><span id="tblCount">'+tblCountText(f)+'</span><span id="tblTier">'+tierChip(ts)+'</span></div></div>'+
+            '<div class="verdict-lg vl-overall" id="seasonBlock">'+seasoningVerdict(f)+'</div>'+
+            splitFlagHTML(f)+
+          '</div>')+
       '<div id="featQuoteBlock"></div>'+
       '<p class="film-syn">'+esc(f.syn)+'</p>'+
       '<div id="ageRatingWrap">'+ageRatingHTML(f)+'</div>'+
@@ -9062,13 +9106,16 @@ function renderFilm(id){
       castCrewHTML(f)+
       '<div class="tag-row">'+tags+'</div>'+
     '</div>'+
-    '<div class="detail-cols">'+
-      '<div class="panel"><h3>The Kitchen</h3><p class="p-sub">Verified critics of the culture. These reviews move the official score.</p>'+(reviews||'<p class="empty-note">The Kitchen is being seated. Verified critic reviews are on the way — the culture writes them.</p>')+criticForm+'</div>'+
-      '<div class="panel" id="votePanel"><h3>The Table</h3>'+
+    '<div class="detail-cols'+(soonC?' one-col':'')+'">'+
+      /* No critic can review a film nobody has screened, so the Kitchen panel
+         (and its "being seated" empty note) is dropped for unreleased titles
+         rather than sitting there empty — the row goes single-column and
+         carries the premiere reminder instead. The hype vote already lives up
+         top in .soon-stage, so it isn't repeated down here. */
+      (soonC?'':'<div class="panel"><h3>The Kitchen</h3><p class="p-sub">Verified critics of the culture. These reviews move the official score.</p>'+(reviews||'<p class="empty-note">The Kitchen is being seated. Verified critic reviews are on the way — the culture writes them.</p>')+criticForm+'</div>')+
+      '<div class="panel" id="votePanel"><h3>'+(soonC?'Be here when it drops':'The Table')+'</h3>'+
       (soonC
-        ? '<p class="p-sub">Not out yet \u2014 the verdict opens the day it premieres. For now, tell the table how hyped you are.</p>'+
-          '<div style="font-weight:700;font-size:14px;margin:8px 0 8px">How hyped are you?</div>'+excitementButtons(soonC,true)+
-          (soonReleased(soonC)?'':premiereHookHTML(soonC.id,f.title,soonC.date,''))
+        ? (soonReleased(soonC)?'<p class="p-sub">It\u2019s out \u2014 the verdict is open.</p>':premiereHookHTML(soonC.id,f.title,soonC.date,''))
         : '<p class="p-sub">The People\u2019s Cut. Did it earn a seat at the table?</p>'+
         '<div class="vote-btns"><button class="vbtn for" id="btnFor" onclick="castVote(\''+f.id+'\',\'for\')">It\u2019s Seasoned</button>'+
         '<button class="vbtn against" id="btnAgainst" onclick="castVote(\''+f.id+'\',\'against\')">Send It Back</button></div>'+
