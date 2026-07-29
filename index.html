@@ -7330,12 +7330,34 @@ function loadAllExcitement(){
       }).catch(function(){});
   }catch(e){}
 }
+/* Repaint every hype-vote row bound to this COMING_SOON id, in place. The
+   id is already in each button's own onclick, so this finds them without
+   needing to know which surface rendered them. Surgical on purpose: no full
+   re-render, so nothing scroll-jumps under the tap. */
+function repaintExciteRows(soonId){
+  var c=findSoon(soonId); if(!c)return false;
+  var rows=document.querySelectorAll('.excite-row'), hit=false;
+  for(var i=0;i<rows.length;i++){
+    if(rows[i].innerHTML.indexOf("'"+soonId+"'")<0) continue;   // a different title's row
+    var tmp=document.createElement('div');
+    tmp.innerHTML=excitementButtons(c,true);
+    var fresh=tmp.firstChild;
+    if(fresh&&rows[i].parentNode){ rows[i].parentNode.replaceChild(fresh,rows[i]); hit=true; }
+  }
+  return hit;
+}
 function refreshExcitement(soonId){
   var on=document.querySelector('.view.on'); if(!on)return;
   var v=on.getAttribute('data-view');
-  if(v==='soon')renderSoon();
-  else if(v==='film'&&_activeFilm===soonId)renderSoonDetail(soonId);
-  if(v==='home'&&soonId===MARRIED_FEATURE_ID)paintMarriedFeature();
+  if(v==='soon'){ renderSoon(); return; }
+  if(v==='film'&&_activeFilm===soonId){ renderSoonDetail(soonId); return; }
+  if(v==='home'&&soonId===MARRIED_FEATURE_ID){ paintMarriedFeature(); return; }
+  /* Catalog film page for an unreleased title: the page is keyed on the
+     FILMS id (e.g. the-thomas-crown-affair-2027) but its hype vote belongs
+     to the COMING_SOON entry (cs-615121), so the id check above can never
+     match and the buttons used to never repaint — the vote saved and synced
+     but the UI never showed it, which reads as "the button doesn't work". */
+  repaintExciteRows(soonId);
 }
 function findSoon(id){ for(var i=0;i<COMING_SOON.length;i++){ if(COMING_SOON[i].id===id)return COMING_SOON[i]; } return null; }
 function soonIndex(id){ for(var i=0;i<COMING_SOON.length;i++){ if(COMING_SOON[i].id===id)return i; } return -1; }
