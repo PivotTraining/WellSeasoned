@@ -3683,3 +3683,41 @@ it's diagnosed from the documented cause + the server-side playability check
 rather than a live repro — if trailers still error after this deploy, the next
 thing to rule out is a browser extension stripping referrers (the standard
 second cause of 153).
+
+## Ray Jr. — three films added with real trailers (2026-07-30)
+Owner: "Can you find the movies for ray jr and put them in the appropriate
+categories with trailers and descriptions." Ray Jr. is a Cleveland indie
+filmmaker/actor (Legit Paper Entertainment). TMDB person 2616888 carries
+exactly three credits, and a separate TMDB title search + web sweep surfaced
+nothing else — his own site (legitpaperent.com) is now a squatted spam domain,
+so TMDB is the only verifiable source. All three added, each with real
+TMDB data (id/year/dir/cast/poster/synopsis) and a real trailer:
+- **Rent Due** (2019, `rent-due-2019`) — Comedy, 1h 13m, dir. Mike Berry;
+  Ray Jr. stars as Reggie and exec produces, with Jasmin Brown, Michael
+  Colyar and Machine Gun Kelly (TMDB credits him as "mgk", person 1276759 —
+  Cleveland connection checks out). Free on Tubi.
+- **Ray Jr's Legit Paper** (2021, `ray-jrs-legit-paper-2021`) — Drama, 1h 8m,
+  dir. Ray Jr. + Mike Berry, with Barton Fitzpatrick, Lamar Odom and Stalley.
+  Free on Tubi, also rent.
+- **Ray Jr's Just My Thoughts** (2022, `ray-jrs-just-my-thoughts-2022`) —
+  Documentary, 1h 11m, dir. Ray Jr. Rent only (Apple TV/Google Play/YouTube).
+Categories are the site's real ones, verified against the live predicates
+rather than assumed: `isDoc()` picks up Just My Thoughts (genre Documentary +
+tag), `isShort()` correctly rejects all three (68–73 min, over the 40-min
+bar), and the two Tubi titles land in the "Free on Tubi" home shelf via
+`where` (no TUBI_IDS entry needed — that list only *appends* Tubi to films
+that don't already declare it). `where` values reflect the live TMDB US
+watch-providers feed, not a guess.
+- **Trailers**: all three verified via YouTube oEmbed as uploads on
+  **LegitPaperEnt**, Ray Jr.'s own company channel — official source, not a
+  re-uploader — and each confirmed `playableInEmbed:true` before wiring.
+  Added to `WS_TRAILERS`.
+- **`nobd:true` on all three**: TMDB has no backdrop for any of them, and
+  "Rent Due" is exactly the kind of generic title the title+year hydrator can
+  mismatch, so the flag blocks a wrong film's backdrop from ever landing.
+  Posters pinned in `WS_POSTERS` for the same reason.
+- `k`/`t` null, `votes:0`, `reviews:[]` — nothing fake. Catalog 1265 → 1268;
+  ran `node scripts/build-films-json.cjs`. Verified in headless Chromium: all
+  three resolve with correct genre/type/doc/short classification, posters and
+  trailers wired, film pages render with the trailer button, a site search for
+  "ray jr" returns all three (Rent Due via the cast match), zero console errors.
