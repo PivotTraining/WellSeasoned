@@ -3763,3 +3763,32 @@ film's real premise:
 - Noted, not "fixed": IMDb dates **Rent Due** 2020-03-20, TMDB 2019-08-11.
   Kept the TMDB year since that's where the poster and the catalog id come
   from; likely a 2019 festival/limited run ahead of a 2020 release.
+
+## Poster-art audit: which titles actually render without art (2026-07-30)
+Owner: "what movies do i need art for?" Answered by replicating the site's own
+hydrator query rather than reading `films.json` — a missing `p` there only
+means "not pinned in WS_POSTERS" (`build-films-json.cjs` backfills from the
+pin map, never from live TMDB), so 180 entries looked artless when almost all
+of them resolve fine at render time. Ran the exact `hydrateFromTMDB()` search
+per title (movie search + `year`, or `search/tv` + `first_air_date_year` for
+TV) across all 180 unpinned titles: **160 resolve real art, 20 do not.**
+- **5 were recoverable and are now pinned** — the live art existed, the
+  title+year query just missed it (year off by one, or the doc lives on
+  TMDB's TV side while our entry is `type:'movie'`): Ethnic Notions (TMDB
+  1986 vs our 1987), Tell Them We Are Rising (2017 vs 2018), What's My Name:
+  Muhammad Ali (TMDB titles it with a pipe, and it's a TV entry), Shut Up and
+  Dribble, Simone Biles Rising. Each confirmed as the same film by
+  overview/date before pinning; all 5 URLs verified 200.
+- **14 genuinely have no art anywhere on TMDB** and need a real source: 9
+  stand-up specials (D.L. Hughley Live, Rickey Smiley ×2, Earthquake ×2, Paul
+  Mooney, Platinum Comedy Series: Steve Harvey, Deon Cole, Corey Holcomb),
+  Whoopi Goldberg Presents: Billy Connolly, Citizen King, and the 3 `nopo`
+  Ray Jr. titles (Damon Stringer Story, Only Child, On the Fly).
+- **1 needs verification, not art**: `damon-wayans-the-last-stand` is in the
+  catalog as a 2013 Showtime special dir. Beth McCarthy-Miller, but the only
+  TMDB match is a 1991 special dir. Terri McCoy (56m). Either our year/dir is
+  wrong or they're two different specials — deliberately NOT pinned, since
+  guessing would put the wrong art on it.
+Catalog stays 1271; ran `node scripts/build-films-json.cjs` (5 backfilled).
+Verified in headless Chromium: all 5 pinned posters resolve on the live
+objects, zero console errors.
