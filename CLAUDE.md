@@ -3721,3 +3721,45 @@ watch-providers feed, not a guess.
   three resolve with correct genre/type/doc/short classification, posters and
   trailers wired, film pages render with the trailer button, a site search for
   "ray jr" returns all three (Rent Due via the cast match), zero console errors.
+
+## Ray Jr.: three more films off his IMDb page + new `nopo` flag (2026-07-30)
+Owner followed the TMDB-sourced additions above with his IMDb link
+(nm5673405). IMDb carries titles TMDB does not, so the filmography was
+genuinely incomplete. Getting at it took a detour: imdb.com sits behind an AWS
+WAF JS challenge (curl gets a 202 challenge page, and a headless browser can't
+reach imdb.com through this sandbox's proxy at all), but IMDb's own
+`caching.graphql.imdb.com` endpoint answers a plain GET with the site's
+client headers — that returned the full credit list. Confirmed nm5673405 is
+the same person as TMDB 2616888 via IMDb's suggestion API ("Actor, Ray Jr's
+Legit Paper (2021)"). Three real films were missing, all verified against
+their own distribution listings and his own trailers — **IMDb was used only to
+DISCOVER the titles, never as the source of anything displayed** (their data
+licence forbids that), so every synopsis here is written fresh from the
+film's real premise:
+- **Ray Jr's What If: The Damon Stringer Story** (2020, doc, 1h 15m) — Damon
+  Stringer, Ohio's Mr. Basketball in the early '90s, Big Ten to the
+  penitentiary. Free on Tubi. IMDb genre-tags it "Family"; it's a
+  documentary, and it's filed as one.
+- **Only Child** (2024, drama, 1h 38m) — a girl placed with the father she
+  never knew after her mother dies. **Picked up by Starz**, also on Prime.
+  Does exist on TMDB (id 1291319) but with no art, under a duplicate Ray Jr.
+  person entity, which is why his TMDB person page never showed it.
+- **On the Fly** (2025, doc, 52m) — basketball standout RJ Winegarner leaving
+  Cleveland for Atlanta. Apple TV via Filmhub.
+- All three trailers verified via oEmbed as **LegitPaperEnt** uploads (his own
+  channel) and confirmed `playableInEmbed:true`.
+- **New `nopo` flag** (the poster twin of `nobd`, guards `applyPoster()` and
+  the `hydrateFromTMDB()` pending filter): TMDB has no poster for any of the
+  three, and "Only Child" / "On the Fly" are exactly the kind of generic
+  titles the title+year hydrator would resolve to a DIFFERENT film and cache
+  forever — TMDB's own search for "Only Child" 2024 surfaces an unrelated
+  "The Only Child" that DOES have art. Such a title rides its `grad` + title
+  card instead of wearing another film's poster. Verified by mocking TMDB to
+  return a poison poster/backdrop: neither leaked onto any of the three.
+- Catalog 1268 → 1271; ran `node scripts/build-films-json.cjs`. Verified in
+  headless Chromium: all six Ray Jr. titles classify correctly (3 docs, 0
+  shorts — On the Fly's 52m clears the 40m bar), trailers wired, film pages
+  render, a search for "ray jr" returns all six, zero console errors.
+- Noted, not "fixed": IMDb dates **Rent Due** 2020-03-20, TMDB 2019-08-11.
+  Kept the TMDB year since that's where the poster and the catalog id come
+  from; likely a 2019 festival/limited run ahead of a 2020 release.
