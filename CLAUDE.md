@@ -3792,3 +3792,39 @@ TV) across all 180 unpinned titles: **160 resolve real art, 20 do not.**
 Catalog stays 1271; ran `node scripts/build-films-json.cjs` (5 backfilled).
 Verified in headless Chromium: all 5 pinned posters resolve on the live
 objects, zero console errors.
+
+## Fix: artist pages ignored our own catalog (Ray Jr. showed 3 of 6) (2026-07-30)
+Owner: "i dont see six under his name." Real bug, and not specific to Ray Jr.
+`renderArtist`/`paintArtist` built the filmography **entirely from TMDB's
+`movie_credits`**, and additionally dropped any credit with `!poster_path` —
+so a person we carry six films for could show three, and a person TMDB has no
+record of at all got "Couldn't find this artist" even when the catalog
+credits them. Backwards for the whole premise: our catalog is the thing you
+can actually vote on, and it is deepest exactly where TMDB is thinnest (indie
+Black film — Ray Jr.'s "Only Child" is invisible on his TMDB page because it
+sits under a duplicate person entity).
+- New `ourFilmsByPerson(name)` — every catalog title crediting the person as
+  director (comma-split, so 'Ray Jr., Mike Berry' matches) or in `cast`/
+  `castFull`. Exact name match after trim, so no false positives (verified:
+  "Ray" → 0 films, while Denzel → 26, Ava DuVernay → 16, Tyler Perry → 62).
+- `paintArtist` now leads with ours (tagged "On the menu", newest first, each
+  linking straight into our film page), then appends whatever else TMDB
+  credits them with, deduped via the existing `ourFilmByTitleYear` so a film
+  in both lists renders once.
+- New `artFilmTileHTML` + `.art-film-noart` CSS: a catalog title with no
+  poster (a `nopo` film, or one TMDB has no art for) rides its own `grad` +
+  title instead of being dropped the way the TMDB path drops them.
+- New `paintArtistFromCatalog(name)` wired into all three TMDB-failure
+  branches (no key / person not found / network error) — so a filmmaker TMDB
+  has never heard of still gets a real page off the catalog. Verified: "Damon
+  Stringer" (no TMDB person record, cast on the doc we carry) now renders his
+  page with 1 film; a genuinely unknown name still shows "Couldn't find this
+  artist."
+- Caught in testing: `esc(f.year)` threw `s.replace is not a function` because
+  catalog years are Numbers while the TMDB path passes a string slice — the
+  whole paint died silently inside the promise chain and the page sat on
+  "Loading…". Fixed with `esc(String(f.year||''))`.
+- Verified in headless Chromium with a mocked TMDB person payload: Ray Jr.'s
+  page shows all 6 ours + 1 TMDB-only credit, 3 gradient tiles for the artless
+  ones, "Rent Due" correctly shows no Director role (he's cast; Mike Berry
+  directed), clicking a tile routes to `#/film/<id>`, zero console errors.

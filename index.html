@@ -820,6 +820,11 @@
   .art-film.linked:hover .art-film-poster{transform:translateY(-4px);box-shadow:var(--shadow-3)}
   .art-film.linked:hover .art-film-ttl{color:var(--gold-ink)}
   .art-film-poster{position:relative;aspect-ratio:2/3;border-radius:12px;background-size:cover;background-position:center;background-color:var(--inset);box-shadow:var(--shadow-1)}
+  /* A catalog title we carry that has no poster anywhere (a `nopo` film, or
+     one TMDB simply has no art for) still belongs on the filmography — it
+     wears its own gradient and title instead of being dropped. */
+  .art-film-noart{display:flex;align-items:center;justify-content:center;padding:14px}
+  .art-film-noart-ttl{font-family:var(--display);font-weight:800;font-size:15px;line-height:1.15;text-align:center;color:#F6ECD7;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .art-film-tag{position:absolute;left:8px;bottom:8px;background:var(--gold);color:#241703;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 7px;border-radius:999px}
   .art-film-ttl{font-weight:700;font-size:13px;margin-top:8px;line-height:1.2}
   .art-film-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
@@ -11268,7 +11273,7 @@ function renderArtist(pid){
   var cache=loadPeopleCache();
   if(cache[pid]){ paintArtist(cache[pid]); }
   else el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button><p class="empty-note" style="margin-top:20px">Loading…</p>';
-  if(!TMDB_KEY){ if(!cache[pid]) el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Artist details need the TMDB connection.</p>'; return; }
+  if(!TMDB_KEY){ if(!cache[pid] && !paintArtistFromCatalog(pid)) el.innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Artist details need the TMDB connection.</p>'; return; }
   // Accept either a TMDB person id (from a cast link) or a name (from the
   // rankings, whose ids are our own serial keys) — resolve names via search.
   var isId=/^\d+$/.test(String(pid));
@@ -11276,7 +11281,7 @@ function renderArtist(pid){
     : fetch('https://api.themoviedb.org/3/search/person?api_key='+TMDB_KEY+'&query='+encodeURIComponent(pid))
         .then(function(r){return r.json();}).then(function(d){ var h=d&&d.results&&d.results[0]; return h?h.id:null; });
   resolveId.then(function(rid){
-    if(!rid){ if(!loadPeopleCache()[pid]) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t find this artist.</p>'; return null; }
+    if(!rid){ if(!loadPeopleCache()[pid] && !paintArtistFromCatalog(pid)) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t find this artist.</p>'; return null; }
     return Promise.all([
       fetch('https://api.themoviedb.org/3/person/'+rid+'?api_key='+TMDB_KEY).then(function(r){return r.json();}),
       fetch('https://api.themoviedb.org/3/person/'+rid+'/movie_credits?api_key='+TMDB_KEY).then(function(r){return r.json();})
@@ -11298,7 +11303,7 @@ function renderArtist(pid){
       birthday:p.birthday||'',place:p.place_of_birth||'',films:films.slice(0,24)};
     cache[pid]=data; cache[String(p.id)]=data; savePeopleCache(cache);
     if(_artistId===pid) paintArtist(data);
-  }).catch(function(){ if(!loadPeopleCache()[pid]) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t load this artist right now.</p>'; });
+  }).catch(function(){ if(!loadPeopleCache()[pid] && !paintArtistFromCatalog(pid)) byId('artistContent').innerHTML='<button class="backbtn" onclick="goBack()">← Back</button><p class="empty-note" style="margin-top:20px">Couldn’t load this artist right now.</p>'; });
 }
 /* match a TMDB filmography entry to a title already in our catalog */
 function ourFilmByTitleYear(title,year){
@@ -11306,19 +11311,69 @@ function ourFilmByTitleYear(title,year){
   for(var i=0;i<FILMS.length;i++){ var f=FILMS[i]; if(f.title.toLowerCase()===t && (!year || Math.abs((f.year||0)-parseInt(year||0,10))<=1)) return f; }
   return null;
 }
+/* Every title in OUR catalog credited to this person, as director or cast.
+   The filmography used to be purely TMDB's `movie_credits`, which also drops
+   any credit with no poster — so a filmmaker we carry six films for could
+   show three or none. That's backwards for the whole point of the site: the
+   catalog is the thing you can actually vote on, and it's deepest exactly
+   where TMDB is thinnest (indie Black film). Ours lead the page now. */
+function ourFilmsByPerson(name){
+  if(!name)return [];
+  var n=String(name).trim().toLowerCase();
+  return FILMS.filter(function(f){
+    if(f.noart)return false;
+    var dirs=String(f.dir||'').split(',');
+    for(var i=0;i<dirs.length;i++){ if(dirs[i].trim().toLowerCase()===n) return true; }
+    var cast=(f.cast||[]).concat((f.castFull||[]).map(function(c){return c.name;}));
+    for(var j=0;j<cast.length;j++){ if(String(cast[j]).trim().toLowerCase()===n) return true; }
+    return false;
+  }).sort(function(a,b){ return (b.year||0)-(a.year||0); });
+}
+/* One filmography tile. `f.poster` can legitimately be absent (a `nopo` title,
+   or one TMDB has no art for at all) — fall back to the film's own gradient
+   rather than dropping it from the page the way the TMDB list does. */
+function artFilmTileHTML(f,role){
+  var art=f.poster
+    ? 'background-image:url(\''+f.poster+'\')'
+    : (f.grad||'linear-gradient(160deg,#3a2a18,#140d08)').replace(/^/,'background:');
+  return '<div class="art-film linked" onclick="go(\'film\',\''+f.id+'\')" style="cursor:pointer" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
+    '<div class="art-film-poster'+(f.poster?'':' art-film-noart')+'" style="'+art+'">'+
+      '<span class="art-film-tag">On the menu</span>'+
+      (f.poster?'':'<span class="art-film-noart-ttl">'+esc(f.title)+'</span>')+
+    '</div>'+
+    '<div class="art-film-ttl">'+esc(f.title)+'</div>'+
+    '<div class="art-film-sub">'+esc(String(f.year||''))+(role?' · '+esc(role):'')+'</div></div>';
+}
+/* TMDB is not the only source of truth for who a person is. When it has no
+   record of them (or no key is configured), but our own catalog credits them,
+   paint the page from the catalog instead of a dead end. */
+function paintArtistFromCatalog(name){
+  var ours=ourFilmsByPerson(name);
+  if(!ours.length) return false;
+  paintArtist({id:name,name:name,bio:'',photo:null,dept:'',birthday:'',place:'',films:[]});
+  return true;
+}
 function paintArtist(d){
   var el=byId('artistContent'); if(!el)return;
   var av=d.photo?'<span class="artist-photo" style="background-image:url(\'https://image.tmdb.org/t/p/w342'+d.photo+'\')"></span>'
                 :'<span class="artist-photo artist-photo-init">'+esc(initials(d.name))+'</span>';
   var meta=[]; if(d.dept)meta.push(esc(d.dept)); if(d.birthday)meta.push('b. '+esc(d.birthday)); if(d.place)meta.push(esc(d.place));
   var rawbio=(d.bio||''); if(rawbio.length>900){ rawbio=rawbio.slice(0,900); var sp=rawbio.lastIndexOf(' '); if(sp>600)rawbio=rawbio.slice(0,sp); rawbio+='…'; }
-  var films=d.films.map(function(fm){
+  // Ours first, then whatever else TMDB credits them with, deduped so a film
+  // that's in both doesn't render twice.
+  var ours=ourFilmsByPerson(d.name), mineIds={};
+  ours.forEach(function(f){ mineIds[f.id]=1; });
+  var films=ours.map(function(f){
+    var role=String(f.dir||'').split(',').some(function(x){ return x.trim().toLowerCase()===String(d.name).trim().toLowerCase(); })?'Director':'';
+    return artFilmTileHTML(f,role);
+  }).concat((d.films||[]).map(function(fm){
     var mine=ourFilmByTitleYear(fm.title,fm.year);
+    if(mine&&mineIds[mine.id]) return '';
     var click=mine?' onclick="go(\'film\',\''+mine.id+'\')" style="cursor:pointer" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+mine.id+'\')"':'';
     var poster='https://image.tmdb.org/t/p/w342'+fm.poster;
     return '<div class="art-film'+(mine?' linked':'')+'"'+click+'><div class="art-film-poster" style="background-image:url(\''+poster+'\')">'+(mine?'<span class="art-film-tag">On the menu</span>':'')+'</div>'+
       '<div class="art-film-ttl">'+esc(fm.title)+'</div><div class="art-film-sub">'+esc(fm.year||'')+(fm.ch?' · '+esc(fm.ch):'')+'</div></div>';
-  }).join('');
+  })).join('');
   el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
     '<div class="artist-hero">'+av+'<div class="artist-lead"><h1>'+esc(d.name)+'</h1>'+
       (meta.length?'<div class="artist-meta">'+meta.join(' &nbsp;·&nbsp; ')+'</div>':'')+
