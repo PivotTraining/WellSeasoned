@@ -3654,3 +3654,32 @@ with this."
   eyebrow, film page gating correct on both the unreleased series and a
   released control, zero horizontal overflow at 360/390/768/1280/1920, zero
   console errors.
+
+## Fix: every trailer embed showed "Error 153 — Video player configuration error" (2026-07-30)
+Owner screenshotted a home card mid-hover-preview showing YouTube's "Error 153
+Video player configuration error" and said "they all say that" — i.e. every
+trailer on the site, not one bad video id. Verified the video itself was fine
+before touching anything: fetching the embed page server-side with a real
+Referer returns `playableInEmbed:true` and `previewPlayabilityStatus.status:
+"OK"`, so nothing was wrong with the ids, the channels, or `youtube-nocookie`.
+Error 153 is YouTube's embed player refusing to initialize when it can't read
+the embedding page's origin off the **referrer** — Safari's tracking
+protection strips the referrer on cross-site subresources by default (the
+owner is on Safari), so the player had nothing to verify us with. Nothing in
+this repo set a referrer policy at all: no `<meta name="referrer">`, no
+`referrerpolicy` on any iframe, and no CSP/headers in `vercel.json`, so the
+site was riding whatever each browser defaulted to. Fix: declare it
+explicitly in both places — a `<meta name="referrer"
+content="strict-origin-when-cross-origin">` in `<head>`, plus
+`referrerpolicy="strict-origin-when-cross-origin"` on all five embed sites
+(the 4 markup iframes — Coming Soon detail, film-page trailer modal, home
+marquee, Balcony video interview — and the JS-built hover-preview iframe in
+`cardPreview()`, set via `setAttribute`). That sends the bare origin, no path
+or query, which is all YouTube needs. Verified in headless Chromium: the meta
+tag, the modal iframe, and the dynamically-created hover-preview iframe all
+carry the policy, zero console errors. NOTE: this could not be reproduced
+in-sandbox (no outbound route to youtube.com from headless Chromium here), so
+it's diagnosed from the documented cause + the server-side playability check
+rather than a live repro — if trailers still error after this deploy, the next
+thing to rule out is a browser extension stripping referrers (the standard
+second cause of 153).

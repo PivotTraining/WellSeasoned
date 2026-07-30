@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- YouTube's embed player refuses to start ("Error 153 — Video player
+     configuration error") when it can't read the embedding page's origin off
+     the referrer. Safari's tracking protection strips the referrer on
+     cross-site subresources by default, which killed every trailer on the
+     site. Stating the policy explicitly here (and per-iframe) sends the bare
+     origin — no path, no query — which is all YouTube needs to verify us. -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Well Seasoned — Two verdicts on every film</title>
 <meta name="description" content="Rated by the culture. The Kitchen is verified critics of the culture. The Table is the community that bought the ticket. Two honest scores on every film.">
 <meta name="theme-color" content="#E49B0B">
@@ -6459,7 +6466,7 @@ function cardPreview(el,tid){
   _prevTimer=setTimeout(function(){
     if(el.querySelector('.poster-tr'))return;
     var fr=document.createElement('iframe');
-    fr.className='poster-tr'; fr.setAttribute('allow','autoplay; encrypted-media'); fr.setAttribute('tabindex','-1'); fr.setAttribute('aria-hidden','true');
+    fr.className='poster-tr'; fr.setAttribute('allow','autoplay; encrypted-media'); fr.setAttribute('referrerpolicy','strict-origin-when-cross-origin'); fr.setAttribute('tabindex','-1'); fr.setAttribute('aria-hidden','true');
     fr.src='https://www.youtube-nocookie.com/embed/'+tid+'?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist='+tid+'&start=6';
     el.appendChild(fr); el.classList.add('previewing');
   },560);
@@ -7412,7 +7419,7 @@ function paintMarriedFeature(){
   var open="go('film','"+c.id+"')";
   var shareBtn='<button class="mf-share" aria-label="Share" onclick="openShareCardSoon(\''+c.id+'\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>';
   var hero=c.trailer
-    ? '<div class="mf-trailer"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(c.trailer)+'?rel=0&amp;modestbranding=1" title="'+esc(c.title)+' trailer" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>'+shareBtn+'</div>'
+    ? '<div class="mf-trailer"><iframe referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/'+esc(c.trailer)+'?rel=0&amp;modestbranding=1" title="'+esc(c.title)+' trailer" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>'+shareBtn+'</div>'
     : (c.poster?'<div class="mf-poster"><img src="'+esc(c.poster)+'" alt="'+esc(c.title)+' poster" loading="lazy">'+shareBtn+'</div>':'');
   el.innerHTML='<div class="mf-wrap">'+
     '<div class="mf-spark s1"></div><div class="mf-spark s2"></div><div class="mf-spark s3"></div>'+
@@ -8054,7 +8061,7 @@ function openSoonTrailer(i){
   track('trailer',{film:c.id});
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2 style="font-size:20px;margin-bottom:12px">'+esc(c.title)+' &middot; Trailer</h2>'+
-    '<div class="tr-wrap"><iframe src="https://www.youtube-nocookie.com/embed/'+c.trailer+'?autoplay=1&rel=0&modestbranding=1" title="'+esc(c.title)+' trailer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>');
+    '<div class="tr-wrap"><iframe referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/'+c.trailer+'?autoplay=1&rel=0&modestbranding=1" title="'+esc(c.title)+' trailer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>');
   byId('modal').classList.add('wide');
 }
 /* ============ CURATE PAGE (full catalog management) ============ */
@@ -10936,7 +10943,7 @@ function openTrailer(id){
   var f=find(id); if(!f||!f.trailer)return;
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2 style="font-size:20px;margin-bottom:12px">'+esc(f.title)+' &middot; Trailer</h2>'+
-    '<div class="tr-wrap"><iframe src="https://www.youtube-nocookie.com/embed/'+f.trailer+'?autoplay=1&rel=0&modestbranding=1" title="'+esc(f.title)+' trailer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>');
+    '<div class="tr-wrap"><iframe referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/'+f.trailer+'?autoplay=1&rel=0&modestbranding=1" title="'+esc(f.title)+' trailer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>');
   byId('modal').classList.add('wide');
 }
 /* Fandango via CJ Affiliate: once approved, put your CJ publisher ID (PID)
@@ -11539,7 +11546,7 @@ function renderRead(slug){
     var heroSubject=(a.subject&&a.kind==='interview')?'<div class="read-hero-subject">With '+esc(a.subject)+'</div>':'';
     var hero=a.hero_image?'<div class="read-hero" style="background-image:url(\''+esc(a.hero_image)+'\');background-position:center '+(a.hero_pos||'center')+'"><div class="read-hero-scrim"></div>'+heroSubject+'</div>':(heroSubject?'<div class="read-hero read-hero-plain">'+heroSubject+'</div>':'');
     var vid=ytId(a.video_url);
-    var video=vid?'<div class="mf-trailer" style="margin:18px 0"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(vid)+'?rel=0&amp;modestbranding=1" title="'+esc(a.title)+'" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>':'';
+    var video=vid?'<div class="mf-trailer" style="margin:18px 0"><iframe referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/'+esc(vid)+'?rel=0&amp;modestbranding=1" title="'+esc(a.title)+'" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>':'';
     var kindLabel=(a.kind&&ARTICLE_KIND_LABEL[a.kind])||'The Balcony';
     el.innerHTML='<button class="backbtn" onclick="goBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>'+
       hero+
