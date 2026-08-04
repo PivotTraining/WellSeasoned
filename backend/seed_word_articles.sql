@@ -165,7 +165,7 @@ Keeping track of our own work is not nostalgia. It's maintenance. Somebody has t
 -- 6) FEATURE — Colman Domingo (cover story; newest) --------------------------
 ('colman-domingo-was-never-waiting',
  'They Didn''t Discover Colman Domingo. They Stalled Him.',
- $d$Five Black men have won Best Actor in the Academy's near-century. A thirty-eight-year silence sits in the middle of that record. Domingo's late ascent isn't the system working — it's a man outlasting a machine built to wait him out.$d$,
+ $d$Six Black men have won Best Actor in the Academy's near-century. A thirty-eight-year silence sits in the middle of that record. Domingo's late ascent isn't the system working — it's a man outlasting a machine built to wait him out.$d$,
  $md$There is a scene, filmed in the dead of the pandemic, in which almost nothing happens and everything does. It is Christmas. Two people are sitting in a diner.
 
 The episode is *Euphoria*'s — one of the two bottle installments shot in late 2020, when the rest of television had gone dark and a hit show reduced itself, out of necessity and then out of nerve, to a pair of people in a booth. On one side is Rue, a teenage addict fresh off a relapse. On the other is the older man from her recovery meetings, the one who came when she called. His name is Ali. He orders food. And then, for the better part of an hour, he does the single hardest thing an actor can do on camera, the thing that separates a craftsman from whatever Colman Domingo is: he listens. He lets the silences stretch until they ache. He watches a girl lie to his face and declines to correct her. In a scene built entirely of talk, he becomes the most magnetic presence on television by doing the least — and somewhere in the second act it lands on you that the stillness is not restraint. It is authority. Here is a man with nothing left to prove and all the time in the world, lending both to someone who has neither.
@@ -184,7 +184,7 @@ In *Rustin*, in 2023, he played Bayard Rustin, the openly gay architect of the M
 
 > Twice to the front of that room. Twice sent home.
 
-It is worth being precise about what that is, because the polite framing — *what an honor just to be nominated* — is a sedative, and Domingo's career deserves to be read awake. Consider the arithmetic he was nominated into. In the roughly one hundred years the Academy has given out its award for Best Actor, five Black men have won it: Sidney Poitier, then a silence you could raise a child inside, then Denzel Washington thirty-eight years later, then Jamie Foxx, Forest Whitaker, Will Smith. That is the whole list. And when the long silence finally broke, it broke for Denzel playing a crooked narcotics cop in *Training Day* — Black menace, the safest thing that room knows how to reward — after it had passed him over as Malcolm X and as a wrongly convicted boxer. The companion prize for Black women has been won exactly once, by Halle Berry, in 2002; she is still, a quarter-century on, standing up there alone. This is not a category having an off decade. It is a preference, expressed with great consistency, over a very long time.
+It is worth being precise about what that is, because the polite framing — *what an honor just to be nominated* — is a sedative, and Domingo's career deserves to be read awake. Consider the arithmetic he was nominated into. In the roughly one hundred years the Academy has given out its award for Best Actor, six Black men have won it: Sidney Poitier, then a silence you could raise a child inside, then Denzel Washington thirty-eight years later, then Jamie Foxx, Forest Whitaker, Will Smith, and this March, Michael B. Jordan for *Sinners*. That is the whole list. And when the long silence finally broke, it broke for Denzel playing a crooked narcotics cop in *Training Day* — Black menace, the safest thing that room knows how to reward — after it had passed him over as Malcolm X and as a wrongly convicted boxer. The companion prize for Black women has been won exactly once, by Halle Berry, in 2002; she is still, a quarter-century on, standing up there alone. This is not a category having an off decade. It is a preference, expressed with great consistency, over a very long time.
 
 The business treats a Black actor's age as depreciation — use him young, discard him at forty, cast him thereafter as the wise neighbor who dies in the second act. Domingo did the one thing the model does not price in. He compounded. Every year the room stayed turned away, he was accruing: the theater discipline, the supporting parts where a whole man had to be built and buried inside four scenes, the flat refusal to hand back a smaller version of himself than the one he arrived with.
 
@@ -308,6 +308,20 @@ on conflict (slug) do nothing;
 -- inserted or already existed. Names must match TMDB person search.
 update public.articles set subject='Jaafar Jackson, Colman Domingo, Nia Long, Antoine Fuqua' where slug='michael-billion-dollar-reckoning';
 update public.articles set subject='Colman Domingo' where slug='colman-domingo-was-never-waiting';
+
+-- Fact-check patch (2026-08-04): Michael B. Jordan won Best Actor for
+-- Sinners at the 98th Academy Awards (March 2026), which was AFTER this
+-- piece originally published (2026-07-14) but the count was never updated —
+-- "five Black men have won Best Actor" quietly went stale the moment it
+-- happened. Patched via replace() so it's a no-op on a second run (the old
+-- search string no longer matches once patched), same idempotency guarantee
+-- as the rest of this file, without re-pasting the whole ~5KB body.
+update public.articles set
+  dek = replace(dek, 'Five Black men have won Best Actor', 'Six Black men have won Best Actor'),
+  body = replace(body,
+    'five Black men have won it: Sidney Poitier, then a silence you could raise a child inside, then Denzel Washington thirty-eight years later, then Jamie Foxx, Forest Whitaker, Will Smith. That is the whole list.',
+    'six Black men have won it: Sidney Poitier, then a silence you could raise a child inside, then Denzel Washington thirty-eight years later, then Jamie Foxx, Forest Whitaker, Will Smith, and this March, Michael B. Jordan for *Sinners*. That is the whole list.')
+  where slug='colman-domingo-was-never-waiting';
 update public.articles set subject='Michael B. Jordan, Ryan Coogler' where slug='the-genre-was-always-ours';
 update public.articles set subject='Ryan Coogler, Michael B. Jordan' where slug='ryan-coogler-bet-on-us';
 update public.articles set subject='Nia Long, Larenz Tate' where slug='the-case-for-black-romance';

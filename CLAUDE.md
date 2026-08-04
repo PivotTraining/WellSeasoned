@@ -3828,3 +3828,94 @@ sits under a duplicate person entity).
   page shows all 6 ours + 1 TMDB-only credit, 3 gradient tiles for the artless
   ones, "Rent Due" correctly shows no Director role (he's cast; Mike Berry
   directed), clicking a tile routes to `#/film/<id>`, zero console errors.
+
+## Ten-item refresh sweep — three fixed, one added (2026-08-04)
+Owner asked for ten site-refresh candidates researched from the web/trades,
+then to fix everything that needed fixing and add the Mahershala Ali trailer.
+Did the two most urgent categories from that list (accuracy + something about
+to go stale) plus the requested new title; held the rest (Emmy carousel
+revival, Sinners' 16-nomination Oscar sweep, BlackStar editorial, Idlewild
+20th, Beauty in Black S4 renewal) since the owner didn't ask for those yet.
+
+- **Fixed a real "nothing fake" violation on two live Balcony pieces.**
+  "They Didn't Discover Colman Domingo" (published 2026-07-14) said "Five
+  Black men have won Best Actor" — true when written, false the moment
+  Michael B. Jordan won for *Sinners* at the 98th Academy Awards that March,
+  and nobody had gone back to update it. Fixed the dek and body (five→six,
+  names Jordan/*Sinners* at the end of the list) in
+  `backend/seed_word_articles.sql`. Since the piece may already be live from
+  an earlier owner SQL run, added an idempotent `update ... set dek =
+  replace(...), body = replace(...)` patch at the bottom of the file (mirrors
+  the existing `update ... set subject=...` pattern already there) — a
+  literal-string replace is a no-op on a second run since the stale text no
+  longer matches, so it's safe whether or not the row already exists.
+  Validated against a throwaway Postgres 16: first run inserts 9 rows + patches
+  correctly (verified via `LIKE` on the live row — new text present, old text
+  gone); second run does `INSERT 0 0` and the dek/body are unchanged,
+  confirming idempotency. "The Count Was Never Neutral" was audited too — its
+  Halle Berry / Denzel-2002 lines are pure historical narration of that one
+  night, not a present-tense count, so nothing there needed a fix; still the
+  sole Black Best Actress winner, confirmed against the 98th ceremony (Jessie
+  Buckley won for *Hamnet*).
+- **The Bracket was about to go dead.** The 2000s Cookout (started 2026-07-30,
+  2 days/round × 3 rounds) closes 2026-08-05 and `BRACKETS` had nothing
+  queued after it. Added **The 2010s Renaissance** (`id:'2010s'`, start
+  2026-08-06, zero gap) — Moonlight, Get Out, Black Panther, Fruitvale
+  Station, Selma, Straight Outta Compton, Creed, 12 Years a Slave — all eight
+  already real catalog entries with real posters, verified via `find()`
+  resolving all eight before shipping.
+- **`LEAD_STORY` swapped off the finished Denzel bracket tie-in** ("Eight
+  Roles, No Consensus" explicitly invites readers to "go vote" on a bracket
+  that ended 2026-07-28) onto **"The Count Was Never Neutral"** — the
+  founder's manifesto, evergreen, no bracket/date dependency. Eyebrow
+  changed from "The Balcony · The Bracket" to "The Balcony · Why We Built
+  This" to match.
+- **Lanterns restored to the home carousel** with its real, newly-released
+  official trailer. HBO Max dropped it at SDCC (2026-07-24); verified
+  `7UIBOsuUwc4` via oEmbed (channel: "HBO Max", the primary US upload, not a
+  regional variant) and confirmed `playableInEmbed:true` before wiring into
+  `WS_TRAILERS`. Replaced `fightland` in `FEATURED` (Fightland premiered
+  2026-07-31 and already had its premiere moment; Lanterns — DC Studios'
+  flagship, Aaron Pierre as Green Lantern — is the bigger real story right
+  now) — Fightland stays in FILMS, only unwired from the carousel, same
+  unwire-don't-delete convention as every prior carousel swap. Eyebrow leads
+  with "The official trailer is here" (a real, dated moment) rather than
+  evergreen copy, `until:'2026-10-01'` auto-retires it.
+- **Urbanworld Film Festival added to `EVENTS`.** Resolved a real date
+  conflict at the source: an older GlobeNewswire release said Nov 4–8, but
+  the festival's own live site (fetched directly, not from a search snippet)
+  states **Oct 14–18, 2026** under its own "Road to 30" banner — used the
+  official primary source over the older press release. 30th-anniversary
+  framing pulled from the same page.
+- **Added Your Mother Your Mother Your Mother** (2026, `your-mother-your-
+  mother-your-mother-2026`) — the requested Mahershala Ali trailer. Verified
+  via TMDB (id 1437396, dir. Bassam Tariq — reunited with his would-have-been
+  *Blade* collaborator) and the trades: Ali leads as Latif, a devoutly
+  religious hitman protecting his children across Houston after his wife's
+  death, with John Cho, Giancarlo Esposito, Abubakr Ali, Tramell Tillman,
+  Tiffany Boone. In theaters Sep 25, 2026 (Orion Pictures/Amazon MGM). Trailer
+  `uEcoV-ngH38` verified via oEmbed as the official Amazon MGM Studios upload,
+  `playableInEmbed:true`. Added to FILMS (k/t null, votes:0, reviews:[],
+  scope:'ours' — Ali is the unambiguous lead) and COMING_SOON (`cs-1437396`,
+  real TMDB poster/backdrop), so it gets the honest hype-vote-not-verdict-vote
+  treatment until it actually releases. Real poster pinned in `WS_POSTERS`
+  (TMDB search for this generic-ish title returns close variants — pin avoids
+  any future mismatch); OG card generated (`og/your-mother-your-mother-your-
+  mother-2026.jpg`).
+- Catalog 1271 → 1272; ran `node scripts/build-films-json.cjs`. Verified in
+  headless Chromium: active bracket correctly still 2000s through Aug 5 (2010s
+  takes over Aug 6, confirmed by date math, not just eyeballed), all 8 new
+  bracket seeds resolve, lead story no longer references the finished
+  tournament, carousel carries Lanterns with a working trailer, Urbanworld
+  dates correct, new film shows hype-vote+coming-badge with zero verdict
+  buttons pre-release and the same referrerpolicy fix applies to its trailer,
+  zero console errors, zero horizontal overflow across every touched route.
+
+**Still open from the researched list** (not done this pass, flagged for a
+future ask): Emmy nominee carousel revival for the Sept 14 ceremony
+(currently dead code, data intact); a Sinners Oscar-sweep editorial (16
+nominations, MBJ Best Actor, Coogler screenplay, Durald Arkapaw first woman
+to win Cinematography); a BlackStar Film Festival spotlight piece (festival
+runs Aug 6–9, already 2 days out); an Idlewild 20th-anniversary spotlight
+(Aug 25, already in the catalog); updating the Beauty in Black synopsis/
+carousel copy for the confirmed Season 4 renewal.
