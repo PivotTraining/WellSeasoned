@@ -3987,3 +3987,48 @@ issues, all fixed:
 Full regression sweep after all three: 18 routes × desktop/mobile/narrow-
 desktop (1000px, inside the newly-relevant <1250px band), zero console
 errors, zero horizontal overflow anywhere.
+
+## "What the culture's saying" — spotlight redesign + moved way up (2026-08-04)
+Owner: "Do something fun with the 'What the culture's saying' box its too low
+and needs some prominence." It was true on both counts: the section
+(`culTalkSection` — real owner-featured comments, `loadCulTalk()`) was a
+plain cream 3-col grid identical to every other shelf, and it sat second-to-
+last of ~16 sections on the entire home page, well below the fold on any
+device.
+
+- **Moved** from its old spot (between the Balcony teaser and the Classics
+  shelf, near the very bottom) to directly after the mosaic — now the FIRST
+  item in the dessert tier, ahead of the Balcony lead story, Events, Ten
+  Years, the Bracket teaser, and Card Check. Justified on the same logic as
+  the standing "stay review-focused" guardrail: this isn't a game or a
+  spotlight unit, it's real audience voice — the single strongest proof the
+  reviews are genuine — so it earns first billing over editorial/engagement
+  content, without going above the core film grid itself.
+- **Redesigned** into the site's established dark-stage spotlight language
+  (same family as Ten Years/Events/Emmy): gradient dark card, a rotating gold
+  conic sweep (`emmySpinCenter`, with the `translateZ(0)`+`isolation:isolate`
+  hardening from the WebKit-clip-bug lesson applied from the start this time),
+  twinkling sparkle accents, a shimmering gold-foil eyebrow, serif headline.
+  Each quote is now a full-bleed card — the film's own poster art behind a
+  scrim, a gold/paprika stance pill ("Seasoned"/"Sent It Back") matching the
+  site's existing verdict-color vocabulary, the quote in large italic serif,
+  name + film at the bottom — in a horizontal swipeable rail (reuses the
+  existing `.rail`/`railBy()` scroll mechanism already used by every other
+  shelf, so no new JS scroll logic).
+- **Deliberately did NOT reuse `posterInner()`** for the card art — that
+  helper renders an absolutely-positioned `<img>` that needs a positioned
+  ancestor, which is exactly the bug that made this same component render a
+  full-viewport image a few sessions back (`.ctc-poster` had no
+  `position:relative`). The new `.ctw-art` is a plain CSS `background-image`
+  div — structurally can't reproduce that bug class.
+  Fallback to the film's `grad` gradient when there's no poster, same
+  precedent as everywhere else art can be missing.
+- Still shown only once real featured comments exist (`loadCulTalk()`'s empty-
+  state hide is untouched) — nothing new is fabricated, still a human curation
+  call via the existing `set_comment_featured` owner toggle.
+- Verified in headless Chromium, desktop + mobile, with mocked featured
+  comments (including a real poster fetch to confirm the art actually
+  renders): section lands immediately after `#mosaic` and before `#leadStory`,
+  cards render at correct, bounded sizes (not full-viewport, not zero-size),
+  empty state still hides the whole section, full 18-route × 3-viewport
+  regression sweep clean (zero console errors, zero horizontal overflow).

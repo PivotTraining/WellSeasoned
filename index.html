@@ -1047,6 +1047,43 @@
   .ev-meta{font-family:var(--mono);font-size:11.5px;color:var(--gold-soft);margin-top:6px}
   .ev-blurb{font-size:13.5px;color:#D8C9A8;line-height:1.55;margin-top:10px;flex:1}
   .ev-card .btn{margin-top:16px;align-self:flex-start}
+  /* HOME "What the culture's saying" — real featured comments, given the
+     same dark-stage spotlight treatment as Ten Years/Events instead of a
+     plain cream grid buried near the bottom of the page. Cards bleed the
+     film's own poster art behind the quote (same fallback-to-grad pattern
+     as everywhere a poster can be missing), so it reads as a wall of real
+     reactions, not a form. */
+  .ctw-outer{margin:0 0 26px}
+  .ctw-wrap{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:30px 30px 26px;
+    background:linear-gradient(150deg,#241708,#120b04);box-shadow:0 26px 60px -20px rgba(0,0,0,.55);
+    -webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate}
+  .ctw-wrap::after{content:"";position:absolute;top:50%;left:50%;width:170%;height:170%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
+    background:conic-gradient(from 0deg,transparent 0 76%,rgba(244,197,66,.14) 86%,transparent 94%);animation:emmySpinCenter 19s linear infinite}
+  .ctw-wrap>*{position:relative;z-index:2}
+  .ctw-spark{position:absolute;z-index:1;width:5px;height:5px;border-radius:50%;background:#F4C542;box-shadow:0 0 8px 2px rgba(244,197,66,.7);animation:emmyTwinkle 3.3s ease-in-out infinite}
+  .ctw-spark.s1{top:24px;right:44px} .ctw-spark.s2{top:66px;right:96px;animation-delay:1.1s} .ctw-spark.s3{bottom:36px;left:40px;animation-delay:2s}
+  .ctw-eyebrow{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
+  .ctw-h{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.6vw,42px);line-height:1.06;margin-top:10px;color:#F4ECD8}
+  .ctw-dek{color:#D8C9A8;font-size:14.5px;line-height:1.55;margin-top:8px;max-width:60ch}
+  .ctw-rail-wrap{margin-top:22px}
+  .ctw-rail{gap:16px;padding:4px 4px 8px}
+  .ctw-card{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start;position:relative;display:block;overflow:hidden;border-radius:16px;
+    min-height:290px;border:1px solid rgba(244,197,66,.24);box-shadow:0 14px 34px rgba(0,0,0,.4);cursor:pointer;color:inherit;
+    transition:transform .18s,box-shadow .18s,border-color .18s}
+  .ctw-card:hover{transform:translateY(-4px);box-shadow:0 20px 46px rgba(0,0,0,.55);border-color:rgba(244,197,66,.6)}
+  .ctw-art{position:absolute;inset:0;background-size:cover;background-position:center;background-color:#241b12}
+  .ctw-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,10,6,.1) 0%,rgba(14,10,6,.58) 56%,rgba(14,10,6,.95) 100%)}
+  .ctw-body{position:relative;z-index:2;display:flex;flex-direction:column;gap:10px;padding:18px;min-height:290px;justify-content:flex-end}
+  .ctw-stance{align-self:flex-start;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+  .ctw-stance.for{background:rgba(228,155,11,.88);color:#241703}
+  .ctw-stance.against{background:rgba(196,69,31,.88);color:#FCEEE6}
+  .ctw-quote{font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.4;color:#FBF3DE}
+  .ctw-foot{font-size:12.5px;color:#D8C9A8}
+  .ctw-foot b{color:#F4ECD8;font-weight:700}
+  @media(prefers-reduced-motion:reduce){ .ctw-wrap::after{animation:none} .ctw-spark{animation:none} .ctw-eyebrow{animation:none} }
+  @media(max-width:900px){ .ctw-card{flex:0 0 calc((100% - 16px)/2)} }
+  @media(max-width:640px){ .ctw-wrap{padding:22px 20px} .ctw-card{flex:0 0 78%} }
   /* HOME "This Week at The Table" — the weekly ballot that concentrates voting */
   .week-table{margin:6px 0 30px}
   .wt-head{margin-bottom:16px}
@@ -2150,7 +2187,23 @@
         <div id="marriedFeature" class="married-feat" style="display:none"></div>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
-        <!-- Engagement/spotlight units — dessert, below the core film grid. -->
+        <!-- Engagement/spotlight units — dessert, below the core film grid.
+             "What the culture's saying" leads the dessert tier now: it's real
+             audience voice, the strongest proof the reviews are genuine, so
+             it earns first billing over the editorial/game units below it. -->
+        <section class="ctw-outer" id="culTalkSection" style="display:none">
+          <div class="ctw-wrap">
+            <div class="ctw-spark s1"></div><div class="ctw-spark s2"></div><div class="ctw-spark s3"></div>
+            <span class="ctw-eyebrow">🗣️ Real talk · The Table</span>
+            <h2 class="ctw-h">What the culture's saying.</h2>
+            <p class="ctw-dek">Real reads, pulled straight from the room — nothing scripted, nothing bought.</p>
+            <div class="rail-wrap ctw-rail-wrap">
+              <button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+              <div id="culTalkGrid" class="rail ctw-rail"></div>
+              <button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </section>
         <section id="leadStory" class="lead-story" style="display:none"></section>
         <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
         <section id="tenYears" class="ten-years" style="display:none"></section>
@@ -2208,10 +2261,6 @@
         <div id="wordHomeGrid" class="word-grid"></div>
       </section>
 
-      <section class="shelf" id="culTalkSection" style="display:none">
-        <div class="shelf-head"><h2>What the culture's saying</h2></div>
-        <div id="culTalkGrid" class="cul-talk-grid"></div>
-      </section>
 
       <section class="shelf shelf-band shelf-band-vintage" id="classicSection">
         <div class="shelf-head"><h2>Grandma’s Recipes · Classic films</h2><button class="see" onclick="setFilter('era','1990s');go('browse')">See all</button></div>
@@ -8970,10 +9019,16 @@ function renderHome(){
 function culTalkCardHTML(c){
   var f=find(c.film_slug); if(!f) return '';
   var lab=c.stance==='for'?'Seasoned':'Sent it back';
-  return '<div class="cul-talk-card" onclick="go(\'film\',\''+f.id+'\')" tabindex="0" role="button" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
-    '<div class="ctc-poster'+(f.noart?' noart':'')+'" style="'+(f.noart?'':'background:'+f.grad)+'">'+posterInner(f,'')+'</div>'+
-    '<div class="ctc-body"><p>&ldquo;'+esc(c.body).slice(0,160)+(c.body.length>160?'…':'')+'&rdquo;</p>'+
-    '<div class="ctc-foot"><span class="ctc-name">'+esc(c.name||'Guest')+'</span><span class="stance '+c.stance+'">'+lab+'</span><span class="ctc-film">on '+esc(f.title)+'</span></div></div></div>';
+  // Plain background-image, deliberately NOT posterInner()'s absolutely-
+  // positioned <img> — that pattern needs a positioned ancestor or the image
+  // renders full-viewport (the ctc-poster bug from earlier this project).
+  // A CSS background can't make that mistake.
+  var art=f.poster?'background-image:url(\''+f.poster+'\')':(f.grad?'background:'+f.grad:'');
+  return '<a class="ctw-card" onclick="go(\'film\',\''+f.id+'\')" tabindex="0" role="button" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
+    '<div class="ctw-art" style="'+art+'"></div><div class="ctw-scrim"></div>'+
+    '<div class="ctw-body"><span class="ctw-stance '+c.stance+'">'+lab+'</span>'+
+    '<p class="ctw-quote">&ldquo;'+esc(c.body).slice(0,150)+(c.body.length>150?'…':'')+'&rdquo;</p>'+
+    '<div class="ctw-foot"><b>'+esc(c.name||'Guest')+'</b> · on '+esc(f.title)+'</div></div></a>';
 }
 function loadCulTalk(){
   var s=byId('culTalkSection'), g=byId('culTalkGrid'); if(!s||!g)return;
