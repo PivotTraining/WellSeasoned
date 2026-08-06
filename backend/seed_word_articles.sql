@@ -298,7 +298,39 @@ There's no real answer to which performance is his best, and the Academy's own s
  'The Founder', 'training-day',
  'https://itswellseasoned.com/word/denzel-eight-roles.jpg', 'center',
  'article', true,
- '2026-07-25 12:00:00+00', '2026-07-25 12:00:00+00')
+ '2026-07-25 12:00:00+00', '2026-07-25 12:00:00+00'),
+
+-- 10) FEATURE — Aaron Pierre, the long way to the Lantern (cover; newest) ----
+('the-long-way-to-the-lantern',
+ 'The Long Way to the Lantern',
+ $d$He got his break because another actor walked off a film. Three years and two inherited legacies later, a studio is building its next universe around him anyway.$d$,
+ $md$In the summer of 2021, principal photography on Jeremy Saulnier's *Rebel Ridge* — an ex-Marine walks into a small Louisiana town and finds its police department rotten from the inside — was about a month underway when John Boyega walked off the production. Family reasons, nothing to do with the film, but Saulnier was left holding a half-shot movie with no lead. He got on a Zoom call with an actor he barely knew: a Brit with a handful of credits, nobody outside casting offices had memorized his name. Two minutes in, by Saulnier's own account, he knew. This is the guy. He later told Vulture he was willing to risk the movie rather than compromise on who played the part.
+
+The actor was Aaron Pierre, and what happened to that production afterward tells you something about what he'd actually signed up for. Filming didn't resume for another year. The movie didn't wrap until the summer of 2022. It then sat in post-production through the 2023 industry strikes and didn't reach Netflix until September 2024 — three full years after that first Zoom call, for a role most actors would have treated as a fill-in. When it finally arrived, *Rebel Ridge* became one of Netflix's biggest movies of the year, the kind of notice that turns a working actor into a name people start asking about.
+
+> A director doesn't bet a movie on a two-minute impression unless the tape already told him everything he needed to know.
+
+Before any of that, Pierre had put in the years actors put in while nobody outside the business is watching. Born in London in 1994, trained at LAMDA, he worked his way through small parts on British television — a Manchester drama called *The A Word*, a *Prime Suspect* revival most people have forgotten existed — and then three seasons into the kind of genre work that pays real bills while promising nothing: Dev-Em, an alien soldier on Syfy's *Krypton*. The résumé read like a string of almost-arrivals, the normal shape of a career that hasn't broken yet.
+
+The first person to actually bet on him was Barry Jenkins, and it happened almost by accident. In 2018, Jenkins was in the audience at Shakespeare's Globe to watch his friend André Holland play the title role in *Othello*. Pierre was in the same production, cast as Cassio — a supporting part, not the one anyone had bought a ticket for. Jenkins noticed him anyway and sent a message afterward: he'd loved what he'd seen and wanted to find something they could work on together. Not long after, Pierre got his first audition for *The Underground Railroad*, Jenkins's ten-part adaptation of Colson Whitehead's novel, and landed Caesar — one of two performances the whole unbearable, necessary thing turned on. It premiered on Amazon in May 2021, a month before Boyega walked off *Rebel Ridge*, and put Pierre's name into rooms that mattered for the first time.
+
+What came after is the part worth sitting with, because it all landed inside a single calendar year. In February 2024, National Geographic's *Genius: MLK/X* put Pierre across the frame from Kelvin Harrison Jr., the two of them playing Martin Luther King Jr. and Malcolm X as men arguing the same fight from opposite ends of it. Pierre took Malcolm X — the harder performance to get right, if only because everyone alive already has an opinion about how the man sounded, most of it built from a few seconds of archival footage on a loop. He didn't reach for an impression. He built a man the show could sit with for eight hours. Seven months later came *Rebel Ridge*, the role he'd been sitting on since 2021, finally reaching the public. And before that same year was out, Jenkins came back for him a second time — not to run through the woods again, but to voice Mufasa in Disney's *Lion King* prequel, inheriting a role James Earl Jones had owned, unchallenged, for thirty years. Malcolm X in February, a Netflix action lead in September, the voice of Mufasa in December — three registers, three real performances, one year. A director casting the same actor twice in that span, across two completely different projects, is easy to read past. It shouldn't be. Directors don't do that by accident. They do it because they've found someone they trust to carry weight, and then they keep handing him more of it.
+
+Pierre didn't pretend the Mufasa assignment was small. "The shoes of James Earl Jones cannot be filled, and I wouldn't ever claim to be filling them," he said before the film opened — the only honest answer available, and also the words of a man who understood precisely what he'd just been handed. Jenkins built the tribute around that understanding: the prequel opens on Jones's own voice, the "kings of the past" speech, before Pierre says a word. Then it's Pierre alone for the rest of the film, doing the thing every actor who inherits a legacy role has to do — sound like continuation, not imitation.
+
+> Jenkins didn't ask him to imitate a legend. He asked him to be trusted with one.
+
+None of that, on its own, would add up to more than a very good year. Good notices come and go, and the industry mostly moves on to the next name. What's happened since is the part that's harder to shrug off. In October 2024, DC Studios cast Pierre as John Stewart — the architect who becomes a Green Lantern, the character generations of Black comic readers have pointed to as theirs — opposite Kyle Chandler's Hal Jordan, for *Lanterns*, the eight-episode HBO series built by Chris Mundy, Damon Lindelof, and Tom King. It premieres August 16, and it's Pierre's face carrying the poster, not tucked into an ensemble.
+
+Then came the part that actually separates this from a good run. This past March, James Gunn's team confirmed Pierre would reprise John Stewart in *Man of Tomorrow*, the next mainline Superman film, opposite David Corenswet. Gunn has been explicit about why: it's the stated architecture of the new DC universe, television and film reporting to one continuity, characters crossing the wall between the two — and Pierre's Green Lantern is one of the first built to walk through it.
+
+> Nobody hands a favor the keys to two properties at once. They hand it to the person they've decided to build around.
+
+Go back to that Zoom call for a second. Saulnier didn't know, in the two minutes it took him to decide, that he was casting the actor a studio would eventually trust as the connective tissue of an entire cinematic universe. He just knew the tape was good. Pierre has spent every year since proving that instinct was undersold, not overstated — that the replacement, the second choice, the guy nobody outside a casting office had heard of, was simply early. When *Lanterns* airs on August 16, the audience watching won't know or care that none of this was the plan, or that the actor playing their Green Lantern once waited three years for the world to see the performance that was supposed to make him. They'll just see the Green Lantern. That's the whole reward for doing the work right the first time nobody was watching: eventually, somebody builds the plan around you instead.$md$,
+ 'The Founder', 'lanterns',
+ 'https://itswellseasoned.com/word/the-long-way-to-the-lantern.jpg', 'center',
+ 'article', true,
+ '2026-08-06 12:00:00+00', '2026-08-06 12:00:00+00')
 
 on conflict (slug) do nothing;
 
@@ -329,3 +361,4 @@ update public.articles set subject='Sanaa Lathan, Omar Epps' where slug='the-coo
 update public.articles set subject='Julie Dash' where slug='streaming-keeps-losing-our-movies';
 update public.articles set subject='Halle Berry, Denzel Washington, Sidney Poitier' where slug='the-count-was-never-neutral';
 update public.articles set subject='Denzel Washington, Chadwick Boseman, Phylicia Rashad' where slug='denzel-eight-roles-no-consensus';
+update public.articles set subject='Aaron Pierre, Barry Jenkins, Jeremy Saulnier, James Earl Jones' where slug='the-long-way-to-the-lantern';

@@ -4049,3 +4049,61 @@ Added a text-shadow on `.ctw-quote` as a second line of defense. Verified via
 screenshot: quote text is now clearly legible on both the brightest (Rent
 Due) and darkest (Moonlight) source images tested, full regression sweep
 still clean.
+
+## The Balcony: "The Long Way to the Lantern" — Aaron Pierre feature (2026-08-06)
+Owner picked the Aaron Pierre pitch from the ten-item refresh list, with a
+specific brief: "Create some cuts that matter but land him as a triumphant
+actor. Ensure the arc is there." Researched every beat before writing rather
+than working from memory, and caught two real errors in the first pass:
+
+- **Boyega's exit timing.** Initially drafted as if he left before *Rebel
+  Ridge* started shooting; the real story is more dramatic — production was
+  a month into filming (May→June 2021) when he walked, forcing a mid-shoot
+  recast. Verified via multiple trade sources before fixing.
+- **The Vulture quote attribution.** First draft had Saulnier "telling
+  Netflix" he'd risk the movie; the actual quote ("I was willing to risk the
+  movie unless I found the one and only true Terry Richmond") was given to
+  Vulture. Fixed to the correct source.
+- **The production gap.** *Rebel Ridge* was cast in 2021 but didn't reach
+  Netflix until September 2024 — COVID had already pushed the original 2020
+  shoot date back a year before Boyega's exit, filming didn't resume until
+  a year after the Zoom-call recast, the film wrapped summer 2022, then sat
+  in post through the 2023 strikes. That three-year gap became a real beat
+  in the piece rather than a glossed-over detail.
+- **The Jenkins/Othello discovery story**, precisely sourced: Jenkins was at
+  Shakespeare's Globe in 2018 to see his friend André Holland lead a
+  production of *Othello*; Pierre was in the same cast as Cassio (a
+  supporting role, not the one anyone bought a ticket for), Jenkins noticed
+  him anyway and DM'd him afterward, which led to his first *Underground
+  Railroad* audition.
+- **The single-year stack, verified date by date**: *Genius: MLK/X* (Feb
+  2024, Malcolm X opposite Kelvin Harrison Jr.'s MLK) → *Rebel Ridge* (Sep
+  2024) → *Mufasa: The Lion King* (Dec 2024, voicing Mufasa, succeeding James
+  Earl Jones — real quote: "The shoes of James Earl Jones cannot be filled,
+  and I wouldn't ever claim to be filling them") — three registers, three
+  real credits, one calendar year, all independently confirmed via TMDB +
+  trade coverage.
+- **The Lanterns/Man of Tomorrow through-line**: cast as John Stewart in DC's
+  *Lanterns* (Oct 2024 casting, premieres Aug 16, 2026 — 10 days out from
+  publish), then confirmed (March 2026) to reprise the role in James Gunn's
+  *Man of Tomorrow*, explicitly as part of Gunn's stated plan to run DC
+  television and film through one continuity. That's the "triumphant landing"
+  the owner asked for — not a cameo, but a studio building connective tissue
+  through him.
+- Delayed-lead NYMag/VF voice, no subheads, 3 pull quotes, ~7k-char body.
+  Hero art: real Lanterns key art (Pierre + Kyle Chandler, TMDB backdrop)
+  through the house photo-treatment pipeline, committed to
+  `word/the-long-way-to-the-lantern.jpg`. `subject:'Aaron Pierre, Barry
+  Jenkins, Jeremy Saulnier, James Earl Jones'` for the featured-people chips.
+  `film_slug:'lanterns'`. Dated newest (2026-08-06) → cover story on #/word.
+- Validated against a throwaway Postgres 16: 10/10 rows insert clean, 3 pull
+  quotes present, idempotent re-run (`INSERT 0 0`). Verified in headless
+  Chromium with mocked article data: read page renders title/dek/hero/3 pull
+  quotes/4 people chips correctly, and it's the cover story on `#/word`.
+- **Not auto-published** — same as every other Balcony piece, this
+  environment can't authenticate to the owner-gated `publish_article` RPC.
+  The owner runs `backend/seed_word_articles.sql` once in the Supabase SQL
+  editor. The hero art deploys with the push regardless. `LEAD_STORY` (the
+  home page banner) was deliberately left pointing at "The Count Was Never
+  Neutral" — that swap wasn't asked for this time, flagging it as an easy
+  follow-up if the owner wants this piece leading home too.
