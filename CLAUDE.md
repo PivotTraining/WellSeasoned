@@ -4032,3 +4032,20 @@ device.
   cards render at correct, bounded sizes (not full-viewport, not zero-size),
   empty state still hides the whole section, full 18-route × 3-viewport
   regression sweep clean (zero console errors, zero horizontal overflow).
+
+## "What the culture's saying" — quote legibility fix (2026-08-04)
+Owner: "the script is hard to read in those blocks...maybe drop the image
+behind the words more." Real issue — the scrim on the new spotlight cards
+(previous entry) went dark too late (56%→95%) and the raw poster art was at
+full brightness underneath it, so a bright/high-contrast poster (Sinners'
+orange glow, Rent Due's sky-blue background) could still fight the white
+serif quote text sitting in the lower half. Fixed two ways at once: `.ctw-art`
+now carries `filter:brightness(.55) saturate(.75)` so the photo is dimmed
+before the scrim even touches it (art still reads as real texture, just
+recedes further), and `.ctw-scrim`'s gradient goes dark much earlier and
+harder (35%→94% instead of 56%→95%) so the whole lower two-thirds — where
+the quote actually sits — is solidly dark regardless of the source image.
+Added a text-shadow on `.ctw-quote` as a second line of defense. Verified via
+screenshot: quote text is now clearly legible on both the brightest (Rent
+Due) and darkest (Moonlight) source images tested, full regression sweep
+still clean.
