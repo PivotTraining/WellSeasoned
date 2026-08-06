@@ -4164,3 +4164,29 @@ in an artistic way?"
   correct foreshortening) on both desktop and mobile (stacks correctly).
   Full 19-route × 3-viewport (incl. 1920px) regression sweep clean — zero
   console errors, zero horizontal overflow.
+
+## Spindle un-merged from the Balcony banner — now its own marquee rail beside the vote widget (2026-08-06)
+Owner, right after the spindle shipped: "I wanted the balcony article separate
+from the spindle as its own hero header. The spindle was to be a taller
+vertical to the side of the main voting platform almost like an advertisement
+slim side box." A real miss on my part — I'd merged two different ideas (the
+article banner, the carousel-as-spindle) into one unit instead of building
+them as the two separate things the owner asked for. Showed a concept
+mockup (two static frames) before touching code this time, got a "lets try
+it," then built it:
+- **`#leadStory`/`paintLeadStory()` reverted to a plain standalone hero** —
+  always renders `.lead-media` (the real article art) on its right side, no
+  spindle branch. `LEAD_STORY` data/behavior otherwise unchanged.
+- **New `#sideSpindle`/`paintSideSpindle()`** — the spindle now lives in its
+  own tall, slim rail (`flex:0 0 200px`, ~318px tall in practice) beside the
+  home vote widget (`.vote-row` wraps `.teach` + `#sideSpindle`), reading
+  like a marquee/ad box next to "the main voting platform" per the brief.
+  Same underlying data/geometry (`leadSpindleHTML()`, still driven by
+  `featSlides()`) — reshaped narrower/taller (112×248 posters vs. the
+  previous 148×208) and given its own eyebrow ("On the marquee"). `spindlePause`/
+  `spindleResume` repointed to the new `#sideSpindleRing` id. Stacks under
+  the vote widget on mobile (`@media(max-width:760px){.vote-row{flex-
+  direction:column}}`), narrows its flex-basis at 900px.
+- Verified in headless Chromium: `#leadStory` contains zero spindle markup,
+  `.vote-row` renders the vote widget + a 200×318 spindle with 7 live poster
+  faces side by side, mobile stacks correctly, zero console errors.
