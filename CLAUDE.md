@@ -4190,3 +4190,41 @@ it," then built it:
 - Verified in headless Chromium: `#leadStory` contains zero spindle markup,
   `.vote-row` renders the vote widget + a 200×318 spindle with 7 live poster
   faces side by side, mobile stacks correctly, zero console errors.
+
+## The Varnell Hill Show added — real press art, no trailer yet (2026-08-06)
+Owner: "We need to get the trailer and art up for the Varnell Hill show."
+Researched before adding anything: **The Varnell Hill Show** is a real
+*Martin* spinoff — Tommy Davidson reprises Varnell Hill, now hosting his own
+late-night talk show decades later, exec produced by Martin Lawrence and
+showrunner Bentley Kyle Evans, with Kym Whitley, Wendy Raquel Robinson, Nick
+Cafero, Emmanuel Hudson, Chris Williams (BET Studios/Jesse Collins
+Entertainment/Runteldat/Harvest Studios). Global premiere on **Paramount+
+Sept 1, 2026** (first 2 of 8 episodes), confirmed via the show's own TMDB
+entry (id 330912, found via IMDb id `tt36586787`) and Paramount+'s press
+description as republished by vitalthrills.com (real outlet, byline dated
+2026-08-05).
+- **No trailer exists yet** — only first-look photos were released
+  (announcement was literally the day before this session). Checked two
+  candidate YouTube uploads via oEmbed: one from an unofficial re-uploader,
+  one an Entertainment Tonight news segment — neither is the show's own
+  official trailer, so **nothing was wired to `WS_TRAILERS`**. Add a real id
+  once Paramount+ or BET posts one on an official channel.
+- **TMDB has zero art** (`poster_path`/`backdrop_path` both null). Rather
+  than leave it artless or fake a poster crop from a landscape still, saved
+  one of Paramount+'s own official first-look press photos (via
+  vitalthrills.com, real outlet) to `press/varnell-hill-show.jpg` — self-
+  hosted the same way Balcony hero art is self-hosted — and set it as
+  `backdrop` directly with `nobd:true` to lock it in against a future
+  (possibly mismatched) TMDB hydrate. **No true poster art exists** (only
+  landscape press stills, nothing portrait-shaped), so `nopo:true` — same
+  honest call as the Ray Jr. titles rather than force-cropping a still into
+  a fake poster; the card rides its `grad` + title instead.
+- Added to **FILMS** (`the-varnell-hill-show`, type:'tv', k/t null, votes:0,
+  reviews:[]) and **COMING_SOON** (`cs-330912`, `trailer:null`), so
+  `upcomingSoonEntry()` gates it correctly — hype vote + "Coming Sep 1, 2026
+  — not out yet" badge + the premiere email hook, zero verdict buttons,
+  since nobody (critics or the Table) has actually seen it yet.
+- Ran `node scripts/build-films-json.cjs` (1272→1273). Verified in headless
+  Chromium: catalog + Coming Soon entries resolve, film page renders real
+  cast/crew, the coming badge, the hype vote, and the premiere hook with zero
+  verdict buttons, zero fabricated trailer button, zero console errors.
