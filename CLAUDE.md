@@ -3919,3 +3919,71 @@ to win Cinematography); a BlackStar Film Festival spotlight piece (festival
 runs Aug 6–9, already 2 days out); an Idlewild 20th-anniversary spotlight
 (Aug 25, already in the catalog); updating the Beauty in Black synopsis/
 carousel copy for the confirmed Season 4 renewal.
+
+## Flow audit → three fixes: mobile nav gap, a literal duplicate card, You-page dead end (2026-08-04)
+Owner: "Look at how we are optimizing the website flow wise," then "Go get
+busy" on the findings. Audited navigation at every breakpoint and the core
+vote/signup funnels rather than the marketing copy. Three real, verified
+issues, all fixed:
+
+- **Shop, The Table, and The Balcony had zero nav entry point below 1250px
+  width** — every phone, most tablets, plenty of laptops. `.topnav nav`
+  (the entire desktop nav, including the direct Shop/Balcony/Table links AND
+  the existing More▾ dropdown) gets `display:none` under 1250px, replaced
+  only by the 6-item tabbar (Home/Browse/Kids/Rankings/Theaters/You) — which
+  has no equivalent overflow menu. The only path to Shop/Balcony/Table/Couch/
+  Vault/Soon/Events on a narrow screen was the footer link row, below however
+  many sections the current page has (20+ on home). Given Shop and The Table
+  are the site's two live monetization surfaces and Balcony is the SEO
+  surface, this was a real cost, not a cosmetic gap.
+  Fixed by adding a 7th tabbar button, **"More"** (`#tabMoreBtn` →
+  `openMoreSheet()`), that opens a plain modal (not a positioned dropdown —
+  the tabbar sits at the bottom of the viewport with no room above it) listing
+  the seven destinations the tabbar's 6 fixed tabs don't cover: The Balcony,
+  Shop, The Table, Coming Soon, On The Couch, The Vault, Film Events. Theaters
+  is deliberately left out of the list — it already has its own tabbar tab.
+  New `MORE_SHEET_ITEMS`/`moreSheetHTML()`/`openMoreSheet()`; new
+  `TABBAR_MORE_VIEWS` array so `#tabMoreBtn` highlights `.active` when the
+  current view is one of the seven (mirrors how `navMoreBtn` already does
+  this for the desktop dropdown via `NAV_MORE_VIEWS`). New `.more-sheet`/
+  `.more-sheet-row` CSS, same visual language as `.nav-more-panel a`, sized up
+  for touch targets. `.tabbar button` gained `min-width:0` (7 flex:1 buttons
+  need it to actually shrink below content size — same class of fix as the
+  grid-track-blowout bug earlier this project) plus a size step inside the
+  existing `@media max-width:360px` block. Verified in headless Chromium:
+  0 overflow at 360/390/768/1000/1250px (the pre-existing 9px at 320px is the
+  already-documented header auth-cluster overflow, confirmed unrelated — the
+  tabbar itself measures exactly 320px wide); the sheet lists all 7 items,
+  tapping one navigates and closes the modal, `#tabMoreBtn` correctly
+  highlights while on a More-only view.
+- **The home vote-bar and "This Week at The Table" showed the identical film
+  twice in a row.** `voteBarPick()` picks `weekBallot()`'s first resolvable
+  film; `paintWeekTable()` rendered `weekBallot()`'s full 12 directly below
+  it — so the same poster/title appeared as the big "cast your first verdict"
+  card, then again as the first tile in the 12-card grid a few hundred pixels
+  down. The original intent (documented in the existing code comment) was
+  good — one deterministic pick, not a second disconnected selection — but
+  the literal re-render read as a duplicate/glitch rather than reinforcement.
+  Fixed in `paintWeekTable()`: filters the vote-bar's current pick out of the
+  grid's id list (calling `voteBarPick()` directly, so it's the same seeded
+  source of truth either way — no ordering dependency since the function
+  caches on first call regardless of which caller hits it first), backfills
+  from the same pool so the grid still shows a full 12. Verified in headless
+  Chromium: vote-bar showed "nickel," the 12-card grid below it did not
+  include "nickel," grid still had exactly 12 unique cards.
+- **The You page never pointed a real, signed-in user at Shop or membership.**
+  Someone who created an account has shown real investment, and the page
+  showed plate/votes/reads/taste and nothing else. Added `shopPromoBlock()`
+  (both signed-in and signed-out — browsing merch needs no account) and
+  `tablePromoBlock()` (signed-in only — pitching paid membership before
+  someone has even a free account is backwards), both one line + one button
+  in the existing `.you-sec`/`.taste-card` pattern already used by
+  `tasteBlock`/`connectBlock`, placed after the page's actual utility blocks
+  (plate/votes/reads) — same "supporting, not the front door" convention as
+  the home page's dessert tier. Verified in headless Chromium: signed-out
+  shows Shop only, signed-in shows both, both buttons route correctly
+  (`go('shop')`/`go('join')`).
+
+Full regression sweep after all three: 18 routes × desktop/mobile/narrow-
+desktop (1000px, inside the newly-relevant <1250px band), zero console
+errors, zero horizontal overflow anywhere.

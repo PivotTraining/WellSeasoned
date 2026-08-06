@@ -200,6 +200,14 @@
   .nav-more-panel a:hover svg{color:var(--ink)}
   .nav-more-panel a.active{color:var(--gold-ink);background:rgba(228,155,11,.12);font-weight:700}
   .nav-more-panel a.active svg{color:var(--gold-ink)}
+  /* Mobile "More" sheet (tabMoreBtn → openMoreSheet) — same row language as
+     the desktop dropdown above, sized up for a modal + touch targets. */
+  .more-sheet{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+  .more-sheet-row{display:flex;align-items:center;gap:14px;font-size:16px;font-weight:700;color:var(--ink-2);cursor:pointer;padding:14px 12px;border-radius:12px;transition:background .12s,color .12s}
+  .more-sheet-row svg{flex:none;width:20px;height:20px;color:var(--ink-3)}
+  .more-sheet-row:hover,.more-sheet-row:focus-visible{background:var(--inset);color:var(--ink);outline:none}
+  .more-sheet-row.active{color:var(--gold-ink);background:rgba(228,155,11,.12)}
+  .more-sheet-row.active svg{color:var(--gold-ink)}
   .topnav .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;flex:none}
   .topnav .right .btn{white-space:nowrap}
   .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;min-width:150px;max-width:230px;flex:1;position:relative}
@@ -361,7 +369,7 @@
   /* ============ BOTTOM TAB BAR (mobile) ============ */
   .tabbar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:80;height:var(--tab-h);background:rgba(252,247,236,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
   .tabbar .row{display:flex;height:100%}
-  .tabbar button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink-3);font-size:10.5px;font-weight:700}
+  .tabbar button{flex:1;min-width:0;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink-3);font-size:10.5px;font-weight:700}
   .tabbar button.active{color:var(--paprika)}
   .tabbar button svg{width:22px;height:22px}
 
@@ -1967,6 +1975,11 @@
     .brand{gap:6px}
     .brand-word{font-size:16px}
     .topnav .right{gap:5px}
+    /* 7 tabs at 320px leaves ~44px each — "Rankings"/"Theaters" at 10.5px
+       min-width:0 wraps to two lines and still fits, but shave a hair more
+       so nothing crowds the edges */
+    .tabbar button{font-size:9.5px;gap:2px}
+    .tabbar button svg{width:19px;height:19px}
   }
   @media (max-width:640px){
     .aura,.cert-seal{filter:none!important}   /* glow costs GPU memory phones don't have */
@@ -2404,6 +2417,7 @@
     <button data-nav="ranked" onclick="go('ranked')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V10M12 21V4M19 21v-7"/></svg>Rankings</button>
     <button data-nav="theaters" onclick="go('theaters')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>Theaters</button>
     <button data-nav="you" onclick="go('you')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>You</button>
+    <button id="tabMoreBtn" onclick="openMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>More</button>
   </div>
 </nav>
 
@@ -6563,11 +6577,20 @@ function loadState(){
 
 /* ============ ROUTER ============ */
 var NAV_MORE_VIEWS=['theaters','soon','couch','vault','events'];
+/* The mobile/narrow-desktop tabbar (<1250px) swaps in for the ENTIRE desktop
+   <nav> — including the direct Balcony/Shop/The Table links, which have no
+   tabbar slot of their own. Below 1250px those three, plus everything in the
+   desktop More▾ dropdown, were reachable only via the footer link row (a full
+   scroll down whatever page you're on). "theaters" isn't in this list since
+   it already has its own tabbar tab — this is only for what's otherwise
+   completely orphaned on a narrow screen. */
+var TABBAR_MORE_VIEWS=['word','shop','join','soon','couch','vault','events'];
 function setActiveNav(view){
   document.querySelectorAll('[data-nav]').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-nav')===view);
   });
   var moreBtn=byId('navMoreBtn'); if(moreBtn) moreBtn.classList.toggle('active', NAV_MORE_VIEWS.indexOf(view)>=0);
+  var tabMoreBtn=byId('tabMoreBtn'); if(tabMoreBtn) tabMoreBtn.classList.toggle('active', TABBAR_MORE_VIEWS.indexOf(view)>=0);
 }
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
@@ -7551,8 +7574,22 @@ function weekBallot(){
 }
 function paintWeekTable(){
   var el=byId('weekTable'); if(!el)return;
-  var ids=weekBallot();
-  if(!ids.length){ el.style.display='none'; return; }
+  var full=weekBallot();
+  if(!full.length){ el.style.display='none'; return; }
+  /* The vote-bar right above this already features weekBallot()'s own top
+     pick, prominently, with its own "cast your first verdict" framing. Left
+     alone, the exact same poster/title then reappeared as the ballot grid's
+     first card a few hundred pixels down — reads as a glitch, not
+     reinforcement. Same underlying seeded pick either way (still one source
+     of truth, per the original intent); it's just never rendered twice in a
+     row. Backfilled from the same pool so the grid still shows a full 12. */
+  var lead=voteBarPick();
+  var ids=full.filter(function(id){ return !lead||id!==lead.id; });
+  if(lead && ids.length<12){
+    function ok(f){ return f&&!f.noart&&homeOurs(f)&&!upcomingSoonEntry(f); }
+    var pad=seededShuffle(FILMS.filter(ok).map(function(f){return f.id;}),(HOME_SEED+11)>>>0);
+    for(var i=0;i<pad.length&&ids.length<12;i++){ if(ids.indexOf(pad[i])<0 && pad[i]!==lead.id) ids.push(pad[i]); }
+  }
   el.style.display='';
   var total=0;
   ids.forEach(function(id){ var f=find(id); if(f) total+=(f.votes.for||0)+(f.votes.against||0); });
@@ -12080,6 +12117,20 @@ function voteBlock(voteIds){
   var sub=rated?'<p class="you-sub" style="margin:-2px 0 12px">You side with the culture on <b>'+withRoom+'</b> of <b>'+rated+'</b> scored verdicts.</p>':'';
   return '<div class="you-sec"><h2>Your verdicts</h2>'+sub+'<div class="vote-list">'+rows+'</div></div>';
 }
+/* Someone who's created an account has already shown real investment, but the
+   You page never pointed them at either of the site's two follow-on
+   destinations — Shop (merch) or The Table (paid membership). Kept to the
+   same low-key .you-sec/.taste-card pattern as tasteBlock/connectBlock —
+   one line, one button, no hard sell — and placed after the page's actual
+   utility (plate/votes/reads), same "supporting, not the front door"
+   convention used on home. Membership is shown to signed-in users only —
+   pitching a paid tier before someone even has a free account is backwards. */
+function shopPromoBlock(){
+  return '<div class="you-sec"><h2>Wear the verdict</h2><div class="taste-card"><p>Kitchen/Table gear and the house marks, on real tees — nothing licensed, all ours.</p><button class="btn btn-ghost btn-sm" onclick="go(\'shop\')">Shop →</button></div></div>';
+}
+function tablePromoBlock(){
+  return '<div class="you-sec"><h2>Pull up a seat at The Table</h2><div class="taste-card"><p>Membership funds this place directly — zero ads, ever, paid for by the culture instead.</p><button class="btn btn-ghost btn-sm" onclick="go(\'join\')">See membership →</button></div></div>';
+}
 function connectBlock(){
   var on=!!TMDB_KEY;
   return '<div class="you-sec"><h2>Real posters</h2><div class="taste-card"><p>'+
@@ -12099,12 +12150,12 @@ function renderYou(){
   if(!app.signedIn){
     el.innerHTML='<div class="you-hero">'+av+'<div><h1>Your table</h1><p class="you-sub">Create a free account to save films, keep your votes across devices, and get picks made for you.</p></div></div>'+
       '<div class="film-actions" style="margin-bottom:8px"><button class="btn btn-gold" onclick="openAuth(\'signup\')">Create free account</button><button class="btn btn-ghost" onclick="openQuiz(0)">Take the taste quiz</button></div>'+
-      tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds);
+      tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds)+shopPromoBlock();
     return;
   }
   el.innerHTML='<div class="you-hero">'+av+'<div><h1>'+esc(app.name||'Your table')+'</h1><p class="you-sub">Signed in on this device. <a onclick="signOut()" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Sign out</a></p></div></div>'+
     '<div class="you-stats"><div class="ys"><b>'+plateFilms.length+'</b><span>On My Plate</span></div><div class="ys"><b>'+voteIds.length+'</b><span>Films voted</span></div><div class="ys"><b>'+reads+'</b><span>Reads posted</span></div></div>'+
-    kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+seenBlock()+voteBlock(voteIds);
+    kitchenBlock()+tasteBlock()+connectBlock()+plateBlock(plateFilms)+seenBlock()+voteBlock(voteIds)+tablePromoBlock()+shopPromoBlock();
 }
 
 /* ================= ADVERTISE: rate card / media kit ================= */
@@ -12924,6 +12975,32 @@ document.addEventListener('click',function(ev){
 /* "More" nav dropdown — the top nav had 9 flat links (too busy); the
    less-frequent ones now live behind this menu instead. */
 var _moreNavOpen=false;
+/* Mobile/narrow-desktop "More" sheet — the tabbar's answer to the desktop
+   More▾ dropdown, but reachable from a fixed nav slot instead of a scroll to
+   the footer. A plain modal (not a positioned dropdown) since the tabbar
+   sits at the bottom of the viewport, not inside a header bar with room
+   above it. Covers everything the tabbar's 6 fixed tabs don't: the two
+   monetization surfaces (Shop, The Table) and the editorial pillar (The
+   Balcony), plus the same four the desktop dropdown already covers. Theaters
+   is left out — it already has its own tabbar tab. */
+var MORE_SHEET_ITEMS=[
+  {view:'word',label:'The Balcony',icon:'<path d="M4 5h16v13a1 1 0 0 1-1 1H7l-3 3z"/><path d="M7 9h10M7 13h6"/>'},
+  {view:'shop',label:'Shop',icon:'<path d="M6 8V6a4 4 0 0 1 8 0v2"/><path d="M4 8h12l1 12H3z"/>'},
+  {view:'join',label:'The Table',icon:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6"/><path d="M15 14a6 6 0 0 1 6 6"/>'},
+  {view:'soon',label:'Coming Soon',icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>'},
+  {view:'couch',label:'On The Couch',icon:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 3l-5 4-5-4"/>'},
+  {view:'vault',label:'The Vault',icon:'<path d="M4 5h16v14H4z"/><path d="M4 9h16M9 9v10"/>'},
+  {view:'events',label:'Film Events',icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1.4" fill="currentColor" stroke="none"/>'}
+];
+function moreSheetHTML(){
+  var cur=parseHash().view;
+  var rows=MORE_SHEET_ITEMS.map(function(it){
+    return '<a class="more-sheet-row'+(it.view===cur?' active':'')+'" onclick="closeModal();go(\''+it.view+'\')" tabindex="0" onkeydown="if(event.key===\'Enter\'){closeModal();go(\''+it.view+'\')}">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+it.icon+'</svg>'+esc(it.label)+'</a>';
+  }).join('');
+  return '<button class="close" aria-label="Close" onclick="closeModal()">✕</button><h2>More</h2><div class="more-sheet">'+rows+'</div>';
+}
+function openMoreSheet(){ showModal(moreSheetHTML()); }
 function toggleMoreNav(){ if(_moreNavOpen) closeMoreNav(); else openMoreNav(); }
 function openMoreNav(){
   _moreNavOpen=true;
