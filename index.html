@@ -981,7 +981,7 @@
   .lead-dek{color:#D8C9A8;font-size:15.5px;line-height:1.6;margin-top:14px;max-width:52ch}
   .lead-cta{display:inline-block;margin-top:24px;align-self:flex-start}
   @media(prefers-reduced-motion:reduce){ .lead-inner::after{animation:none} }
-  @media(max-width:760px){ .lead-inner{flex-direction:column-reverse;min-height:0} .lead-media{flex:none;width:100%;min-height:220px} .lead-copy{padding:26px 22px} .lead-media::before{background:linear-gradient(180deg,transparent 60%,rgba(26,17,8,.4))} }
+  @media(max-width:760px){ .lead-inner{flex-direction:column-reverse;min-height:0} .lead-media{flex:none;width:100%;min-height:220px} .lead-spindle{flex:none;width:100%;min-height:260px} .lead-copy{padding:26px 22px} .lead-media::before{background:linear-gradient(180deg,transparent 60%,rgba(26,17,8,.4))} }
   @media(max-width:820px){ .word-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .read-hero{height:230px} }
   @media(max-width:520px){ .word-grid{grid-template-columns:1fr} }
   /* HOME ten-years-on spotlight — anniversary stage card (shares emmy chrome) */
@@ -1255,58 +1255,37 @@
   .freedom-wl-cr{font-size:12.5px;color:#0A7A33;font-weight:700;text-decoration:none}
   .freedom-wl-cr:hover{text-decoration:underline}
   @media(max-width:640px){ .freedom{padding:16px 14px} .freedom-h{font-size:21px} .aa-flag{width:52px;height:34px} .freedom-wl-h{font-size:16px} }
-  /* Featured spotlight carousel (home) — same "stage" language as the Emmy
-     carousel (gold sweep, shimmer text, story-bar progress) so the site's
-     two big carousels don't read as two different builds. */
-  .feat-wrap{margin:0 0 22px}
-  .feat-car{position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid rgba(244,197,66,.28);
-    box-shadow:0 14px 36px rgba(0,0,0,.34),0 0 0 1px rgba(244,197,66,.08) inset,0 0 40px rgba(228,155,11,.1);isolation:isolate;
-    -webkit-transform:translateZ(0);transform:translateZ(0)}
-  .feat-car::after{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.13) 10deg,transparent 26deg,transparent 334deg);
-    animation:emmySpin 10s linear infinite;pointer-events:none;mix-blend-mode:screen;z-index:0}
-  .feat-track{position:relative;z-index:1;display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1);will-change:transform}
-  /* Scaled up 2026-07-29 (owner: "make it larger and more grand") — this is
-     the home page's flagship spotlight, so it follows the featured-moment
-     visual bar: one big confident title, a foil-framed poster with a pulsing
-     gold glow, real depth. Sizes are clamp()ed so the grandeur scales down
-     cleanly instead of overwhelming small laptops. */
-  .feat{flex:0 0 100%;position:relative;overflow:hidden;background-color:#0b1420;background-size:cover;background-position:center 26%;display:flex;align-items:stretch;gap:clamp(26px,3.4vw,48px);min-height:clamp(300px,31vw,392px);padding:clamp(30px,3.4vw,48px) clamp(34px,5vw,72px);cursor:pointer}
-  .feat:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
-  .feat-body{flex:1 1 auto;align-self:center;max-width:660px;position:relative;z-index:1}
-  .feat-ey{font-family:var(--mono);font-size:clamp(11px,1.05vw,13px);letter-spacing:.16em;text-transform:uppercase;font-weight:800;display:inline-block;
-    background:linear-gradient(90deg,#a9720b,#f9dd8b,#a9720b);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
-    animation:emmyShine 3s linear infinite}
-  .feat-ttl{font-family:var(--display);font-weight:800;font-size:clamp(38px,4.3vw,58px);line-height:1.01;letter-spacing:-.015em;color:#fff;margin:10px 0 8px;text-shadow:0 3px 26px rgba(0,0,0,.7)}
-  .feat-meta{font-size:clamp(13px,1.1vw,15px);color:rgba(255,255,255,.78);margin-bottom:12px}
-  .feat-syn{font-size:clamp(14.5px,1.2vw,16.5px);line-height:1.55;color:rgba(255,255,255,.93);margin-bottom:20px;max-width:600px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .feat-cta{display:flex;gap:11px;flex-wrap:wrap}
-  .feat-poster{flex:none;width:clamp(168px,15.5vw,224px);align-self:center;border-radius:12px;object-fit:cover;position:relative;z-index:1;
-    box-shadow:0 0 0 1px rgba(244,197,66,.55),0 0 0 6px rgba(14,9,5,.55),0 20px 48px rgba(0,0,0,.62),0 0 34px rgba(228,155,11,.16);
-    animation:featPosterGlow 5.5s ease-in-out infinite}
-  @keyframes featPosterGlow{
-    0%,100%{box-shadow:0 0 0 1px rgba(244,197,66,.45),0 0 0 6px rgba(14,9,5,.55),0 20px 48px rgba(0,0,0,.62),0 0 26px rgba(228,155,11,.12)}
-    50%{box-shadow:0 0 0 1px rgba(244,197,66,.75),0 0 0 6px rgba(14,9,5,.55),0 20px 48px rgba(0,0,0,.62),0 0 46px rgba(228,155,11,.30)}
-  }
-  .feat-arw{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid rgba(244,197,66,.4);background:rgba(12,8,4,.55);color:#fff;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .15s;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-  .feat-arw:hover{background:rgba(244,197,66,.28)}
-  .feat-arw.prev{left:12px}
-  .feat-arw.next{right:12px}
-  .feat-segs{position:absolute;left:16px;right:16px;top:14px;display:flex;gap:5px;z-index:3}
-  .feat-seg{flex:1;height:3px;border:0;padding:0;cursor:pointer;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}
-  .feat-seg i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f4c542,#fff2c2);border-radius:3px}
-  .feat-seg.done i{width:100%}
-  .feat-seg.active i{animation:featSegFill 6.5s linear forwards}
-  @keyframes featSegFill{from{width:0}to{width:100%}}
-  @media (prefers-reduced-motion:reduce){ .feat-car::after,.feat-ey,.feat-seg.active i,.feat-poster{animation:none} }
-  @media (max-width:640px){
-    .feat{flex-direction:column;gap:18px;padding:22px 20px 36px;background-position:center;min-height:0}
-    .feat-ttl{font-size:clamp(27px,7.4vw,34px)}
-    .feat-poster{width:132px;order:-1}
-    .feat-syn{-webkit-line-clamp:4}
-    .feat-arw{width:34px;height:34px;font-size:19px}
-    .feat-arw.prev{left:6px}
-    .feat-arw.next{right:6px}
-  }
+  /* Home lead banner's poster spindle — the carousel that used to run across
+     the top of the page, now a rotating cylinder on the banner's right side
+     (leadSpindleHTML). A real 3D ring: .spindle-ring holds the perspective
+     context, each .spindle-poster is placed by its own rotateY+translateZ,
+     and the ring's own rotateY animation spins the whole thing. */
+  .lead-spindle{position:relative;z-index:1;flex:1 1 53%;min-width:0;min-height:360px;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(120% 90% at 50% 20%,#241708 0%,#0d0703 70%)}
+  .lead-spindle::after{content:'';position:absolute;inset:-60%;pointer-events:none;z-index:0;
+    background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.14) 10deg,transparent 26deg,transparent 334deg);
+    animation:emmySpin 12s linear infinite}
+  .spindle-stage{position:relative;z-index:1;perspective:1100px}
+  .spindle-rod{position:absolute;top:-34px;bottom:-34px;left:50%;width:5px;margin-left:-2.5px;border-radius:3px;
+    background:linear-gradient(180deg,#5c3f16,#F4C542 14%,#5c3f16 50%,#F4C542 86%,#5c3f16);
+    box-shadow:0 0 16px rgba(244,197,66,.55);z-index:0}
+  .spindle-cap{position:absolute;left:50%;width:34px;height:10px;margin-left:-17px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#F7D77A,#A6740F 75%);box-shadow:0 3px 8px rgba(0,0,0,.5);z-index:0}
+  .spindle-cap.top{top:-39px}
+  .spindle-cap.bottom{bottom:-39px}
+  .spindle-ring{position:absolute;top:0;left:0;transform-style:preserve-3d;animation:spindleSpin 28s linear infinite}
+  .spindle-ring.paused{animation-play-state:paused}
+  .spindle-poster{position:absolute;top:0;left:0;border-radius:9px;overflow:hidden;background-size:cover;background-position:center;
+    background-color:#241b12;box-shadow:0 0 0 1px rgba(244,197,66,.35),0 14px 30px rgba(0,0,0,.55);
+    cursor:pointer;transition:box-shadow .2s}
+  .spindle-poster:hover{box-shadow:0 0 0 2px rgba(244,197,66,.9),0 18px 40px rgba(0,0,0,.65)}
+  .spindle-poster span{position:absolute;left:0;right:0;bottom:0;padding:8px 9px 7px;font-family:var(--display);font-weight:800;
+    font-size:12px;line-height:1.2;color:#FBF3DE;background:linear-gradient(0deg,rgba(9,6,3,.92),transparent);
+    text-shadow:0 2px 6px rgba(0,0,0,.6)}
+  @keyframes spindleSpin{ to{ transform:rotateY(360deg); } }
+  @media (prefers-reduced-motion:reduce){ .lead-spindle::after,.spindle-ring{animation:none} }
+  @media (max-width:760px){ .lead-spindle{min-height:260px} }
   @media(max-width:900px){ .art-films{grid-template-columns:repeat(4,minmax(0,1fr))} }
   @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,minmax(0,1fr))} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
   @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
@@ -2133,10 +2112,11 @@
   <section class="view on" data-view="home" aria-label="Home">
     <div class="wrap">
       <div class="hero">
-        <!-- The carousel leads: it's the site's most current, most cinematic unit
-             (real premieres, date-gated, auto-retiring). The Balcony lead story
-             moved down into the dessert tier — it's editorial, not the front door. -->
-        <div id="featuredBanner" class="feat-wrap" style="display:none"></div>
+        <!-- The Balcony's current feature leads the page now, with the
+             carousel's picks folded into it as a spinning poster spindle on
+             its right side (paintLeadStory/leadSpindleHTML) rather than a
+             separate unit competing for the same top-of-page position. -->
+        <section id="leadStory" class="lead-story" style="display:none"></section>
         <div class="hero-top">
           <div>
             <span class="eyebrow">Focus this week</span>
@@ -2207,7 +2187,6 @@
             </div>
           </div>
         </section>
-        <section id="leadStory" class="lead-story" style="display:none"></section>
         <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
@@ -8806,7 +8785,6 @@ var FEATURED=[
   {id:'the-drop-a-snowfall-saga',ey:'Premieres Sep 8 · FX, streams on Hulu',eyLive:'New series · FX, streams on Hulu',premiere:'2026-09-08',until:'2026-10-20'},
   {id:'survival-of-the-thickest',ey:'Final season · Streaming now'}
 ];
-var _featIdx=0,_featTimer=null;
 function featSlides(){
   var out=[],now=Date.now();
   for(var i=0;i<FEATURED.length;i++){ var e=FEATURED[i];
@@ -8817,70 +8795,28 @@ function featSlides(){
   }
   return out;
 }
-/* Same released-vs-coming-soon branch the film page already uses for its
-   own Share button (renderFilm, ~line 8706) — a title still in its Coming
-   Soon window gets the real "COMING SOON" poster card (buildSoonShareCard),
-   never a verdict share card for a film nobody's voted on yet. */
-function featShare(id){
-  var f=find(id); if(!f)return;
-  var soonC=upcomingSoonEntry(f);
-  if(soonC) openShareCardSoon(soonC.id); else openShareCard(f.id);
-}
-function featSlideHTML(f,ey){
-  var bg=f.backdrop||'', poster=(typeof servePoster==='function'?servePoster(f):null)||f.poster||'';
-  var open="go('film','"+f.id+"')";
-  var meta=f.year+' · '+esc(effGenre(f))+' · '+esc(f.rt)+(f.type==='tv'?' · Series':((f.dir&&f.dir!=='—')?' · Dir. '+esc(f.dir):''));
-  return '<div class="feat"'+(bg?' style="background-image:linear-gradient(90deg,rgba(9,6,3,.95),rgba(9,6,3,.6) 55%,rgba(9,6,3,.25)),url(\''+bg+'\')"':'')+
-    ' role="button" tabindex="0" onclick="'+open+'" onkeydown="if(event.key===\'Enter\')'+open+'">'+
-    '<div class="feat-body">'+
-      '<span class="feat-ey">'+esc(ey)+'</span>'+
-      '<h2 class="feat-ttl">'+esc(f.title)+'</h2>'+
-      '<div class="feat-meta">'+meta+'</div>'+
-      '<p class="feat-syn">'+esc(f.syn)+'</p>'+
-      '<div class="feat-cta"><span class="btn btn-gold btn-sm">'+(f.type==='tv'?'See the show →':'See the film →')+'</span>'+
-        (f.trailer?'<button class="btn btn-ghost btn-sm light" onclick="event.stopPropagation();openTrailer(\''+f.id+'\')">▶ Trailer</button>':'')+
-        '<button class="btn btn-ghost btn-sm light" onclick="event.stopPropagation();featShare(\''+f.id+'\')">Share ↗</button>'+
-      '</div>'+
-    '</div>'+
-    (poster?'<img class="feat-poster" src="'+poster+'" alt="'+esc(f.title)+' poster" loading="lazy">':'')+
+/* The old top-of-page horizontal carousel is now a rotating "spindle" of the
+   same picks, folded into the home lead banner's right side (paintLeadStory)
+   instead of competing with it for the top of the page. A real 3D cylinder,
+   not a metaphor: each poster is placed around a circle via rotateY+translateZ
+   on a shared center, then the whole ring spins. Geometry only, so it can't
+   drift out of round regardless of how many slides FEATURED carries. */
+function leadSpindleHTML(){
+  var slides=featSlides(); if(!slides.length) return '';
+  var n=slides.length, w=148, h=208;
+  var radius=Math.round((w/2)/Math.tan(Math.PI/n))+16;
+  var posters=slides.map(function(s,i){
+    var f=s.f, ang=Math.round((360/n)*i);
+    var art=f.poster?'background-image:url(\''+f.poster+'\')':(f.grad?'background:'+f.grad:'');
+    return '<div class="spindle-poster" style="width:'+w+'px;height:'+h+'px;'+art+';transform:rotateY('+ang+'deg) translateZ('+radius+'px)" onclick="go(\'film\',\''+f.id+'\')" title="'+esc(f.title)+'"><span>'+esc(f.title)+'</span></div>';
+  }).join('');
+  return '<div class="spindle-stage" style="width:'+w+'px;height:'+h+'px">'+
+    '<span class="spindle-cap top"></span><span class="spindle-cap bottom"></span><span class="spindle-rod"></span>'+
+    '<div class="spindle-ring" id="leadSpindleRing" style="width:'+w+'px;height:'+h+'px">'+posters+'</div>'+
   '</div>';
 }
-function featSegHTML(slides){
-  return '<div class="feat-segs">'+slides.map(function(_,j){
-    var cls=j<_featIdx?'done':(j===_featIdx?'active':'');
-    return '<button class="feat-seg'+(cls?' '+cls:'')+'" aria-label="Slide '+(j+1)+'" onclick="featSet('+j+')"><i></i></button>';
-  }).join('')+'</div>';
-}
-function paintFeatured(){
-  var el=byId('featuredBanner'); if(!el) return;
-  var slides=featSlides();
-  if(!slides.length){ el.style.display='none'; return; }
-  el.style.display='';
-  if(_featIdx>=slides.length) _featIdx=0;
-  var single=slides.length<2;
-  var html='<div class="feat-car"'+(single?'':' onmouseenter="featPause()" onmouseleave="featPlay()"')+'>'+
-    (single?'':featSegHTML(slides))+
-    '<div class="feat-track">';
-  for(var i=0;i<slides.length;i++){ html+=featSlideHTML(slides[i].f,slides[i].ey); }
-  html+='</div>';
-  if(!single){
-    html+='<button class="feat-arw prev" aria-label="Previous" onclick="featGo(-1)">‹</button>'+
-      '<button class="feat-arw next" aria-label="Next" onclick="featGo(1)">›</button>';
-  }
-  html+='</div>';
-  el.innerHTML=html;
-  featApply();
-  if(!single) featPlay();
-}
-function featApply(){
-  var el=byId('featuredBanner'); if(!el)return;
-  var track=el.querySelector('.feat-track'); if(track) track.style.transform='translateX(-'+(_featIdx*100)+'%)';
-  var segs=el.querySelector('.feat-segs'); if(segs) segs.outerHTML=featSegHTML(featSlides());
-}
-function featSet(i){ var n=featSlides().length; if(!n)return; _featIdx=((i%n)+n)%n; featApply(); featPlay(); }
-function featGo(d){ featSet(_featIdx+d); }
-function featPlay(){ featPause(); if(featSlides().length<2)return; _featTimer=setInterval(function(){ featGo(1); },6500); }
-function featPause(){ if(_featTimer){ clearInterval(_featTimer); _featTimer=null; } }
+function spindlePause(){ var r=byId('leadSpindleRing'); if(r) r.classList.add('paused'); }
+function spindleResume(){ var r=byId('leadSpindleRing'); if(r) r.classList.remove('paused'); }
 /* The real, browsable catalog size — excludes any noart placeholder (e.g. the
    old [Sample Film] tier demo) so the number matches what a visitor can actually
    find in Browse/search/shelves. Never a hand-maintained figure that can drift. */
@@ -8890,32 +8826,39 @@ function paintCatalogCount(){
   var el=byId('catalogCount'); if(!el)return;
   el.innerHTML='<b>'+fmt(catalogCount())+'</b><span>Films &amp; shows, and counting</span>';
 }
-/* Home lead story — a dark cinematic banner promoting the current cover
-   feature in The Balcony (replaced the 2026 Emmy nominations unit). Baked
-   promo content so it shows regardless of DB state; the card opens the real
-   article. Update these four fields when a new piece should lead the home. */
+/* Home lead banner — the Balcony's current cover feature, now paired with a
+   rotating spindle of the site's featured-moment picks on its right side
+   (leadSpindleHTML — see the note above it) instead of a flat article photo.
+   The carousel that used to lead the page moved here as the supporting
+   visual; the story leads. Falls back to the article's own photo only when
+   there's nothing in FEATURED to spin. Baked promo content so it shows
+   regardless of DB state; the card opens the real article. Update these
+   four fields when a new piece should lead the home. */
 var LEAD_STORY={
-  slug:'the-count-was-never-neutral',
-  eyebrow:'The Balcony · Why We Built This',
-  title:'The Count Was Never Neutral',
-  dek:'Hollywood budgets our films a quarter less, hands them to a critic pool that is 82% white, and calls the smaller return proof. This is why we built a different scale.',
-  image:'/word/the-count-was-never-neutral.jpg'
+  slug:'the-long-way-to-the-lantern',
+  eyebrow:'The Balcony · Feature',
+  title:'The Long Way to the Lantern',
+  dek:'He got his break because another actor walked off a film. Three years and two inherited legacies later, a studio is building its next universe around him anyway.',
+  image:'/word/the-long-way-to-the-lantern.jpg'
 };
 function paintLeadStory(){
   var s=byId('leadStory'); if(!s)return;
   var a=LEAD_STORY; if(!a||!a.slug){ s.style.display='none'; return; }
   s.style.display='';
+  var spindle=leadSpindleHTML();
   s.innerHTML='<a class="lead-inner" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+
     '<div class="lead-copy"><span class="lead-eyebrow">'+esc(a.eyebrow)+'</span>'+
     '<h2 class="lead-h">'+esc(a.title)+'</h2>'+
     '<p class="lead-dek">'+esc(a.dek)+'</p>'+
     '<span class="btn btn-gold lead-cta">Read the story →</span></div>'+
-    '<div class="lead-media" style="background-image:url(\''+esc(a.image)+'\')"></div></a>';
+    (spindle
+      ? '<div class="lead-spindle" onmouseenter="spindlePause()" onmouseleave="spindleResume()" onclick="event.stopPropagation()">'+spindle+'</div>'
+      : '<div class="lead-media" style="background-image:url(\''+esc(a.image)+'\')"></div>')+
+  '</a>';
 }
 function renderHome(){
   paintCatalogCount();
   paintLeadStory();
-  paintFeatured();
   paintFreedom();
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
     .filter(function(id,i,a){return a.indexOf(id)===i;})

@@ -4107,3 +4107,60 @@ than working from memory, and caught two real errors in the first pass:
   home page banner) was deliberately left pointing at "The Count Was Never
   Neutral" — that swap wasn't asked for this time, flagging it as an easy
   follow-up if the owner wants this piece leading home too.
+
+## Home lead swaps to "The Long Way to the Lantern" + carousel becomes a spinning poster spindle (2026-08-06)
+Owner: "The balcony article on the homepage needs to be rotated. The new
+article should replace the current banner carousel. That carousel should
+drop to a cylinder spindal on the right side of empty space. Can we do that
+in an artistic way?"
+
+- **`LEAD_STORY` updated** to the just-published Aaron Pierre feature
+  (`the-long-way-to-the-lantern`) — the "rotate" the owner asked for.
+- **The home lead banner and the FEATURED carousel traded places and merged.**
+  The carousel (`#featuredBanner`, a horizontal slideshow) used to lead the
+  entire page, with the Balcony banner (`#leadStory`) demoted into the
+  dessert tier below the film grid. Now `#leadStory` leads the page, and the
+  carousel's picks (`featSlides()` — unchanged data source, still the real
+  `FEATURED` array with its date-gated `until`/`premiere` logic) got folded
+  into the banner's own right side as a **real 3D rotating spindle** —
+  literally a cylinder, not a metaphor: each poster is placed around a
+  circle via `rotateY(angle) translateZ(radius)` off a shared center
+  (`leadSpindleHTML()`, radius computed from poster width + slide count so
+  it can't drift out of round regardless of how many titles are in
+  `FEATURED`), and the whole ring spins via one `rotateY(0→360deg)`
+  animation on the parent — the standard, robust CSS-3D-carousel technique,
+  not a fragile from-scratch build. A gold spindle rod + end caps run
+  through the vertical center for the literal "spindle" read the owner
+  asked for.
+- Clicking a poster goes straight to that film (`go('film',id)`); clicking
+  the banner's copy side still opens the Balcony article — the spindle
+  wrapper calls `event.stopPropagation()` so poster/empty-space clicks never
+  also fire the outer article link, same pattern already used across the
+  site (e.g. `quickVote`'s `stopPropagation` inside a clickable card).
+  Hovering the spindle pauses the rotation (`spindlePause`/`spindleResume`
+  toggle a `.paused` class → `animation-play-state:paused`) so a visitor can
+  actually read a title before it spins past.
+- **Old carousel fully retired, not left as dead code**: removed
+  `#featuredBanner`'s markup + `.feat-car`/`.feat-track`/`.feat-arw`/
+  `.feat-seg`/`.feat-poster` CSS and their JS (`paintFeatured`, `featApply`,
+  `featSet`, `featGo`, `featPlay`, `featPause`, `featSegHTML`,
+  `featSlideHTML`, `featShare`, `_featIdx`, `_featTimer`) — this was pure
+  rendering plumbing for a UI treatment being replaced, not a content
+  feature, so it didn't warrant the site's usual unwire-don't-delete
+  convention. `featSlides()` itself (the data-selection function) is
+  untouched and now feeds the spindle instead. `.feat-quote`/`.feat-tag`
+  (an unrelated, differently-named component) were left alone — checked
+  before deleting anything with a `feat-` prefix.
+- Mobile: `.lead-spindle` gets the same `flex:none;width:100%` stacking
+  treatment `.lead-media` already had at ≤760px, so it sits above the copy
+  as its own full-width band rather than being squeezed to nothing.
+  `prefers-reduced-motion` freezes both the spindle's spin and its ambient
+  gold sweep, matching every other spotlight unit on the site.
+- Verified in headless Chromium: `#featuredBanner` gone, `#leadStory` is now
+  the first element in `.hero`, spindle renders one poster per live
+  `FEATURED` slide, clicking a poster routes to that film (not the article),
+  clicking the copy routes to the article, hover pauses/resumes rotation,
+  screenshots confirm real 3D depth (posters at different angles show
+  correct foreshortening) on both desktop and mobile (stacks correctly).
+  Full 19-route × 3-viewport (incl. 1920px) regression sweep clean — zero
+  console errors, zero horizontal overflow.
