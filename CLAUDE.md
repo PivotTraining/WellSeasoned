@@ -4228,3 +4228,15 @@ description as republished by vitalthrills.com (real outlet, byline dated
   Chromium: catalog + Coming Soon entries resolve, film page renders real
   cast/crew, the coming badge, the hype vote, and the premiere hook with zero
   verdict buttons, zero fabricated trailer button, zero console errors.
+
+## The Varnell Hill Show added to the home marquee rotation (2026-08-06)
+Owner: "add it in rotation with the Aaron Pierre article" — i.e. into
+`FEATURED`, the same rotation feeding the home spindle rail beside the vote
+widget. Added with the same date-gated pattern as every other premiere in
+the array: `ey:'A Martin spinoff · Premieres Sep 1 · Paramount+'` →
+`eyLive:'New series · Paramount+'` on the day, `until:'2026-10-15'` to
+auto-retire. Since it has no poster (`nopo:true`, no true poster art exists
+yet — see the prior entry), its spindle poster face falls back to the
+gradient + title treatment, same as any other artless title. Verified in
+headless Chromium: `featSlides()` returns it 7th of 8 real slides with the
+correct eyebrow copy, spindle renders it correctly, zero console errors.
