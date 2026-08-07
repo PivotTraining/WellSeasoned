@@ -967,8 +967,8 @@
   @media(max-width:640px){ .read-pq{font-size:22px;padding-left:18px;margin:24px 0} }
   /* HOME lead story — a dark cinematic banner promoting the cover feature */
   .lead-story{margin:0 0 26px}
-  .lead-inner{position:relative;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--r-xl);
-    background:linear-gradient(150deg,#241809,#110a04);box-shadow:0 30px 70px rgba(0,0,0,.5);cursor:pointer;color:inherit;min-height:360px;
+  .lead-inner{position:relative;overflow:hidden;border-radius:var(--r-xl);
+    background:linear-gradient(150deg,#241809,#110a04);box-shadow:0 30px 70px rgba(0,0,0,.5);min-height:360px;
     -webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate}
   .lead-inner::after{content:"";position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;
     background:conic-gradient(from 0deg,transparent 0 78%,rgba(244,197,66,.12) 87%,transparent 95%);animation:emmySpinCenter 16s linear infinite}
@@ -981,7 +981,7 @@
   .lead-dek{color:#D8C9A8;font-size:15.5px;line-height:1.6;margin-top:14px;max-width:52ch}
   .lead-cta{display:inline-block;margin-top:24px;align-self:flex-start}
   @media(prefers-reduced-motion:reduce){ .lead-inner::after{animation:none} }
-  @media(max-width:760px){ .lead-inner{flex-direction:column-reverse;min-height:0} .lead-media{flex:none;width:100%;min-height:220px} .lead-copy{padding:26px 22px} .lead-media::before{background:linear-gradient(180deg,transparent 60%,rgba(26,17,8,.4))} }
+  @media(max-width:760px){ .lead-inner{min-height:0} .lead-track{min-height:460px} .lead-slide{flex-direction:column-reverse} .lead-media{flex:none;width:100%;min-height:220px} .lead-copy{padding:26px 22px} .lead-media::before{background:linear-gradient(180deg,transparent 60%,rgba(26,17,8,.4))} }
   @media(max-width:820px){ .word-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .read-hero{height:230px} }
   @media(max-width:520px){ .word-grid{grid-template-columns:1fr} }
   /* HOME ten-years-on spotlight — anniversary stage card (shares emmy chrome) */
@@ -1255,45 +1255,25 @@
   .freedom-wl-cr{font-size:12.5px;color:#0A7A33;font-weight:700;text-decoration:none}
   .freedom-wl-cr:hover{text-decoration:underline}
   @media(max-width:640px){ .freedom{padding:16px 14px} .freedom-h{font-size:21px} .aa-flag{width:52px;height:34px} .freedom-wl-h{font-size:16px} }
-  /* The carousel that used to run across the top of the page is now a
-     rotating cylinder of poster art in a tall, slim "marquee" rail
-     (side-spindle) that sits beside the home vote widget — its own unit,
-     not folded into the Balcony lead banner. Real 3D ring: .spindle-ring
-     holds the perspective context, each .spindle-poster is placed by its
-     own rotateY+translateZ, the ring's own rotateY animation spins it. */
-  .vote-row{display:flex;align-items:stretch;gap:16px;margin-bottom:22px}
-  .vote-row .teach{flex:1 1 auto;min-width:0;margin-bottom:0}
-  .side-spindle{position:relative;z-index:1;flex:0 0 200px;min-width:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
-    border-radius:var(--r-lg);padding:20px 0;gap:14px;box-shadow:var(--shadow-2);
-    background:radial-gradient(120% 90% at 50% 20%,#241708 0%,#0d0703 70%)}
-  .side-spindle::after{content:'';position:absolute;inset:-60%;pointer-events:none;z-index:0;
-    background:conic-gradient(from 0deg,transparent 0deg,rgba(255,224,150,.14) 10deg,transparent 26deg,transparent 334deg);
-    animation:emmySpin 12s linear infinite}
-  .side-spindle-ey{position:relative;z-index:2;font-family:var(--mono);font-size:10px;font-weight:700;
-    letter-spacing:.16em;text-transform:uppercase;text-align:center;
-    background:linear-gradient(90deg,#a9720b,#f9dd8b 45%,#f4c542);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .spindle-stage{position:relative;z-index:1;perspective:1100px}
-  .spindle-rod{position:absolute;top:-34px;bottom:-34px;left:50%;width:5px;margin-left:-2.5px;border-radius:3px;
-    background:linear-gradient(180deg,#5c3f16,#F4C542 14%,#5c3f16 50%,#F4C542 86%,#5c3f16);
-    box-shadow:0 0 16px rgba(244,197,66,.55);z-index:0}
-  .spindle-cap{position:absolute;left:50%;width:34px;height:10px;margin-left:-17px;border-radius:50%;
-    background:radial-gradient(circle at 35% 35%,#F7D77A,#A6740F 75%);box-shadow:0 3px 8px rgba(0,0,0,.5);z-index:0}
-  .spindle-cap.top{top:-39px}
-  .spindle-cap.bottom{bottom:-39px}
-  .spindle-ring{position:absolute;top:0;left:0;transform-style:preserve-3d;animation:spindleSpin 28s linear infinite}
-  .spindle-ring.paused{animation-play-state:paused}
-  .spindle-poster{position:absolute;top:0;left:0;border-radius:9px;overflow:hidden;background-size:cover;background-position:center;
-    background-color:#241b12;box-shadow:0 0 0 1px rgba(244,197,66,.35),0 14px 30px rgba(0,0,0,.55);
-    cursor:pointer;transition:box-shadow .2s}
-  .spindle-poster:hover{box-shadow:0 0 0 2px rgba(244,197,66,.9),0 18px 40px rgba(0,0,0,.65)}
-  .spindle-poster span{position:absolute;left:0;right:0;bottom:0;padding:8px 9px 7px;font-family:var(--display);font-weight:800;
-    font-size:12px;line-height:1.2;color:#FBF3DE;background:linear-gradient(0deg,rgba(9,6,3,.92),transparent);
-    text-shadow:0 2px 6px rgba(0,0,0,.6)}
-  @keyframes spindleSpin{ to{ transform:rotateY(360deg); } }
-  @media (prefers-reduced-motion:reduce){ .side-spindle::after,.spindle-ring{animation:none} }
-  @media (max-width:900px){ .side-spindle{flex-basis:160px} }
-  @media (max-width:760px){ .vote-row{flex-direction:column} .side-spindle{width:100%;min-height:230px} }
+  /* The home lead banner rotates through the Balcony's current feature plus
+     the real FEATURED picks — one auto-advancing carousel instead of a
+     separate spindle unit. .lead-track stacks every .lead-slide absolutely
+     inset:0 and crossfades opacity on .on; each slide keeps the same
+     .lead-copy/.lead-media split layout the standalone banner used. */
+  .lead-track{position:relative;width:100%;min-height:360px}
+  .lead-slide{position:absolute;inset:0;z-index:1;display:flex;align-items:stretch;
+    opacity:0;pointer-events:none;transition:opacity .6s ease;cursor:pointer;color:inherit}
+  .lead-slide.on{opacity:1;pointer-events:auto;z-index:2}
+  @media(prefers-reduced-motion:reduce){ .lead-slide{transition:none} }
+  .lead-arw{position:absolute;top:50%;z-index:3;width:38px;height:38px;margin-top:-19px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;background:rgba(15,10,5,.55);color:#F4ECD8;
+    border:1px solid rgba(244,197,66,.3);backdrop-filter:blur(2px);transition:background .2s}
+  .lead-arw:hover{background:rgba(15,10,5,.8)}
+  .lead-arw svg{width:19px;height:19px}
+  .lead-arw.prev{left:14px}
+  .lead-arw.next{right:14px}
+  .lead-segs{position:absolute;left:18px;right:18px;bottom:16px;z-index:3}
+  @media(max-width:760px){ .lead-arw{display:none} .lead-segs{left:14px;right:14px;bottom:10px} }
   @media(max-width:900px){ .art-films{grid-template-columns:repeat(4,minmax(0,1fr))} }
   @media(max-width:560px){ .art-films{grid-template-columns:repeat(3,minmax(0,1fr))} .artist-photo{width:104px;height:104px} .artist-hero{gap:16px} }
   @media(max-width:640px){ .room-hero{flex-direction:column;align-items:flex-start;gap:16px;padding:18px} .room-backdrop{min-height:300px} .room-poster{width:118px} .cast-card{width:84px} .cast-av{width:68px;height:68px} }
@@ -2120,10 +2100,9 @@
   <section class="view on" data-view="home" aria-label="Home">
     <div class="wrap">
       <div class="hero">
-        <!-- The Balcony's current feature leads the page as its own standalone
-             hero banner (paintLeadStory). The carousel's picks live separately,
-             as a rotating poster spindle beside the vote widget below
-             (#sideSpindle/paintSideSpindle). -->
+        <!-- The Balcony's current feature leads the page, rotating in with the
+             carousel's real picks (paintLeadStory/leadSlides) — one banner,
+             auto-advancing, instead of a separate spindle unit. -->
         <section id="leadStory" class="lead-story" style="display:none"></section>
         <div class="hero-top">
           <div>
@@ -2161,20 +2140,14 @@
           </div>
         </section>
         <div id="homeScope" class="scope-wrap"></div>
-        <div class="vote-row">
-          <div class="teach">
-            <div class="teach-vote" id="teachVote"></div>
-            <div class="teach-explain">
-              <div class="teach-verdict2" id="teachVerdict"></div>
-              <p><b>How to read a score.</b> The Kitchen number comes from verified critics of the culture. The Table number is the audience. When they agree, it earns the seal. When they split, that gap tells you something.</p>
-              <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
-              <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
-            </div>
+        <div class="teach">
+          <div class="teach-vote" id="teachVote"></div>
+          <div class="teach-explain">
+            <div class="teach-verdict2" id="teachVerdict"></div>
+            <p><b>How to read a score.</b> The Kitchen number comes from verified critics of the culture. The Table number is the audience. When they agree, it earns the seal. When they split, that gap tells you something.</p>
+            <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
+            <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
           </div>
-          <!-- The old top carousel, now a tall slim rotating "marquee" rail
-               beside the vote widget (paintSideSpindle/leadSpindleHTML) —
-               its own unit, separate from the Balcony lead banner above. -->
-          <div id="sideSpindle" class="side-spindle" style="display:none" onmouseenter="spindlePause()" onmouseleave="spindleResume()"></div>
         </div>
         <!-- The review act comes first: this week's ballot, then the films. The site
              is a film & TV review platform — voting + the catalog lead; games and
@@ -8832,36 +8805,6 @@ function featSlides(){
   }
   return out;
 }
-/* The old top-of-page horizontal carousel is now a rotating "spindle" of the
-   same picks, living in its own tall/slim marquee rail beside the home vote
-   widget (paintSideSpindle) rather than folded into the Balcony lead banner.
-   A real 3D cylinder, not a metaphor: each poster is placed around a circle
-   via rotateY+translateZ on a shared center, then the whole ring spins.
-   Geometry only, so it can't drift out of round regardless of how many
-   slides FEATURED carries. */
-function leadSpindleHTML(){
-  var slides=featSlides(); if(!slides.length) return '';
-  var n=slides.length, w=112, h=248;
-  var radius=Math.round((w/2)/Math.tan(Math.PI/n))+14;
-  var posters=slides.map(function(s,i){
-    var f=s.f, ang=Math.round((360/n)*i);
-    var art=f.poster?'background-image:url(\''+f.poster+'\')':(f.grad?'background:'+f.grad:'');
-    return '<div class="spindle-poster" style="width:'+w+'px;height:'+h+'px;'+art+';transform:rotateY('+ang+'deg) translateZ('+radius+'px)" onclick="go(\'film\',\''+f.id+'\')" title="'+esc(f.title)+'"><span>'+esc(f.title)+'</span></div>';
-  }).join('');
-  return '<div class="spindle-stage" style="width:'+w+'px;height:'+h+'px">'+
-    '<span class="spindle-cap top"></span><span class="spindle-cap bottom"></span><span class="spindle-rod"></span>'+
-    '<div class="spindle-ring" id="sideSpindleRing" style="width:'+w+'px;height:'+h+'px">'+posters+'</div>'+
-  '</div>';
-}
-function spindlePause(){ var r=byId('sideSpindleRing'); if(r) r.classList.add('paused'); }
-function spindleResume(){ var r=byId('sideSpindleRing'); if(r) r.classList.remove('paused'); }
-function paintSideSpindle(){
-  var s=byId('sideSpindle'); if(!s)return;
-  var spindle=leadSpindleHTML();
-  if(!spindle){ s.style.display='none'; return; }
-  s.style.display='';
-  s.innerHTML='<span class="side-spindle-ey">On the marquee</span>'+spindle;
-}
 /* The real, browsable catalog size — excludes any noart placeholder (e.g. the
    old [Sample Film] tier demo) so the number matches what a visitor can actually
    find in Browse/search/shelves. Never a hand-maintained figure that can drift. */
@@ -8871,14 +8814,13 @@ function paintCatalogCount(){
   var el=byId('catalogCount'); if(!el)return;
   el.innerHTML='<b>'+fmt(catalogCount())+'</b><span>Films &amp; shows, and counting</span>';
 }
-/* Home lead banner — the Balcony's current cover feature, now paired with a
-   rotating spindle of the site's featured-moment picks on its right side
-   (leadSpindleHTML — see the note above it) instead of a flat article photo.
-   The carousel that used to lead the page moved here as the supporting
-   visual; the story leads. Falls back to the article's own photo only when
-   there's nothing in FEATURED to spin. Baked promo content so it shows
-   regardless of DB state; the card opens the real article. Update these
-   four fields when a new piece should lead the home. */
+/* Home lead banner — the Balcony's current cover feature rotating in with the
+   real FEATURED picks, one auto-advancing carousel instead of a separate
+   spindle unit. Slide 0 is always the Balcony piece; the rest are
+   featSlides()'s real, date-gated titles. Each slide keeps the same dark
+   split-panel look (.lead-copy/.lead-media); a segmented progress bar
+   (reusing the Emmy carousel's .emmy-car-seg pattern) and prev/next arrows
+   sit on top. Baked promo content so slide 0 shows regardless of DB state. */
 var LEAD_STORY={
   slug:'the-long-way-to-the-lantern',
   eyebrow:'The Balcony · Feature',
@@ -8886,18 +8828,79 @@ var LEAD_STORY={
   dek:'He got his break because another actor walked off a film. Three years and two inherited legacies later, a studio is building its next universe around him anyway.',
   image:'/word/the-long-way-to-the-lantern.jpg'
 };
+var _leadSlides=[], _leadIdx=0, _leadTimer=null;
+var LEAD_ROT_MS=6500;
+function leadSlides(){
+  var out=[];
+  if(LEAD_STORY && LEAD_STORY.slug) out.push({type:'article',data:LEAD_STORY});
+  featSlides().forEach(function(s){ out.push({type:'film',data:s}); });
+  return out;
+}
+function leadSlideHTML(s,active){
+  if(s.type==='article'){
+    var a=s.data;
+    return '<div class="lead-slide'+(active?' on':'')+'" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+
+      '<div class="lead-copy"><span class="lead-eyebrow">'+esc(a.eyebrow)+'</span>'+
+      '<h2 class="lead-h">'+esc(a.title)+'</h2>'+
+      '<p class="lead-dek">'+esc(a.dek)+'</p>'+
+      '<span class="btn btn-gold lead-cta">Read the story →</span></div>'+
+      '<div class="lead-media" style="background-image:url(\''+esc(a.image)+'\')"></div>'+
+    '</div>';
+  }
+  var f=s.data.f, ey=s.data.ey;
+  var img=f.backdrop||f.poster||'';
+  var media=img?('background-image:url(\''+esc(img)+'\')'):('background:'+(f.grad||'#1a1108'));
+  var syn=(f.syn||'').slice(0,150); if(f.syn&&f.syn.length>150) syn+='…';
+  return '<div class="lead-slide'+(active?' on':'')+'" onclick="go(\'film\',\''+f.id+'\')">'+
+    '<div class="lead-copy"><span class="lead-eyebrow">'+esc(ey)+'</span>'+
+    '<h2 class="lead-h">'+esc(f.title)+'</h2>'+
+    '<p class="lead-dek">'+esc(syn)+'</p>'+
+    '<span class="btn btn-gold lead-cta">See it →</span></div>'+
+    '<div class="lead-media" style="'+media+'"></div>'+
+  '</div>';
+}
 function paintLeadStory(){
   var s=byId('leadStory'); if(!s)return;
-  var a=LEAD_STORY; if(!a||!a.slug){ s.style.display='none'; return; }
+  var slides=leadSlides();
+  if(!slides.length){ s.style.display='none'; return; }
   s.style.display='';
-  s.innerHTML='<a class="lead-inner" onclick="go(\'read\',\''+esc(a.slug)+'\')">'+
-    '<div class="lead-copy"><span class="lead-eyebrow">'+esc(a.eyebrow)+'</span>'+
-    '<h2 class="lead-h">'+esc(a.title)+'</h2>'+
-    '<p class="lead-dek">'+esc(a.dek)+'</p>'+
-    '<span class="btn btn-gold lead-cta">Read the story →</span></div>'+
-    '<div class="lead-media" style="background-image:url(\''+esc(a.image)+'\')"></div>'+
-  '</a>';
+  _leadSlides=slides; if(_leadIdx>=slides.length) _leadIdx=0;
+  var segs=slides.length>1
+    ? '<div class="emmy-car-segs lead-segs">'+slides.map(function(sl,i){
+        return '<button class="emmy-car-seg'+(i<_leadIdx?' done':(i===_leadIdx?' active':''))+'" onclick="event.stopPropagation();leadGoTo('+i+')" aria-label="Slide '+(i+1)+'"><i></i></button>';
+      }).join('')+'</div>'
+    : '';
+  var arrows=slides.length>1
+    ? '<button class="lead-arw prev" onclick="event.stopPropagation();leadStep(-1)" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>'+
+      '<button class="lead-arw next" onclick="event.stopPropagation();leadStep(1)" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>'
+    : '';
+  s.innerHTML='<div class="lead-inner" onmouseenter="leadPause()" onmouseleave="leadResume()">'+
+    '<div class="lead-track">'+slides.map(function(sl,i){ return leadSlideHTML(sl,i===_leadIdx); }).join('')+'</div>'+
+    segs+arrows+
+  '</div>';
+  leadArm();
 }
+function leadApply(){
+  var track=document.querySelector('#leadStory .lead-track'); if(!track)return;
+  var kids=track.children;
+  for(var i=0;i<kids.length;i++) kids[i].className='lead-slide'+(i===_leadIdx?' on':'');
+  var segEls=document.querySelectorAll('#leadStory .emmy-car-seg');
+  for(var j=0;j<segEls.length;j++) segEls[j].className='emmy-car-seg'+(j<_leadIdx?' done':(j===_leadIdx?' active':''));
+}
+function leadGoTo(i){ _leadIdx=i; leadApply(); leadArm(); }
+function leadStep(d){
+  if(!_leadSlides.length) return;
+  _leadIdx=(_leadIdx+d+_leadSlides.length)%_leadSlides.length;
+  leadApply(); leadArm();
+}
+function leadArm(){
+  if(_leadTimer){ clearTimeout(_leadTimer); _leadTimer=null; }
+  if(_leadSlides.length<2) return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  _leadTimer=setTimeout(function(){ leadStep(1); },LEAD_ROT_MS);
+}
+function leadPause(){ if(_leadTimer){ clearTimeout(_leadTimer); _leadTimer=null; } }
+function leadResume(){ leadArm(); }
 function renderHome(){
   paintCatalogCount();
   paintLeadStory();
@@ -8934,7 +8937,6 @@ function renderHome(){
   paintTrivia();
   paintWeekTable();
   paintVoteBar();
-  paintSideSpindle();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+

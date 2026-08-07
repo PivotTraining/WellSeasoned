@@ -4266,3 +4266,48 @@ noted on Diarra from Detroit).
   Chromium: real poster/backdrop resolve, not in the `FEATURED` carousel,
   not gated as unreleased, full verdict-vote panel renders (not the hype
   vote), real cast/crew, zero console errors.
+
+## Spindle retired — the top banner now rotates through the Balcony piece + FEATURED (2026-08-07)
+Owner: "take the spindle down and put it in rotation of the banner at the
+top." Reversed the prior split (side-spindle beside the vote widget) back
+into one unit — but not the original merged-into-one-banner version either;
+now the top `#leadStory` banner itself is a real auto-advancing carousel
+whose slides are the Balcony piece (always slide 0) plus every real
+`featSlides()` pick, instead of a static article + a separate spindle.
+- **Markup/CSS**: `.lead-track` stacks each `.lead-slide` absolutely
+  (`inset:0`), crossfading opacity on `.on` (0.6s, respects
+  `prefers-reduced-motion` by skipping the transition). Each slide keeps the
+  same `.lead-copy`/`.lead-media` split layout the standalone banner used —
+  `.lead-inner` itself no longer needs `display:flex`, since that moved onto
+  `.lead-slide`. Segmented progress bar reuses the (previously dead) Emmy
+  carousel's `.emmy-car-seg`/`emmySegFill` CSS instead of duplicating it;
+  added simple prev/next arrow buttons (`.lead-arw`, hidden < 760px, segments
+  stay). The dark stage background + gold spotlight sweep
+  (`.lead-inner::after`, `emmySpinCenter`) live on the container, so it
+  doesn't restart per slide swap.
+- **JS**: `leadSlides()` = `[{type:'article',data:LEAD_STORY}].concat(
+  featSlides())`; `leadSlideHTML()` branches film vs. article (film slides
+  use the real backdrop/poster/grad + a trimmed synopsis, "See it →" CTA
+  routing to `go('film',id)`; the article slide is unchanged, routes to
+  `go('read',slug)`). `leadArm()`/`leadStep()`/`leadGoTo()`/`leadPause()`/
+  `leadResume()` (hover pauses, same as every other auto-rotating unit on
+  the site) replace `leadSpindleHTML`/`spindlePause`/`spindleResume`/
+  `paintSideSpindle`, all fully removed (not left as dead code — this was
+  pure rendering plumbing, not a content feature, same call made when the
+  original carousel was retired). `renderHome()` no longer calls
+  `paintSideSpindle()`.
+- **Markup**: `#sideSpindle` and the `.vote-row` wrapper around `.teach`
+  removed — the vote widget goes back to full width, matching how it looked
+  before the spindle experiment (note: `.vote-row` as a class name was
+  already independently used by the pre-existing You-page verdicts-list
+  component; reusing it for the home wrapper was an unrelated naming
+  collision that's now moot since the wrapper is gone).
+- Verified in headless Chromium: 9 slides (1 article + 8 real FEATURED
+  titles), 9 segments, arrows present, clicking a segment/arrow navigates
+  correctly (confirmed segment 0 always returns to "The Long Way to the
+  Lantern"), the vote widget is full-width with no side box, zero horizontal
+  overflow at 360/390/768/1280/1920px, zero console errors. (A very early
+  automated check showed the auto-timer already a few slides in — traced to
+  slow blocked-resource retries inflating real wall-clock time during page
+  load in this sandbox, not a code bug; manual navigation and settled-state
+  screenshots both confirm the crossfade and slide content are correct.)
