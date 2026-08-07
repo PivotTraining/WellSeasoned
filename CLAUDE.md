@@ -4240,3 +4240,29 @@ yet — see the prior entry), its spindle poster face falls back to the
 gradient + title treatment, same as any other artless title. Verified in
 headless Chromium: `featSlides()` returns it 7th of 8 real slides with the
 correct eyebrow copy, spindle renders it correctly, zero console errors.
+
+## Average Joe added to the catalog (2026-08-07)
+Owner: "Push 'The Average Joe' on the site with the other shows as well not
+a marquee show." Verified via TMDB (id 228421) + Wikipedia before adding:
+**Average Joe** is a real BET+/Paramount+ dark comedy-crime series, created
+by Robb Cullen, Deon Cole leads as Joe Washington (a plumber who learns his
+late father stole millions from the Russian mafia). Season 1 aired 2023 on
+BET+ and is already real, watchable content; Season 2 premieres Aug 19, 2026
+on Paramount+ (BET+ folding into Paramount+, same platform shift already
+noted on Diarra from Detroit).
+- Added as a **normal FILMS entry** (`average-joe-2023`, type:'tv'), NOT to
+  `COMING_SOON` and NOT to `FEATURED` — per the owner's explicit "not a
+  marquee show," and because Season 1 already released means it's not an
+  entirely-unreleased title needing the hype-vote gate (`upcomingSoonEntry`
+  correctly returns null for it) — it's fully votable like any other
+  catalog show, same precedent as `the-chi`/`raising-kanan`.
+- Real cast pulled from Wikipedia (TMDB's cast list was incomplete/season-2-
+  not-yet-indexed): Deon Cole, Tammy Townsend, Malcolm Barrett, Cynthia
+  McWilliams, Michael Trucco, Ashani Roberts. Real TMDB poster/backdrop
+  pinned in `WS_POSTERS` (the generic title collides with a 2003 NBC reality
+  show of the same name, so pinning avoids a hydrator mismatch) — both URLs
+  verified 200 before pinning.
+- Ran `node scripts/build-films-json.cjs` (1273→1274). Verified in headless
+  Chromium: real poster/backdrop resolve, not in the `FEATURED` carousel,
+  not gated as unreleased, full verdict-vote panel renders (not the hype
+  vote), real cast/crew, zero console errors.
