@@ -4311,3 +4311,88 @@ whose slides are the Balcony piece (always slide 0) plus every real
   slow blocked-resource retries inflating real wall-clock time during page
   load in this sandbox, not a code bug; manual navigation and settled-state
   screenshots both confirm the crossfade and slide content are correct.)
+
+## Fresh-content sweep: 4 films/series + 8 trailers + 2 data fixes (2026-08-10)
+Owner: "Do a web scrape of fresh shows, movies and trailers to go on site."
+Ran two parallel research sweeps (TV premieres, film releases + trailers)
+alongside direct TMDB queries, then independently re-verified every claim
+before anything landed — TMDB for cast/art/dates, YouTube oEmbed for channel
+ownership, plus a `playableInEmbed` check on every trailer id.
+
+**Added to the catalog (1274 → 1278):**
+- **A Different World** (`a-different-world-2026`, Netflix, Sep 24 2026) —
+  the sequel series, premiering 39 years to the day after the original.
+  Maleah Joi Moon as Deborah Wayne (daughter of Dwayne and Whitley);
+  Kadeem Hardison, Jasmine Guy, Cree Summer and Darryl M. Bell all return
+  as recurring. Felicia Pride showruns; Debbie Allen EPs and directs three
+  episodes. TMDB's cast list only carries the new freshman class, so the
+  returning four were confirmed separately (Netflix Tudum + Deadline +
+  TheGrio) and live in the synopsis rather than being passed off as TMDB
+  data. `nobd:true` — TMDB has no backdrop yet.
+- **The Greatest** (`the-greatest-2026`, Prime Video, Nov 4 2026) — the
+  first *authorized* scripted Muhammad Ali series. Jaalen Best as Ali,
+  Omari Hardwick as Cassius Clay Sr., Amin Joseph as Sonny Liston, Erica
+  Tazel. Created by Ben Watkins; Outlier Society (Michael B. Jordan) and
+  Roc Nation produce, Lonnie Ali EPs.
+- **Color Book** (`color-book-2024`, Netflix) — David Fortune's B&W debut
+  feature; a newly widowed father and his son, who has Down syndrome,
+  travel across Metro Atlanta to their first baseball game. Catalog year is
+  2024 (Tribeca premiere, per TMDB) even though the wide Netflix release
+  was June 2026 — same call already made on the Ray Jr. titles; the
+  synopsis carries the Netflix date.
+- **If I Go Will They Miss Me** (`if-i-go-will-they-miss-me-2026`) — Walter
+  Thompson-Hernández's Watts father-son story, Danielle Brooks / J. Alphonse
+  Nicholson / Bre-Z. Added with NO trailer: its only YouTube copy sits on a
+  film-festival channel (Las Palmas de Gran Canaria), not a distributor.
+
+**Trailers wired (8), each oEmbed-verified as an official studio upload and
+confirmed `playableInEmbed`:** The Wrong Girls (NEON), Matchbox (Apple TV),
+The Only Living Pickpocket in New York (Sony Pictures Classics), I Play Rocky
+(Amazon MGM), Ride or Die (Prime Video), A Different World (Netflix), The
+Greatest (Prime Video), Color Book (Netflix).
+
+**Two real data bugs found and fixed:**
+- **Ride or Die had a namespace id collision.** Its COMING_SOON id 241882 is
+  a *TV* id; `/movie/241882` is an unrelated 2014 Indian film (*Ankhon
+  Dekhi*), whose trailer a naive movie-endpoint lookup would have wired as
+  Ride or Die's. Caught because the "trailer" came back dated 2014.
+- **By Any Means was dated Sep 3.** The verified US theatrical date is
+  **Sep 4, 2026** (TMDB US release-type 3, corroborated by Deadline and
+  FirstShowing). Fixed.
+
+**Build-script gotcha worth remembering:** `scripts/build-films-json.cjs`
+extracts the FILMS literal with a scanner that is string-aware but **NOT
+comment-aware**, so a single unbalanced apostrophe in a `/* ... */` comment
+inside the FILMS array (e.g. writing "Jordan's") opens a phantom string and
+silently truncates the parse — the script then dies with a confusing
+`SyntaxError` pointing at a completely unrelated entry hundreds of lines
+later. Keep apostrophes in FILMS comments balanced, or avoid them. A note to
+this effect now sits inline next to the entry that triggered it.
+
+Also deduped two redundant `WS_TRAILERS` keys introduced this pass (both
+mapped to the same value as an existing pin, so no behavior change).
+`one-night-in-miami` still carries a pre-existing duplicate key with an
+identical value — harmless, left alone.
+
+OG share cards generated for all four new titles. Verified in headless
+Chromium across 17 routes × 2 viewports: unreleased titles (A Different
+World, The Greatest) correctly show the hype vote + "not out yet" badge and
+zero verdict buttons; released ones (Color Book, If I Go) vote normally;
+zero console errors, zero horizontal overflow.
+
+**Researched and deliberately NOT added** (flagged for the owner):
+- **Black Market** (Nollywood, dir. Fatimah Binta Gimsay, Sep 26) — real,
+  but TMDB has it "In Production" with no poster and runtime 0; too thin to
+  add well. Revisit when art lands.
+- **Colours of Fire** (Netflix Nigeria) — real, but no trailer on any
+  official channel could be confirmed.
+- **14th** (Ava DuVernay, Netflix) — premieres at NYFF Oct 9; no exact
+  release date or trailer announced yet.
+- **S.W.A.T. Exiles** (Starz, Sep 25, Shemar Moore leads + EPs),
+  **The Fall and Rise of Reggie Dinkins** S2 (NBC, Nov 2, Tracy Morgan),
+  **Cupertino** (CBS, Oct 8, Mike Colter + Renée Elise Goldsberry) — all
+  real and all missing from the catalog, but each is a closer-bar call
+  (Black lead, non-Black creator) that is the owner's to make. **All
+  American** (the flagship, not just *Homecoming*) is also genuinely
+  missing and is NOT a closer-bar case — worth adding on request.
+- **P-Valley S3** lands Dec 18, 2026 — queue a carousel moment for it.
