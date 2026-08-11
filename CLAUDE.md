@@ -4396,3 +4396,49 @@ zero console errors, zero horizontal overflow.
   American** (the flagship, not just *Homecoming*) is also genuinely
   missing and is NOT a closer-bar case — worth adding on request.
 - **P-Valley S3** lands Dec 18, 2026 — queue a carousel moment for it.
+
+## Marquee reshuffled for the new content + All American added (2026-08-10)
+Owner: "You have permission to shift what needs shifted on site to
+accommodating new content." Placement work so the titles added in the sweep
+above actually surface, rather than growing the marquee until nothing does.
+
+- **`FEATURED` reordered by soonest real moment**, so the slide on arrival is
+  the most urgent one and currently-airing titles trail the upcoming
+  premieres: Lanterns (Aug 16) → Beauty in Black (Aug 27) → The Varnell Hill
+  Show (Sep 1) → The Drop (Sep 8) → **A Different World (Sep 24)** → Misty
+  Green (Oct) → **The Greatest (Nov 4)** → Diarra from Detroit (airing, shows
+  its `eyLive` copy). Previously the array order was arbitrary.
+- **Held the array at 8 slides instead of growing to 10.** The lead rotator
+  prepends the Balcony feature and holds each slide 6.5s, so a 10-entry array
+  is a ~71s cycle — every addition pushes the newest titles out of reach of a
+  single visit. Retired the two most-spent slides to make room, both left in
+  the catalog (unwire-don't-delete, as always): `the-thomas-crown-affair-2027`
+  (its "first trailer is here" moment was 12 days old and the film is 19
+  months out — its own inline note already said to re-feature closer to
+  release) and `survival-of-the-thickest` (evergreen filler; S3 dropped Jul 2
+  with no live moment left to claim). A comment on the array now states the
+  rule: when something new earns the marquee, retire the most-spent slide
+  rather than appending.
+- **All American added** (`all-american`, 2018, 8 seasons) — the flagship, not
+  just the `all-american-homecoming` spinoff the catalog already carried.
+  Daniel Ezra as Spencer James, Bre-Z, Michael Evans Behling, Karimah
+  Westbrook; inspired by the real life of NFL player Spencer Paysinger. Final
+  season premiered Jul 13 2026, so it is a normal votable entry, not
+  COMING_SOON-gated. TMDB credits April Blair as creator, so that is the
+  creator line; Nkechi Okoro Carroll (showrunner for most of its run) is named
+  in the synopsis rather than swapped into a credit that is not hers.
+- **Found and closed a real orphan in the crawler data while doing it.**
+  `all-american` was ALREADY in `api/films.json` — so `/f/all-american` was a
+  live, sitemapped, crawlable share page for a title the catalog did not
+  actually carry, and clicking through led nowhere. Same class of bug already
+  documented on the Little House removal (the build script adds and backfills
+  but never prunes). Adding the real catalog entry resolved it. Audited the
+  whole file afterward: **0 orphans remain** (1278 non-noart FILMS ids vs 1278
+  films.json entries, exact match) — worth re-running that check after any
+  future catalog removal.
+- Catalog 1278 → 1279. OG card generated. Verified in headless Chromium: the
+  marquee returns the 8 slides in the intended order with correct pre/post
+  premiere eyebrow copy, the rotator still renders 9 slides / 9 segments, both
+  retired titles still resolve in the catalog, All American renders ungated
+  with a real poster; 17 routes × 2 viewports, zero console errors, zero
+  horizontal overflow.
