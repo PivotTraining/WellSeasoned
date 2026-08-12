@@ -4442,3 +4442,65 @@ above actually surface, rather than growing the marquee until nothing does.
   retired titles still resolve in the catalog, All American renders ungated
   with a real poster; 17 routes × 2 viewports, zero console errors, zero
   horizontal overflow.
+
+## "The slate" — interactive countdown runway on home (2026-08-12)
+Owner, after the social kit: "Put this fall slate box on the site with some
+creative interaction. Let it lead to those pages when selected as well." The
+social graphic became a live section rather than a baked image.
+- **`#fallSlate`/`paintFallSlate()`/`fallSlateItems()`** (index.html) — a
+  horizontal rail of every real upcoming premiere, each card carrying poster
+  art, the title, the real date + platform, a live **countdown** ("In 4 days"
+  / "Tomorrow" / "Premieres today", `fsDaysUntil`/`fsCountdown`) and a gold
+  proximity meter. Clicking or pressing Enter on a card opens that title's
+  film page (`go('film',id)`) — cards are `tabindex="0" role="link"` so the
+  keyboard path works too.
+- **Data is DERIVED, never a hand-kept list.** It merges the curated marquee
+  moments (`FEATURED` entries carrying a future `premiere`) with anything in
+  the catalog holding a genuine future Coming Soon date, dedupes by film id,
+  sorts by date, caps at 8, and drops anything that does not resolve to a real
+  catalog entry — so a card can never point at a page that isn't there, and
+  the section self-maintains as dates pass. Empty set hides the whole section
+  rather than rendering an empty box.
+- **The interaction is the site's spotlight metaphor made literal**: hovering
+  one card dims and desaturates every other card (`.fs-rail:hover .fs-card`
+  → `.fs-rail .fs-card:hover`), so the rail behaves like a moving spotlight
+  instead of a static shelf. Cards sit in a gently fanned deck (per-card
+  rotation set inline by index) and straighten + lift + gold-ring on pick, with
+  an "Open →" chip fading in inside the art frame. All CSS, no JS animation;
+  fully neutralised under `prefers-reduced-motion`, and the dimming is disabled
+  under 640px since hover on touch would strand a card mid-state.
+- Art is a CSS `background-image`, deliberately NOT `posterInner()` — that
+  helper renders an absolutely-positioned img needing a positioned ancestor,
+  the exact bug that once made a poster fill the whole viewport (`.ctc-poster`).
+- Placed at the head of the dessert tier (after the mosaic/culture-talk, above
+  Events/Ten Years/Bracket/Card Check): it is real film & TV content extending
+  the catalog, not a game, so it earns the top dessert slot while still sitting
+  below the grid per the standing review-focused guardrail.
+
+### Bug found and fixed: a sequel was gating its own predecessor
+Building the slate surfaced "A Different World" TWICE. Root cause was not the
+slate — `upcomingSoonEntry(f)` matched COMING_SOON **by title alone**, in
+direct violation of the catalog's own documented rule that identity is
+title+year and never title alone. The 1987 original (`a-different-world`, dir.
+Bill Cosby, 6 seasons — already in the catalog) therefore matched the 2026
+sequel's Coming Soon row, so its film page had started showing
+"Coming Sep 24, 2026 — not out yet", hiding its verdict vote behind a hype
+vote for a show that ended in 1993. A live regression on a real title,
+introduced the moment the sequel was added.
+Fix: match title AND year. Title-only survives as a fallback but ONLY when no
+other catalog entry shares that title, so every legacy single-title case keeps
+its exact previous behavior. Verified by diffing the full gated set across the
+catalog before/after: **10 → 9 matches, the only removal being the 1987
+original**; all nine legitimate gates preserved. Re-confirmed on both pages —
+`a-different-world` votes normally again, `a-different-world-2026` still shows
+the coming badge + hype vote.
+**Worth remembering:** grepping raw index.html text for a title can miss real
+entries (my first check for an existing "A Different World" came back clean and
+was wrong). Grep the *parsed* FILMS array instead — the same balanced-literal
+eval `scripts/build-films-json.cjs` uses.
+
+Verified in headless Chromium: 8 unique real titles in date order with correct
+countdowns, every card resolves to a live catalog page, click routes to
+`#/film/lanterns`, hover spotlight measured (hovered opacity 1.0 vs neighbours
+0.4), desktop + mobile screenshots clean, 17 routes × 2 viewports with zero
+console errors and zero horizontal overflow.

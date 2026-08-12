@@ -1255,6 +1255,74 @@
   .freedom-wl-cr{font-size:12.5px;color:#0A7A33;font-weight:700;text-decoration:none}
   .freedom-wl-cr:hover{text-decoration:underline}
   @media(max-width:640px){ .freedom{padding:16px 14px} .freedom-h{font-size:21px} .aa-flag{width:52px;height:34px} .freedom-wl-h{font-size:16px} }
+  /* ===== THE FALL SLATE — interactive countdown runway =====
+     The interaction IS the site's spotlight metaphor made literal: hovering
+     one card dims and desaturates every other card, so the section behaves
+     like a moving spotlight rather than a static shelf. Cards sit in a gently
+     fanned deck (per-card rotation set inline by index) and straighten + lift
+     when picked. All CSS — no JS animation — and fully disabled under
+     prefers-reduced-motion. */
+  .fall-slate{margin:0 0 30px}
+  .fs-wrap{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:40px 0 34px;
+    background:linear-gradient(150deg,#241809,#110a04);box-shadow:0 30px 70px rgba(0,0,0,.5);
+    -webkit-transform:translateZ(0);transform:translateZ(0);isolation:isolate}
+  .fs-wrap::after{content:"";position:absolute;top:50%;left:50%;width:150%;height:150%;
+    transform:translate(-50%,-50%);pointer-events:none;z-index:0;
+    background:conic-gradient(from 0deg,transparent 0 76%,rgba(244,197,66,.13) 86%,transparent 94%);
+    animation:emmySpinCenter 18s linear infinite}
+  .fs-head{position:relative;z-index:2;padding:0 40px;margin-bottom:26px}
+  .fs-ey{font-family:var(--mono);font-weight:700;font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
+    background:linear-gradient(90deg,#F4C542,#E7A21B,#F4C542);background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:emmyShine 4s linear infinite}
+  .fs-h{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.2vw,50px);line-height:1.02;
+    margin-top:10px;color:#F4ECD8;letter-spacing:.2px}
+  .fs-dek{color:#D8C9A8;font-size:15px;line-height:1.6;margin-top:10px;max-width:56ch}
+  .fs-rail{position:relative;z-index:2;display:flex;gap:20px;padding:14px 40px 8px;
+    overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .fs-rail::-webkit-scrollbar{height:8px}
+  .fs-rail::-webkit-scrollbar-thumb{background:rgba(244,197,66,.32);border-radius:99px}
+  .fs-card{flex:none;width:186px;scroll-snap-align:start;cursor:pointer;position:relative;
+    transition:transform .32s cubic-bezier(.2,1,.35,1),opacity .32s ease,filter .32s ease}
+  /* the spotlight: everything recedes, the picked card stays lit */
+  .fs-rail:hover .fs-card,.fs-rail:focus-within .fs-card{opacity:.4;filter:saturate(.45)}
+  .fs-rail .fs-card:hover,.fs-rail .fs-card:focus-visible{opacity:1;filter:none;z-index:3;
+    transform:rotate(0deg) translateY(-12px) scale(1.045)}
+  .fs-card:focus-visible{outline:none}
+  .fs-art{position:relative;aspect-ratio:4/5;border-radius:13px;overflow:hidden;background-size:cover;
+    background-position:center 22%;background-color:#241b12;
+    box-shadow:0 0 0 1px rgba(244,197,66,.34),0 14px 30px rgba(0,0,0,.55);transition:box-shadow .32s ease}
+  .fs-card:hover .fs-art,.fs-card:focus-visible .fs-art{
+    box-shadow:0 0 0 2px rgba(244,197,66,.95),0 20px 44px rgba(0,0,0,.7),0 0 46px rgba(228,155,11,.35)}
+  .fs-scrim{position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,5,2,.82),transparent 52%)}
+  .fs-count{position:absolute;left:9px;bottom:9px;right:9px;font-family:var(--mono);font-size:10.5px;
+    font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-soft);
+    text-shadow:0 2px 8px rgba(0,0,0,.9)}
+  .fs-meta{padding:11px 2px 0}
+  .fs-name{font-family:var(--display);font-weight:800;font-size:16px;line-height:1.16;color:#FBF3DE}
+  .fs-when{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(216,201,168,.72);margin-top:5px}
+  .fs-meter{height:3px;border-radius:99px;background:rgba(255,255,255,.13);margin-top:10px;overflow:hidden}
+  .fs-meter i{display:block;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,#a9720b,#F4C542)}
+  .fs-go{position:absolute;top:9px;right:9px;z-index:2;font-family:var(--mono);font-size:9.5px;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;color:#2b1c02;padding:5px 9px;border-radius:99px;
+    background:linear-gradient(180deg,#F6C544,#D9930C);opacity:0;
+    transition:opacity .28s ease,transform .28s ease;transform:translateY(-5px)}
+  .fs-card:hover .fs-go,.fs-card:focus-visible .fs-go{opacity:1;transform:translateY(0)}
+  @media(prefers-reduced-motion:reduce){
+    .fs-wrap::after,.fs-ey{animation:none}
+    .fs-card,.fs-art,.fs-go{transition:none}
+    .fs-rail:hover .fs-card,.fs-rail:focus-within .fs-card{opacity:1;filter:none}
+    .fs-rail .fs-card:hover,.fs-rail .fs-card:focus-visible{transform:rotate(0deg)}
+  }
+  @media(max-width:640px){
+    .fs-wrap{padding:30px 0 26px}
+    .fs-head{padding:0 20px}
+    .fs-rail{padding:12px 20px 8px;gap:14px}
+    .fs-card{width:150px}
+    /* no hover on touch — dimming would strand a card mid-state */
+    .fs-rail:hover .fs-card,.fs-rail:focus-within .fs-card{opacity:1;filter:none}
+  }
   /* The home lead banner rotates through the Balcony's current feature plus
      the real FEATURED picks — one auto-advancing carousel instead of a
      separate spindle unit. .lead-track stacks every .lead-slide absolutely
@@ -2174,6 +2242,10 @@
             </div>
           </div>
         </section>
+        <!-- Real upcoming premieres, dated and clickable. Sits at the head of the
+             dessert tier because it is actual film/TV content extending the
+             catalog, not a game — it stays below the grid, above the rest. -->
+        <section id="fallSlate" class="fall-slate" style="display:none"></section>
         <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
@@ -8863,6 +8935,81 @@ function featSlides(){
 /* The real, browsable catalog size — excludes any noart placeholder (e.g. the
    old [Sample Film] tier demo) so the number matches what a visitor can actually
    find in Browse/search/shelves. Never a hand-maintained figure that can drift. */
+/* ============ THE FALL SLATE ============
+   An interactive countdown runway of everything real that hasn't premiered
+   yet. Data is DERIVED, never a hand-kept list that could drift from the
+   catalog: it merges the curated marquee moments (FEATURED entries carrying a
+   future `premiere`) with anything in the catalog that has a genuine future
+   Coming Soon date, dedupes by film id and sorts by date. Only titles that
+   actually resolve to a catalog entry make the cut, so every card always has
+   a real page to open. Art is a CSS background-image, never posterInner() —
+   that helper renders an absolutely-positioned img needing a positioned
+   ancestor, which is exactly the bug that once made a poster fill the whole
+   viewport (see the .ctc-poster note). */
+function fsDaysUntil(iso){
+  var p=(iso||'').split('-'); if(p.length<3)return 9999;
+  var t=Date.UTC(+p[0],+p[1]-1,+p[2]), n=new Date();
+  return Math.round((t-Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()))/86400000);
+}
+function fsCountdown(days){
+  if(days<=0) return 'Premieres today';
+  if(days===1) return 'Tomorrow';
+  if(days<=60) return 'In '+days+' days';
+  return 'In '+Math.round(days/30)+' months';
+}
+function fallSlateItems(){
+  var today=isoToday(), out=[], seen={};
+  function push(id,date){
+    if(!id||!date||date<=today||seen[id]) return;
+    var f=find(id); if(!f||f.noart) return;
+    seen[id]=1; out.push({f:f,date:date});
+  }
+  var F=(typeof FEATURED!=='undefined'&&FEATURED)||[];
+  for(var i=0;i<F.length;i++){ if(F[i]&&F[i].premiere) push(F[i].id,F[i].premiere); }
+  for(var j=0;j<FILMS.length;j++){
+    var f=FILMS[j]; if(!f||f.noart||f.scope==='all') continue;
+    var c=upcomingSoonEntry(f); if(c) push(f.id,c.date);
+  }
+  out.sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
+  return out.slice(0,8);
+}
+function fsCardHTML(it,i,maxDays){
+  var f=it.f, days=fsDaysUntil(it.date);
+  var art=servePoster(f)||f.backdrop||'';
+  var bg=art?("background-image:url('"+esc(art)+"')"):("background:"+(f.grad||'#241b12'));
+  var where=(f.where&&f.where.length)?f.where[0]:'';
+  var pct=maxDays>0?Math.max(6,Math.round((1-(days/maxDays))*100)):100;
+  var tilt=((i%2)?1:-1)*(1.1+(i%3)*0.5);          // gentle fanned-deck angle
+  return '<div class="fs-card" style="transform:rotate('+tilt.toFixed(2)+'deg)" tabindex="0" role="link"'+
+      ' aria-label="'+esc(f.title)+', '+esc(fsCountdown(days))+'"'+
+      ' onclick="go(\'film\',\''+f.id+'\')"'+
+      ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();go(\'film\',\''+f.id+'\');}">'+
+    '<div class="fs-art" style="'+bg+'"><span class="fs-scrim"></span>'+
+      '<span class="fs-go">Open &rarr;</span>'+
+      '<span class="fs-count">'+esc(fsCountdown(days))+'</span></div>'+
+    '<div class="fs-meta">'+
+      '<div class="fs-name">'+esc(f.title)+'</div>'+
+      '<div class="fs-when">'+esc(soonDate(it.date))+(where?' · '+esc(where):'')+'</div>'+
+      '<div class="fs-meter"><i style="width:'+pct+'%"></i></div>'+
+    '</div>'+
+  '</div>';
+}
+function paintFallSlate(){
+  var el=byId('fallSlate'); if(!el)return;
+  var items=fallSlateItems();
+  if(!items.length){ el.style.display='none'; return; }   // nothing upcoming = no empty box
+  el.style.display='';
+  var maxDays=fsDaysUntil(items[items.length-1].date)||1;
+  var cards=items.map(function(it,i){ return fsCardHTML(it,i,maxDays); }).join('');
+  el.innerHTML='<div class="fs-wrap">'+
+    '<div class="fs-head">'+
+      '<span class="fs-ey">What&rsquo;s coming &middot; Dated and tracked</span>'+
+      '<h2 class="fs-h">The slate.</h2>'+
+      '<p class="fs-dek">Every premiere we&rsquo;re counting down to. Tap one to open its page &mdash; hype vote, cast, and the day it drops.</p>'+
+    '</div>'+
+    '<div class="fs-rail">'+cards+'</div>'+
+  '</div>';
+}
 function catalogCount(){ var n=0; for(var i=0;i<FILMS.length;i++){ if(!FILMS[i].noart)n++; } return n; }
 /* Small, honest catalog-size counter on the home hero. */
 function paintCatalogCount(){
@@ -8992,6 +9139,7 @@ function renderHome(){
   paintTrivia();
   paintWeekTable();
   paintVoteBar();
+  paintFallSlate();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+
@@ -11167,7 +11315,24 @@ function upcomingSoonEntry(f){
   if(!f||!f.title)return null;
   var today=new Date().toISOString().slice(0,10), t=f.title.toLowerCase();
   var list=(typeof COMING_SOON!=='undefined'&&COMING_SOON)||[];
-  for(var i=0;i<list.length;i++){ var c=list[i]; if(c&&c.title&&c.date&&c.date>today&&c.title.toLowerCase()===t) return c; }
+  var loose=null;
+  for(var i=0;i<list.length;i++){
+    var c=list[i];
+    if(!c||!c.title||!c.date||c.date<=today) continue;
+    if(c.title.toLowerCase()!==t) continue;
+    if(String(f.year)===c.date.slice(0,4)) return c;    // title AND year — the catalog's real identity rule
+    if(!loose) loose=c;
+  }
+  /* Title-only is the legacy match and stays as a fallback, but ONLY when no
+     other catalog entry shares this title. Otherwise a sequel/remake gates its
+     own predecessor: adding the 2026 A Different World made the 1987 original
+     report as "not out yet" — hiding its verdict vote behind a hype vote for a
+     show that ended in 1993. Identity here is title+year, never title alone. */
+  if(loose){
+    var n=0;
+    for(var j=0;j<FILMS.length;j++){ if(FILMS[j]&&FILMS[j].title&&FILMS[j].title.toLowerCase()===t) n++; }
+    if(n<=1) return loose;
+  }
   return null;
 }
 function filmByTitle(t){ if(!t)return null; var lt=t.toLowerCase(); for(var i=0;i<FILMS.length;i++){ if(FILMS[i].title.toLowerCase()===lt) return FILMS[i]; } return null; }
