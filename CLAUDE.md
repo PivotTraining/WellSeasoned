@@ -4504,3 +4504,59 @@ countdowns, every card resolves to a live catalog page, click routes to
 `#/film/lanterns`, hover spotlight measured (hovered opacity 1.0 vs neighbours
 0.4), desktop + mobile screenshots clean, 17 routes × 2 viewports with zero
 console errors and zero horizontal overflow.
+
+## Home + Kids refresh; Kids "Family" tag collision fixed (2026-08-14)
+Owner: "refresh the home screen and kid page."
+
+**Home** — the only genuinely stale unit was the bracket. `activeBracket()`
+picks the LAST entry in ARRAY ORDER whose start has passed (not the latest
+date), and `bracketRound()` clamps at 3, so the 2010s Renaissance bracket
+(start Aug 6, 3 rounds x 2 days) had been frozen on its champion since Aug 12
+with no votable matchup. Added **`capes` — "Best Black Superhero"**, start
+2026-08-14, appended LAST so it actually becomes active (prepending it made
+the 2010s bracket win — caught and fixed). Timed to Lanterns premiering Aug
+16; seeds are film AND TV on purpose (Luke Cage and Black Lightning belong in
+that argument), seeded so Black Panther and Blade sit in opposite halves and
+can only meet in the final. All 8 seeds verified to resolve via `find()`.
+Everything else on home was already current and needed no edit: BlackStar
+auto-retired from Events (its `end` passed, `upcomingEvents()` filters
+correctly) leaving HollyShorts leading, the slate/marquee both lead with
+Lanterns, and `LEAD_STORY` is still the Aaron Pierre feature — which lands
+two days before his series premieres.
+
+**Kids — a real content bug, not just staleness.** `isKidFriendly()` keyed on
+`tags` containing `Family` or `Animation`, but on this catalog **`Family` is
+overloaded**: it means both "family-friendly" AND "a film about a family". So
+adult dramas were sitting in the Kids grid on the second sense alone —
+Everything Everywhere All at Once (R), Queen Sugar, Tyler Perry's The Oval,
+Bull Street, Color Book, Only Child, Preacher's Kid. (The Oval was already
+flagged in the 2026-07-13 Kids entry as polluting the *featured pick*; the
+fix then only biased the featured slot to Animation and left the GRID
+unfiltered, so the same class of title kept showing.) Fixed in layers, real
+data first:
+```
+function isKidFriendly(f){
+  if(!f||!f.tags) return false;
+  if(ageTier(f.ageCert)==='ya') return false;   // real R/TV-MA cert — never in Kids
+  if(f.notkids) return false;                   // editorial opt-out, cert unresolved
+  return f.tags.indexOf('Family')>=0||f.tags.indexOf('Animation')>=0;
+}
+```
+Teen (PG-13/TV-14) is deliberately still allowed — the page advertises
+Kid/Teen/Young Adult tiers and shows each title's real rating, so it is a
+family-viewing hub, not an under-10 walled garden. The seven adult dramas
+above carry `notkids:true`.
+**The opposite gap was also real:** genuinely family-appropriate classics were
+MISSING because they were tagged only `Drama` — Akeelah and the Bee, Remember
+the Titans, Queen of Katwe, Hidden Figures, Glory Road, The Pursuit of
+Happyness, Drumline. All seven gained a `Family` tag (which also improves the
+Browse Family filter). Eve's Bayou (R) and Crooklyn were considered and
+deliberately left out as too heavy. Net: Kids stays at 67 titles, but seven
+adult dramas were swapped for seven family classics.
+- Gotcha worth remembering: FILMS entries are inconsistently quoted — some
+  `{id:'x'`, some `{id:"x"`, some fully JSON `"id":"x"`. A regex written for
+  one form silently misses the others (it missed 5 of 14 edits here). Always
+  report per-id success and re-check, or match all three forms.
+- Verified in headless Chromium: new bracket active at round 0 with all seeds
+  resolving, the 7 adult dramas gone from Kids and the 7 classics present,
+  17 routes x 2 viewports, zero console errors, zero horizontal overflow.
