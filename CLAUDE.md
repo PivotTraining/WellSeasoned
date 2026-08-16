@@ -4596,3 +4596,16 @@ page swapped the hype vote for the real verdict vote, the slate dropped it and
 re-led with Beauty in Black, and the new bracket advanced to round 1. Worth
 recording as evidence the `premiere`/`until`/Coming-Soon gating works
 end-to-end rather than needing manual takedowns.
+
+## A Different World 2026: real backdrop landed, nobd removed (2026-08-16)
+When the sequel was added on 2026-08-10, TMDB carried no backdrop for it, so
+the entry ran `nobd:true` (the flag that permanently blocks backdrop hydration
+so a wrong one can never land). TMDB has since published real key art —
+`/6CpTZlJKSipDi9mz5khiSYGIkhO.jpg`, Deborah Wayne in the Hillman College
+sweatshirt — and the flag was now actively suppressing correct art. Dropped
+`nobd` and baked the backdrop in (URL verified 200). Verified the 1987
+original is untouched, still ungated and voting normally. Same treated image
+is the hero for the Balcony piece below.
+Worth remembering as a pattern: `nobd`/`nopo` are a snapshot of what TMDB had
+on the day a title was added, not a permanent property. For a title added
+pre-release it is worth re-checking once the marketing campaign ramps.
