@@ -4560,3 +4560,39 @@ adult dramas were swapped for seven family classics.
 - Verified in headless Chromium: new bracket active at round 0 with all seeds
   resolving, the 7 adult dramas gone from Kids and the 7 classics present,
   17 routes x 2 viewports, zero console errors, zero horizontal overflow.
+
+## Share the slate — the on-site slate as the social card (2026-08-16)
+Owner: "I want to be able to share the slate into the graphic you created for
+it." The "On The Grill" flyer had been a hand-run Playwright script in the
+scratchpad; this makes the site generate the same card itself.
+- **`buildSlateShareCard()`/`openSlateShare()`/`saveSlateCard()`/
+  `nativeSlateShare()`** (index.html) — a 1080x1350 canvas card built from the
+  SAME `fallSlateItems()` data the on-page slate renders, so the card can
+  never claim a title, date or platform the site isn't showing. Hero (the next
+  thing out, with its live countdown pill) + a four-poster "Also coming" strip,
+  on the flyer's dark stage with the paprika ember bed. Reuses the existing
+  `buildSoonShareCard` plumbing: `scRounded`, crossOrigin poster load, blob
+  export, `socialShareRow`, and the same save/native-share pair.
+- New helpers: `scLoadImages()` loads N posters against ONE shared 6.5s
+  deadline, so a single slow or blocked image degrades that tile to a gradient
+  instead of hanging the whole card; `scCover()` draws a rounded cover-fit
+  image with the gold foil stroke and a gradient+title fallback; `scClip()`
+  ellipsizes a label to its column so strip titles can't run into each other.
+- "Share the slate ↗" button added to the slate section header
+  (`.fs-share`), wired to `openSlateShare()`.
+- Verified in headless Chromium with real JPEG bytes served for the poster
+  routes (a 2-byte stub would have hidden this): the modal opens, the canvas
+  renders at 1080x1350, and **`getImageData` succeeds — i.e. the canvas is not
+  tainted**, which matters because a tainted canvas makes `toBlob` fail
+  silently and Save would appear to do nothing. Countdown pill, date+platform
+  line, strip labels and ellipsis all correct; zero console errors.
+
+### Clock check: the site's date gating did its job
+While testing this, the container clock rolled to **Sunday Aug 16** — the day
+Lanterns premieres — and every date-gated surface updated on its own with no
+edit: the marquee slide flipped from "Premieres Aug 16" to its `eyLive` copy
+("New series · HBO Max"), `upcomingSoonEntry('lanterns')` went null so the film
+page swapped the hype vote for the real verdict vote, the slate dropped it and
+re-led with Beauty in Black, and the new bracket advanced to round 1. Worth
+recording as evidence the `premiere`/`until`/Coming-Soon gating works
+end-to-end rather than needing manual takedowns.

@@ -1277,6 +1277,7 @@
   .fs-h{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.2vw,50px);line-height:1.02;
     margin-top:10px;color:#F4ECD8;letter-spacing:.2px}
   .fs-dek{color:#D8C9A8;font-size:15px;line-height:1.6;margin-top:10px;max-width:56ch}
+  .fs-share{margin-top:16px}
   .fs-rail{position:relative;z-index:2;display:flex;gap:20px;padding:14px 40px 8px;
     overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
   .fs-rail::-webkit-scrollbar{height:8px}
@@ -8106,6 +8107,159 @@ function nativeSoonShare(id){ var c=findSoon(id); soonCardBlob(id,function(b){
     if(navigator.canShare&&navigator.canShare(data)){ navigator.share(data).catch(function(){}); }
     else if(navigator.share){ navigator.share({title:c.title+' — Well Seasoned',text:'Coming '+soonDate(c.date),url:link}).catch(function(){}); }
   }); }
+/* ============ SHARE THE SLATE ============
+   Turns the live #/ slate section into the same "On The Grill" flyer we post
+   to social — built on canvas at 1080x1350 from the SAME fallSlateItems()
+   data the section renders, so the card can never claim a title, date or
+   platform the site isn't actually showing. Mirrors the existing
+   buildSoonShareCard plumbing (crossOrigin poster load + per-image timeout +
+   toBlob), just with a hero plus a four-poster strip. */
+function slateShareItems(){ return fallSlateItems().slice(0,5); }
+/* Load N posters with a shared deadline — one slow/blocked image can't hang
+   the whole card, it just draws as a gradient tile like the site does. */
+function scLoadImages(urls,done){
+  var out=new Array(urls.length), left=urls.length, settled=false;
+  if(!left){ done(out); return; }
+  var finish=function(){ if(settled)return; settled=true; done(out); };
+  setTimeout(finish,6500);
+  urls.forEach(function(u,i){
+    var step=function(){ if(--left<=0) finish(); };
+    if(!u){ out[i]=null; step(); return; }
+    var url=String(u).replace('/t/p/w342','/t/p/w500');
+    url+=(url.indexOf('?')<0?'?':'&')+'ws=cors';
+    var img=new Image(); img.crossOrigin='anonymous';
+    img.onload=function(){ out[i]=img; step(); };
+    img.onerror=function(){ out[i]=null; step(); };
+    img.src=url;
+  });
+}
+function scCover(ctx,img,x,y,w,h,r,fallbackGrad,label){
+  ctx.save(); scRounded(ctx,x,y,w,h,r||14); ctx.clip();
+  if(img){ var sc=Math.max(w/img.width,h/img.height);
+    ctx.drawImage(img,x+(w-img.width*sc)/2,y+(h-img.height*sc)/2,img.width*sc,img.height*sc); }
+  else { var g=ctx.createLinearGradient(x,y,x+w,y+h); g.addColorStop(0,'#7a4a12'); g.addColorStop(1,'#241503');
+    ctx.fillStyle=g; ctx.fillRect(x,y,w,h);
+    if(label){ ctx.fillStyle='rgba(255,243,222,.92)'; ctx.textAlign='center';
+      ctx.font='800 26px "Bricolage Grotesque", Inter, sans-serif';
+      ctx.fillText(String(label).slice(0,22), x+w/2, y+h/2); } }
+  ctx.restore();
+  ctx.save(); scRounded(ctx,x,y,w,h,r||14);
+  ctx.strokeStyle='rgba(244,197,66,.55)'; ctx.lineWidth=2; ctx.stroke(); ctx.restore();
+}
+var _slateCanvas=null;
+function buildSlateShareCard(done){
+  var items=slateShareItems();
+  if(!items.length){ done(null); return; }
+  var W=1080,H=1350,cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  var hero=items[0], rest=items.slice(1,5);
+  var urls=[servePoster(hero.f)||hero.f.backdrop].concat(rest.map(function(it){ return servePoster(it.f)||it.f.backdrop; }));
+  scLoadImages(urls,function(imgs){
+    var g=ctx.createLinearGradient(0,0,W*0.4,H); g.addColorStop(0,'#2a1d10'); g.addColorStop(.52,'#150d06'); g.addColorStop(1,'#0a0603');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    var rg=ctx.createRadialGradient(W*0.86,-60,40,W*0.86,-60,W*0.8);
+    rg.addColorStop(0,'rgba(228,155,11,.26)'); rg.addColorStop(1,'rgba(228,155,11,0)'); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+    /* ember bed — same paprika heat as the printed flyer */
+    var eg=ctx.createRadialGradient(W/2,H+80,60,W/2,H+80,W*0.78);
+    eg.addColorStop(0,'rgba(190,59,24,.48)'); eg.addColorStop(.5,'rgba(228,155,11,.12)'); eg.addColorStop(1,'rgba(228,155,11,0)');
+    ctx.fillStyle=eg; ctx.fillRect(0,H*0.5,W,H*0.5);
+
+    ctx.textAlign='left';
+    ctx.fillStyle='#F4B733'; ctx.font='500 26px "DM Mono", monospace';
+    ctx.fillText('W H A T ’ S   C O M I N G', 70, 100);
+    ctx.fillStyle='#FBF3DE'; ctx.font='800 86px "Bricolage Grotesque", Inter, sans-serif';
+    ctx.fillText('The slate.', 70, 196);
+    ctx.fillStyle='rgba(244,236,216,.74)'; ctx.font='600 27px Inter, sans-serif';
+    ctx.fillText('Every premiere we’re counting down to.', 70, 246);
+
+    /* hero — the next thing out */
+    var hx=70, hy=300, hw=272, hh=408;
+    scCover(ctx,imgs[0],hx,hy,hw,hh,18,null,hero.f.title);
+    var cx=hx+hw+34, days=fsDaysUntil(hero.date);
+    var pill=String(fsCountdown(days)).toUpperCase();
+    ctx.font='700 22px "DM Mono", monospace';
+    var pw=ctx.measureText(pill).width+36;
+    ctx.fillStyle='#F0B21E'; scRounded(ctx,cx,hy+14,pw,46,23); ctx.fill();
+    ctx.fillStyle='#2b1c02'; ctx.fillText(pill,cx+18,hy+44);
+    ctx.fillStyle='#FBF3DE';
+    var tz=hero.f.title.length>17?46:58;
+    ctx.font='800 '+tz+'px "Bricolage Grotesque", Inter, sans-serif';
+    ctx.fillText(hero.f.title, cx, hy+128);
+    ctx.fillStyle='#F4B733'; ctx.font='700 27px Inter, sans-serif';
+    var whereH=(hero.f.where&&hero.f.where.length)?hero.f.where[0]:'';
+    ctx.fillText(soonDate(hero.date)+(whereH?'  ·  '+whereH:''), cx, hy+176);
+
+    /* strip — what's behind it */
+    ctx.fillStyle='rgba(244,236,216,.55)'; ctx.font='700 20px "DM Mono", monospace';
+    ctx.fillText('A L S O   C O M I N G', 70, 772);
+    var n=rest.length||1, gap=22, sw=Math.floor((940-gap*(n-1))/n), sh=Math.round(sw*1.5), sy=804;
+    rest.forEach(function(it,i){
+      var x=70+i*(sw+gap);
+      scCover(ctx,imgs[i+1],x,sy,sw,sh,12,null,it.f.title);
+      ctx.fillStyle='#FBF3DE'; ctx.font='800 21px "Bricolage Grotesque", Inter, sans-serif';
+      ctx.fillText(scClip(ctx,it.f.title,sw), x, sy+sh+34);
+      ctx.fillStyle='#F4B733'; ctx.font='500 16px "DM Mono", monospace';
+      ctx.fillText(scClip(ctx,String(fsCountdown(fsDaysUntil(it.date))).toUpperCase(),sw), x, sy+sh+60);
+    });
+
+    ctx.fillStyle='rgba(246,236,215,.62)'; ctx.font='500 26px "DM Mono", monospace';
+    ctx.fillText('itswellseasoned.com', 70, 1296);
+    ctx.textAlign='right';
+    ctx.fillStyle='rgba(246,236,215,.5)'; ctx.font='500 22px "DM Mono", monospace';
+    ctx.fillText('RATED BY THE CULTURE', W-70, 1296);
+    ctx.textAlign='left';
+    _slateCanvas=cv; done(cv);
+  });
+}
+/* trim a label to the column it sits in rather than letting it run into the next */
+function scClip(ctx,txt,max){
+  txt=String(txt||''); if(ctx.measureText(txt).width<=max) return txt;
+  while(txt.length>1&&ctx.measureText(txt+'…').width>max) txt=txt.slice(0,-1);
+  return txt+'…';
+}
+function openSlateShare(){
+  var items=slateShareItems();
+  if(!items.length){ toast('Nothing on the slate to share yet.'); return; }
+  _slateCanvas=null; track('share_slate',{count:items.length});
+  var url='https://itswellseasoned.com/';
+  var title='The slate — what’s coming on Well Seasoned';
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Share the slate</h2><p class="m-sub">Every premiere we’re counting down to, as one card. Post it.</p>'+
+    '<div id="slWrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Building your card…</span></div>'+
+    '<div class="sc-soc-lab">Post to</div>'+socialShareRow('slate',url,title)+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px">'+
+      '<button class="btn btn-gold" onclick="saveSlateCard()">Save card</button>'+
+      (navigator.share?'<button class="btn btn-ink" onclick="nativeSlateShare()">Share card</button>':'')+
+    '</div>');
+  buildSlateShareCard(function(cv){
+    if(!cv)return; var w=byId('slWrap'); if(!w)return;
+    cv.style.cssText='width:min(300px,80vw);border-radius:14px;box-shadow:var(--shadow-3)';
+    w.innerHTML=''; w.appendChild(cv);
+  });
+}
+function slateCardBlob(cb){
+  var go=function(cv){ if(!cv){cb(null);return;} cv.toBlob(function(b){cb(b);},'image/png'); };
+  if(_slateCanvas) go(_slateCanvas); else buildSlateShareCard(go);
+}
+function saveSlateCard(){
+  slateCardBlob(function(b){
+    if(!b){ toast('Could not build the card.'); return; }
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='well-seasoned-the-slate.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+    toast('Card saved. Post it.');
+  });
+}
+function nativeSlateShare(){
+  slateCardBlob(function(b){
+    var link='https://itswellseasoned.com/', txt='What’s coming — the slate on Well Seasoned';
+    if(!b){ if(navigator.share)navigator.share({title:'The slate',text:txt,url:link}).catch(function(){}); return; }
+    var file=new File([b],'well-seasoned-the-slate.png',{type:'image/png'});
+    var data={files:[file],title:'The slate',text:txt+' · itswellseasoned.com'};
+    if(navigator.canShare&&navigator.canShare(data)) navigator.share(data).catch(function(){});
+    else if(navigator.share) navigator.share({title:'The slate',text:txt,url:link}).catch(function(){});
+  });
+}
 function isoToday(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 /* July 4 freedom spotlight — live only on July 4 (visitor local time), 12:00am
    to 12:00am July 5. Real Black films on the fight against injustice and for
@@ -9013,6 +9167,7 @@ function paintFallSlate(){
       '<span class="fs-ey">What&rsquo;s coming &middot; Dated and tracked</span>'+
       '<h2 class="fs-h">The slate.</h2>'+
       '<p class="fs-dek">Every premiere we&rsquo;re counting down to. Tap one to open its page &mdash; hype vote, cast, and the day it drops.</p>'+
+      '<button class="btn btn-gold btn-sm fs-share" onclick="openSlateShare()">Share the slate &#8599;</button>'+
     '</div>'+
     '<div class="fs-rail">'+cards+'</div>'+
   '</div>';
