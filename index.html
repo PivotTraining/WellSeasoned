@@ -2248,6 +2248,10 @@
              catalog, not a game — it stays below the grid, above the rest. -->
         <section id="fallSlate" class="fall-slate" style="display:none"></section>
         <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
+        <section class="shelf emmy-banner" id="emmyBanner" style="display:none">
+          <h2 class="emmy-h">🏆 The 2026 Emmys · Sept 14</h2>
+          <div id="emmyCar"></div>
+        </section>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
         <section id="dailyTrivia" class="trivia" style="display:none"></section>
@@ -8383,7 +8387,9 @@ var EMMY_SHOWS_2026=[
 /* Owner extended this from the original ~36hr window to a full 7 days from
    2026-07-09 (owner request: "get a carousel... keep it up for 7 days from
    today") — still auto-expires, no manual takedown needed. */
-var EMMY_EXPIRES='2026-07-16T23:59:59Z';
+/* Runs through the morning after the 78th Primetime Emmys (Sept 14, 2026,
+   NBC/Peacock). Auto-hides itself after — no manual takedown needed. */
+var EMMY_EXPIRES='2026-09-15T23:59:59Z';
 /* ---- Emmy nominee photo carousel: one medium image per unique nominee/show,
    auto-advancing every 4s. Person photos come from a live TMDB person search
    (cached to localStorage, same "nothing fake" bar as every other real-photo
@@ -9366,6 +9372,7 @@ function renderHome(){
   byId('mosaic').innerHTML=focus.map(cardHTML).join('');
   paintMarriedFeature();
   paintEventSpotlight();
+  paintEmmyBanner();
   paintTenYears();
   paintTrivia();
   paintWeekTable();
