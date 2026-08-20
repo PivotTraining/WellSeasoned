@@ -4609,3 +4609,25 @@ is the hero for the Balcony piece below.
 Worth remembering as a pattern: `nobd`/`nopo` are a snapshot of what TMDB had
 on the day a title was added, not a permanent property. For a title added
 pre-release it is worth re-checking once the marketing campaign ramps.
+
+## Backend migrations: ALL APPLIED (verified live 2026-08-20)
+Several entries below still say a migration is "NOT YET APPLIED LIVE" and
+ask the owner to paste it into the Supabase SQL editor. Those notes are
+stale — every one of them is deployed. Probed the live REST API directly:
+`mini_tag_votes`, `mini_tag_counts` and `title_suggestions` all return 200,
+and `admin_dashboard_stats`, `admin_user_directory`, `list_title_suggestions`,
+`admin_list_comments` and `admin_moderate_comment` all resolve (they answer
+`unauthorized` to a bad passphrase, which only a deployed function can do).
+Do NOT tell the owner these are outstanding.
+
+Probing gotcha worth keeping: PostgREST resolves overloads by NAMED
+parameters, so calling a three-argument function with only `p_secret` gives
+a 404 that reads exactly like "function does not exist." It bit me once on
+`admin_moderate_comment`. Always probe with the full argument list; a type
+error on an argument is proof the function is there. (`comments.id` is
+bigint, not uuid.)
+
+The Balcony seed is also fully published as of 2026-08-20 — all twelve
+pieces including `hillman-never-closed` and `the-streamer-ate-the-network`.
+`backend/publish_two_balcony_pieces.sql` was the trimmed file used for the
+last two; it has served its purpose and is now a no-op on re-run.
