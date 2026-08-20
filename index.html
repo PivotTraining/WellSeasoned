@@ -3916,7 +3916,7 @@ var FILMS=[
   {id:'average-joe-2023',title:'Average Joe',year:2023,rt:'2 seasons',genre:'Dark Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#5c1a1a,#160707)',
    backdrop:'https://image.tmdb.org/t/p/w1280/l2E1zRep7sM73aCJ4YTuLPxid5H.jpg',
    dir:'Robb Cullen',cast:['Deon Cole','Tammy Townsend','Malcolm Barrett','Cynthia McWilliams','Michael Trucco','Ashani Roberts'],moods:['Intense'],era:'2020s',where:['Paramount+'],
-   syn:'Blue-collar plumber Joe Washington (Deon Cole) discovers his recently deceased father was secretly working for the Russian mafia — and stole millions from them right before he died. Now they think Joe knows where it is, and his very average life turns into a bloody, darkly funny race to find the truth before they find him. Season 2 premieres Aug 19, 2026 on Paramount+.',
+   syn:'Blue-collar plumber Joe Washington (Deon Cole) discovers his recently deceased father was secretly working for the Russian mafia — and stole millions from them right before he died. Now they think Joe knows where it is, and his very average life turns into a bloody, darkly funny race to find the truth before they find him. Its second season is on Paramount+.',
    tags:['Comedy','Crime','Drama'],votes:{for:0,against:0},reviews:[]},
   /* Demascus — Tubi original, found in the 2026-08-17 content sweep. Okieriete
      Onaodowan leads; Martin Lawrence is in the cast. Created by Tearrance
@@ -7420,7 +7420,14 @@ var BRACKETS=[
      sit in opposite halves and can only meet in the final. */
   { id:'capes', title:'Best Black Superhero', start:'2026-08-14', roundDays:2,
     sub:'Aaron Pierre takes the ring this Sunday. Before he does — eight who already suited up. Who wore it best?',
-    seeds:['black-panther','sleight-2017','marvel-s-luke-cage','the-meteor-man','blade','captain-america-brave-new-world-2025','black-panther-wakanda-fore','black-lightning'] }
+    seeds:['black-panther','sleight-2017','marvel-s-luke-cage','the-meteor-man','blade','captain-america-brave-new-world-2025','black-panther-wakanda-fore','black-lightning'] },
+  /* Appended LAST on purpose: activeBracket() picks the last entry in ARRAY
+     ORDER whose start has passed, not the latest date. Timed to A Different
+     World's Sep 24 return — seeded so School Daze and A Different World sit
+     in opposite halves and can only meet in the final. */
+  { id:'campus', title:'Best Campus Classic', start:'2026-08-20', roundDays:2,
+    sub:'Hillman reopens Sep 24. Before it does — eight that made the yard, the dorm and the quad ours. Who takes the crown?',
+    seeds:['school-daze','stomp-the-yard','higher-learning','love-basketball','a-different-world','drumline','dear-white-people','the-great-debaters'] }
 ];
 function activeBracket(){
   if(!BRACKETS.length) return null;
@@ -7706,7 +7713,7 @@ var TEN_YEARS={
   eyebrow:'Ten years on · Class of 2016',
   title:'Insecure & Atlanta turned 10.',
   dek:'A decade since two shows rewrote what our stories could look like on TV — messy, funny, specific, ours. Pull up a seat and revisit them.',
-  note:'Issa Rae just announced a 10th-anniversary Insecure celebration — the culture never left.',
+  note:'Issa Rae has a 10th-anniversary Insecure celebration in the works — the culture never left.',
   shows:[
     {id:'insecure',name:'Insecure',sub:'Premiered Oct 9, 2016 · HBO',backdrop:'https://image.tmdb.org/t/p/w1280/jS2R26p1S7JQtSCo4MjA9El45A8.jpg'},
     {id:'atlanta',name:'Atlanta',sub:'Premiered Sep 6, 2016 · FX',backdrop:'https://image.tmdb.org/t/p/w1280/vN84JlTvOZvZzxi0D2SJQNFvtjS.jpg'}
@@ -9374,10 +9381,12 @@ function renderHome(){
   }else{ sec.style.display='none'; }
   // Bracket teaser reflects the current tournament
   (function(){ var abk=activeBracket(); if(byId('brtTitle')&&abk) byId('brtTitle').textContent=abk.title+' — vote the tournament'; })();
-  // Just Dropped — Coming Soon titles whose release date has arrived (last 45 days)
+  // Just Dropped — Coming Soon titles whose release date has arrived. Window
+  // is 30 days: at 45 a title five weeks old still sat under a shelf headed
+  // "Just Dropped", which stops being true well before it stops rendering.
   (function(){
     var s=byId('dropSection'), g=byId('dropGrid'); if(!s||!g)return;
-    var cut=isoDaysAgo(45), today=isoToday(), items=[];
+    var cut=isoDaysAgo(30), today=isoToday(), items=[];
     COMING_SOON.forEach(function(c,i){ if(c.date && c.date<=today && c.date>=cut) items.push({c:c,i:i}); });
     items.sort(function(a,b){ return a.c.date<b.c.date?1:-1; });
     if(items.length){ g.innerHTML=items.slice(0,8).map(function(x){return soonCard(x.c,x.i);}).join(''); s.style.display=''; }
