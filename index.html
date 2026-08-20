@@ -7429,11 +7429,51 @@ var BRACKETS=[
     sub:'Hillman reopens Sep 24. Before it does — eight that made the yard, the dorm and the quad ours. Who takes the crown?',
     seeds:['school-daze','stomp-the-yard','higher-learning','love-basketball','a-different-world','drumline','dear-white-people','the-great-debaters'] }
 ];
+/* When the authored list above runs dry the tournament froze on its champion
+   until somebody hand-added the next one — it did exactly that twice in one
+   week. BRACKET_POOL keeps it running on its own: once the last authored
+   bracket finishes its cycle, activeBracket() deals the next pool theme a
+   computed start date and keeps cycling, indefinitely. Every generated run
+   gets a unique id (theme + its start date) so its debate_votes tallies can
+   never collide with an earlier run of the same theme. Seeds are ordered so
+   the two heaviest hitters sit in opposite halves and can only meet in the
+   final — bracketTree() pairs [0v1][2v3] against [4v5][6v7].
+   To add a theme: append here, verify every seed id resolves via find(). */
+var BRACKET_POOL=[
+  { id:'romcom', title:'Best Black Rom-Com',
+    sub:'Eight that made us believe. One matchup at a time — you decide which love story still holds.',
+    seeds:['love-jones','brown-sugar','the-best-man','just-wright','love-basketball','the-photograph','rye-lane','boomerang'] },
+  { id:'music', title:'Best Music Movie',
+    sub:'Biopics, backstage drama and one purple motorcycle. Which one earned the encore?',
+    seeds:['ray','dreamgirls','cadillac-records','bessie','purple-rain','straight-outta-compton','the-five-heartbeats','respect'] },
+  { id:'sports', title:'Best Sports Film',
+    sub:'Eight that made the game mean something bigger. Vote the one that still gets you off the couch.',
+    seeds:['he-got-game','glory-road','coach-carter','42','creed','remember-the-titans','ali','the-hurricane'] },
+  { id:'comedy', title:'Funniest of All Time',
+    sub:'Eight we can quote start to finish. Settle it.',
+    seeds:['coming-to-america','house-party','barbershop','white-chicks','friday','girls-trip','dolemite-is-my-name','i-m-gonna-git-you-sucka'] },
+  { id:'page', title:'Best Page to Screen',
+    sub:'Eight books the screen actually did right by. Which adaptation earned the shelf?',
+    seeds:['the-color-purple','precious-2009','the-hate-u-give','native-son','beale','american-fiction','nickel','beloved'] }
+];
+/* A tournament cycle is roundDays x 4: QF, SF and Final take three rounds,
+   then the champion stands for one more before the next opens. */
+function _brIso(d){
+  var m=d.getMonth()+1, dd=d.getDate();
+  return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd;
+}
 function activeBracket(){
   if(!BRACKETS.length) return null;
   var now=new Date(), pick=BRACKETS[0];
   for(var i=0;i<BRACKETS.length;i++){ if(new Date(BRACKETS[i].start+'T00:00:00')<=now) pick=BRACKETS[i]; }
-  return pick;
+  if(!BRACKET_POOL.length) return pick;
+  var rd=pick.roundDays||2, cycle=rd*4*86400000;
+  var end=new Date(pick.start+'T00:00:00').getTime()+cycle;
+  if(now.getTime()<end) return pick;           /* authored bracket still running */
+  var n=Math.floor((now.getTime()-end)/cycle); /* 0 = first pool theme */
+  var p=BRACKET_POOL[n%BRACKET_POOL.length];
+  var iso=_brIso(new Date(end+n*cycle));
+  return { id:p.id+'-'+iso, title:p.title, sub:p.sub, seeds:p.seeds, roundDays:rd, start:iso };
 }
 var _brTallies={};
 function mMatchId(bid,round,a,b){ return 'br-'+bid+'-r'+round+'-'+a+'-'+b; }
