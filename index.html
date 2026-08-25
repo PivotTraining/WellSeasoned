@@ -2153,6 +2153,11 @@
 @media(max-width:640px){.p10-wrap{padding:26px 16px 22px;border-radius:16px}
   .p10-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
 @media(prefers-reduced-motion:reduce){.p10-wrap::after,.p10-spark{animation:none}}
+
+.p10-share{margin-top:14px;font-family:var(--display);font-weight:800;font-size:14px;cursor:pointer;
+  color:var(--gold-soft);background:rgba(244,197,66,.10);border:1px solid rgba(244,197,66,.4);
+  border-radius:99px;padding:9px 20px;transition:background .16s ease,transform .16s ease}
+.p10-share:hover{background:rgba(244,197,66,.2);transform:translateY(-1px)}
 </style>
 </head>
 <body>
@@ -6849,7 +6854,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -6865,6 +6870,16 @@ function parseHash(){
   return {view:view,arg:arg};
 }
 function render(view,arg){
+  if(view==='perfect-ten'){
+    /* Shareable deep link for the poll, which lives as a home section. Render
+       home, then bring the poll into view — landing at the top of a 20-section
+       page and asking people to hunt for it loses them. */
+    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on', v.getAttribute('data-view')==='home');});
+    if(document.body)document.body.setAttribute('data-view','home');
+    setActiveNav('home'); renderHome(); applyMetaTags('home');
+    setTimeout(function(){ var el=byId('perfectTen'); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); },260);
+    return;
+  }
   if(view==='apply'){
     // Shareable public apply link (#/apply, #/apply/critic, #/apply/writer):
     // show home behind and open the application form so an external link lands
@@ -8399,6 +8414,115 @@ function nativeSlateShare(){
     var data={files:[file],title:'The slate',text:txt+' · itswellseasoned.com'};
     if(navigator.canShare&&navigator.canShare(data)) navigator.share(data).catch(function(){});
     else if(navigator.share) navigator.share({title:'The slate',text:txt,url:link}).catch(function(){});
+  });
+}
+/* ---- Perfect Ten share ----------------------------------------------------
+   The shareable thing is the user's OWN two picks, not the leaderboard — a
+   card that says "here is my answer, come argue" travels; a bar chart does
+   not. Falls back to the current top three when they haven't picked yet, so
+   the button is never dead. Reuses the slate's canvas helpers wholesale. */
+var _p10Canvas=null;
+function p10ShareState(){
+  var mine=p10Mine().map(find).filter(Boolean);
+  if(mine.length) return {mode:'mine',films:mine};
+  var c=p10Counts(), rows=[];
+  PERFECT_TEN.forEach(function(o){ var f=find(o.id); if(f) rows.push({f:f,n:c.byFilm[o.id]||0}); });
+  rows.sort(function(a,b){ return b.n-a.n; });
+  return {mode:'top',films:rows.slice(0,2).map(function(r){return r.f;}),total:c.total};
+}
+function buildPerfectTenCard(done){
+  var st=p10ShareState();
+  if(!st.films.length){ done(null); return; }
+  var W=1080,H=1350,cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  scLoadImages(st.films.map(function(f){ return servePoster(f)||f.backdrop; }),function(imgs){
+    var g=ctx.createLinearGradient(0,0,W*0.4,H);
+    g.addColorStop(0,'#2a1d10'); g.addColorStop(.52,'#150d06'); g.addColorStop(1,'#0a0603');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.textAlign='left';
+    ctx.fillStyle='#F4B733'; ctx.font='500 19px "DM Mono", ui-monospace, monospace';
+    ctx.fillText('THE PERFECT TEN', 78, 112);
+    ctx.fillStyle='#FBF3DE'; ctx.font='400 74px "Instrument Serif", Georgia, serif';
+    ctx.fillText(st.mode==='mine'?'No bad parts.':'The room’s answer.', 78, 196);
+    ctx.fillStyle='rgba(244,236,216,.78)'; ctx.font='600 25px Inter, system-ui, sans-serif';
+    var sub = st.mode==='mine'
+      ? 'Not my favourite. Not the most important.'
+      : (st.total? st.total+' picks cast so far.' : 'Ten films. Two picks. One question.');
+    ctx.fillText(scClip(ctx,sub,W-156), 78, 244);
+    ctx.fillStyle='rgba(244,236,216,.62)'; ctx.font='600 25px Inter, system-ui, sans-serif';
+    ctx.fillText(st.mode==='mine'?'The two with nothing to skip.':'Which one has no bad parts at all?', 78, 282);
+    /* the two posters */
+    var pw=430, ph=Math.round(pw*1.5), gap=34, x0=78, y0=350;
+    st.films.slice(0,2).forEach(function(f,i){
+      scCover(ctx,imgs[i],x0+i*(pw+gap),y0,pw,ph,18,null,f.title);
+    });
+    ctx.textAlign='left';
+    st.films.slice(0,2).forEach(function(f,i){
+      var x=x0+i*(pw+gap);
+      ctx.fillStyle='#F4B733'; ctx.font='500 16px "DM Mono", ui-monospace, monospace';
+      ctx.fillText(st.mode==='mine'?('PICK '+(i+1)):('#'+(i+1)), x, y0+ph+38);
+      ctx.fillStyle='#FBF3DE'; ctx.font='800 30px "Bricolage Grotesque", Inter, sans-serif';
+      ctx.fillText(scClip(ctx,f.title,pw), x, y0+ph+76);
+      ctx.fillStyle='rgba(244,236,216,.6)'; ctx.font='600 21px Inter, system-ui, sans-serif';
+      ctx.fillText(String(f.year||''), x, y0+ph+108);
+    });
+    /* the challenge line */
+    ctx.fillStyle='#FBF3DE'; ctx.font='400 44px "Instrument Serif", Georgia, serif';
+    ctx.fillText(st.mode==='mine'?'Two picks. Tell me I’m wrong.':'Two picks. Where do you land?', 78, H-186);
+    ctx.fillStyle='#F4B733'; ctx.font='500 20px "DM Mono", ui-monospace, monospace';
+    ctx.fillText('ITSWELLSEASONED.COM', 78, H-120);
+    ctx.fillStyle='rgba(244,236,216,.55)'; ctx.font='500 17px "DM Mono", ui-monospace, monospace';
+    ctx.fillText('Well Seasoned · rated by the culture', 78, H-84);
+    _p10Canvas=cv; done(cv);
+  });
+}
+function openPerfectTenShare(){
+  var st=p10ShareState();
+  if(!st.films.length){ toast('Pick at least one first.'); return; }
+  _p10Canvas=null; track('share_perfect_ten',{mode:st.mode});
+  var url='https://itswellseasoned.com/#/perfect-ten';
+  var title=st.mode==='mine'
+    ? 'My two: '+st.films.map(function(f){return f.title;}).join(' + ')+' — which film has no bad parts?'
+    : 'Ten Black films. Two picks. Which one has no bad parts at all?';
+  showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
+    '<h2>Share your two</h2><p class="m-sub">Post your picks and let people argue with them. That’s the point.</p>'+
+    '<div id="p10Wrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Building your card…</span></div>'+
+    '<div class="sc-soc-lab">Post to</div>'+socialShareRow('p10',url,title)+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px">'+
+      '<button class="btn btn-gold" onclick="saveP10Card()">Save card</button>'+
+      (navigator.share?'<button class="btn btn-ink" onclick="nativeP10Share()">Share card</button>':'')+
+    '</div>');
+  buildPerfectTenCard(function(cv){
+    if(!cv)return; var w=byId('p10Wrap'); if(!w)return;
+    cv.style.cssText='width:min(300px,80vw);border-radius:14px;box-shadow:var(--shadow-3)';
+    w.innerHTML=''; w.appendChild(cv);
+  });
+}
+function p10CardBlob(cb){
+  var go=function(cv){ if(!cv){cb(null);return;} cv.toBlob(function(b){cb(b);},'image/png'); };
+  if(_p10Canvas) go(_p10Canvas); else buildPerfectTenCard(go);
+}
+function saveP10Card(){
+  p10CardBlob(function(b){
+    if(!b){ toast('Could not build the card.'); return; }
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='well-seasoned-perfect-ten.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+    toast('Card saved. Post it.');
+  });
+}
+function nativeP10Share(){
+  p10CardBlob(function(b){
+    var st=p10ShareState();
+    var link='https://itswellseasoned.com/#/perfect-ten';
+    var txt=st.mode==='mine'
+      ? 'My two films with no bad parts: '+st.films.map(function(f){return f.title;}).join(' + ')
+      : 'Ten Black films. Two picks. Which has no bad parts at all?';
+    if(!b){ if(navigator.share)navigator.share({title:'The Perfect Ten',text:txt,url:link}).catch(function(){}); return; }
+    var file=new File([b],'well-seasoned-perfect-ten.png',{type:'image/png'});
+    var data={files:[file],title:'The Perfect Ten',text:txt+' · itswellseasoned.com'};
+    if(navigator.canShare&&navigator.canShare(data)) navigator.share(data).catch(function(){});
+    else if(navigator.share) navigator.share({title:'The Perfect Ten',text:txt,url:link}).catch(function(){});
   });
 }
 function isoToday(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
@@ -10111,6 +10235,7 @@ function paintPerfectTen(){
       '<p class="p10-lede">Not your favourite. Not the most important. The one with no stretch you skip, no scene you have to explain. Pick up to two.</p>'+
       '<p class="p10-status">'+(mine.length?(mine.length+' of 2 picked'+(mine.length===2?' — tap one to swap':'')):'Two picks maximum')+
         (c.total?' · '+c.total+' pick'+(c.total===1?'':'s')+' cast':'')+'</p>'+
+      '<button class="p10-share" onclick="openPerfectTenShare()">'+(mine.length?'Share your two ↗':'Share the poll ↗')+'</button>'+
     '</div>'+
     '<div class="p10-grid">'+rows+'</div></div>';
   el.style.display='';
