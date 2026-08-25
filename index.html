@@ -2087,6 +2087,29 @@
   @media(min-width:640px){ .pwa-install{bottom:16px} }
   /* nudge above the mobile tabbar when it's showing */
   @media(max-width:640px){ .pwa-install{bottom:calc(env(safe-area-inset-bottom,0px) + var(--tab-h) + 10px)} }
+
+/* ===== THE KITCHEN BOARD (#/kitchen) ===== */
+.kb-head{max-width:760px;margin:0 0 26px}
+.kb-ey{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep)}
+.kb-h{font-family:var(--display);font-weight:800;font-size:clamp(30px,4vw,44px);line-height:1.05;margin:10px 0 10px}
+.kb-lede{color:var(--ink-soft);font-size:17px;line-height:1.6;max-width:60ch;margin-bottom:16px}
+.kb-count{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 14px}
+.kb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.kb-card{display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.kb-card:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 10px 26px rgba(0,0,0,.12)}
+/* position:relative is REQUIRED — posterInner() renders an absolutely
+   positioned <img>, which sizes against its nearest positioned ancestor. A
+   static parent here is exactly the bug that once made a poster fill the
+   whole viewport (see the .ctc-poster entry in CLAUDE.md). */
+.kb-po{position:relative;flex:none;width:58px;height:87px;border-radius:8px;overflow:hidden;background:var(--line)}
+.kb-meta{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 auto}
+.kb-t{font-weight:800;font-size:16px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-y{font-size:13px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-v{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);margin-top:2px}
+.kb-go{flex:none;font-family:var(--display);font-weight:800;font-size:13px;color:var(--gold-deep);white-space:nowrap}
+@media(max-width:760px){.kb-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -2394,6 +2417,9 @@
   <!-- ============ FILM EVENTS ============ -->
   <section class="view" data-view="events" aria-label="Film Events">
     <div class="wrap" id="eventsContent"></div>
+  </section>
+  <section class="view" data-view="kitchen" aria-label="The Kitchen Board">
+    <div class="wrap" id="kitchenContent"></div>
   </section>
 
   <!-- ============ RANKINGS ============ -->
@@ -6779,7 +6805,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -6832,6 +6858,7 @@ function render(view,arg){
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
   else if(view==='events')renderEvents();
+  else if(view==='kitchen')renderKitchenBoard();
   // Reset to the top AFTER the view's content is in the DOM. The pre-render
   // scrollTo above runs while the new view is still empty and gets undone by the
   // fade transition / late layout, which left film pages opening at the previous
@@ -9911,6 +9938,78 @@ function loadKitchenScores(){
   }catch(e){}
 }
 /* Pull the verified reviews for one film into the same shape the renderer uses. */
+/* ============ THE KITCHEN BOARD (#/kitchen) ============
+   The gap this closes: the ONLY place a seated critic could ever post was a
+   film page, which means they had to already be standing on the right film.
+   Nothing anywhere told them where they were needed. Result: eight seated
+   critics, 24 reviews, and a Kitchen score on 1.6% of the catalog while the
+   Table has voted on 26%.
+   This ranks the films the room has ALREADY judged that still have no critic
+   score — highest Table turnout first. Those are the titles where one review
+   makes the dual verdict possible, so a critic's next twenty minutes are spent
+   where they actually move the seal. It is a linkable route on purpose: it can
+   go straight into an email to a critic. */
+var _kbRows=null;
+function renderKitchenBoard(){
+  var host=byId('kitchenContent'); if(!host)return;
+  if(!app.signedIn){
+    host.innerHTML='<div class="kb-head"><span class="kb-ey">The Kitchen</span><h1 class="kb-h">Critics only.</h1>'+
+      '<p class="kb-lede">Sign in with your critic account to see where the Kitchen needs you.</p>'+
+      '<button class="btn btn-gold" onclick="openAuth(\'signin\')">Sign in</button></div>';
+    return;
+  }
+  if(!app.isCritic){
+    host.innerHTML='<div class="kb-head"><span class="kb-ey">The Kitchen</span><h1 class="kb-h">This board is for seated critics.</h1>'+
+      '<p class="kb-lede">The Kitchen is the verified-critic half of the verdict. If you write about film and want a seat at it, the door is open.</p>'+
+      '<button class="btn btn-gold" onclick="openContribute(\'critic\')">Apply to The Kitchen</button></div>';
+    return;
+  }
+  host.innerHTML='<div class="kb-head"><span class="kb-ey">The Kitchen</span><h1 class="kb-h">Where the Kitchen needs you.</h1>'+
+    '<p class="kb-lede">These films already carry a Table verdict and no critic score. One review from you makes the dual verdict possible.</p></div>'+
+    '<div id="kbList"><p class="empty-note">Loading the board…</p></div>';
+  loadKitchenBoard();
+}
+function loadKitchenBoard(){
+  if(!sbConfigured()){ byId('kbList').innerHTML='<p class="empty-note">Not configured.</p>'; return; }
+  var mine={}, ks={}, vc=[];
+  function paint(){
+    var rows=[];
+    for(var i=0;i<vc.length;i++){
+      var v=vc[i], slug=v.film_slug, total=(v.for_count||0)+(v.against_count||0);
+      if(ks[slug]) continue;          /* already has a Kitchen score */
+      if(mine[slug]) continue;        /* this critic already reviewed it */
+      var f=find(slug); if(!f||f.noart) continue;
+      if(upcomingSoonEntry(f)) continue;   /* not out yet — nobody can review it honestly */
+      rows.push({f:f,total:total});
+    }
+    rows.sort(function(a,b){ return b.total-a.total; });
+    _kbRows=rows;
+    var host=byId('kbList'); if(!host)return;
+    if(!rows.length){ host.innerHTML='<p class="empty-note">Nothing waiting. Every voted film already has a Kitchen score, or you have reviewed them all.</p>'; return; }
+    host.innerHTML='<p class="kb-count">'+rows.length+' films waiting on a critic</p><div class="kb-grid">'+
+      rows.slice(0,40).map(kbCardHTML).join('')+'</div>';
+  }
+  fetch(SUPABASE_URL+'/rest/v1/critic_reviews?select=film_slug&user_id=eq.'+encodeURIComponent(myUid()||''),{headers:sbUserHeaders()})
+    .then(function(r){return r.ok?r.json():[];}).then(function(d){ (d||[]).forEach(function(x){mine[x.film_slug]=1;}); })
+    .catch(function(){})
+    .then(function(){ return fetch(SUPABASE_URL+'/rest/v1/kitchen_scores?select=film_slug&limit=2000',{headers:sbHeaders()}); })
+    .then(function(r){return r.ok?r.json():[];}).then(function(d){ (d||[]).forEach(function(x){ks[x.film_slug]=1;}); })
+    .catch(function(){})
+    .then(function(){ return fetch(SUPABASE_URL+'/rest/v1/vote_counts?select=film_slug,for_count,against_count&limit=2000',{headers:sbHeaders()}); })
+    .then(function(r){return r.ok?r.json():[];}).then(function(d){ vc=d||[]; paint(); })
+    .catch(function(){ var h=byId('kbList'); if(h)h.innerHTML='<p class="empty-note">Could not load the board — try again.</p>'; });
+}
+function kbCardHTML(row){
+  var f=row.f;
+  return '<button class="kb-card" onclick="go(\'film\',\''+esc(f.id)+'\')">'+
+    '<span class="kb-po">'+posterInner(f)+'</span>'+
+    '<span class="kb-meta">'+
+      '<span class="kb-t">'+esc(f.title)+'</span>'+
+      '<span class="kb-y">'+esc(String(f.year||''))+(f.dir?' · '+esc(f.dir):'')+'</span>'+
+      '<span class="kb-v">'+row.total+' verdict'+(row.total===1?'':'s')+' waiting</span>'+
+    '</span>'+
+    '<span class="kb-go">Score it →</span></button>';
+}
 function loadKitchenReviews(slug){
   if(!sbConfigured())return;
   try{
@@ -12887,9 +12986,12 @@ function legalTerms(){
 function kitchenBlock(){
   var inner;
   if(app.isCritic){
+    /* Was: "open any film" + a button to Browse — i.e. go wander 1,280 titles
+       and guess. That is why eight seated critics produced 24 reviews. The
+       board names the exact films where one review completes a verdict. */
     inner='<b>You’re seated in the Kitchen'+(app.criticOutlet?' · '+esc(app.criticOutlet):'')+'.</b>'+
-      '<span>Open any film and use the “Your Kitchen review” box — your scores move the official number.</span>'+
-      '<button class="btn btn-gold btn-sm" onclick="go(\'browse\')">Review a film</button>';
+      '<span>The Table has already voted on films that still have no critic score. Your review is what makes the dual verdict possible on them.</span>'+
+      '<button class="btn btn-gold btn-sm" onclick="go(\'kitchen\')">See where you’re needed</button>';
   } else if(app.kitchenApp==='received'||app.kitchenApp==='review'){
     inner='<b>Your Kitchen application is in review.</b>'+
       '<span>A human on the editorial team reads every application. We’ll reach out at '+esc(app.email||'your email')+' — once seated, a review box appears on every film page.</span>';
