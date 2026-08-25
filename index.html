@@ -2110,6 +2110,49 @@
 .kb-v{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);margin-top:2px}
 .kb-go{flex:none;font-family:var(--display);font-weight:800;font-size:13px;color:var(--gold-deep);white-space:nowrap}
 @media(max-width:760px){.kb-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ===== THE PERFECT TEN (home poll) ===== */
+.p10{padding:30px 0}
+.p10-wrap{position:relative;overflow:hidden;isolation:isolate;transform:translateZ(0);
+  border-radius:22px;padding:34px 30px 30px;
+  background:linear-gradient(158deg,#241a10 0%,#140d06 56%,#0a0603 100%);
+  box-shadow:0 22px 60px rgba(0,0,0,.45)}
+.p10-wrap::after{content:'';position:absolute;top:50%;left:50%;width:170%;height:170%;
+  transform:translate(-50%,-50%);pointer-events:none;z-index:0;
+  background:conic-gradient(from 210deg,transparent 0 62%,rgba(255,214,130,.11) 74%,rgba(255,214,130,.03) 81%,transparent 88%);
+  animation:emmySpinCenter 20s linear infinite}
+.p10-spark{position:absolute;width:5px;height:5px;border-radius:50%;background:#F4C542;opacity:.7;z-index:1;
+  box-shadow:0 0 10px 2px rgba(244,197,66,.6);animation:emmyTwinkle 3.4s ease-in-out infinite}
+.p10-spark.s1{top:34px;right:64px}.p10-spark.s2{bottom:44px;left:52px;animation-delay:1.5s}
+.p10-head{position:relative;z-index:2;text-align:center;max-width:62ch;margin:0 auto 24px}
+.p10-ey{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+  background:linear-gradient(90deg,#a9720b,#f9dd8b 42%,#f4c542);-webkit-background-clip:text;background-clip:text;color:transparent}
+.p10-h{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,44px);line-height:1.1;color:#FBF3DE;margin:10px 0 10px}
+.p10-h em{color:var(--gold-soft);font-style:normal}
+.p10-lede{color:rgba(244,236,216,.76);font-size:16px;line-height:1.55;margin:0 auto}
+.p10-status{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-soft);margin-top:12px}
+.p10-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.p10-card{position:relative;overflow:hidden;border-radius:12px;aspect-ratio:2/3;padding:0;cursor:pointer;
+  border:1px solid rgba(244,197,66,.22);background:#140d06;text-align:left;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.p10-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 12px 28px rgba(0,0,0,.5)}
+.p10-card.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 12px 30px rgba(228,155,11,.3)}
+.p10-art{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.72)}
+.p10-card.on .p10-art{filter:brightness(.85)}
+.p10-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,3,.05) 30%,rgba(10,6,3,.88) 72%,rgba(10,6,3,.97) 100%)}
+.p10-tick{position:absolute;top:8px;right:8px;z-index:3;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#2b1c02;
+  background:linear-gradient(180deg,#F6C544,#D9930C);box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.p10-body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:10px 10px 11px;display:block}
+.p10-t{display:block;font-family:var(--display);font-weight:800;font-size:14px;line-height:1.15;color:#FBF3DE}
+.p10-n{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:rgba(244,236,216,.62);margin-top:3px}
+.p10-bar{display:block;height:4px;border-radius:99px;background:rgba(255,255,255,.16);margin-top:8px;overflow:hidden}
+.p10-bar span{display:block;height:100%;background:linear-gradient(90deg,#D9930C,#F6C544);border-radius:99px}
+.p10-pct{display:block;font-family:var(--mono);font-size:10px;color:var(--gold-soft);margin-top:4px}
+@media(max-width:900px){.p10-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:640px){.p10-wrap{padding:26px 16px 22px;border-radius:16px}
+  .p10-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+@media(prefers-reduced-motion:reduce){.p10-wrap::after,.p10-spark{animation:none}}
 </style>
 </head>
 <body>
@@ -2277,6 +2320,7 @@
         </section>
         <section id="tenYears" class="ten-years" style="display:none"></section>
         <div class="br-teaser" onclick="go('bracket')"><div><div class="brt-ey">The Bracket</div><div class="brt-ttl" id="brtTitle">Vote the tournament</div></div><span class="brt-cta">Enter →</span></div>
+        <section id="perfectTen" class="p10" style="display:none"></section>
         <section id="dailyTrivia" class="trivia" style="display:none"></section>
       </div>
 
@@ -9472,6 +9516,7 @@ function renderHome(){
     if(list.length){ g.innerHTML=list.slice(0,3).map(articleCard).join(''); s.style.display=''; }
     else s.style.display='none';
   });
+  paintPerfectTen(); loadPerfectTen();
   loadCulTalk();
 }
 /* "What the culture's saying" — owner-featured Table reads, pulled across
@@ -10009,6 +10054,102 @@ function kbCardHTML(row){
       '<span class="kb-v">'+row.total+' verdict'+(row.total===1?'':'s')+' waiting</span>'+
     '</span>'+
     '<span class="kb-go">Score it →</span></button>';
+}
+/* ============ THE PERFECT TEN (home poll) ============
+   "Which of these has no bad parts in it at all?" — not best, not favourite.
+   Airtight. No stretch you skip, no scene you defend.
+   Two picks max, and the maximum is enforced by the backend, not by a client
+   guard: debate_votes carries a unique index on (debate_id, user_id), so each
+   of the two slot ids can hold exactly one row per identity. Tapping a third
+   film is refused; tapping one you already picked releases that slot.
+   Reuses debate_votes / debate_tallies exactly as the Bracket does — no new
+   table, no migration. */
+var P10_SLOTS=['p10-a','p10-b'];
+var PERFECT_TEN=[
+  {id:'coming-to-america', note:'1988 · Landis'},
+  {id:'do-the-right-thing', note:'1989 · Lee'},
+  {id:'boyz',               note:'1991 · Singleton'},
+  {id:'friday',             note:'1995 · Gray'},
+  {id:'set-it-off',         note:'1996 · Gray'},
+  {id:'love-jones',         note:'1997 · Witcher'},
+  {id:'love-basketball',    note:'2000 · Prince-Bythewood'},
+  {id:'moonlight',          note:'2016 · Jenkins'},
+  {id:'getout',             note:'2017 · Peele'},
+  {id:'sinners',            note:'2025 · Coogler'}
+];
+var _p10Tally={};
+function p10Mine(){ try{ return JSON.parse(localStorage.getItem('ws_p10')||'[]')||[]; }catch(e){ return []; } }
+function p10Save(a){ try{ localStorage.setItem('ws_p10',JSON.stringify(a)); }catch(e){} }
+function p10Counts(){
+  var out={}, tot=0;
+  for(var d in _p10Tally){ var picks=_p10Tally[d]; for(var p in picks){ out[p]=(out[p]||0)+picks[p]; tot+=picks[p]; } }
+  return {byFilm:out,total:tot};
+}
+function paintPerfectTen(){
+  var el=byId('perfectTen'); if(!el)return;
+  var mine=p10Mine(), c=p10Counts();
+  var rows=PERFECT_TEN.map(function(o){
+    var f=find(o.id); if(!f) return '';
+    var n=c.byFilm[o.id]||0, pct=c.total?Math.round(n*100/c.total):0;
+    var on=mine.indexOf(o.id)>=0;
+    var p=servePoster(f);
+    return '<button class="p10-card'+(on?' on':'')+'" onclick="p10Pick(\''+esc(o.id)+'\')" aria-pressed="'+(on?'true':'false')+'">'+
+      '<span class="p10-art" style="'+(p?'background-image:url(\''+p.replace(/'/g,"%27")+'\')':'background:'+f.grad)+'"></span>'+
+      '<span class="p10-scrim"></span>'+
+      (on?'<span class="p10-tick">✓</span>':'')+
+      '<span class="p10-body">'+
+        '<span class="p10-t">'+esc(f.title)+'</span>'+
+        '<span class="p10-n">'+esc(o.note)+'</span>'+
+        (c.total?'<span class="p10-bar"><span style="width:'+pct+'%"></span></span><span class="p10-pct">'+pct+'%</span>':'') +
+      '</span></button>';
+  }).join('');
+  el.innerHTML='<div class="p10-wrap">'+
+    '<div class="p10-spark s1"></div><div class="p10-spark s2"></div>'+
+    '<div class="p10-head">'+
+      '<span class="p10-ey">The Perfect Ten</span>'+
+      '<h2 class="p10-h">Which one has <em>no bad parts</em>?</h2>'+
+      '<p class="p10-lede">Not your favourite. Not the most important. The one with no stretch you skip, no scene you have to explain. Pick up to two.</p>'+
+      '<p class="p10-status">'+(mine.length?(mine.length+' of 2 picked'+(mine.length===2?' — tap one to swap':'')):'Two picks maximum')+
+        (c.total?' · '+c.total+' pick'+(c.total===1?'':'s')+' cast':'')+'</p>'+
+    '</div>'+
+    '<div class="p10-grid">'+rows+'</div></div>';
+  el.style.display='';
+}
+function p10Pick(id){
+  var mine=p10Mine(), i=mine.indexOf(id);
+  if(i>=0){                                  /* release the slot */
+    var slot=P10_SLOTS[i];
+    mine.splice(i,1); p10Save(mine); paintPerfectTen();
+    if(sbConfigured()) ensureIdentityThen(function(){
+      /* Never fire the DELETE without a real uid — an empty user_id=eq. filter
+         is a request with no owner predicate. RLS would refuse it anyway
+         (using user_id = auth.uid()), but not sending it is the better habit. */
+      var uid=myUid(); if(!uid) return;
+      fetch(SUPABASE_URL+'/rest/v1/debate_votes?debate_id=eq.'+encodeURIComponent(slot)+'&user_id=eq.'+encodeURIComponent(uid),
+        {method:'DELETE',headers:sbVoteHeaders()}).then(loadPerfectTen).catch(function(){});
+    });
+    return;
+  }
+  if(mine.length>=2){ toast('Two picks maximum — tap one to swap it out.'); return; }
+  var slotIdx=mine.length, slotId=P10_SLOTS[slotIdx];
+  mine.push(id); p10Save(mine); sfx('for'); track('perfect_ten',{pick:id,slot:slotId}); paintPerfectTen();
+  if(!sbConfigured())return;
+  ensureIdentityThen(function(){
+    fetch(SUPABASE_URL+'/rest/v1/debate_votes?on_conflict=debate_id,user_id',{
+      method:'POST',
+      headers:sbVoteHeaders({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({debate_id:slotId,pick:id,device_id:wsDevice(),user_id:myUid()})
+    }).then(loadPerfectTen).catch(function(){});
+  });
+}
+function loadPerfectTen(){
+  if(!sbConfigured()){ paintPerfectTen(); return; }
+  fetch(SUPABASE_URL+'/rest/v1/debate_tallies?debate_id=like.p10-*&select=debate_id,pick,n',{headers:sbHeaders()})
+    .then(function(r){return r.ok?r.json():[];})
+    .then(function(rows){
+      _p10Tally={}; (rows||[]).forEach(function(x){ if(!_p10Tally[x.debate_id])_p10Tally[x.debate_id]={}; _p10Tally[x.debate_id][x.pick]=x.n; });
+      paintPerfectTen();
+    }).catch(function(){ paintPerfectTen(); });
 }
 function loadKitchenReviews(slug){
   if(!sbConfigured())return;
