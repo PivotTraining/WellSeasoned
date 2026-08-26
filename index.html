@@ -2184,6 +2184,26 @@
   color:var(--gold-deep);background:rgba(244,197,66,.12);border:1px solid rgba(244,197,66,.35);
   border-radius:99px;padding:7px 14px}
 @media(max-width:640px){.an-card{width:150px}}
+
+/* ===== COMING SOON — returning seasons ===== */
+.rs-card{position:relative;overflow:hidden;border-radius:14px;aspect-ratio:16/9;padding:0;cursor:pointer;
+  border:1px solid rgba(244,197,66,.4);background:#140d06;text-align:left;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.rs-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 12px 28px rgba(0,0,0,.28)}
+.rs-art{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.8)}
+.rs-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,3,.1) 30%,rgba(10,6,3,.9) 78%,rgba(10,6,3,.97) 100%)}
+.rs-day{position:absolute;top:10px;left:10px;z-index:3;font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:#2b1c02;background:linear-gradient(180deg,#F6C544,#D9930C);
+  border-radius:99px;padding:4px 10px}
+.rs-body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:11px 12px 13px;display:block}
+.rs-t{display:block;font-family:var(--display);font-weight:800;font-size:17px;line-height:1.15;color:#FBF3DE}
+.rs-s{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--gold-soft);margin-top:4px}
+
+.c-air{position:absolute;top:8px;left:8px;z-index:4;font-family:var(--mono);font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:#FBF3DE;background:rgba(10,6,3,.78);
+  border:1px solid rgba(244,236,216,.3);border-radius:99px;padding:3px 8px;backdrop-filter:blur(3px);
+  max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-air.prem{color:#2b1c02;background:linear-gradient(180deg,#F6C544,#D9930C);border-color:transparent}
 </style>
 </head>
 <body>
@@ -8605,6 +8625,11 @@ function refreshAiringBadge(){
 }
 function paintAiringNow(){
   refreshAiringBadge();
+  (function(){ var v=parseHash();
+    if(v.view==='soon') renderSoon();
+    if(v.view==='kids') renderKids();
+    if(v.view==='couch') renderCouch();
+    if(v.view==='browse') renderBrowse(); })();
   var el=byId('airingNow'); if(!el)return;
   var items=airingItems(7);
   if(!items.length){ el.style.display='none'; return; }
@@ -8832,6 +8857,7 @@ function isoDaysAgo(n){ var d=new Date(); d.setDate(d.getDate()-n); return d.get
 function soonReleased(c){ return c.date && c.date <= isoToday(); }   // its release date has arrived
 function renderSoon(){
   var g=byId('soonGrid'); if(!g)return;
+  if(!_airing){ loadAiringNow(); }   /* repaints via paintAiringNow -> refreshSoonReturning */
   var lead=[],feat=[];
   // Only still-upcoming titles here; released ones graduate to "Just Dropped".
   COMING_SOON.forEach(function(c,i){ if(soonReleased(c))return; (c.lead?lead:feat).push(soonCard(c,i)); });
@@ -8840,7 +8866,43 @@ function renderSoon(){
     '<p class="soon-sec-sub">Our people above the title. These are ours.</p><div class="soon-grid">'+lead.join('')+'</div>';
   if(feat.length) html+='<div class="shelf-head" style="margin:26px 0 4px"><h2>They\u2019re in the building</h2></div>'+
     '<p class="soon-sec-sub">Big ensembles with our folks in the cast.</p><div class="soon-grid">'+feat.join('')+'</div>';
+  var ret=returningSeasonsHTML();
+  if(ret) html = ret + html;
   g.innerHTML=html||'<p class="empty-note">Nothing on the stove right now \u2014 check back Friday.</p>';
+}
+/* Coming Soon only ever held brand-NEW titles, so a returning season was
+   invisible here — Beauty in Black's third season premiered with no listing at
+   all, and Abbott's sixth had none either. A new season is exactly as much a
+   "coming soon" as a new show. Sourced from the same data/airing.json the home
+   shelf uses, filtered to season premieres that have not aired yet, and any
+   title already carried in COMING_SOON is skipped so nothing double-lists. */
+function returningSeasons(){
+  var out=[], src=_airing||{}, seen={};
+  COMING_SOON.forEach(function(c){ seen[(c.title||'').toLowerCase()]=1; });
+  for(var id in src){
+    var e=src[id]; if(!e.premiere||e.season<2) continue;      /* season 1 = a new show, already listed */
+    var f=find(id); if(!f||f.noart) continue;
+    if(seen[(f.title||'').toLowerCase()]) continue;
+    var lab=anDayLabel(e.air_date); if(!lab) continue;        /* already aired — drop */
+    out.push({f:f,e:e,label:lab});
+  }
+  out.sort(function(a,b){ return a.e.air_date<b.e.air_date?-1:1; });
+  return out;
+}
+function returningSeasonsHTML(){
+  var items=returningSeasons(); if(!items.length) return '';
+  return '<div class="shelf-head" style="margin:8px 0 4px"><h2>Back for another season</h2></div>'+
+    '<p class="soon-sec-sub">Shows you already know, returning with new episodes.</p>'+
+    '<div class="soon-grid">'+items.map(function(it){
+      var f=it.f, e=it.e, p=servePoster(f);
+      return '<button class="rs-card" onclick="go(\'film\',\''+esc(f.id)+'\')">'+
+        '<span class="rs-art" style="'+(p?'background-image:url(\''+p.replace(/'/g,"%27")+'\')':'background:'+f.grad)+'"></span>'+
+        '<span class="rs-scrim"></span>'+
+        '<span class="rs-day">Premieres '+esc(it.label)+'</span>'+
+        '<span class="rs-body"><span class="rs-t">'+esc(f.title)+'</span>'+
+          '<span class="rs-s">Season '+e.season+(f.where&&f.where.length?' · '+esc(f.where[0]):'')+'</span></span>'+
+        '</button>';
+    }).join('')+'</div>';
 }
 function openSoonTrailer(i){
   var c=COMING_SOON[i]; if(!c||!c.trailer)return;
@@ -9801,11 +9863,23 @@ function fmtBadge(f){
   if(!lab) return '';
   return '<span class="card-fmt cf-'+lab.toLowerCase()+'">'+lab+'</span>';
 }
+/* A show with a new episode on the way says so on its card, everywhere a card
+   appears — Kids, Browse, On The Couch, every home shelf. Making it part of
+   cardHTML rather than one bespoke shelf is the point: the weekly cadence is
+   the reason to come back, so it should be visible wherever you meet a show,
+   not only on the one surface that was built for it. Returns '' for films, for
+   shows with nothing scheduled, and for dates already past. */
+function cardAiringPill(f){
+  if(!f||f.type!=='tv'||!_airing) return '';
+  var e=_airing[f.id]; if(!e) return '';
+  var lab=anDayLabel(e.air_date); if(!lab) return '';
+  return '<span class="c-air'+(e.premiere?' prem':'')+'">'+esc(e.premiere?'Premieres '+lab:'New '+lab)+'</span>';
+}
 function cardHTML(id){
   var f=(typeof id==='string')?find(id):id;
   var hov=f.trailer?' onmouseenter="cardPreview(this,\''+f.trailer+'\')" onmouseleave="cardPreviewOut(this)"':'';
   return '<div class="card" tabindex="0" role="button" aria-label="'+esc(f.title)+'" onclick="go(\'film\',\''+f.id+'\')" onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')">'+
-    '<div class="poster'+(f.noart?' noart':'')+' t-'+tier(f.k)+'"'+hov+' style="'+(f.noart?'':'background:'+f.grad)+'">'+fmtBadge(f)+posterInner(f,'p-ttl')+'</div>'+
+    '<div class="poster'+(f.noart?' noart':'')+' t-'+tier(f.k)+'"'+hov+' style="'+(f.noart?'':'background:'+f.grad)+'">'+fmtBadge(f)+cardAiringPill(f)+posterInner(f,'p-ttl')+'</div>'+
     '<div class="c-meta"><div class="c-name">'+esc(f.title)+'</div>'+
       cardScores(f)+
       '<div class="c-sub">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'By ':'Dir. ')+esc(f.dir)+' · ':'')+f.year+(f.type==='tv'?' · Series':'')+'</div>'+
@@ -11517,6 +11591,7 @@ function kidsFeaturedHTML(f){
 }
 function renderKids(){
   var el=byId('kidsContent'); if(!el)return;
+  if(!_airing) loadAiringNow();
   var all=FILMS.filter(function(f){ return !f.noart && scopeMatch(f) && isKidFriendly(f); });
   var types=[['✨ Everything','all'],['🎬 Movies','movie'],['📺 Series','tv']];
   var list=all.filter(function(f){ return KIDS_TYPE==='all' || f.type===KIDS_TYPE; })
