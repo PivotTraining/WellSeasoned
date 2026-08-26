@@ -2158,6 +2158,32 @@
   color:var(--gold-soft);background:rgba(244,197,66,.10);border:1px solid rgba(244,197,66,.4);
   border-radius:99px;padding:9px 20px;transition:background .16s ease,transform .16s ease}
 .p10-share:hover{background:rgba(244,197,66,.2);transform:translateY(-1px)}
+
+/* ===== AIRING NOW ===== */
+.an{padding:26px 0}
+.an-rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.an-rail::-webkit-scrollbar{display:none}
+.an-card{position:relative;flex:none;width:190px;aspect-ratio:2/3;scroll-snap-align:start;padding:0;cursor:pointer;
+  border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#140d06;text-align:left;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.an-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 12px 28px rgba(0,0,0,.28)}
+.an-card.prem{border-color:rgba(244,197,66,.75);box-shadow:0 0 0 1px rgba(244,197,66,.45)}
+.an-art{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.82)}
+.an-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,3,.12) 34%,rgba(10,6,3,.9) 74%,rgba(10,6,3,.97) 100%)}
+.an-day{position:absolute;top:9px;left:9px;z-index:3;font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:#FBF3DE;background:rgba(10,6,3,.72);
+  border:1px solid rgba(244,236,216,.28);border-radius:99px;padding:4px 9px;backdrop-filter:blur(3px)}
+.an-day.prem{color:#2b1c02;background:linear-gradient(180deg,#F6C544,#D9930C);border-color:transparent}
+.an-body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:10px 11px 12px;display:block}
+.an-t{display:block;font-family:var(--display);font-weight:800;font-size:15px;line-height:1.15;color:#FBF3DE}
+.an-ep{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--gold-soft);margin-top:4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.an-w{display:block;font-size:11.5px;color:rgba(244,236,216,.6);margin-top:3px}
+.an-badge{display:inline-block;margin:10px 0 0;font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+  color:var(--gold-deep);background:rgba(244,197,66,.12);border:1px solid rgba(244,197,66,.35);
+  border-radius:99px;padding:7px 14px}
+@media(max-width:640px){.an-card{width:150px}}
 </style>
 </head>
 <body>
@@ -2317,6 +2343,7 @@
         <!-- Real upcoming premieres, dated and clickable. Sits at the head of the
              dessert tier because it is actual film/TV content extending the
              catalog, not a game — it stays below the grid, above the rest. -->
+        <section id="airingNow" class="an" style="display:none"></section>
         <section id="fallSlate" class="fall-slate" style="display:none"></section>
         <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
         <section class="shelf emmy-banner" id="emmyBanner" style="display:none">
@@ -8525,6 +8552,88 @@ function nativeP10Share(){
     else if(navigator.share) navigator.share({title:'The Perfect Ten',text:txt,url:link}).catch(function(){});
   });
 }
+/* ============ AIRING NOW — what drops this week ============
+   TV was being treated exactly like film: one verdict for a five-season show,
+   and total silence about the fact that half a dozen of them air new episodes
+   every single week. That weekly cadence is the strongest reason-to-return
+   this site has and it was going unused.
+   Data comes from api/airing.json, precomputed by scripts/build-airing.cjs
+   (TMDB has no bulk "next episode" endpoint and its on_the_air feed found only
+   4 of our 176 shows, so doing it live would cost ~176 requests per visitor).
+   Staleness is handled here rather than by trusting the file: anything whose
+   air date has already passed is dropped, so an old build shows FEWER shows
+   than reality instead of a wrong date. Nothing is ever invented. */
+var _airing=null;
+function anDayLabel(iso){
+  var d=new Date(iso+'T00:00:00'), t=new Date(); t.setHours(0,0,0,0);
+  var diff=Math.round((d-t)/86400000);
+  if(diff<0) return null;
+  if(diff===0) return 'Tonight';
+  if(diff===1) return 'Tomorrow';
+  if(diff<7) return d.toLocaleDateString('en-US',{weekday:'long'});
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function loadAiringNow(){
+  if(_airing){ paintAiringNow(); return; }
+  fetch('/api/airing.json',{cache:'no-cache'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){ _airing=(j&&j.shows)||{}; paintAiringNow(); })
+    .catch(function(){ _airing={}; paintAiringNow(); });
+}
+function airingItems(days){
+  var out=[], src=_airing||{};
+  for(var id in src){
+    var e=src[id], f=find(id); if(!f||f.noart) continue;
+    var lab=anDayLabel(e.air_date); if(!lab) continue;      /* already aired — drop it */
+    var d=new Date(e.air_date+'T00:00:00'), t=new Date(); t.setHours(0,0,0,0);
+    var diff=Math.round((d-t)/86400000);
+    if(days && diff>days) continue;
+    out.push({f:f,e:e,label:lab,diff:diff});
+  }
+  out.sort(function(a,b){ return a.diff-b.diff; });
+  return out;
+}
+/* The film page paints synchronously but airing.json arrives async, so a
+   direct load of a show's page rendered an empty badge and never came back to
+   it. Fill the slot again once the data lands. */
+function refreshAiringBadge(){
+  var w=byId('airingBadgeWrap'); if(!w)return;
+  var r=parseHash(); if(r.view!=='film')return;
+  var f=find(r.arg); if(!f)return;
+  w.innerHTML=airingBadgeHTML(f);
+}
+function paintAiringNow(){
+  refreshAiringBadge();
+  var el=byId('airingNow'); if(!el)return;
+  var items=airingItems(7);
+  if(!items.length){ el.style.display='none'; return; }
+  el.innerHTML='<div class="shelf-head"><h2>New this week</h2>'+
+      '<button class="see" onclick="go(\'couch\')">All shows</button></div>'+
+    '<div class="an-rail">'+items.map(anCardHTML).join('')+'</div>';
+  el.style.display='';
+}
+function anCardHTML(it){
+  var f=it.f, e=it.e, p=servePoster(f);
+  var prem=e.premiere;
+  return '<button class="an-card'+(prem?' prem':'')+'" onclick="go(\'film\',\''+esc(f.id)+'\')">'+
+    '<span class="an-art" style="'+(p?'background-image:url(\''+p.replace(/'/g,"%27")+'\')':'background:'+f.grad)+'"></span>'+
+    '<span class="an-scrim"></span>'+
+    '<span class="an-day'+(prem?' prem':'')+'">'+esc(prem?'Premieres '+it.label:it.label)+'</span>'+
+    '<span class="an-body">'+
+      '<span class="an-t">'+esc(f.title)+'</span>'+
+      '<span class="an-ep">S'+e.season+'&thinsp;E'+e.episode+
+        (e.name&&!/^Episode \d+$/i.test(e.name)?' · '+esc(e.name):'')+'</span>'+
+      (f.where&&f.where.length?'<span class="an-w">'+esc(f.where[0])+'</span>':'')+
+    '</span></button>';
+}
+/* Film-page badge: a show with a dated next episode says so on its own page. */
+function airingBadgeHTML(f){
+  if(!f||f.type!=='tv'||!_airing) return '';
+  var e=_airing[f.id]; if(!e) return '';
+  var lab=anDayLabel(e.air_date); if(!lab) return '';
+  return '<div class="an-badge">📺 '+(e.premiere?'Premieres ':'New episode ')+esc(lab)+
+    ' · S'+e.season+'E'+e.episode+'</div>';
+}
 function isoToday(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
 /* July 4 freedom spotlight — live only on July 4 (visitor local time), 12:00am
    to 12:00am July 5. Real Black films on the fight against injustice and for
@@ -9640,6 +9749,7 @@ function renderHome(){
     if(list.length){ g.innerHTML=list.slice(0,3).map(articleCard).join(''); s.style.display=''; }
     else s.style.display='none';
   });
+  loadAiringNow();
   paintPerfectTen(); loadPerfectTen();
   loadCulTalk();
 }
@@ -9865,6 +9975,7 @@ function renderFilm(id){
             '<h1>'+esc(f.title)+'</h1>'+
             '<div class="room-meta">'+(f.dir&&f.dir!=='—'?(f.type==='tv'?'Created by ':'Dir. ')+esc(f.dir)+' &nbsp;·&nbsp; ':'')+f.year+' &nbsp;·&nbsp; '+f.rt+' &nbsp;·&nbsp; '+effGenre(f)+(f.type==='tv'?' &nbsp;·&nbsp; <strong>Series</strong>':'')+'</div>'+
             (upcomingReleaseDate(f)?'<div class="coming-badge">🗓 Coming '+artDate(upcomingReleaseDate(f))+' — not out yet</div>':'')+
+            '<span id="airingBadgeWrap">'+airingBadgeHTML(f)+'</span>'+
             /* An unreleased title has nowhere to watch — "Rent or buy"/"All
                options" would send people to a JustWatch search for a film that
                doesn't exist yet. Row is dropped entirely until it's out; the
@@ -9943,7 +10054,7 @@ function renderFilm(id){
       )+
       '</div>'+
     '</div>';
-  applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id); loadMyWatch(f.id); loadMiniTags(f.id);
+  if(!_airing)loadAiringNow(); applyHeroBg(f); renderVotes(f); renderComments(f); restoreVoteUI(f); animateAura(byId('filmContent')); loadBackendVotes(f.id); loadBackendComments(f.id); loadKitchenReviews(f.id); loadMyWatch(f.id); loadMiniTags(f.id);
   hydrateFilmMedia(f).then(function(changed){
     if(!changed)return;
     var on=document.querySelector('.view.on');
