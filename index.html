@@ -2289,6 +2289,7 @@
         <!-- The Balcony's current feature leads the page, rotating in with the
              carousel's real picks (paintLeadStory/leadSlides) — one banner,
              auto-advancing, instead of a separate spindle unit. -->
+        <section id="airingNow" class="an" style="display:none"></section>
         <section id="leadStory" class="lead-story" style="display:none"></section>
         <div class="hero-top">
           <div>
@@ -2363,7 +2364,6 @@
         <!-- Real upcoming premieres, dated and clickable. Sits at the head of the
              dessert tier because it is actual film/TV content extending the
              catalog, not a game — it stays below the grid, above the rest. -->
-        <section id="airingNow" class="an" style="display:none"></section>
         <section id="fallSlate" class="fall-slate" style="display:none"></section>
         <section id="eventSpotlight" class="ev-spot" style="display:none"></section>
         <section class="shelf emmy-banner" id="emmyBanner" style="display:none">
@@ -4005,7 +4005,7 @@ var FILMS=[
    tags:['Comedy','Chosen family','Second chances'],votes:{for:0,against:0},reviews:[]},
   {id:'all-the-queens-men',title:"All the Queen's Men",year:2021,rt:'5 seasons',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#6a1a6a,#1c0722)',
    backdrop:'https://image.tmdb.org/t/p/w1280/dt75jPUtDiY7sZpQaNoFKv3zkv.jpg',
-   dir:'Christian Keyes',cast:['Eva Marcille','Skyh Alvester Black','Candace Maxwell','Racquel Palmer'],moods:['Intense'],era:'2020s',where:['BET+','Paramount+'],
+   dir:'Christian Keyes',cast:['Eva Marcille','Skyh Alvester Black','Candace Maxwell','Racquel Palmer'],moods:['Intense'],era:'2020s',where:['Paramount+'],
    syn:'Marilyn "Madam" DeVille sits atop Atlanta’s nightclub empire, ruling a crew of male dancers and letting nothing and no one stand in her way. Now in its fifth season.',
    tags:['Drama','Atlanta','Power'],votes:{for:0,against:0},reviews:[]},
   {id:'lanterns',title:'Lanterns',year:2026,rt:'8 episodes',genre:'Superhero',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#1f7a4d,#06231a)',
@@ -4292,7 +4292,7 @@ var FILMS=[
    tags:['TV Movie','Comedy'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-house-of-payne',title:'Tyler Perry\'s House of Payne',year:2007,rt:'14 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#6a1810,#200705)',
    backdrop:'https://image.tmdb.org/t/p/w1280/4bzSEBjVb3QwPaJ39Rp2gmH9Bug.jpg',
-   dir:'Tyler Perry',cast:['LaVan Davis','Cassi Davis','Allen Payne','Doc Shaw','Lance Gross'],moods:['Playful'],era:'2000s',where:['BET+'],
+   dir:'Tyler Perry',cast:['LaVan Davis','Cassi Davis','Allen Payne','Doc Shaw','Lance Gross'],moods:['Playful'],era:'2000s',where:['Philo','The Roku Channel'],
    syn:'A multigenerational, working-class family experience life\'s struggles with faith, love and, most importantly, humor. Curtis, aka \'Pops\', the uncle and head of the household, has house and home turned upside down when an unexpected event forces…',
    tags:['Comedy'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-the-haves-and-the',title:'Tyler Perry\'s The Haves and the Have Nots',year:2013,rt:'8 seasons',genre:'Soap',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#4a1c3a,#180a14)',
@@ -4302,22 +4302,22 @@ var FILMS=[
    tags:['Soap','Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-bruh',title:'Tyler Perry\'s Bruh',year:2020,rt:'4 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#5a2a12,#1c0d05)',
    backdrop:'https://image.tmdb.org/t/p/w1280/isVsViu7d6eCNi60PwqiBA2BM3T.jpg',
-   dir:'Tyler Perry',cast:['Barry Brewer','Mahdi Cocci','Phillip Mullings Jr.','Monti Washington','Alyssa Goss'],moods:['Playful'],era:'2020s',where:['BET+'],
+   dir:'Tyler Perry',cast:['Barry Brewer','Mahdi Cocci','Phillip Mullings Jr.','Monti Washington','Alyssa Goss'],moods:['Playful'],era:'2020s',where:['Paramount+'],
    syn:'This dramedy follows four longtime friends as they navigate life and relationships through the strength of their brother-like bond. In a society where relationships between men of color are often misjudged and misrepresented, the series embraces…',
    tags:['Comedy','Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-zatima',title:'Tyler Perry\'s Zatima',year:2022,rt:'4 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#1c3a5a,#08131c)',
    backdrop:'https://image.tmdb.org/t/p/w1280/lmAuvlNINC7UhHpWaI7L3fdcjCw.jpg',
-   dir:'Tyler Perry',cast:['Jasmin Brown'],moods:['Playful'],era:'2020s',where:['BET+'],
+   dir:'Tyler Perry',cast:['Jasmin Brown'],moods:['Playful'],era:'2020s',where:['Paramount+'],
    syn:'Zac and Fatima take a huge step to strengthen their bond, but new friends and past actions interfere with their blossoming relationship.',
    tags:['Comedy','Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'caught-up',title:'Caught Up',year:2023,rt:'1 season',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#3a1c5a,#140a24)',
    backdrop:'https://image.tmdb.org/t/p/w1280/grRS1JR1IB6NXriWaX4M9rc8aXo.jpg',
-   dir:'Jasmin Brown',cast:['Jasmin Brown'],moods:['Playful'],era:'2020s',where:['BET+'],
+   dir:'Jasmin Brown',cast:['Jasmin Brown'],moods:['Playful'],era:'2020s',where:['Paramount+'],
    syn:'Jazzy, like most women in their twenties, wants it all – the career, the home, the husband. Enter Wayne. Handsome, successful, thoughtful, and spontaneous, he sweeps Jazzy off her feet almost instantly. But after spending a year building their…',
    tags:['Comedy','Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-assisted-living',title:'Tyler Perry\'s Assisted Living',year:2020,rt:'6 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#144a3a,#07160f)',
    backdrop:'https://image.tmdb.org/t/p/w1280/3zAzYjSUMYjdeY5gBTe7HTP0sMt.jpg',
-   dir:'Tyler Perry',cast:['J. Anthony Brown','Na\'im Lynn','David Mann','Courtney Nichole','Tamela Mann'],moods:['Playful'],era:'2020s',where:['BET+'],
+   dir:'Tyler Perry',cast:['J. Anthony Brown','Na\'im Lynn','David Mann','Courtney Nichole','Tamela Mann'],moods:['Playful'],era:'2020s',where:['Paramount+'],
    syn:'After losing his job, Jeremy, a patriarch of a young family with teenage children, decides to move to the backwoods of Georgia to help his crazy grandfather. Grandpa Vinny has foolishly purchased a terribly run-down home for the elderly and he is…',
    tags:['Comedy'],votes:{for:0,against:0},reviews:[]},
   {id:'beauty-in-black',title:'Beauty in Black',year:2024,rt:'2 seasons',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#7a1414,#280808)',
@@ -4332,7 +4332,7 @@ var FILMS=[
    tags:['Comedy','Family'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-divorced-sistas',title:'Tyler Perry\'s Divorced Sistas',year:2025,rt:'1 season',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#231a4d,#0b0820)',
    backdrop:'https://image.tmdb.org/t/p/w1280/zhM516IPD6XuRk0KozRC8lpmDuD.jpg',
-   dir:'Tyler Perry',cast:['LeToya Luckett','Khadeen Indréa','Porscha Coleman','Briana Price','Jennifer Sears'],moods:['Contemplative'],era:'2020s',where:['BET+'],
+   dir:'Tyler Perry',cast:['LeToya Luckett','Khadeen Indréa','Porscha Coleman','Briana Price','Jennifer Sears'],moods:['Contemplative'],era:'2020s',where:['Paramount+'],
    syn:'Five friends - Rasheda, Geneva, Naomi, Tiffany, and Bridgette - support each other through divorce, marriage, dating, healing, and friendship struggles while their loyalty and sisterhood bonds are tested.',
    tags:['Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-meet-the-browns',title:'Tyler Perry\'s Meet the Browns',year:2009,rt:'5 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#6a1810,#200705)',
@@ -4356,17 +4356,17 @@ var FILMS=[
    tags:['Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-the-oval',notkids:true,title:'Tyler Perry\'s The Oval',year:2019,rt:'7 seasons',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#3a1c5a,#140a24)',
    backdrop:'https://image.tmdb.org/t/p/w1280/nHhczDKcSsnNFWDHVTMhXcnh9zF.jpg',
-   dir:'Tyler Perry',cast:['Ed Quinn','Kron Moore','Javon Johnson','Ptosha Storey','Daniel Croix'],moods:['Contemplative'],era:'2010s',where:['BET+'],
+   dir:'Tyler Perry',cast:['Ed Quinn','Kron Moore','Javon Johnson','Ptosha Storey','Daniel Croix'],moods:['Contemplative'],era:'2010s',where:['Paramount+','Hulu'],
    syn:'A seemingly perfect interracial first family becomes the White House\'s newest residents. But behind closed doors they unleash a torrent of lies, cheating and corruption.',
    tags:['Drama','Family'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-sistas',title:'Tyler Perry\'s Sistas',year:2019,rt:'10 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#144a3a,#07160f)',
    backdrop:'https://image.tmdb.org/t/p/w1280/8pWr7esugITmgrH22OXVmRg8xks.jpg',
-   dir:'Tyler Perry',cast:['KJ Smith','Mignon Von','Ebony Obsidian','Novi Brown','Crystal Hayslett'],moods:['Playful'],era:'2010s',where:['BET+'],
+   dir:'Tyler Perry',cast:['KJ Smith','Mignon Von','Ebony Obsidian','Novi Brown','Crystal Hayslett'],moods:['Playful'],era:'2010s',where:['Paramount+','Hulu'],
    syn:'There\'s nothing that bonds a group of single black women together more than sidestepping the land mines of living, working and dating in Atlanta. In a sea of swipe-lefts, social media drama and unrealistic #relationshipgoals, these friends try to…',
    tags:['Comedy','Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-ruthless',title:'Tyler Perry\'s Ruthless',year:2020,rt:'6 seasons',genre:'Drama',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#7a1414,#280808)',
    backdrop:'https://image.tmdb.org/t/p/w1280/w9jIdhlDrMcW2VcJ7oKFRAuAxpY.jpg',
-   dir:'Tyler Perry',cast:['Melissa L. Williams','Matt Cedeño','Lenny Thomas','Yvonne Senat Jones','Baadja-Lyne Odums'],moods:['Contemplative'],era:'2020s',where:['BET+'],
+   dir:'Tyler Perry',cast:['Melissa L. Williams','Matt Cedeño','Lenny Thomas','Yvonne Senat Jones','Baadja-Lyne Odums'],moods:['Contemplative'],era:'2020s',where:['Paramount+'],
    syn:'A spinoff of "The Oval," follows Ruth Truesdale as she\'s forced to play nice with a scandalous religious cult of powerful sex crazed fanatics in the hopes of freeing herself and her daughter.',
    tags:['Drama'],votes:{for:0,against:0},reviews:[]},
   {id:'tyler-perry-s-for-better-or-worse',title:'Tyler Perry\'s For Better or Worse',year:2011,rt:'6 seasons',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#5a4a12,#1c1505)',
