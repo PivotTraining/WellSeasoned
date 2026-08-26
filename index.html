@@ -8557,7 +8557,8 @@ function nativeP10Share(){
    and total silence about the fact that half a dozen of them air new episodes
    every single week. That weekly cadence is the strongest reason-to-return
    this site has and it was going unused.
-   Data comes from api/airing.json, precomputed by scripts/build-airing.cjs
+   Data comes from data/airing.json, precomputed by scripts/build-airing.cjs
+   (data/, not api/ — on Vercel api/ is the functions dir and is not static)
    (TMDB has no bulk "next episode" endpoint and its on_the_air feed found only
    4 of our 176 shows, so doing it live would cost ~176 requests per visitor).
    Staleness is handled here rather than by trusting the file: anything whose
@@ -8575,7 +8576,7 @@ function anDayLabel(iso){
 }
 function loadAiringNow(){
   if(_airing){ paintAiringNow(); return; }
-  fetch('/api/airing.json',{cache:'no-cache'})
+  fetch('/data/airing.json',{cache:'no-cache'})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(j){ _airing=(j&&j.shows)||{}; paintAiringNow(); })
     .catch(function(){ _airing={}; paintAiringNow(); });

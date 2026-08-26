@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Builds api/airing.json — the next episode to air for every TV title in the
+/* Builds data/airing.json — the next episode to air for every TV title in the
    catalog, straight from TMDB.
    Why precomputed and not fetched live: TMDB has no bulk "next episode" call,
    and its on_the_air feed is global and misses most US shows (it found 4 of our
@@ -9,6 +9,10 @@
    entry whose air date has passed, so a stale build shows FEWER shows than
    reality rather than a wrong date. Re-run this weekly, same as
    build-films-json.cjs.
+   NOTE on location: this lives in data/, NOT api/. On Vercel api/ is the
+   serverless-functions directory and its files are not served statically —
+   api/films.json 404s publicly too; it only works because api/f.js *imports*
+   it server-side. data/ is served static, same as og/ and word/.
    Usage: node scripts/build-airing.cjs                                       */
 const fs=require('fs'), path=require('path'), https=require('https');
 const ROOT=path.join(__dirname,'..');
@@ -57,7 +61,7 @@ function films(){
     }
     if(n%25===0) console.log('  …checked',n,'of',tv.length);
   }
-  const file=path.join(ROOT,'api','airing.json');
+  const file=path.join(ROOT,'data','airing.json');
   fs.writeFileSync(file,JSON.stringify({built:new Date().toISOString().slice(0,10),shows:out},null,0));
   console.log('\nairing.json: %d shows with a scheduled next episode (of %d checked)',found,tv.length);
   if(skipped.length){ console.log('rejected on name mismatch (%d):',skipped.length); skipped.slice(0,12).forEach(x=>console.log('   ',x)); }
