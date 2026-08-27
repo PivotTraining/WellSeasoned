@@ -2204,6 +2204,40 @@
   border:1px solid rgba(244,236,216,.3);border-radius:99px;padding:3px 8px;backdrop-filter:blur(3px);
   max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c-air.prem{color:#2b1c02;background:linear-gradient(180deg,#F6C544,#D9930C);border-color:transparent}
+
+/* ===== THE WIRE (news division) ===== */
+.wire{margin:0 0 30px}
+.wire-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  border-bottom:2px solid var(--paprika);padding-bottom:10px;margin-bottom:4px}
+.wire-ey{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--paprika)}
+.wire-sub{font-size:14px;color:var(--ink-3)}
+.wire-all{margin-left:auto;font-family:var(--display);font-weight:800;font-size:13px;color:var(--gold-deep);
+  background:none;border:0;cursor:pointer}
+.wire-all:hover{text-decoration:underline}
+.wire-list{list-style:none;margin:0;padding:0}
+.wire-item{display:grid;grid-template-columns:104px 1fr;gap:16px;padding:15px 2px;
+  border-bottom:1px solid var(--line);align-items:start}
+.wire-item:last-child{border-bottom:0}
+.wire-when{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:4px;white-space:nowrap}
+.wire-h{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.25;margin:0;color:var(--ink)}
+.wire-d{font-size:15px;line-height:1.55;color:var(--ink-2);margin:5px 0 0;max-width:70ch}
+.wire-foot{display:flex;gap:14px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.wire-link{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold-deep);background:rgba(228,155,11,.12);border:1px solid rgba(228,155,11,.35);
+  border-radius:99px;padding:5px 11px;cursor:pointer}
+.wire-link:hover{background:rgba(228,155,11,.22)}
+.wire-src{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.wire-full .wire-item{padding:18px 2px}
+/* The Balcony runs a dark tone; the wire has to follow it there. */
+body[data-view="word"] .wire-h{color:#FBF3DE}
+body[data-view="word"] .wire-d{color:rgba(244,236,216,.74)}
+body[data-view="word"] .wire-sub,body[data-view="word"] .wire-when,body[data-view="word"] .wire-src{color:rgba(244,236,216,.55)}
+body[data-view="word"] .wire-item{border-bottom-color:rgba(244,236,216,.16)}
+body[data-view="word"] .wire-ey{color:#E4794A}
+body[data-view="word"] .wire-head{border-bottom-color:#E4794A}
+body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--gold-soft)}
+@media(max-width:640px){.wire-item{grid-template-columns:1fr;gap:4px}.wire-when{padding-top:0}}
 </style>
 </head>
 <body>
@@ -2514,6 +2548,9 @@
   <section class="view" data-view="events" aria-label="Film Events">
     <div class="wrap" id="eventsContent"></div>
   </section>
+  <section class="view" data-view="wire" aria-label="The Wire">
+    <div class="wrap" id="wireContent"></div>
+  </section>
   <section class="view" data-view="kitchen" aria-label="The Kitchen Board">
     <div class="wrap" id="kitchenContent"></div>
   </section>
@@ -2540,6 +2577,7 @@
 
   <!-- ============ THE WORD (editorial) ============ -->
   <section class="view" data-view="word" aria-label="The Balcony">
+    <div class="wrap"><div id="wordWire" class="wire" style="display:none"></div></div>
     <div class="wrap" id="wordContent"></div>
   </section>
   <section class="view" data-view="read" aria-label="Article">
@@ -6901,7 +6939,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1};
+var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -6965,6 +7003,7 @@ function render(view,arg){
   else if(view==='advertise')renderAdvertise();
   else if(view==='events')renderEvents();
   else if(view==='kitchen')renderKitchenBoard();
+  else if(view==='wire')renderWire();
   // Reset to the top AFTER the view's content is in the DOM. The pre-render
   // scrollTo above runs while the new view is still empty and gets undone by the
   // fade transition / late layout, which left film pages opening at the previous
@@ -12705,11 +12744,73 @@ function renderWord(){
   loadArticles(function(list){
     var g=byId('wordGrid'), cv=byId('wordCover'); if(!g)return;
     if(!list.length){ g.innerHTML='<p class="empty-note">The first pieces are being written. Check back soon.</p>'; if(cv)cv.innerHTML=''; return; }
-    var cover=list[0], rest=list.slice(1);
+    /* News is a different shape and a different clock from the longform, so it
+       is pulled out of the magazine grid entirely and runs as a dated wire
+       above it. A dispatch in a Vanity-Fair card would read as a stub feature;
+       a feature in a wire list would read as a headline with no story. */
+    var news=list.filter(function(a){ return a.kind==='news'; });
+    var mag=list.filter(function(a){ return a.kind!=='news'; });
+    paintWire(news);
+    if(!mag.length){ g.innerHTML='<p class="empty-note">The first pieces are being written. Check back soon.</p>'; if(cv)cv.innerHTML=''; return; }
+    var cover=mag[0], rest=mag.slice(1);
     if(cv)cv.innerHTML=wordCoverHTML(cover);
     // Vanity-Fair-style mixed editorial grid — no section headers; each
     // piece's kind reads as its red kicker, newest first.
     g.innerHTML=rest.length?'<div class="vf-grid">'+rest.map(articleVFCard).join('')+'</div>':'';
+  });
+}
+/* ---- THE WIRE — the news division ------------------------------------------
+   Short dated dispatches: headline, a few sentences, a source. Reuses the
+   articles table, the owner-gated publish RPC and the read policy — a news
+   item is just kind='news' with a source_url. It gets its own presentation
+   because it is a different shape from a feature, and its own honest clock:
+   every item shows how old it is, so a quiet stretch reads as a quiet stretch
+   rather than being disguised. */
+function wireAgo(iso){
+  if(!iso) return '';
+  var t=Date.parse(iso); if(isNaN(t)) return '';
+  var mins=Math.floor((Date.now()-t)/60000);
+  if(mins<60) return mins<=1?'just now':mins+'m ago';
+  var h=Math.floor(mins/60); if(h<24) return h+'h ago';
+  var d=Math.floor(h/24); if(d===1) return 'yesterday';
+  if(d<7) return d+' days ago';
+  return new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function wireItemHTML(a){
+  var link='', f=a.film_slug?find(a.film_slug):null;
+  if(f) link='<button class="wire-link" onclick="go(\'film\',\''+esc(f.id)+'\')">'+esc(f.title)+' →</button>';
+  var src=a.source_url?'<a class="wire-src" href="'+esc(a.source_url)+'" target="_blank" rel="noopener noreferrer">Source ↗</a>':'';
+  return '<li class="wire-item">'+
+    '<div class="wire-when">'+esc(wireAgo(a.created_at))+'</div>'+
+    '<div class="wire-body">'+
+      '<h3 class="wire-h">'+esc(a.title)+'</h3>'+
+      (a.dek?'<p class="wire-d">'+esc(a.dek)+'</p>':'')+
+      '<div class="wire-foot">'+link+src+'</div>'+
+    '</div></li>';
+}
+function paintWire(news){
+  var host=byId('wordWire'); if(!host)return;
+  if(!news||!news.length){ host.innerHTML=''; host.style.display='none'; return; }
+  var top=news.slice(0,6);
+  host.innerHTML='<div class="wire-head">'+
+      '<span class="wire-ey">📰 The Wire</span>'+
+      '<span class="wire-sub">Black film &amp; TV news, as it lands</span>'+
+      (news.length>6?'<button class="wire-all" onclick="go(\'wire\')">All dispatches →</button>':'')+
+    '</div><ul class="wire-list">'+top.map(wireItemHTML).join('')+'</ul>';
+  host.style.display='';
+}
+function renderWire(){
+  var el=byId('wireContent'); if(!el)return;
+  el.innerHTML='<button class="backbtn" onclick="go(\'word\')">← The Balcony</button>'+
+    '<div class="browse-head"><span class="eyebrow">📰 The Wire</span>'+
+    '<h1 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Black film &amp; TV news.</h1>'+
+    '<p class="soon-sec-sub">Every dispatch, newest first. Each one cites where it came from.</p></div>'+
+    '<div id="wireAll"><p class="empty-note">Loading…</p></div>';
+  loadArticles(function(list){
+    var news=list.filter(function(a){ return a.kind==='news'; });
+    var h=byId('wireAll'); if(!h)return;
+    h.innerHTML=news.length?'<ul class="wire-list wire-full">'+news.map(wireItemHTML).join('')+'</ul>'
+      :'<p class="empty-note">No dispatches yet.</p>';
   });
 }
 /* small, safe markdown: escape first, then headings / bold / italic / links / lists / paragraphs */
@@ -12742,15 +12843,33 @@ function ytId(url){
   if(/^[A-Za-z0-9_-]{9,15}$/.test(s))return s;
   return null;
 }
-var ARTICLE_KIND_LABEL={interview:'🎤 Interview',editorial:'✍️ Editorial',article:'The Balcony'};
+var ARTICLE_KIND_LABEL={interview:'🎤 Interview',editorial:'✍️ Editorial',news:'📰 The Wire',article:'The Balcony'};
 /* Reads with the magazine columns; falls back to the pre-migration column
    list (same guard as loadArticles) so an unmigrated DB still serves reads. */
 function _articleFetch(qs, cb){
-  var full='slug,title,dek,author,film_slug,hero_image,hero_pos,kind,video_url,subject,body,created_at';
+  /* Column sets, widest first. Each fallback is one step narrower, so a
+     database that has not had a given migration run still returns everything
+     it does have instead of collapsing straight to the oldest schema:
+       full  — with source_url (news division)
+       mag   — with kind/video_url/subject (magazine)
+       basic — the original columns */
+  var full ='slug,title,dek,author,film_slug,hero_image,hero_pos,kind,video_url,subject,source_url,body,created_at';
+  var mag  ='slug,title,dek,author,film_slug,hero_image,hero_pos,kind,video_url,subject,body,created_at';
   var basic='slug,title,dek,author,film_slug,hero_image,hero_pos,body,created_at';
-  fetch(SUPABASE_URL+'/rest/v1/articles?'+qs+'&select='+full,{headers:sbHeaders()})
-    .then(function(r){ if(!r.ok){ _articlesMagazineCols=false; return fetch(SUPABASE_URL+'/rest/v1/articles?'+qs+'&select='+basic,{headers:sbHeaders()}).then(function(r2){return r2.json();}); } return r.json(); })
-    .then(function(rows){ if(Array.isArray(rows))rows.forEach(function(a){ if(!a.kind)a.kind='article'; }); cb(rows); })
+  function grab(cols){ return fetch(SUPABASE_URL+'/rest/v1/articles?'+qs+'&select='+cols,{headers:sbHeaders()}); }
+  grab(full)
+    .then(function(r){
+      if(r.ok) return r.json();
+      return grab(mag).then(function(rm){
+        if(rm.ok) return rm.json();
+        _articlesMagazineCols=false;
+        return grab(basic).then(function(rb){ return rb.json(); });
+      });
+    })
+    .then(function(rows){
+      if(Array.isArray(rows)) rows.forEach(function(a){ if(!a.kind) a.kind='article'; });
+      cb(rows);
+    })
     .catch(function(){ cb(null); });
 }
 function renderRead(slug){
@@ -12802,14 +12921,18 @@ function openArticleEditor(slug){
   }
   paintArticleEditor(slug);
 }
-function _arKindFieldsHTML(kind,videoUrl){
+function _arKindFieldsHTML(kind,videoUrl,sourceUrl){
+  if(kind==='news'){
+    /* A dispatch cites or it isn't news. */
+    return '<div class="field"><label for="arSource">Source URL</label><input id="arSource" value="'+esc(sourceUrl||'')+'" placeholder="Link to the trade piece, press release or official post"></div>';
+  }
   if(kind!=='interview')return '';
   return '<div class="field"><label for="arVideo">Video URL (interview, optional)</label><input id="arVideo" value="'+esc(videoUrl||'')+'" placeholder="YouTube link — leave blank for a text-only interview"></div>';
 }
 function arKindChanged(){
   var kind=(byId('arKind')||{}).value||'article';
   var wrap=byId('arKindFields'); if(!wrap)return;
-  wrap.innerHTML=_arKindFieldsHTML(kind,(byId('arVideo')||{}).value);
+  wrap.innerHTML=_arKindFieldsHTML(kind,(byId('arVideo')||{}).value,(byId('arSource')||{}).value);
 }
 function paintArticleEditor(slug){
   var a=slug?(_articleBySlug[slug]||{}):{};
@@ -12817,10 +12940,10 @@ function paintArticleEditor(slug){
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>'+(slug?'Edit':'Write')+' for the magazine</h2><p class="m-sub">Publishes to The Balcony for everyone. Markdown: <b>## heading</b>, <b>**bold**</b>, <b>*italic*</b>, <b>- list</b>, <b>[text](url)</b>.</p>'+
     '<div class="field"><label for="arKind">Kind</label><select id="arKind" onchange="arKindChanged()">'+
-      [['article','Article / Review'],['interview','Interview'],['editorial','Editorial']].map(function(k){ return '<option value="'+k[0]+'"'+(kind===k[0]?' selected':'')+'>'+k[1]+'</option>'; }).join('')+
+      [['article','Article / Review'],['interview','Interview'],['editorial','Editorial'],['news','📰 News dispatch (The Wire)']].map(function(k){ return '<option value="'+k[0]+'"'+(kind===k[0]?' selected':'')+'>'+k[1]+'</option>'; }).join('')+
       '</select></div>'+
     '<div class="field"><label for="arSubject">People featured (comma-separated)</label><input id="arSubject" value="'+esc(a.subject||'')+'" placeholder="e.g. Colman Domingo, Nia Long — each name links to their profile"></div>'+
-    '<div id="arKindFields">'+_arKindFieldsHTML(kind,a.video_url)+'</div>'+
+    '<div id="arKindFields">'+_arKindFieldsHTML(kind,a.video_url,a.source_url)+'</div>'+
     '<div class="field"><label for="arTitle">Title</label><input id="arTitle" value="'+esc(a.title||'')+'" placeholder="Headline"></div>'+
     '<div class="field"><label for="arDek">Dek (subtitle)</label><input id="arDek" value="'+esc(a.dek||'')+'" placeholder="One line under the headline"></div>'+
     '<div class="field"><label for="arAuthor">Author</label><input id="arAuthor" value="'+esc(a.author||'The Founder')+'" placeholder="Byline"></div>'+
@@ -12850,7 +12973,7 @@ function doPublishArticle(slug){
     film_slug:(byId('arFilm')||{}).value||'', hero_image:(byId('arHero')||{}).value||'',
     hero_pos:(byId('arHeroPos')||{}).value||'center', body:body, published:true,
     kind:(byId('arKind')||{}).value||'article', subject:(byId('arSubject')||{}).value||'',
-    video_url:(byId('arVideo')||{}).value||'' };
+    video_url:(byId('arVideo')||{}).value||'', source_url:(byId('arSource')||{}).value||'' };
   if(slug)art.slug=slug;
   ownerFetch(SUPABASE_URL+'/rest/v1/rpc/publish_article',{p_secret:_adminSecretQuiet(),p_article:art})
     .then(function(r){ if(!r.ok){ toast('Failed — make sure you’re signed in as the owner.'); return null; } return r.json(); })
