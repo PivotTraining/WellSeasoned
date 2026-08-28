@@ -1,0 +1,68 @@
+# Refreshes data/airing.json — the "New this week" shelf, the Coming Soon
+# "Back for another season" section, and the card pills.
+#
+# Why this has to be automated: the file stores only each show's NEXT episode.
+# A weekly show therefore falls out of the shelf the day after it airs and does
+# not come back until the script runs again. Built by hand, the shelf empties
+# itself within a week while the shows are still on the air. There is no person
+# whose job this is, so it is a cron.
+#
+# It commits straight to the deploy branch, which is what triggers Vercel — the
+# same effect as a normal push. If TMDB returns nothing new the file is
+# unchanged and the job exits without committing, so this does not produce a
+# daily empty commit.
+name: Refresh airing schedule
+
+on:
+  schedule:
+    - cron: '17 9 * * *'      # 09:17 UTC daily — off the hour, since scheduled
+                              # jobs on the hour queue behind everyone else's
+  workflow_dispatch:           # and runnable by hand from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-airing
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/new-session-9aa459
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Rebuild the airing schedule from TMDB
+        run: node scripts/build-airing.cjs
+
+      - name: Sanity-check the output before committing
+        run: |
+          node -e "
+            const d=require('./data/airing.json');
+            const n=Object.keys(d.shows||{}).length;
+            if(!d.built) { console.error('no build date'); process.exit(1); }
+            // A run that finds nothing is far more likely to be a TMDB outage
+            // or a broken query than a genuine week with zero Black TV airing.
+            // Refuse to commit an empty file over a good one.
+            if(n===0) { console.error('refusing to commit an empty schedule'); process.exit(1); }
+            console.log('ok:',n,'shows, built',d.built);
+          "
+
+      - name: Commit if the schedule actually changed
+        run: |
+          if git diff --quiet -- data/airing.json; then
+            echo "schedule unchanged — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "well-seasoned-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/airing.json
+          git commit -m "Refresh airing schedule ($(date -u +%Y-%m-%d))"
+          git push
