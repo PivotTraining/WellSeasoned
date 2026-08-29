@@ -2238,6 +2238,26 @@ body[data-view="word"] .wire-ey{color:#E4794A}
 body[data-view="word"] .wire-head{border-bottom-color:#E4794A}
 body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--gold-soft)}
 @media(max-width:640px){.wire-item{grid-template-columns:1fr;gap:4px}.wire-when{padding-top:0}}
+
+/* ===== AIRING NOW — daily rotating lead ===== */
+.an-lead{position:relative;display:block;width:100%;aspect-ratio:21/9;border-radius:16px;overflow:hidden;
+  padding:0;cursor:pointer;border:1px solid var(--line);background:#140d06;text-align:left;margin:2px 0 14px;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.an-lead:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 16px 36px rgba(0,0,0,.3)}
+.an-lead.prem{border-color:rgba(244,197,66,.75)}
+.anl-art{position:absolute;inset:0;background-size:cover;background-position:center 28%;filter:brightness(.78)}
+.anl-scrim{position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(10,6,3,.92) 0%,rgba(10,6,3,.72) 42%,rgba(10,6,3,.25) 100%),
+             linear-gradient(0deg,rgba(10,6,3,.8) 0%,transparent 55%)}
+.anl-body{position:absolute;left:0;bottom:0;z-index:2;padding:20px 24px 22px;display:block;max-width:78%}
+.anl-when{display:block;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold-soft)}
+.an-lead.prem .anl-when{color:#F6C544}
+.anl-t{display:block;font-family:var(--display);font-weight:800;font-size:clamp(24px,3.2vw,38px);
+  line-height:1.05;color:#FBF3DE;margin-top:7px}
+.anl-ep{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;
+  color:rgba(244,236,216,.76);margin-top:8px}
+@media(max-width:640px){.an-lead{aspect-ratio:4/3}.anl-body{max-width:100%;padding:16px 16px 18px}}
 </style>
 </head>
 <body>
@@ -8662,6 +8682,34 @@ function refreshAiringBadge(){
   var f=find(r.arg); if(!f)return;
   w.innerHTML=airingBadgeHTML(f);
 }
+/* One show leads the shelf and it changes every day. The rail underneath stays
+   in air-date order — that ordering is the whole utility, "what is on tonight"
+   is not something to shuffle — so the rotation happens in the pick, not the
+   sort. Among everything sharing the soonest air date, the day number chooses
+   which one gets the spotlight, so three shows airing the same night each get
+   their turn as the page's lead on different days. Deterministic, so every
+   visitor sees the same lead on the same day. */
+function airingSpotlight(items){
+  if(!items.length) return null;
+  var soonest=items[0].diff;
+  var tied=items.filter(function(x){ return x.diff===soonest; });
+  var n=triviaDayNo();
+  return tied[((n%tied.length)+tied.length)%tied.length];
+}
+function airingLeadHTML(it){
+  var f=it.f, e=it.e, bg=f.backdrop||servePoster(f);
+  var when=e.premiere?('Premieres '+it.label):(it.label==='Tonight'?'New episode tonight':'New episode '+it.label);
+  return '<button class="an-lead'+(e.premiere?' prem':'')+'" onclick="go(\'film\',\''+esc(f.id)+'\')">'+
+    '<span class="anl-art" style="'+(bg?'background-image:url(\''+bg.replace(/'/g,"%27")+'\')':'background:'+f.grad)+'"></span>'+
+    '<span class="anl-scrim"></span>'+
+    '<span class="anl-body">'+
+      '<span class="anl-when">'+esc(when)+'</span>'+
+      '<span class="anl-t">'+esc(f.title)+'</span>'+
+      '<span class="anl-ep">S'+e.season+' E'+e.episode+
+        (e.name&&!/^Episode \d+$/i.test(e.name)?' · '+esc(e.name):'')+
+        (f.where&&f.where.length?'  ·  '+esc(f.where[0]):'')+'</span>'+
+    '</span></button>';
+}
 function paintAiringNow(){
   refreshAiringBadge();
   (function(){ var v=parseHash();
@@ -8672,9 +8720,14 @@ function paintAiringNow(){
   var el=byId('airingNow'); if(!el)return;
   var items=airingItems(7);
   if(!items.length){ el.style.display='none'; return; }
+  var lead=airingSpotlight(items);
+  /* the lead is dropped from the rail so the same show is not shown twice —
+     the same duplication that read as a glitch on the home vote bar */
+  var rail=items.filter(function(x){ return !lead || x.f.id!==lead.f.id; });
   el.innerHTML='<div class="shelf-head"><h2>New this week</h2>'+
       '<button class="see" onclick="go(\'couch\')">All shows</button></div>'+
-    '<div class="an-rail">'+items.map(anCardHTML).join('')+'</div>';
+    (lead?airingLeadHTML(lead):'')+
+    (rail.length?'<div class="an-rail">'+rail.map(anCardHTML).join('')+'</div>':'');
   el.style.display='';
 }
 function anCardHTML(it){
