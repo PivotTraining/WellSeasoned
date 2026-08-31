@@ -1,0 +1,32 @@
+name: Weekly Pulse digest
+
+on:
+  schedule:
+    - cron: '5 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/new-session-9aa459
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/pulse-digest.cjs 
+      - name: Commit the report if it changed
+        run: |
+          git config user.name  "well-seasoned-bot"
+          git config user.email "bot@itswellseasoned.com"
+          if git diff --quiet -- pulse-digest.md; then
+            echo "Findings unchanged — nothing to commit."
+            exit 0
+          fi
+          git add pulse-digest.md
+          git commit -m "chore: Weekly Pulse digest"
+          git push origin claude/new-session-9aa459

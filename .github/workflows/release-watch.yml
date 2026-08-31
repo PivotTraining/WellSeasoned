@@ -1,0 +1,32 @@
+name: Weekly release watch
+
+on:
+  schedule:
+    - cron: '41 10 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/new-session-9aa459
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/release-watch.cjs --days 60 --pages 5
+      - name: Commit the report if it changed
+        run: |
+          git config user.name  "well-seasoned-bot"
+          git config user.email "bot@itswellseasoned.com"
+          if git diff --quiet -- release-watch.md; then
+            echo "Findings unchanged — nothing to commit."
+            exit 0
+          fi
+          git add release-watch.md
+          git commit -m "chore: Weekly release watch"
+          git push origin claude/new-session-9aa459
