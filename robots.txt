@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# Marketing source files are committed so scheduled runs survive the container,
+# but they are working assets, not pages. Keep them out of the index — a draft
+# that has not been posted yet should not turn up in search.
+Disallow: /marketing/
+
 Sitemap: https://itswellseasoned.com/sitemap.xml
