@@ -2258,6 +2258,36 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
 .anl-ep{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;
   color:rgba(244,236,216,.76);margin-top:8px}
 @media(max-width:640px){.an-lead{aspect-ratio:4/3}.anl-body{max-width:100%;padding:16px 16px 18px}}
+
+/* ===== JUST DROPPED — verdict-forward rows, not a poster wall ===== */
+.dr-sec{margin:0 0 42px}
+.dr-h{font-family:var(--serif);font-size:clamp(26px,3.4vw,36px);font-weight:400;margin:0 0 6px}
+.dr-sub{color:var(--ink-soft);max-width:60ch;margin:0 0 20px;font-size:15px}
+.dr-empty{color:var(--ink-soft);padding:18px 0;font-style:italic}
+.dr-row{display:flex;gap:18px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}
+.dr-row:last-child{border-bottom:1px solid var(--line)}
+.dr-po{flex:none;width:64px;height:96px;border-radius:8px;background-size:cover;background-position:center;
+  background-color:var(--line);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.16)}
+.dr-po:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.dr-body{flex:1;min-width:0}
+.dr-t{font-size:19px;margin:0 0 4px;cursor:pointer;line-height:1.2}
+.dr-t:hover{color:var(--gold-deep);text-decoration:underline}
+.dr-meta{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.dr-scores{display:flex;gap:22px;flex-wrap:wrap}
+.dr-sc{display:flex;flex-direction:column;gap:2px}
+.dr-lab{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+.dr-n{font-size:24px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.dr-n.dr-none{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:0;padding-top:8px}
+.dr-act{flex:none;display:flex;flex-direction:column;gap:8px;width:150px}
+.dr-act .qv{width:100%}
+@media(max-width:720px){
+  .dr-row{flex-wrap:wrap;gap:14px}
+  .dr-po{width:52px;height:78px}
+  .dr-body{flex:1 1 auto;min-width:0}
+  .dr-act{flex:1 0 100%;flex-direction:row;width:auto}
+  .dr-act .qv{flex:1}
+  .dr-scores{gap:18px}
+}
 </style>
 </head>
 <body>
@@ -2303,6 +2333,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
       <div class="nav-more-wrap" id="navMoreWrap">
         <button type="button" class="nav-more-btn" id="navMoreBtn" onclick="toggleMoreNav()" aria-haspopup="true" aria-expanded="false">More <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="nav-more-panel" id="navMorePanel" style="display:none" role="menu">
+          <a data-nav="dropped" onclick="closeMoreNav();go('dropped')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>Just Dropped</a>
           <a data-nav="theaters" onclick="closeMoreNav();go('theaters')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>In Theaters</a>
           <a data-nav="soon" onclick="closeMoreNav();go('soon')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Coming Soon</a>
           <a data-nav="couch" onclick="closeMoreNav();go('couch')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 3l-5 4-5-4"/></svg>On The Couch</a>
@@ -2610,6 +2641,10 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
   </section>
 
   <!-- ============ KIDS ============ -->
+  <section class="view" data-view="dropped" aria-label="Just Dropped">
+    <div class="wrap" id="droppedContent"></div>
+  </section>
+
   <section class="view" data-view="kids" aria-label="Kids">
     <div class="wrap" id="kidsContent"></div>
   </section>
@@ -6962,7 +6997,7 @@ function loadState(){
 }
 
 /* ============ ROUTER ============ */
-var NAV_MORE_VIEWS=['theaters','soon','couch','vault','events'];
+var NAV_MORE_VIEWS=['dropped','theaters','soon','couch','vault','events'];
 /* The mobile/narrow-desktop tabbar (<1250px) swaps in for the ENTIRE desktop
    <nav> — including the direct Balcony/Shop/The Table links, which have no
    tabbar slot of their own. Below 1250px those three, plus everything in the
@@ -6981,7 +7016,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
+var KNOWN_VIEWS={dropped:1,home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -7038,6 +7073,7 @@ function render(view,arg){
   else if(view==='pulse')renderPulse();
   else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
   else if(view==='couch')renderCouch();
+  else if(view==='dropped')renderDropped();
   else if(view==='kids')renderKids();
   else if(view==='shop')renderShop();
   else if(view==='submit')renderSubmit();
@@ -8732,6 +8768,149 @@ function nativeP10Share(){
    Staleness is handled here rather than by trusting the file: anything whose
    air date has already passed is dropped, so an old build shows FEWER shows
    than reality instead of a wrong date. Nothing is ever invented. */
+/* ---------------------------------------------------------------------------
+   JUST DROPPED  (#/dropped)
+   A competitive audit of this space found the same hole in every player: when
+   something comes out on a Friday there is nowhere to find out what Black
+   audiences thought of it. Black Film Archive stops at 1999 and carries no
+   scores. Black Movie Hall of Fame and the critic-authored canons are all-time
+   and closed. Letterboxd's official Black-directors list needs 2,000 ratings
+   before a title appears at all, and it excludes television by design. Shadow
+   and Act and BlackFilmandTV cover new releases daily but assign no score.
+
+   So this board is deliberately the opposite of the rest of the site: it does
+   not lead with poster art, it leads with the two numbers and a vote, scoped
+   to what is out right now and what is on television this week. Television is
+   first on the page on purpose, because it is the one thing a film-only
+   platform cannot follow us into.
+   --------------------------------------------------------------------------- */
+function dropRecentFilms(){
+  var today=isoToday(), out=[], seen={};
+  /* Precise first: anything with a real dated Coming Soon row that has passed.
+     Those are the only titles we can honestly say dropped ON a given day. */
+  for(var i=0;i<COMING_SOON.length;i++){
+    var c=COMING_SOON[i]; if(!c.date||c.date>today) continue;
+    var f=filmByTitle(c.title); if(!f||f.noart||seen[f.id]) continue;
+    seen[f.id]=1; out.push({f:f,date:c.date});
+  }
+  /* Then everything else from the current year that is already out. These have
+     a year and no day, so they are listed after the dated ones and never given
+     a fake specific date. */
+  var yr=new Date().getFullYear();
+  for(var j=0;j<FILMS.length;j++){
+    var g=FILMS[j];
+    if(g.noart||seen[g.id]||g.type==='tv') continue;
+    if(g.year!==yr) continue;
+    if(upcomingSoonEntry(g)) continue;             // not out yet
+    seen[g.id]=1; out.push({f:g,date:null});
+  }
+  out.sort(function(a,b){
+    if(a.date&&b.date) return a.date<b.date?1:-1;
+    if(a.date) return -1;
+    if(b.date) return 1;
+    return a.f.title<b.f.title?-1:1;
+  });
+  return out;
+}
+function dropOnTv(){
+  var out=[], src=(_airing||{});
+  for(var id in src){
+    var e=src[id], f=find(id);
+    if(!f||f.noart) continue;
+    out.push({f:f,e:e});
+  }
+  out.sort(function(a,b){ return a.e.air_date<b.e.air_date?-1:1; });
+  return out;
+}
+function isoToday(){ try{ return new Date().toISOString().slice(0,10); }catch(e){ return '9999-12-31'; } }
+function dropDateLabel(iso){
+  try{
+    var d=new Date(iso+'T00:00:00');
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }catch(e){ return ''; }
+}
+/* The two numbers, stated honestly. A film nobody has scored says so rather
+   than showing a zero, which would read as a bad score instead of no score. */
+function dropScoreHTML(f){
+  var t=tableScore(f);
+  var kitchen = (f.k==null)
+    ? '<span class="dr-n dr-none">Not in yet</span>'
+    : '<span class="dr-n">'+f.k+'</span>';
+  var table = (t==null)
+    ? '<span class="dr-n dr-none">'+esc(tblCountText(f))+'</span>'
+    : '<span class="dr-n">'+t+'</span>';
+  return '<div class="dr-scores">'+
+    '<div class="dr-sc"><span class="dr-lab">The Kitchen</span>'+kitchen+'</div>'+
+    '<div class="dr-sc"><span class="dr-lab">The Table</span>'+table+'</div>'+
+  '</div>';
+}
+function dropRowHTML(f,meta){
+  var v=app.votes[f.id];
+  return '<article class="dr-row">'+
+    '<div class="dr-po" onclick="go(\'film\',\''+f.id+'\')" role="link" tabindex="0" '+
+      'onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')" '+
+      'style="background-image:url('+JSON.stringify(servePoster(f)||'')+');'+(servePoster(f)?'':'background:'+f.grad)+'"></div>'+
+    '<div class="dr-body">'+
+      '<h3 class="dr-t" onclick="go(\'film\',\''+f.id+'\')">'+esc(f.title)+'</h3>'+
+      '<div class="dr-meta">'+esc(meta)+'</div>'+
+      dropScoreHTML(f)+
+    '</div>'+
+    '<div class="dr-act">'+
+      '<button class="qv for'+(v==='for'?' on':'')+'" onclick="dropVote(event,\''+f.id+'\',\'for\')">It’s Seasoned</button>'+
+      '<button class="qv against'+(v==='against'?' on':'')+'" onclick="dropVote(event,\''+f.id+'\',\'against\')">Send It Back</button>'+
+    '</div>'+
+  '</article>';
+}
+/* Own handler rather than quickVote: quickVote hunts for the nearest .card
+   ancestor and swaps in cardHTML, which would replace a board row with a
+   poster tile. Same applyVote underneath, so the vote itself is identical. */
+function dropVote(ev,id,side){
+  ev.stopPropagation(); ev.preventDefault();
+  if(app.votes[id]===side){ toast('You already picked '+(side==='for'?'seasoned':'sent back')+'.'); return; }
+  applyVote(id,side); track('vote',{film:id,side:side,src:'dropped'});
+  if(side==='for'){ sprinkle(ev.target); sfx('for'); toast('Seasoned. Your vote counted.'); }
+  else { sfx('against'); toast('Sent it back. Your vote counted.'); }
+  paintDropped();
+}
+function paintDropped(){
+  var el=byId('droppedBoard'); if(!el) return;
+  var tv=dropOnTv(), films=dropRecentFilms().slice(0,24);
+  var out='';
+  out+='<section class="dr-sec"><h2 class="dr-h">On television this week</h2>'+
+       '<p class="dr-sub">Every Black-led series with an episode on the schedule. '+
+       'The film-only sites cannot follow us here.</p>';
+  if(!tv.length) out+='<p class="dr-empty">Nothing on the schedule right now. Check back Monday.</p>';
+  else out+=tv.map(function(x){
+    var lab=anDayLabel(x.e.air_date);
+    var when=lab?(x.e.premiere?'Premieres '+lab:'New episode '+lab):dropDateLabel(x.e.air_date);
+    return dropRowHTML(x.f,'S'+x.e.season+'E'+x.e.episode+' · '+when+
+      ((x.f.where&&x.f.where[0])?' · '+x.f.where[0]:''));
+  }).join('');
+  out+='</section>';
+
+  out+='<section class="dr-sec"><h2 class="dr-h">Out now</h2>'+
+       '<p class="dr-sub">Released this year. Most of these have no verdict at all yet, '+
+       'which is the point.</p>';
+  if(!films.length) out+='<p class="dr-empty">Nothing dated yet.</p>';
+  else out+=films.map(function(x){
+    return dropRowHTML(x.f,(x.date?'Dropped '+dropDateLabel(x.date):'Out now')+
+      ((x.f.where&&x.f.where[0])?' · '+x.f.where[0]:''));
+  }).join('');
+  out+='</section>';
+  el.innerHTML=out;
+}
+function renderDropped(){
+  var el=byId('droppedContent'); if(!el) return;
+  if(!_airing) loadAiringNow();
+  el.innerHTML=
+    '<div class="ph"><div class="eyebrow">Just Dropped</div>'+
+    '<h1 class="ph-h">What came out. What we said.</h1>'+
+    '<p class="ph-lead">Two numbers on everything current, film and television. '+
+    'The Kitchen is verified critics of the culture. The Table is the room. '+
+    'They are kept apart on purpose, because where they disagree is the whole story.</p></div>'+
+    '<div id="droppedBoard"></div>';
+  paintDropped();
+}
 var _airing=null;
 function anDayLabel(iso){
   var d=new Date(iso+'T00:00:00'), t=new Date(); t.setHours(0,0,0,0);
@@ -8746,8 +8925,8 @@ function loadAiringNow(){
   if(_airing){ paintAiringNow(); return; }
   fetch('/data/airing.json',{cache:'no-cache'})
     .then(function(r){ return r.ok?r.json():null; })
-    .then(function(j){ _airing=(j&&j.shows)||{}; paintAiringNow(); })
-    .catch(function(){ _airing={}; paintAiringNow(); });
+    .then(function(j){ _airing=(j&&j.shows)||{}; paintAiringNow(); paintDropped(); })
+    .catch(function(){ _airing={}; paintAiringNow(); paintDropped(); });
 }
 function airingItems(days){
   var out=[], src=_airing||{};
@@ -14324,6 +14503,7 @@ var _moreNavOpen=false;
    Balcony), plus the same four the desktop dropdown already covers. Theaters
    is left out — it already has its own tabbar tab. */
 var MORE_SHEET_ITEMS=[
+  {view:'dropped',label:'Just Dropped',icon:'<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>'},
   {view:'word',label:'The Balcony',icon:'<path d="M4 5h16v13a1 1 0 0 1-1 1H7l-3 3z"/><path d="M7 9h10M7 13h6"/>'},
   {view:'shop',label:'Shop',icon:'<path d="M6 8V6a4 4 0 0 1 8 0v2"/><path d="M4 8h12l1 12H3z"/>'},
   {view:'join',label:'The Table',icon:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6"/><path d="M15 14a6 6 0 0 1 6 6"/>'},
