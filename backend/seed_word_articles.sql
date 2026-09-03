@@ -448,3 +448,59 @@ update public.articles set subject='Denzel Washington, Chadwick Boseman, Phylici
 update public.articles set subject='Aaron Pierre, Barry Jenkins, Jeremy Saulnier, James Earl Jones' where slug='the-long-way-to-the-lantern';
 update public.articles set subject='Debbie Allen, Jasmine Guy, Kadeem Hardison, Maleah Joi Moon' where slug='hillman-never-closed';
 update public.articles set subject='Tommy Davidson, Tyler Perry, Deon Cole, Martin Lawrence' where slug='the-streamer-ate-the-network';
+
+-- ---------------------------------------------------------------------------
+-- A Thousand Verdicts In (2026-09-03) — the first Table Report.
+-- Every figure in this piece was read live from vote_counts on the day it was
+-- written: 1,033 verdicts across 333 films, 72 titles with four or more, one
+-- title below 50%. Nothing is rounded up and nothing is projected. If this
+-- gets re-published months later the numbers will be stale, so re-run the
+-- query before touching the body rather than editing it from memory.
+-- ---------------------------------------------------------------------------
+insert into articles (slug, kind, title, dek, author, film_slug, hero_image, body, published)
+values (
+  'a-thousand-verdicts-in',
+  'article',
+  'A Thousand Verdicts In',
+  'The Table has ruled on 333 films and agreed on almost every one of them. The two it could not agree on tell you what this site is actually for.',
+  'The Founder',
+  'sinners',
+  'https://itswellseasoned.com/word/a-thousand-verdicts-in.jpg',
+$body$Forty-five people have ruled on Sinners. Not one of them sent it back.
+
+That is the most-voted film on Well Seasoned, and there is no argument in it. Forty-five verdicts, forty-five co-signs, a clean sweep at the top of a board that now holds one thousand and thirty-three rulings across three hundred and thirty-three titles. Every one of those came from a person who watched something and decided how they felt about it. None of them were bought, seeded, or estimated. That was the whole promise when this started, and it is the only reason the numbers below are worth reading.
+
+So here is the first honest look at what the room actually said.
+
+Start with what it loves, because that part is not subtle. Malcolm X, twenty-five verdicts, unanimous. Get Out, twenty-five, unanimous. Judas and the Black Messiah, twenty, unanimous. Training Day, The Woman King, Do the Right Thing, Boyz n the Hood, all of them clean. Black Panther took twenty-six verdicts and lost exactly one. Moonlight, Insecure, Abbott Elementary, The Wire, Fruitvale Station, If Beale Street Could Talk, perfect down the line.
+
+Look at that list long enough and something starts to itch. These are not discoveries. This is the canon. The room walked in already knowing how it felt.
+
+> The room is not hard to please. The room is hard to surprise.
+
+That is not a complaint, and it is not nothing either. A unanimous verdict is a real fact about a film's standing. It means the argument ended years ago and everybody went home. Nobody is relitigating Do the Right Thing. What it also means is that a co-sign is cheap, and the interesting part of any rating system was never the part everyone agrees on.
+
+Seventy-two films here carry four or more verdicts. Of those seventy-two, exactly one sits below fifty percent.
+
+One Battle After Another. Four for, five against. Forty-four percent. The only film this room has actually turned on.
+
+And the fight is not really about the film. Paul Thomas Anderson directed it. Leonardo DiCaprio leads it. Chase Infiniti is in it, and she is the thread it hangs on here, a young Black actress in a real role in a major picture, which was enough to clear the bar the day it went in. Whether that is ever enough has been the quiet question under a few hundred entries in this catalog. The room finally answered out loud, and the answer was a split down the middle.
+
+The next closest is Queen & Slim. Five for, four against. Fifty-six percent.
+
+Nobody has to ask whether Queen & Slim belongs. Melina Matsoukas directed it. Lena Waithe wrote it. Daniel Kaluuya and Jodie Turner-Smith carry it. It is ours by every measure this site has. So when the room splits on Queen & Slim it is splitting on the movie itself, on that ending, on what the film asks you to accept about who becomes a symbol and who pays the bill for it.
+
+> One of those is an argument about a film. The other is an argument about a border.
+
+Two splits, and they could not be less alike. That is the most useful thing in this whole dataset. The room is running two conversations at once and mostly keeping them straight.
+
+Now the part that undercuts all of it, because leaving it out would be a lie by omission. One thousand and thirty-three verdicts sounds like a room. It is not one yet. Of the three hundred and thirty-three films carrying any verdict at all, one hundred and sixty-three carry exactly one. Half this board is a single person's opinion wearing the clothes of a consensus. Only seventy-two titles have enough behind them to mean anything, and both arguments described above rest on nine votes each. Nine.
+
+> A verdict nobody contests is not a verdict. It is a memory.
+
+The canon does not need us. Malcolm X is a great film whether or not twenty-five more people confirm it. What needs us is everything else. The nine hundred and forty-nine titles nobody has ruled on. The hundred and sixty-three sitting on one lonely opinion. The films that are actually in question right now instead of settled thirty years ago.
+
+Go break a tie. That is the entire ask.$body$,
+  true
+)
+on conflict (slug) do nothing;
