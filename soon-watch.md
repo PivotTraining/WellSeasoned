@@ -1,6 +1,6 @@
 # Coming Soon watch
 
-_Generated 2026-08-31 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-09-03 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
 ## Release dates that moved (22)
 
