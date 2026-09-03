@@ -8001,6 +8001,49 @@ function paintTenYears(){
     (d.note?'<p class="ty-note">✨ '+esc(d.note)+'</p>':'')+
   '</div>';
 }
+/* ---------------------------------------------------------------------------
+   ROTATION FLOOR
+   An audit found the curated surfaces were showing 79 of 1,282 titles, 6.2% of
+   the catalog, with Sinners, Moonlight and Get Out each sitting on three
+   surfaces at once. weekBallot was a direct cause: it padded every week's
+   ballot from a hardcoded list of ten prominent films, so the same names came
+   back every single week by construction. Meanwhile the catalog carried 44
+   films from the 1970s, 165 documentaries and 178 series that had never once
+   been surfaced anywhere.
+
+   rotWindow fixes that structurally rather than by swapping one hardcoded list
+   for another. It orders a pool ONCE with a fixed seed (deliberately not the
+   weekly seed, which would reshuffle and allow immediate repeats) and hands
+   out a different, non-overlapping slice each week. A title therefore cannot
+   reappear until the whole pool has been spent: at 4 slots a week against 44
+   seventies titles that is an 11 week cooldown, and against the full eligible
+   catalog it is over two years.
+
+   The week counter is days-since-epoch/7 rather than HOME_SEED. HOME_SEED is
+   year*100+week, which jumps by 49 at every new year and would skip a large
+   block of the pool each January.
+   --------------------------------------------------------------------------- */
+var ROT_SEED=8675309;               // fixed forever; changing it reshuffles every pool
+function rotWeekNo(){
+  try{ return Math.floor(triviaDayNo()/7); }catch(e){ return 0; }
+}
+function rotWindow(ids,perWeek,salt){
+  if(!ids||!ids.length||perWeek<=0) return [];
+  var pool=seededShuffle(ids,(ROT_SEED+(salt||0))>>>0);
+  var start=((rotWeekNo()*perWeek)%pool.length+pool.length)%pool.length;
+  var out=[],n=Math.min(perWeek,pool.length);
+  for(var i=0;i<n;i++) out.push(pool[(start+i)%pool.length]);
+  return out;
+}
+/* The strata the audit found at or near zero exposure. Kept as one predicate
+   so any surface that wants guaranteed catalog depth can reuse it. */
+function underFeatured(f){
+  if(!f) return false;
+  if(f.type==='tv') return true;
+  if(typeof isDoc==='function' && isDoc(f)) return true;
+  var e=f.era||'';
+  return e==='1970s'||e==='1960s'||e==='1950s'||e==='1940s';
+}
 /* "This Week at The Table" — a rotating ballot that CONCENTRATES real voting.
    The Table's 800-odd real votes are spread so thin across 1,200+ titles that
    no single page looks alive; featuring the same ~12 titles to everyone for a
@@ -8010,19 +8053,43 @@ function paintTenYears(){
    genuine activity — NOTHING is seeded or faked; every count is the live
    Supabase tally, and titles at zero just wear the honest invite state. */
 function weekBallot(){
-  function ok(f){ return f && !f.noart && homeOurs(f) && !upcomingSoonEntry(f); }
+  function ok(f){ return f && !f.noart && !f.nopo && homeOurs(f) && !upcomingSoonEntry(f); }
   function nv(f){ return (f.votes.for||0)+(f.votes.against||0); }
-  // lead with real activity: up to 8 titles that already carry votes
-  var voted=seededShuffle(FILMS.filter(function(f){return ok(f)&&nv(f)>0;}).map(function(f){return f.id;}),HOME_SEED).slice(0,8);
-  var pick=voted.slice();
-  // round it out with recognizable titles (some may be at zero — they get the invite)
-  var prom=['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'];
-  seededShuffle(prom,(HOME_SEED+3)>>>0).forEach(function(id){ if(ok(find(id))&&pick.indexOf(id)<0&&pick.length<12) pick.push(id); });
-  if(pick.length<12){
-    var pad=seededShuffle(FILMS.filter(ok).map(function(f){return f.id;}),(HOME_SEED+9)>>>0);
-    for(var i=0;i<pad.length&&pick.length<12;i++){ if(pick.indexOf(pad[i])<0) pick.push(pad[i]); }
+  function idOf(f){ return f.id; }
+  var elig=FILMS.filter(ok);
+  /* Three strata, each on its own cooldown window, so the ballot always
+     carries a reason to vote AND always carries something the site has never
+     shown before.
+       contested — somebody ruled, nobody confirmed. These are the ties the
+                   site actually exists to break, and they are where a new
+                   vote changes the number instead of padding a sweep.
+       deep      — the strata that were sitting at zero exposure.
+       rest      — everything else, so the ballot never gets so obscure that
+                   nobody recognises a single poster. */
+  /* The three pools MUST be disjoint. When they overlapped, a film sitting in
+     both `deep` and `rest` could be drawn by the deep window one week and the
+     rest window the next, which put a title back on the ballot after seven
+     days and quietly defeated the whole cooldown. A 60-week simulation caught
+     it (Uptown Saturday Night, gap of 1). Each film now belongs to exactly one
+     pool, so a pool's window is a real cooldown. */
+  var contested=[], deep=[], rest=[];
+  elig.forEach(function(f){
+    var n=nv(f);
+    if(n>0&&n<4) contested.push(f.id);
+    else if(underFeatured(f)) deep.push(f.id);
+    else rest.push(f.id);
+  });
+  var pick=[];
+  function take(list,n,salt){
+    rotWindow(list,n,salt).forEach(function(id){
+      if(pick.indexOf(id)<0 && pick.length<12) pick.push(id);
+    });
   }
-  return seededShuffle(pick,(HOME_SEED+5)>>>0).slice(0,12);   // mix activity + recognizable in display order
+  take(contested,4,1);
+  take(deep,4,2);
+  take(rest,8,3);
+  if(pick.length<12) take(rest,24,4);   // last resort if a stratum came back thin
+  return seededShuffle(pick,(HOME_SEED+5)>>>0).slice(0,12);   // display order only
 }
 function paintWeekTable(){
   var el=byId('weekTable'); if(!el)return;
