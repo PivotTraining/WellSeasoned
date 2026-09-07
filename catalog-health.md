@@ -1,12 +1,11 @@
-# Catalog health — 2026-08-31
+# Catalog health — 2026-09-07
 
 ## Art now available (2)
-- the-thomas-crown-affair-2027: backdrop now on TMDB (/4IwoYgyFdBCELwCr9VmEH1u0wwF.jpg) — nobd can come off
-- the-drop-a-snowfall-saga: backdrop now on TMDB (/ycLQYTgWfBq53fIkws0qIQOp62g.jpg) — nobd can come off
+- doing-life-2026: poster now on TMDB (/7OAn1ZNkV8wxZ9pUz8WMzkUxilJ.jpg) — nopo can come off
+- doing-life-2026: backdrop now on TMDB (/jhlA7tXeynux7WktY4XGOiYNwCK.jpg) — nobd can come off
 
-## Trailer candidates (4)
+## Trailer candidates (3)
 - one-spoon-of-chocolate-2026: candidate eYkhefDTiXk "One Spoon of Chocolate | Trailer | RZA, Sham" — verify the channel before wiring
-- the-varnell-hill-show: candidate FChcXRz9wEM "Official Trailer" — verify the channel before wiring
 - miss-governor: candidate FLiJiBTLdFM "Official Trailer" — verify the channel before wiring
 - emma-and-bruce-willis-the: candidate wY_w_vPoz9s "‘Emma and Bruce Willis – The Unexpected Jour" — verify the channel before wiring
 
