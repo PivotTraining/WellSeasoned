@@ -504,3 +504,65 @@ Go break a tie. That is the entire ask.$body$,
   true
 )
 on conflict (slug) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- The Laugh Track Is Doing All the Work (2026-09-08) — a pan of The Varnell
+-- Hill Show, first two episodes.
+-- Every critical judgement here is the byline's own, but the supporting
+-- criticism is real and attributed: The A.V. Club, TheWrap and The Hollywood
+-- Reporter are quoted from their actual published reviews. No invented quotes,
+-- no invented scenes, no viewership figures, no Kitchen score (that requires a
+-- seated critic through verify_critic, not an editorial). The Table line at the
+-- end was true when written: for_count 0, against_count 1.
+-- Martin Lawrence's on-screen presence is deliberately NOT claimed — sources
+-- conflict on whether he appears, and every source agrees only that he
+-- co-created and executive produces.
+-- ---------------------------------------------------------------------------
+insert into articles (slug, kind, title, dek, author, film_slug, subject, hero_image, body, published)
+values (
+  'the-laugh-track-is-doing-all-the-work',
+  'editorial',
+  'The Laugh Track Is Doing All the Work',
+  'Varnell Hill finally got his own desk. The show around it was built for a decade that already ended, and the canned laughter is the only thing on set that sounds sure the jokes are funny.',
+  'The Founder',
+  'the-varnell-hill-show',
+  'Tommy Davidson, Martin Lawrence, Bentley Kyle Evans',
+  'https://itswellseasoned.com/word/the-laugh-track-is-doing-all-the-work.jpg',
+$body$Tommy Davidson could always do the thing that cannot be taught.
+
+On In Living Color, in the early nineties, he was the one whose body moved faster than the writing. Give him four seconds and a bad wig and he would find something nobody on the page had thought of. He came up in a room with the Wayans family and Jim Carrey, which was a room that ate people, and he walked out of it dangerous in the way only physical comedians get to be dangerous. You watched him and you genuinely did not know what was coming.
+
+Twenty-nine years after Martin signed off, he has finally been handed his own show. And for most of it, he is standing still.
+
+The Varnell Hill Show arrived on Paramount+ on September 1, two episodes at once, six more landing Tuesdays through October 13. Martin Lawrence co-created it and executive produces. Bentley Kyle Evans, who ran Martin, co-created it with him. The premise is good, and I want to say that plainly before I say anything else, because the premise is the reason I was rooting for it. Varnell Hill, the smooth local personality who used to turn up on Martin to be handsome at people, now hosts a long-running late-night show that is quietly dying. Younger competition. A network losing patience. A man who cannot read the room he built.
+
+That is a real idea. It might be the idea of this decade in television.
+
+And then the canned laughter comes in.
+
+> The show is about a man who cannot tell that his moment has passed. It does not seem to know that this is also a description of itself.
+
+Because The Varnell Hill Show is not a show about a nineties multi-cam. It is a nineties multi-cam. Flat bright light, broad blocking, characters who are one adjective each, and a laugh track deployed at every attempt at a joke rather than at the jokes. The A.V. Club put it about as cleanly as it can be put: it is "just a '90s multi-cam, arriving 30 years too late." TheWrap called it a mixed bag that "bets heavily on nostalgia," carrying "humor that's nostalgic to some and dated to others." The Hollywood Reporter, gentlest of the three, settled on "amiable throwback," which is what a critic writes when they cannot in good conscience write good.
+
+I do not think the problem is that the people who made this lost it. Bentley Kyle Evans and Martin Lawrence built the definitive version of this machine. Martin is one of the great American sitcoms and it is not close. The problem is that they rebuilt the machine exactly, part for part, and set it down in a decade that does not run on it. Comedy moved. Atlanta happened. Insecure happened. Abbott Elementary took the whole warm network-sitcom sensibility, shot it single-camera, cut the laugh track entirely, and trusted the audience to find the joke without being shown where it was. The form did not die. It got quieter, and it started assuming you were smart.
+
+A laugh track is a promise. It tells you where the funny is supposed to be, and when the joke lands, it feels like a room agreeing with you.
+
+> When the joke misses, the laugh track stops being an invitation and becomes a receipt for something that never arrived.
+
+That is the rhythm of these first two episodes. Setup, pause, roar. Setup, pause, roar. The roar is the same size every time, for the ones that work and the ones that die on the floor, and after twenty minutes it stops being reassuring and starts being insulting, because it is the show telling you what to feel about material it could not stand behind on its own.
+
+The cruelest part is what the format does to Davidson. Put a physical comedian inside a locked-off camera and a guaranteed laugh and you have confiscated both of his weapons, which were surprise and timing. He ends up the straight man in his own sitcom. The Hollywood Reporter clocked it too, noting he deserves a proper showcase for gifts this show never quite lets him use. When the funniest instinct in a scene is something small he does with his face, and the track rolls over it on its way to the written punchline, you are watching a format work against the one person it was built for.
+
+So here is where I land, and it is not where I expected to. I do not think Martin Lawrence's time is up. That is the easy read and I think it is the wrong one. He is producing, not out there carrying this, and a man who made something that has outlived three networks does not owe anybody a second act on demand. What is up is the form. Not the people, the form. A spinoff is the one place you cannot hide that, because a spinoff is a bet that the thing still works.
+
+> Nostalgia is not an argument. It is a feeling you have about an argument somebody won thirty years ago.
+
+Eight episodes is not much room to turn a show around. But there is a version of this that finds itself by episode six, kills the track, lets Davidson off the leash and becomes the sharp little show about obsolescence it keeps almost being. I would watch that one. I want to be wrong about this more than I have wanted to be wrong about anything else I have written here.
+
+One person has ruled on it at The Table so far. They sent it back.
+
+Go tell me we are wrong.$body$,
+  true
+)
+on conflict (slug) do nothing;
