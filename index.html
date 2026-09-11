@@ -2337,6 +2337,39 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
   .gp-num b{font-size:24px}
   .gp-stats{gap:22px}
 }
+
+/* ===== UNCHALLENGED — one voice, dressed as a consensus ===== */
+.un-filters{margin:20px 0 8px}
+.un-c{opacity:.6;font-variant-numeric:tabular-nums;margin-left:3px}
+.un-empty{color:var(--ink-soft);font-style:italic;padding:22px 0}
+.un-row{display:flex;gap:18px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+.un-po{flex:none;width:54px;height:81px;border-radius:8px;background-size:cover;
+  background-position:center;background-color:var(--line);cursor:pointer;
+  box-shadow:0 3px 12px rgba(0,0,0,.15)}
+.un-po:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.un-body{flex:1;min-width:0}
+.un-t{font-size:17px;margin:0 0 5px;cursor:pointer;line-height:1.2}
+.un-t:hover{color:var(--gold-deep);text-decoration:underline}
+.un-yr{color:var(--ink-soft);font-weight:400;font-size:14px}
+.un-line{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.5}
+.un-verd{font-weight:700}
+.un-no{color:var(--paprika)}
+.un-yes{color:var(--gold-deep)}
+.un-act{flex:none;display:flex;flex-direction:column;gap:7px;width:148px}
+.un-act .qv{width:100%}
+.un-more{margin-top:22px}
+@media(max-width:720px){
+  .un-row{flex-wrap:wrap;gap:13px}
+  .un-po{width:46px;height:69px}
+  .un-act{flex:1 0 100%;flex-direction:row;width:auto}
+  .un-act .qv{flex:1}
+}
+
+.un-done{opacity:.72}
+.un-settled{color:var(--gold-deep)}
+.un-done-tag{display:inline-block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  font-weight:700;color:var(--ink-soft);border:1px dashed var(--line-strong,var(--line));
+  border-radius:999px;padding:5px 12px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -2382,6 +2415,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
       <div class="nav-more-wrap" id="navMoreWrap">
         <button type="button" class="nav-more-btn" id="navMoreBtn" onclick="toggleMoreNav()" aria-haspopup="true" aria-expanded="false">More <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="nav-more-panel" id="navMorePanel" style="display:none" role="menu">
+          <a data-nav="unchallenged" onclick="closeMoreNav();go('unchallenged')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v9"/><circle cx="12" cy="18" r="1.4"/><path d="M4 20h16"/></svg>Unchallenged</a>
           <a data-nav="gap" onclick="closeMoreNav();go('gap')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h4"/><path d="M15 12h4"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/></svg>The Gap</a>
           <a data-nav="dropped" onclick="closeMoreNav();go('dropped')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>Just Dropped</a>
           <a data-nav="theaters" onclick="closeMoreNav();go('theaters')" tabindex="0" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>In Theaters</a>
@@ -2691,6 +2725,10 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
   </section>
 
   <!-- ============ KIDS ============ -->
+  <section class="view" data-view="unchallenged" aria-label="Unchallenged">
+    <div class="wrap" id="unchContent"></div>
+  </section>
+
   <section class="view" data-view="gap" aria-label="The Gap">
     <div class="wrap" id="gapContent"></div>
   </section>
@@ -6825,6 +6863,7 @@ function rerenderActive(){
      direct load and Just Dropped shows every film as unscored forever, since
      nothing else ever calls them again. */
   else if(v==='gap')renderGap(); else if(v==='dropped')renderDropped();
+  else if(v==='unchallenged')renderUnchallenged();
 }
 function hydrateFromTMDB(){
   var cache=loadPosterCache();
@@ -7067,7 +7106,7 @@ function loadState(){
 }
 
 /* ============ ROUTER ============ */
-var NAV_MORE_VIEWS=['gap','dropped','theaters','soon','couch','vault','events'];
+var NAV_MORE_VIEWS=['unchallenged','gap','dropped','theaters','soon','couch','vault','events'];
 /* The mobile/narrow-desktop tabbar (<1250px) swaps in for the ENTIRE desktop
    <nav> — including the direct Balcony/Shop/The Table links, which have no
    tabbar slot of their own. Below 1250px those three, plus everything in the
@@ -7086,7 +7125,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={gap:1,dropped:1,home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
+var KNOWN_VIEWS={unchallenged:1,gap:1,dropped:1,home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -7143,6 +7182,7 @@ function render(view,arg){
   else if(view==='pulse')renderPulse();
   else if(view==='inbox'){ go('curate','apps'); return; }   // folded into Curate's Applications tab
   else if(view==='couch')renderCouch();
+  else if(view==='unchallenged')renderUnchallenged();
   else if(view==='gap')renderGap();
   else if(view==='dropped')renderDropped();
   else if(view==='kids')renderKids();
@@ -8920,7 +8960,7 @@ function dropRowHTML(f,meta){
   return '<article class="dr-row">'+
     '<div class="dr-po" onclick="go(\'film\',\''+f.id+'\')" role="link" tabindex="0" '+
       'onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')" '+
-      'style="background-image:url('+JSON.stringify(servePoster(f)||'')+');'+(servePoster(f)?'':'background:'+f.grad)+'"></div>'+
+      'style="'+(servePoster(f)?"background-image:url('"+esc(servePoster(f))+"')":'background:'+f.grad)+'"></div>'+
     '<div class="dr-body">'+
       '<h3 class="dr-t" onclick="go(\'film\',\''+f.id+'\')">'+esc(f.title)+'</h3>'+
       '<div class="dr-meta">'+esc(meta)+'</div>'+
@@ -8932,16 +8972,27 @@ function dropRowHTML(f,meta){
     '</div>'+
   '</article>';
 }
-/* Own handler rather than quickVote: quickVote hunts for the nearest .card
-   ancestor and swaps in cardHTML, which would replace a board row with a
-   poster tile. Same applyVote underneath, so the vote itself is identical. */
-function dropVote(ev,id,side){
+/* Shared by every verdict board (Just Dropped, Unchallenged). Not quickVote:
+   that one hunts for the nearest .card ancestor and swaps in cardHTML, which
+   would replace a board row with a poster tile. Same applyVote underneath, so
+   the vote itself is identical — only the repaint differs. */
+function boardVote(ev,id,side,src,repaint){
   ev.stopPropagation(); ev.preventDefault();
   if(app.votes[id]===side){ toast('You already picked '+(side==='for'?'seasoned':'sent back')+'.'); return; }
-  applyVote(id,side); track('vote',{film:id,side:side,src:'dropped'});
+  applyVote(id,side); track('vote',{film:id,side:side,src:src});
   if(side==='for'){ sprinkle(ev.target); sfx('for'); toast('Seasoned. Your vote counted.'); }
   else { sfx('against'); toast('Sent it back. Your vote counted.'); }
-  paintDropped();
+  if(typeof repaint==='function') repaint();
+}
+function dropVote(ev,id,side){ boardVote(ev,id,side,'dropped',paintDropped); }
+function unchVote(ev,id,side){
+  /* Record the side the LONE verdict was on, not the side just voted, so the
+     settled row keeps its place in the sort instead of jumping groups under
+     the reader the instant they tap. Captured before applyVote, while the film
+     still carries exactly one verdict. */
+  var f=find(id);
+  if(f && !UNCH_SETTLED[id]) UNCH_SETTLED[id]=((f.votes.against||0)===1?'against':'for');
+  boardVote(ev,id,side,'unchallenged',paintUnchallenged);
 }
 function paintDropped(){
   var el=byId('droppedBoard'); if(!el) return;
@@ -10713,6 +10764,119 @@ function sbUserHeaders(extra){ var h=sbHeaders(extra); if(authSession&&authSessi
 /* ============ THE KITCHEN: real verified-critic reviews ============ */
 /* Kitchen score = live average of verified critic reviews (kitchen_scores view). */
 /* ---------------------------------------------------------------------------
+   UNCHALLENGED  (#/unchallenged)
+   A hundred and sixty-eight films rest on exactly one person's verdict. On the
+   film page that single vote renders as a settled percentage — 100% or 0% —
+   which is the most misleading number on the whole site, because one voice
+   wearing the clothes of a consensus is not a consensus.
+
+   The twenty-six that one person SENT BACK lead the board on purpose. A film
+   co-signed once and left alone is a gap in the data; a film condemned once
+   and left alone is an argument nobody turned up for. Shaft is sitting on this
+   list at zero because exactly one person said so.
+
+   Everything here is real: the counts come straight from vote_counts, and a
+   film leaves the board the moment a second person rules on it.
+   --------------------------------------------------------------------------- */
+/* Voting here removes a film from the board by definition — it now has two
+   verdicts, so it is no longer unchallenged. Silently vanishing reads as the
+   vote failing, so a film settled during this visit stays put in a done state
+   until the page is left. Session-only and purely cosmetic; the real tally is
+   whatever the server says. */
+var UNCH_SETTLED={};
+var UNCH_FILTER='all';
+var UNCH_ALL=false;
+var UNCH_PAGE=30;
+function unchRows(){
+  var out=[];
+  for(var i=0;i<FILMS.length;i++){
+    var f=FILMS[i];
+    if(!f||f.noart||upcomingSoonEntry(f)) continue;
+    var yes=f.votes.for||0, no=f.votes.against||0;
+    if(UNCH_SETTLED[f.id]){ out.push({f:f,side:UNCH_SETTLED[f.id],settled:true}); continue; }
+    if(yes+no!==1) continue;
+    out.push({f:f,side:(no===1?'against':'for')});
+  }
+  /* Sent-back first: those are the ones with something at stake. Within each
+     group, newest first so the board does not open on 1970s deep cuts. */
+  out.sort(function(a,b){
+    if(a.side!==b.side) return a.side==='against'?-1:1;
+    return (b.f.year||0)-(a.f.year||0);
+  });
+  return out;
+}
+function unchSetFilter(v){ UNCH_FILTER=v; UNCH_ALL=false; paintUnchallenged(); }
+function unchShowAll(){ UNCH_ALL=true; paintUnchallenged(); }
+function unchRowHTML(r){
+  var f=r.f, v=app.votes[f.id];
+  if(r.settled){
+    var t=tableScore(f), n=(f.votes.for||0)+(f.votes.against||0);
+    return '<article class="un-row un-done">'+
+      '<div class="un-po" onclick="go(\'film\',\''+f.id+'\')" role="link" tabindex="0" '+
+        'onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')" '+
+        'style="'+(servePoster(f)?"background-image:url('"+esc(servePoster(f))+"')":'background:'+f.grad)+'"></div>'+
+      '<div class="un-body">'+
+        '<h3 class="un-t" onclick="go(\'film\',\''+f.id+'\')">'+esc(f.title)+
+          ' <span class="un-yr">'+esc(String(f.year||''))+'</span></h3>'+
+        '<p class="un-line"><span class="un-verd un-settled">You settled it.</span> '+
+          esc(n+' verdict'+(n===1?'':'s')+' now')+(t==null?'':', The Table at '+t)+'.</p>'+
+      '</div>'+
+      '<div class="un-act"><span class="un-done-tag">Off the board</span></div>'+
+    '</article>';
+  }
+  var line = r.side==='against'
+    ? '<span class="un-verd un-no">One person sent it back.</span> Nobody has checked them.'
+    : '<span class="un-verd un-yes">One person said it’s seasoned.</span> Nobody has co-signed.';
+  return '<article class="un-row">'+
+    '<div class="un-po" onclick="go(\'film\',\''+f.id+'\')" role="link" tabindex="0" '+
+      'onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')" '+
+      'style="'+(servePoster(f)?"background-image:url('"+esc(servePoster(f))+"')":'background:'+f.grad)+'"></div>'+
+    '<div class="un-body">'+
+      '<h3 class="un-t" onclick="go(\'film\',\''+f.id+'\')">'+esc(f.title)+
+        ' <span class="un-yr">'+esc(String(f.year||''))+'</span></h3>'+
+      '<p class="un-line">'+line+'</p>'+
+    '</div>'+
+    '<div class="un-act">'+
+      '<button class="qv for'+(v==='for'?' on':'')+'" onclick="unchVote(event,\''+f.id+'\',\'for\')">It’s Seasoned</button>'+
+      '<button class="qv against'+(v==='against'?' on':'')+'" onclick="unchVote(event,\''+f.id+'\',\'against\')">Send It Back</button>'+
+    '</div>'+
+  '</article>';
+}
+function paintUnchallenged(){
+  var el=byId('unchBoard'); if(!el) return;
+  var all=unchRows();
+  var no=all.filter(function(r){ return r.side==='against'; });
+  var yes=all.filter(function(r){ return r.side==='for'; });
+  var list = UNCH_FILTER==='against' ? no : (UNCH_FILTER==='for' ? yes : all);
+  var chips=[['all','Everything',all.length],['against','Sent back',no.length],['for','Co-signed',yes.length]];
+  var out='<div class="filters un-filters">'+chips.map(function(c){
+    return '<button class="chip'+(UNCH_FILTER===c[0]?' on':'')+'" onclick="unchSetFilter(\''+c[0]+'\')">'+
+      esc(c[1])+' <span class="un-c">'+c[2]+'</span></button>';
+  }).join('')+'</div>';
+  if(!list.length){
+    out+='<p class="un-empty">Nothing here. Every film in this filter has more than one verdict now.</p>';
+    el.innerHTML=out; return;
+  }
+  var shown = UNCH_ALL ? list : list.slice(0,UNCH_PAGE);
+  out+=shown.map(unchRowHTML).join('');
+  if(!UNCH_ALL && list.length>UNCH_PAGE){
+    out+='<button class="btn btn-ghost un-more" onclick="unchShowAll()">Show all '+list.length+'</button>';
+  }
+  el.innerHTML=out;
+}
+function renderUnchallenged(){
+  var el=byId('unchContent'); if(!el) return;
+  el.innerHTML=
+    '<div class="ph"><div class="eyebrow">Unchallenged</div>'+
+    '<h1 class="ph-h">One person ruled. Nobody checked them.</h1>'+
+    '<p class="ph-lead">These films rest on a single verdict, which the film page is '+
+    'obliged to render as 100% or 0%. That is the most misleading number on this site. '+
+    'One voice is not a consensus, and every one of these is an argument nobody has '+
+    'turned up for yet.</p></div>'+
+    '<div id="unchBoard"></div>';
+  paintUnchallenged();
+}
+/* ---------------------------------------------------------------------------
    THE GAP  (#/gap)
    The one board nobody else in this space can publish. The critic canons
    (AAFCA, the Hall of Fame, the critic-authored books) measure critics. The
@@ -10761,8 +10925,7 @@ function gapRowHTML(r){
   return '<article class="gp-row">'+
     '<div class="gp-po" onclick="go(\'film\',\''+f.id+'\')" role="link" tabindex="0" '+
       'onkeydown="if(event.key===\'Enter\')go(\'film\',\''+f.id+'\')" '+
-      'style="background-image:url('+JSON.stringify(servePoster(f)||'')+');'+
-      (servePoster(f)?'':'background:'+f.grad)+'"></div>'+
+      'style="'+(servePoster(f)?"background-image:url('"+esc(servePoster(f))+"')":'background:'+f.grad)+'"></div>'+
     '<div class="gp-body">'+
       '<h3 class="gp-t" onclick="go(\'film\',\''+f.id+'\')">'+esc(f.title)+
         ' <span class="gp-yr">'+esc(String(f.year||''))+'</span></h3>'+
@@ -14696,6 +14859,7 @@ var _moreNavOpen=false;
    Balcony), plus the same four the desktop dropdown already covers. Theaters
    is left out — it already has its own tabbar tab. */
 var MORE_SHEET_ITEMS=[
+  {view:'unchallenged',label:'Unchallenged',icon:'<path d="M12 4v9"/><circle cx="12" cy="18" r="1.4"/><path d="M4 20h16"/>'},
   {view:'gap',label:'The Gap',icon:'<path d="M5 12h4"/><path d="M15 12h4"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/>'},
   {view:'dropped',label:'Just Dropped',icon:'<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>'},
   {view:'word',label:'The Balcony',icon:'<path d="M4 5h16v13a1 1 0 0 1-1 1H7l-3 3z"/><path d="M7 9h10M7 13h6"/>'},
