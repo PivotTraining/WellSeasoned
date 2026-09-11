@@ -4631,3 +4631,164 @@ The Balcony seed is also fully published as of 2026-08-20 — all twelve
 pieces including `hillman-never-closed` and `the-streamer-ate-the-network`.
 `backend/publish_two_balcony_pieces.sql` was the trimmed file used for the
 last two; it has served its purpose and is now a no-op on re-run.
+
+## Weekly automation: four cron jobs now run the maintenance (2026-09-01→03)
+Owner: "What else can we put on auto pilot scheduling throughout the week?"
+Four GitHub Actions now run without anyone asking, alongside the pre-existing
+daily `refresh-airing`. All are report-only except the airing build — none of
+them edits the catalog, because every decision they surface (a moved date, a
+trailer's channel, whether a title clears the bar) needs a human, and a script
+that guessed would be exactly the fabrication this site exists to avoid. Each
+commits its markdown report ONLY when the findings change, so a quiet week is
+silent.
+
+| Cron | Script | What it watches |
+|---|---|---|
+| Mon 08:05 | `pulse-digest.cjs` | Public vote/comment/coverage counts → `pulse-digest.md` |
+| Mon 10:31 | `catalog-health.cjs` | Art that appeared for `nopo`/`nobd` titles, missing trailers, poster link-rot, dead streaming services |
+| Wed 10:41 | `release-watch.cjs` | Upcoming releases sharing talent with the catalog → candidate queue |
+| Thu 10:11 | `soon-watch.cjs` | COMING_SOON date drift + newly posted trailers |
+
+- `scripts/lib.cjs` — shared catalog parser + JSON GET. **Its `literal()` scanner
+  is string-aware but NOT comment-aware**, same limitation as
+  `build-films-json.cjs`: a stray apostrophe or `<` inside a comment in the
+  target array makes it throw `Unexpected token`. FILMS parses fine; BRACKETS
+  does not. Grep the raw text for those, or extend the scanner.
+- `scripts/verify.cjs` — the regression sweep, finally committed instead of
+  being rebuilt by hand every session. `node scripts/verify.cjs [--quick]`,
+  16 routes × desktop/mobile, exits non-zero on failure. Run it before every
+  push.
+- `scripts/table-report.cjs` — figures for the recurring Balcony data column.
+  Refuses to quote a percentage below n=4 (at n=3 one vote swings it 33
+  points) and says outright to skip an edition rather than pad one.
+- Counting gotcha these all respect: **PostgREST caps a response at 1000 rows**,
+  so array length is not a count. Every count goes through
+  `Prefer: count=exact` + `Range: 0-0` and reads `content-range`. The external
+  Pulse dashboard read 1,000 when the real number was 1,033 for exactly this
+  reason. Also: `votes` has no `id` column (keyed on film_slug+user_id), so
+  count with `select=*`, not a named column.
+
+## Three verdict boards: Just Dropped, The Gap, Unchallenged (2026-09-03→11)
+Built off a competitive audit of the space (Black Film Archive, Shadow and Act,
+BlackFilmandTV, Letterboxd, Rotten Tomatoes, Black Movie Hall of Fame, AAFCA).
+**The finding that drove all three: almost nobody in this category has a
+participation mechanic at all.** Across BFA, BMHOF, AAFCA, Shadow and Act and
+BlackFilmandTV combined, the number of ways a Black viewer can register an
+opinion is zero — Black Film Archive's own homepage button sends you to
+Letterboxd to log the film. And the one player with a real ratings engine
+filters on **creator identity, never audience identity**: Letterboxd's official
+Top 250 Films by Black Directors is the general Letterboxd population's rating,
+it needs 2,000 ratings before a title appears, and it excludes TV and
+documentaries by design.
+
+- **`#/dropped` — Just Dropped.** What is out right now, film and television,
+  leading with the two numbers and a vote instead of poster art. TV is the
+  first section on purpose: a film-only platform cannot follow us there.
+  Recency is only claimed where provable — a specific "Dropped Sep 1" needs a
+  real dated COMING_SOON row that has passed; everything else from the current
+  year reads "Out now" with no invented date.
+- **`#/gap` — The Gap.** Films ranked by the distance between the Kitchen and
+  the Table. Nobody else can publish this, because nobody else measures both
+  sides. Built to admit it is thin rather than look authoritative: 18 of the 21
+  Kitchen scores rest on a single critic, so every row carries the n on BOTH
+  sides and the page says so up top.
+- **`#/unchallenged` — Unchallenged.** The 164 released films resting on
+  exactly one verdict, which the film page must render as 100% or 0%. The 26
+  that one person SENT BACK lead the board. Voting removes a film by
+  definition, so a film settled during the visit stays put in a done state
+  rather than vanishing (which reads as the vote failing), and holds its sort
+  position because the settle records the side the LONE verdict was on, not the
+  side just cast.
+
+**Two real bugs found building these, both worth remembering:**
+1. `rerenderActive()` only knew home/browse/vault/ranked/you. Any view built
+   from backend numbers rendered EMPTY on a direct load and never recovered —
+   The Gap returned zero rows despite `gapRows()` returning 21. Just Dropped
+   had the same latent bug. Both registered now; **register any future
+   data-driven view there.**
+2. The poster `style` attribute was built with `JSON.stringify()`, which emits
+   double quotes inside an already double-quoted `style="..."` and terminates
+   it early — posters rendered as grey boxes with the URL leaking out as stray
+   attributes, on all three boards. **Same class as the documented advertise-page
+   `onclick` bug.** Use the single-quoted `url('...')` form the rest of the file
+   uses. Lesson: a grey poster in a sandbox screenshot is not automatically
+   "TMDB is blocked" — check the attribute.
+
+## Rotation floor: curated surfaces can no longer recycle the same titles (2026-09-04)
+Owner: "we have over done the same top movies." An audit confirmed it —
+curated surfaces were showing **79 of 1,282 titles (6.2%)**, with Sinners,
+Moonlight and Get Out each on three surfaces at once, while 44 films from the
+1970s, 165 documentaries and 178 series had never been surfaced anywhere.
+Root cause was in `weekBallot()`: it padded every week from a hardcoded list of
+ten prominent films, so the same names returned every week by construction.
+
+`rotWindow(ids, perWeek, salt)` replaces it structurally. It orders a pool ONCE
+with a fixed seed (`ROT_SEED`, deliberately **not** the weekly seed, which
+reshuffles and would allow immediate repeats) and hands out a different,
+non-overlapping slice each week, so a title cannot return until the pool is
+spent. Week counter is `triviaDayNo()/7`, not `HOME_SEED` — HOME_SEED is
+year*100+week and jumps by 49 every January, skipping a block of the pool.
+
+The ballot draws from three **disjoint** pools: films with 1-3 verdicts (the
+real ties), the never-surfaced strata via `underFeatured()`, and everything
+else. **The pools originally overlapped and that silently defeated the whole
+cooldown** — a film in both `deep` and `rest` could be drawn by one window then
+the other and reappear after seven days. Caught by a 60-week simulation
+(Uptown Saturday Night, gap of 1). Verified after the fix: 720 unique titles
+over 60 weeks, no title repeating once, every ballot still exactly 12.
+
+## The Balcony: two new pieces + the recurring data column (2026-09-03→08)
+- **"A Thousand Verdicts In"** (`a-thousand-verdicts-in`) — the first Table
+  Report, built entirely on the site's own data, which no competitor can write.
+  States its own weakness rather than burying it: 163 of 333 films rested on a
+  single verdict and both arguments it describes stood on nine votes each.
+- **"The Laugh Track Is Doing All the Work"** (`the-laugh-track-is-doing-all-the-work`)
+  — a pan of The Varnell Hill Show off the first two episodes, and currently the
+  home `LEAD_STORY`. Judgements are the byline's own, but the supporting
+  criticism is real and attributed (A.V. Club, TheWrap, Hollywood Reporter), and
+  the multi-cam/laugh-track format was confirmed before the piece leaned on it.
+  Two deliberate departures from the brief it was written from: Martin
+  Lawrence's on-screen presence is **not claimed** (sources conflict; all agree
+  only that he co-created and EPs), and the argument lands on the **form** rather
+  than the man, which is both more defensible and what three critics reached
+  independently.
+- Both are in `backend/seed_word_articles.sql` and still need the owner to run
+  it — this environment cannot authenticate to the owner-gated
+  `publish_article` RPC. Validated against a throwaway Postgres 16 each time.
+  **Postgres will not run as root here** — use `su -s /bin/bash nobody`.
+
+## Marketing loop: dated folders under `marketing/` (2026-09-02→03)
+The scheduled social-asset runs now persist to `marketing/YYYY-MM-DD/` with the
+PNG, the HTML that produced it (fonts and posters inlined, so it re-renders
+standalone) and `post.md` carrying the caption, the participation mechanic and
+why the angle fit that day. Committed rather than left in the scratchpad because
+this container is ephemeral and a scheduled run that loses its own output is not
+much of a schedule. **`robots.txt` disallows `/marketing/`** — these files are
+served statically once pushed and an unposted draft has no business in search.
+Worth watching: a 1080×1350 @2x PNG is ~1.7MB, so a daily cadence is ~600MB a
+year of binaries. Drop to 1x or keep only the HTML if it becomes a problem.
+
+## Catalog + content added this stretch (2026-09-01→11)
+1,279 → **1,283**. Doing Life (2026, Tyler Perry, Netflix Oct 2 — `nopo`/`nobd`,
+TMDB had no art), Carl Weber's The Black Hamptons (2022, BET+ → Paramount+, **no
+creator claimed** because TMDB's `created_by` is empty and `aggregate_credits`
+returns nothing), plus the Varnell Hill backdrop swap once TMDB published real
+art. `#/dropped`, `#/gap` and `#/unchallenged` all registered in `KNOWN_VIEWS`,
+the desktop More dropdown and the mobile More sheet.
+
+## Outstanding owner actions, consolidated (as of 2026-09-11)
+Nothing below is blocked on code. All of it is blocked on the owner.
+1. **Email the eight seated critics the `#/kitchen` link.** The Kitchen has
+   scored 21 films against the Table's 340, so on 94% of scored films the dual
+   score shows one number. `#/gap` now makes that visible. Highest leverage
+   item on the whole site.
+2. **Run `backend/add_news_division.sql`.** Verified live 2026-09-03:
+   `articles.source_url` does not exist, so it was never run. The Wire is fully
+   built and dark, with six sourced dispatches in `backend/seed_wire.sql`
+   waiting behind it.
+3. **Run `backend/seed_word_articles.sql`** to publish the two new Balcony
+   pieces (the home banner for the Varnell Hill pan is already live).
+4. **Resend SMTP** — still the longest-pending item. The Verdict Drop has a
+   real list and no way to send.
+5. **`CJ_PID`** is unset and Amazon Associates was never signed up, so every
+   "Get tickets" link forfeits its commission.
