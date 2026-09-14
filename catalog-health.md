@@ -1,8 +1,9 @@
-# Catalog health — 2026-09-07
+# Catalog health — 2026-09-14
 
-## Art now available (2)
+## Art now available (3)
 - doing-life-2026: poster now on TMDB (/7OAn1ZNkV8wxZ9pUz8WMzkUxilJ.jpg) — nopo can come off
-- doing-life-2026: backdrop now on TMDB (/jhlA7tXeynux7WktY4XGOiYNwCK.jpg) — nobd can come off
+- doing-life-2026: backdrop now on TMDB (/nDScZ6YR2nfNCeK5bmJ1ujb355b.jpg) — nobd can come off
+- only-child-2024: poster now on TMDB (/wNvzcVqAuUIfXk0z24Tn2Roc3Z0.jpg) — nopo can come off
 
 ## Trailer candidates (3)
 - one-spoon-of-chocolate-2026: candidate eYkhefDTiXk "One Spoon of Chocolate | Trailer | RZA, Sham" — verify the channel before wiring
