@@ -2370,6 +2370,19 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
 .un-done-tag{display:inline-block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
   font-weight:700;color:var(--ink-soft);border:1px dashed var(--line-strong,var(--line));
   border-radius:999px;padding:5px 12px;white-space:nowrap}
+
+/* ===== THE ONE-LINE TAKE — opens as a single row, grows if you keep going ===== */
+.cbox textarea.cbox-one{
+  min-height:44px;height:44px;resize:none;overflow:hidden;line-height:1.45;
+  transition:border-color .18s,box-shadow .18s;
+}
+.cbox-lit{animation:cboxLit 1.5s ease-out 1}
+@keyframes cboxLit{
+  0%{box-shadow:0 0 0 0 rgba(228,155,11,.5)}
+  40%{box-shadow:0 0 0 5px rgba(228,155,11,.16)}
+  100%{box-shadow:0 0 0 0 rgba(228,155,11,0)}
+}
+@media (prefers-reduced-motion:reduce){ .cbox-lit{animation:none} }
 </style>
 </head>
 <body>
@@ -10602,9 +10615,18 @@ function renderFilm(id){
           '<div class="splitbar"><div class="sb-for" id="sbFor"></div><div class="sb-against" id="sbAgainst"></div></div>'+
           '<div class="split-meta"><span id="pctFor"></span><span id="totalVotes"></span></div>'+
         '</div>'+
+        /* The ask used to be a full textarea reading "Say your piece. Why is it
+           seasoned, or why'd you send it back?" — an essay prompt, and it
+           behaved like one: 31 comments all-time at a 472-character median,
+           then nothing for six weeks. It was filtering out everyone unwilling
+           to write a paragraph. Now it opens as a single line and GROWS if
+           someone keeps typing, so the low ask is the default and the
+           essayists (who write the best stuff here) lose nothing. */
         '<div class="cbox"><input id="cName" placeholder="Your name (optional)" aria-label="Your name">'+
-          '<textarea id="cText" placeholder="Say your piece. Why is it seasoned, or why\u2019d you send it back?" aria-label="Your comment"></textarea>'+
-          '<div class="cbox-row"><span class="cbox-hint" id="stanceHint">Pick a side above, then post.</span><button class="btn btn-gold btn-sm" onclick="postComment(\''+f.id+'\')">Post your read</button></div></div>'+
+          '<textarea id="cText" rows="1" class="cbox-one" maxlength="600" '+
+            'placeholder="One line. What\u2019s the verdict?" aria-label="Your one-line take" '+
+            'oninput="cGrow(this)" onkeydown="cKey(event,\''+f.id+'\')"></textarea>'+
+          '<div class="cbox-row"><span class="cbox-hint" id="stanceHint">Pick a side above, then say it in one line.</span><button class="btn btn-gold btn-sm" onclick="postComment(\''+f.id+'\')">Post</button></div></div>'+
         '<div class="comments" id="commentList"></div>'+
         '<div class="safety-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>One vote per film. Reads are held to our <a onclick="openGuidelines()" tabindex="0" onkeydown="if(event.key===\'Enter\')openGuidelines()">community guidelines</a>.</div>'+
         '<button id="soundToggle" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="toggleSound()">'+(app.sound===false?'🔇 Sound off':'🔊 Sound on')+'</button>'
@@ -10683,7 +10705,7 @@ function restoreVoteUI(f){
   var side=app.votes[f.id];
   byId('btnFor').classList.toggle('on',side==='for');
   byId('btnAgainst').classList.toggle('on',side==='against');
-  if(side){ byId('stanceHint').textContent = 'Your vote is in ✓ Add a read below if you feel like it.'; }
+  cPrompt(f.id);
 }
 
 /* ============ VOTING ============ */
@@ -11908,7 +11930,7 @@ function castVote(id,side){
   if(prev===side){toast('You already picked '+(side==='for'?'seasoned':'sent back')+'.');return;}
   applyVote(id,side); track('vote',{film:id,side:side});
   byId('btnFor').classList.toggle('on',side==='for'); byId('btnAgainst').classList.toggle('on',side==='against');
-  byId('stanceHint').textContent = side==='for'?'Vote counted \u2713 Want to say why? Totally optional.':'Vote counted \u2713 Want to say why? Totally optional.';
+  cPrompt(id);
   if(side==='for'){ sprinkle(byId('btnFor')); sfx('for'); stampSeal(f); toast('Seasoned. Your vote counted.'); }
   else { var ba=byId('btnAgainst'); ba.classList.add('shake'); setTimeout(function(){ba.classList.remove('shake');},320); sfx('against'); toast('Sent it back. Your vote counted.'); }
   renderVotes(f);
@@ -12092,6 +12114,46 @@ function toggleCommentFeatured(id,filmId,on){
       toast(on?'Featured on The Table.':'Unfeatured.');
     }).catch(function(){ toast('Network error.'); });
 }
+/* ---------------------------------------------------------------------------
+   THE ONE-LINE TAKE
+   Comment volume was the single worst number on the site: 31 all-time against
+   1,053 verdicts (a 3% rate), spread over 22 of 1,283 films, and nothing at
+   all in the six weeks before this was written. The median body was 472
+   characters, which is the tell — the box was only ever used by people willing
+   to write an essay, because a textarea with "say your piece" asks for one.
+   These three helpers make one line the default without capping anyone: the
+   field opens at a single row, grows as you type, and Enter posts.
+   --------------------------------------------------------------------------- */
+function cGrow(el){
+  if(!el) return;
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,190)+'px';
+}
+function cKey(ev,id){
+  /* Enter posts, Shift+Enter makes a new line. On a single-line field Enter is
+     what people expect, and it removes the reach for the button entirely. */
+  if(ev.key!=='Enter'||ev.shiftKey) return;
+  ev.preventDefault(); postComment(id);
+}
+/* Re-points the prompt at the verdict the visitor just cast. "You said
+   seasoned. Why, in one line?" is a far smaller ask than a blank box, and it
+   is the moment they are most likely to answer. Deliberately does NOT focus
+   the field — on a phone that throws the keyboard up over the celebration. */
+function cPrompt(id){
+  var t=byId('cText'), h=byId('stanceHint'); if(!t) return;
+  var v=app.votes[id];
+  if(!v){ t.placeholder='One line. What\u2019s the verdict?';
+          if(h) h.textContent='Pick a side above, then say it in one line.'; return; }
+  t.placeholder = v==='for' ? 'You said seasoned. Why, in one line?'
+                            : 'You sent it back. Why, in one line?';
+  if(h) h.textContent='One line is plenty. Enter to post.';
+  var box=t.parentNode;
+  if(box&&box.className.indexOf('cbox')>=0){
+    box.classList.remove('cbox-lit');            // restart the pulse if it is mid-run
+    void box.offsetWidth;
+    box.classList.add('cbox-lit');
+  }
+}
 function postComment(id){
   var f=find(id), t=byId('cText').value.trim();
   if(!t){toast('Add a few words before posting.');byId('cText').focus();return;}
@@ -12103,7 +12165,8 @@ function postComment(id){
   app.comments[id].unshift(c); f._comments.unshift(c);
   syncComment(id,c); track('comment',{film:id,stance:c.stance});
   notifyPriorCommenter(id, f, name||app.name||'Someone');
-  byId('cText').value='';byId('cName').value='';renderComments(f);saveState();toast('Posted to The Table.');
+  var _ct=byId('cText'); _ct.value=''; _ct.style.height=''; byId('cName').value='';
+  renderComments(f);saveState();toast('Posted to The Table.');
 }
 /* Best-effort: let a prior commenter on this film know someone replied. Never
    blocks the poster's own comment if this fails — notify_user() is a
