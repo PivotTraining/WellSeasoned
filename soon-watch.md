@@ -1,8 +1,8 @@
 # Coming Soon watch
 
-_Generated 2026-09-10 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-09-17 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
-## Release dates that moved (22)
+## Release dates that moved (23)
 
 - `cs-1437396` **Your Mother Your Mother Your Mother** — we say 2026-09-25, TMDB says 2026-10-09 (+14 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1458099` **The Only Living Pickpocket in New York** — we say 2026-10-16, TMDB says 2026-10-30 (+14 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
@@ -11,6 +11,7 @@ _Generated 2026-09-10 by scripts/soon-watch.cjs. Report only — nothing here is
 - `cs-1288211` **The Great Beyond** — we say 2026-11-11, TMDB says 2027-10-01 (+324 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1286656` **I Play Rocky** — we say 2026-11-13, TMDB says 2026-11-20 (+7 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1630464` **Clarissa** — we say 2026-12-11, TMDB says 2026-10-04 (-68 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-923493` **Samo Lives** — we say 2026-12-12, TMDB says 2026-12-11 (-1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1003596` **Avengers: Doomsday** — we say 2026-12-16, TMDB says 2026-12-18 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1170608` **Dune: Part Three** — we say 2026-12-16, TMDB says 2026-12-18 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-621304` **Children of Blood and Bone** — we say 2027-01-14, TMDB says 2027-01-15 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
@@ -18,7 +19,7 @@ _Generated 2026-09-10 by scripts/soon-watch.cjs. Report only — nothing here is
 - `cs-1397972` **Panic Carefully** — we say 2027-02-25, TMDB says 2027-02-26 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1497464` **Gatto** — we say 2027-03-03, TMDB says 2027-03-05 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1401586` **Sonic the Hedgehog 4** — we say 2027-03-11, TMDB says 2027-03-19 (+8 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
-- `cs-814795` **Pierre the Pigeon-Hawk** — we say 2027-03-24, TMDB says 2027-02-13 (-39 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-814795` **Pierre the Pigeon-Hawk** — we say 2027-03-24, TMDB says 2027-02-26 (-26 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1288438` **Godzilla x Kong: Supernova** — we say 2027-03-25, TMDB says 2027-03-26 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1138528` **Bad Fairies** — we say 2027-05-20, TMDB says 2027-05-21 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-911916` **Spider-Man: Beyond the Spider-Verse** — we say 2027-06-17, TMDB says 2027-06-18 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
