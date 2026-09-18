@@ -1726,6 +1726,26 @@
   .quiz-pick .qp-ttl{font-weight:900;font-size:13px;color:#fff;line-height:.98;text-shadow:0 2px 8px rgba(0,0,0,.5)}
   .quiz-pick .qp-meta{font-size:11.5px;color:var(--ink-2);margin-top:5px;font-weight:600}
 
+  /* taste swipe: one real film at a time, a real vote each time */
+  .sw-count{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+  .sw-card{display:flex;gap:14px;align-items:flex-start;margin:2px 0 14px}
+  .sw-poster{flex:0 0 118px;aspect-ratio:2/3;border-radius:var(--r);background-size:cover;background-position:center;box-shadow:var(--shadow-2);border:1px solid rgba(0,0,0,.08);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:8px}
+  .sw-poster .sw-ptt{font-weight:900;font-size:12.5px;color:#fff;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.55);position:relative;z-index:2}
+  .sw-body{flex:1;min-width:0}
+  .sw-ttl{font-family:var(--display);font-weight:800;font-size:clamp(19px,2.4vw,23px);line-height:1.06}
+  .sw-meta{font-size:13px;color:var(--ink-2);font-weight:600;margin-top:5px}
+  .sw-syn{font-size:13.5px;color:var(--ink-2);margin-top:8px;line-height:1.45;max-height:6.6em;overflow:hidden}
+  .sw-btns{display:flex;gap:9px;margin:2px 0 6px}
+  .sw-btns button{flex:1;border-radius:var(--r);border:1.5px solid var(--line-strong);background:var(--paper);padding:13px 10px;cursor:pointer;font:inherit;font-size:14.5px;font-weight:800;transition:all .14s}
+  .sw-btns .sw-for:hover{border-color:var(--gold-ink);background:rgba(228,155,11,.12)}
+  .sw-btns .sw-against:hover{border-color:var(--paprika);background:rgba(190,74,42,.1)}
+  .sw-skip{display:block;width:100%;background:none;border:0;color:var(--ink-3);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;padding:8px;text-decoration:underline;text-underline-offset:3px}
+  .sw-skip:hover{color:var(--ink)}
+  .arch-tag{display:inline-block;font-size:11.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);margin-bottom:6px}
+  .arch-ev{font-size:13px;color:var(--ink-2);margin:0 0 14px;line-height:1.5}
+  .arch-ev b{color:var(--ink)}
+  @media(max-width:520px){ .sw-poster{flex:0 0 92px} .sw-syn{display:none} }
+
   /* position strip */
   .position{background:linear-gradient(135deg,var(--sumac),#40100a);border-radius:var(--r-lg);padding:40px 40px;color:var(--on-dark);margin:34px 0}
   .position .stat{font-weight:900;font-size:clamp(24px,3.2vw,36px);line-height:1.08;max-width:22ch;color:var(--on-dark)}
@@ -2582,7 +2602,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
       </div>
 
       <section class="shelf" id="forYouSection" style="display:none">
-        <div class="shelf-head"><h2 id="forYouTitle">Picked for your taste</h2><button class="see" onclick="openQuiz(0)">Retake the quiz</button></div>
+        <div class="shelf-head"><h2 id="forYouTitle">Picked for your taste</h2><button class="see" onclick="openQuiz(0)">Run it again</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="forYouRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
@@ -12080,6 +12100,7 @@ function showPostVoteCapture(f,side){
    email is already captured) and shown at most once per browser. */
 function maybeEmailNudge(){
   if(app.signedIn||!sbConfigured()) return;
+  if(_swOn) return;   /* the taste swipe casts real votes in a row; its own end screen makes the ask */
   var shown=false; try{ shown=localStorage.getItem('ws_email_nudge')==='1'; }catch(e){}
   if(shown) return;
   setTimeout(function(){
@@ -14082,11 +14103,14 @@ function tasteSummary(t){
   var moodTxt=t.mood?('drawn to <b>'+esc(t.mood.toLowerCase())+'</b> films'):'open to anything';
   var eraTxt=t.era==='now'?'from <b>right now</b>':(t.era==='recent'?'from the <b>last decade or two</b>':'<b>across every era</b>');
   var genTxt=(t.genre&&t.genre!=='any')?(', with a lean toward <b>'+esc(t.genre.toLowerCase())+'</b>'):'';
-  return 'You are '+moodTxt+' '+eraTxt+genTxt+'. Your home page is tuned to match.';
+  var castTxt=(t.cast?' You have '+t.cast+' verdict'+(t.cast===1?'':'s')+' on the board from setting it.':'');
+  return 'You are '+moodTxt+' '+eraTxt+genTxt+'. Your home page is tuned to match.'+castTxt;
 }
 function tasteBlock(){
-  if(!app.taste)return '<div class="you-sec"><h2>Your taste</h2><div class="taste-card"><p>You have not taken the taste quiz yet. It takes about twenty seconds and tunes your home page.</p><button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Take the quiz</button></div></div>';
-  return '<div class="you-sec"><h2>Your taste</h2><div class="taste-card"><p>'+tasteSummary(app.taste)+'</p><button class="btn btn-ghost btn-sm" onclick="openQuiz(0)">Retake</button></div></div>';
+  if(!app.taste)return '<div class="you-sec"><h2>Your taste</h2><div class="taste-card"><p>Three questions, then a dozen films you either seasoned or sent back. Takes about a minute and every verdict counts for real.</p><button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Set my taste</button></div></div>';
+  return '<div class="you-sec"><h2>Your taste</h2><div class="taste-card">'+
+    (app.taste.arch?'<span class="arch-tag">Your read</span><h3 style="font-size:20px;margin-bottom:4px">'+esc(app.taste.arch.name)+'</h3><p class="arch-ev">'+app.taste.arch.ev+'</p>':'')+
+    '<p>'+tasteSummary(app.taste)+'</p><button class="btn btn-ghost btn-sm" onclick="openQuiz(0)">Run it again</button></div></div>';
 }
 function plateBlock(plateFilms){
   if(!plateFilms.length)return '<div class="you-sec"><h2>My Plate</h2><div class="empty" style="padding:40px 20px"><h3 style="font-size:19px">Nothing plated yet.</h3><p>Open any film and tap Add to My Plate.</p><button class="btn btn-gold" onclick="go(\'browse\')">Browse films</button></div></div>';
@@ -14152,7 +14176,7 @@ function renderYou(){
   var av='<div class="you-av">'+initials(app.name)+'</div>';
   if(!app.signedIn){
     el.innerHTML='<div class="you-hero">'+av+'<div><h1>Your table</h1><p class="you-sub">Create a free account to save films, keep your votes across devices, and get picks made for you.</p></div></div>'+
-      '<div class="film-actions" style="margin-bottom:8px"><button class="btn btn-gold" onclick="openAuth(\'signup\')">Create free account</button><button class="btn btn-ghost" onclick="openQuiz(0)">Take the taste quiz</button></div>'+
+      '<div class="film-actions" style="margin-bottom:8px"><button class="btn btn-gold" onclick="openAuth(\'signup\')">Create free account</button><button class="btn btn-ghost" onclick="openQuiz(0)">Set my taste</button></div>'+
       tasteBlock()+connectBlock()+plateBlock(plateFilms)+voteBlock(voteIds)+shopPromoBlock();
     return;
   }
@@ -14419,10 +14443,13 @@ function openQuiz(step){
 }
 function answerQuiz(step,val){
   quizAns[QUIZ[step].key]=val;
-  if(step<QUIZ.length-1)openQuiz(step+1); else quizResults();
+  if(step<QUIZ.length-1){ openQuiz(step+1); return; }
+  app.taste={mood:quizAns.mood,era:quizAns.era,genre:quizAns.genre,arch:null,cast:0};
+  saveState(); swipeStart();
 }
 function quizResults(){
-  app.taste={mood:quizAns.mood,era:quizAns.era,genre:quizAns.genre};
+  app.taste={mood:quizAns.mood,era:quizAns.era,genre:quizAns.genre,
+    arch:(app.taste&&app.taste.arch)||null,cast:(app.taste&&app.taste.cast)||0};
   saveState(); renderHome();
   var picks=recommend(app.taste).slice(0,3);
   var cards=picks.map(function(f){
@@ -14431,11 +14458,134 @@ function quizResults(){
       '<div class="qp-meta">'+f.year+' · '+effGenre(f)+'</div></div>';
   }).join('');
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
-    '<h2>Your table is set</h2><p class="m-sub">'+tasteSummary(app.taste)+'</p>'+
+    (app.taste.arch?'<span class="arch-tag">Your read</span><h2>'+esc(app.taste.arch.name)+'</h2>'+
+      '<p class="arch-ev">'+app.taste.arch.ev+'</p>'
+      :'<h2>Your table is set</h2>')+
+    '<p class="m-sub">'+tasteSummary(app.taste)+'</p>'+
     '<div class="quiz-picks">'+cards+'</div>'+
     (app.signedIn
       ? '<button class="btn btn-gold" onclick="closeModal();go(\'home\')">See my picks</button>'
       : '<button class="btn btn-gold" onclick="openAuth(\'signup\')">Save my taste and create account</button><p class="m-alt">Just looking? <a onclick="closeModal();go(\'home\')">See my picks</a></p>'));
+}
+
+/* ============ TASTE SWIPE ============
+   The three questions above only ever produced a filter. This stage is where the
+   account actually gets something in it: a run of real catalog titles, one at a
+   time, each answered with the same verdict the rest of the site uses. The votes
+   are REAL — same applyVote -> syncVote path as a film page — so a new visitor
+   finishing onboarding has also grown the Table's coverage, which is the thing
+   we are shortest on. "Haven't seen it" is a first-class answer; you cannot have
+   a verdict on a film you have not watched, and a quiz that made you guess would
+   be manufacturing votes.
+   The archetype at the end is COMPUTED from those answers and shows its own
+   evidence. Nothing is assigned at random and no label is given on fewer than
+   four real verdicts. */
+var SW={list:[],i:0,yes:0,no:0,skip:0,seen:[]};
+var _swOn=false;
+var SW_SIZE=12;
+
+function swipePool(){
+  var pool=recommend(app.taste).filter(function(f){
+    if(f.noart) return false;
+    if(app.votes[f.id]) return false;          /* already has their verdict */
+    if(!servePoster(f)) return false;          /* a poster is what makes it recognisable */
+    if(upcomingSoonEntry(f)) return false;     /* not out yet — nobody has seen it */
+    return true;
+  }).slice(0,60);
+  /* every one of these already matches their answers, so ordering the shortlist
+     by how thin the Table is on it costs the visitor nothing and puts the run
+     where the coverage gap actually is */
+  pool.sort(function(a,b){ return (a.votes.for+a.votes.against)-(b.votes.for+b.votes.against); });
+  return pool.slice(0,SW_SIZE);
+}
+
+function swipeStart(){
+  var pool=swipePool();
+  if(pool.length<4){ quizResults(); return; }   /* not enough to read anything into */
+  SW={list:pool,i:0,yes:0,no:0,skip:0,seen:[]};
+  _swOn=true;
+  track('taste_swipe_start',{n:pool.length});
+  swipePaint();
+}
+
+function swipePaint(){
+  if(SW.i>=SW.list.length){ swipeDone(); return; }
+  var f=SW.list[SW.i], po=servePoster(f);
+  var syn=f.syn?String(f.syn):'';
+  showModal('<button class="close" aria-label="Close" onclick="swipeQuit()">✕</button>'+
+    '<div class="sw-count">Seen it? '+(SW.i+1)+' of '+SW.list.length+'</div>'+
+    '<div class="sw-card">'+
+      '<div class="sw-poster" style="'+(po?"background-image:url('"+esc(po)+"')":'background:'+f.grad)+'"><span class="sw-ptt">'+esc(f.title)+'</span></div>'+
+      '<div class="sw-body"><div class="sw-ttl">'+esc(f.title)+'</div>'+
+        '<div class="sw-meta">'+esc(String(f.year))+' · '+esc(effGenre(f))+(f.dir?' · '+esc(String(f.dir).split(',')[0]):'')+'</div>'+
+        (syn?'<div class="sw-syn">'+esc(syn)+'</div>':'')+
+      '</div></div>'+
+    '<div class="sw-btns"><button class="sw-for" onclick="swipeAnswer(\'for\')">It’s Seasoned</button>'+
+    '<button class="sw-against" onclick="swipeAnswer(\'against\')">Send It Back</button></div>'+
+    '<button class="sw-skip" onclick="swipeAnswer(\'\')">Haven’t seen it</button>');
+}
+
+function swipeAnswer(side){
+  var f=SW.list[SW.i];
+  if(f&&side){
+    applyVote(f.id,side);
+    track('vote',{film:f.id,side:side,src:'taste'});
+    if(side==='for'){ SW.yes++; } else { SW.no++; }
+    SW.seen.push({id:f.id,side:side});
+  } else { SW.skip++; }
+  SW.i++;
+  swipePaint();
+}
+
+function swipeQuit(){ _swOn=false; swipeDone(); }
+
+function swipeDone(){
+  _swOn=false;
+  var a=tasteArch();
+  app.taste.arch=a;
+  app.taste.cast=SW.seen.length;
+  saveState(); renderHome();
+  track('taste_swipe_done',{cast:SW.seen.length,arch:a?a.name:''});
+  quizResults();
+}
+
+/* The archetype is a reading of what they actually did, and the results screen
+   prints the count it was read from. Below four verdicts there is no label —
+   three answers is a mood, not a taste. */
+var ARCH_GENRE={Drama:'The Long Take',Horror:'Basement Seat',Comedy:'The Cookout',Romance:'Slow Burn',Action:'Front Row',Documentary:'The Record Keeper',Thriller:'Edge of the Couch'};
+function tasteArch(){
+  var v=SW.seen, n=v.length;
+  if(n<4) return null;
+  var yes=0, old=0, recent=0, gen={}, agree=0, cmp=0;
+  for(var i=0;i<n;i++){
+    var f=find(v[i].id); if(!f) continue;
+    if(v[i].side==='for'){
+      yes++;
+      if(f.year<2005) old++;
+      if(f.year>=2020) recent++;
+      var g=effGenre(f); gen[g]=(gen[g]||0)+1;
+    }
+    /* compare against the room WITHOUT their own vote in it, and only where a
+       real room exists — one other person is not a consensus */
+    var rf=f.votes.for-(v[i].side==='for'?1:0), ra=f.votes.against-(v[i].side==='against'?1:0);
+    if(rf+ra>=3){ cmp++; if((rf>=ra?'for':'against')===v[i].side) agree++; }
+  }
+  var topG='', topN=0;
+  for(var k in gen){ if(gen.hasOwnProperty(k)&&gen[k]>topN){ topG=k; topN=gen[k]; } }
+
+  if(cmp>=3 && agree/cmp<0.5)
+    return {name:'Against the Grain',ev:'You matched the room on <b>'+agree+' of '+cmp+'</b> of the films it has already argued about. That is rarer than it sounds.'};
+  if(yes>=3 && old/yes>=0.5)
+    return {name:'The Archivist',ev:(old===yes?'Every one of the <b>'+yes+'</b> you seasoned':'<b>'+old+' of the '+yes+'</b> you seasoned')+' came out before 2005. You did not need them to be new.'};
+  if(yes>=3 && recent/yes>=0.6)
+    return {name:'Day One',ev:(recent===yes?'Every one of the <b>'+yes+'</b> you seasoned':'<b>'+recent+' of the '+yes+'</b> you seasoned')+' dropped this decade. You watch it while it is still airing.'};
+  if(topN>=3)
+    return {name:ARCH_GENRE[topG]||('Built for '+topG),ev:'<b>'+topN+'</b> of your seasoned picks were '+esc(String(topG).toLowerCase())+'. The lean is real.'};
+  if(yes/n>=0.8)
+    return {name:'Generous at the Table',ev:'You seasoned <b>'+yes+' of '+n+'</b>. You came to enjoy yourself, not to audit.'};
+  if(yes/n<=0.3)
+    return {name:'Hard to Please',ev:'You sent <b>'+(n-yes)+' of '+n+'</b> back. The Kitchen could use you.'};
+  return {name:'Wide Open',ev:'You seasoned <b>'+yes+' of '+n+'</b> across eras and genres with no single lean. That is its own answer.'};
 }
 
 /* ============ MODALS ============ */
