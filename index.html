@@ -2383,6 +2383,24 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
   100%{box-shadow:0 0 0 0 rgba(228,155,11,0)}
 }
 @media (prefers-reduced-motion:reduce){ .cbox-lit{animation:none} }
+
+/* ===== SETTLE SOMETHING — home entry to the three verdict boards ===== */
+.sb-sec{padding:26px 0 8px}
+.sb-sub{font-size:13.5px;color:var(--ink-soft)}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;margin-top:14px}
+.sb-card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+  padding:18px 18px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);
+  cursor:pointer;font:inherit;color:inherit;transition:border-color .16s,transform .16s,box-shadow .16s}
+.sb-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.10)}
+.sb-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.sb-n{font-size:34px;font-weight:800;line-height:1;color:var(--gold-deep);font-variant-numeric:tabular-nums}
+.sb-lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  font-weight:700;margin-bottom:9px}
+.sb-t{font-size:17px;font-weight:800;line-height:1.2}
+.sb-b{font-size:13.5px;color:var(--ink-2);line-height:1.5;margin-top:3px}
+.sb-go{font-size:12.5px;font-weight:700;color:var(--gold-deep);margin-top:10px}
+@media(max-width:560px){.sb-grid{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.sb-card:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -2526,6 +2544,11 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
         <div id="marriedFeature" class="married-feat" style="display:none"></div>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
         <div id="mosaic" class="mosaic"></div>
+        <!-- Three verdict boards built in Sept had no entry point from home at
+             all — only the More menu. This is the front door to them, and it
+             sits with the review loop rather than in the dessert tier, since
+             every one of these is a place to cast a verdict. -->
+        <section id="settleBoards" class="sb-sec" style="display:none"></section>
         <!-- Engagement/spotlight units — dessert, below the core film grid.
              "What the culture's saying" leads the dessert tier now: it's real
              audience voice, the strongest proof the reviews are genuine, so
@@ -10123,11 +10146,11 @@ function paintCatalogCount(){
    (reusing the Emmy carousel's .emmy-car-seg pattern) and prev/next arrows
    sit on top. Baked promo content so slide 0 shows regardless of DB state. */
 var LEAD_STORY={
-  slug:'the-laugh-track-is-doing-all-the-work',
-  eyebrow:'The Balcony \u00b7 The Verdict',
-  title:'The Laugh Track Is Doing All the Work',
-  dek:'Varnell Hill finally got his own desk. The show around it was built for a decade that already ended, and the canned laughter is the only thing on set that sounds sure the jokes are funny.',
-  image:'/word/the-laugh-track-is-doing-all-the-work.jpg'
+  slug:'a-thousand-verdicts-in',
+  eyebrow:'The Balcony \u00b7 The Table Report',
+  title:'A Thousand Verdicts In',
+  dek:'The Table has ruled on 340 films and agreed on almost every one of them. The two it could not agree on tell you what this site is actually for.',
+  image:'/word/a-thousand-verdicts-in.jpg'
 };
 var _leadSlides=[], _leadIdx=0, _leadTimer=null;
 var LEAD_ROT_MS=6500;
@@ -10240,6 +10263,7 @@ function renderHome(){
   paintWeekTable();
   paintVoteBar();
   paintFallSlate();
+  paintSettleBoards();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+
@@ -10785,6 +10809,50 @@ function sbUserHeaders(extra){ var h=sbHeaders(extra); if(authSession&&authSessi
 
 /* ============ THE KITCHEN: real verified-critic reviews ============ */
 /* Kitchen score = live average of verified critic reviews (kitchen_scores view). */
+/* ---------------------------------------------------------------------------
+   SETTLE SOMETHING — the home entry point to the three verdict boards.
+   Every count below is computed from the SAME function the board itself
+   renders from, so the number on the home page can never promise a board a
+   different size than the one you land on. A board that comes back empty
+   drops out of the row rather than advertising a zero, and if all three are
+   empty the whole section hides.
+   --------------------------------------------------------------------------- */
+function settleBoardStats(){
+  var out=[];
+  try{
+    var u=unchRows().length;
+    if(u) out.push({view:'unchallenged',n:u,label:'films on one person’s word',
+      title:'Unchallenged',blurb:'One verdict in, nobody has checked it. Settle one.'});
+  }catch(e){}
+  try{
+    var g=gapRows().length;
+    if(g) out.push({view:'gap',n:g,label:'where the two scores split',
+      title:'The Gap',blurb:'Where the critics and the room disagree.'});
+  }catch(e){}
+  try{
+    var d=dropOnTv().length+dropRecentFilms().length;
+    if(d) out.push({view:'dropped',n:d,label:'out right now',
+      title:'Just Dropped',blurb:'What came out, film and television. Rule on it.'});
+  }catch(e){}
+  return out;
+}
+function paintSettleBoards(){
+  var el=byId('settleBoards'); if(!el) return;
+  var rows=settleBoardStats();
+  if(!rows.length){ el.style.display='none'; return; }
+  el.style.display='';
+  el.innerHTML='<div class="shelf-head"><h2>Settle something</h2>'+
+      '<span class="sb-sub">Three boards, every one of them a real argument waiting on you.</span></div>'+
+    '<div class="sb-grid">'+rows.map(function(r){
+      return '<button class="sb-card" onclick="go(\''+r.view+'\')">'+
+        '<span class="sb-n">'+fmt(r.n)+'</span>'+
+        '<span class="sb-lab">'+esc(r.label)+'</span>'+
+        '<span class="sb-t">'+esc(r.title)+'</span>'+
+        '<span class="sb-b">'+esc(r.blurb)+'</span>'+
+        '<span class="sb-go">Open →</span>'+
+      '</button>';
+    }).join('')+'</div>';
+}
 /* ---------------------------------------------------------------------------
    UNCHALLENGED  (#/unchallenged)
    A hundred and sixty-eight films rest on exactly one person's verdict. On the
