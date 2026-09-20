@@ -4792,3 +4792,52 @@ Nothing below is blocked on code. All of it is blocked on the owner.
    real list and no way to send.
 5. **`CJ_PID`** is unset and Amazon Associates was never signed up, so every
    "Get tickets" link forfeits its commission.
+
+## JAŸ-Z in 8 added + The Weekly Watch, a unit that re-derives itself every Friday (2026-09-20)
+Owner: the eight-part Jay-Z documentary was missing and should be a conversation
+piece "every week through the site." Verified before building: **JAŸ-Z in 8**,
+HBO and HBO Max, premiered **2026-09-18**, directed by **Rick Rubin**, shot by
+**Bradford Young**, executive produced by Shawn Carter, Rubin and **Daniel
+Kaluuya**. Two chapters every Friday through **Oct 9**. Confirmed via Variety's
+announcement and release-date stories plus TMDB (tv/326440), which carries the
+full episode list with real air dates and the real songs each chapter covers.
+- **Catalog**: `jay-z-in-8`, `type:'doc'`, `scope:'ours'`, HBO Max, real poster
+  pinned in `WS_POSTERS` and backdrop baked, `k`/`t` null, `votes:0`,
+  `reviews:[]`. Catalog 1283 → 1284; ran `build-films-json.cjs` and generated
+  `og/jay-z-in-8.jpg`.
+- **`#jayz8` / `paintJayz8()` / `JAYZ8`** — a dark stage banner high on home,
+  directly under the hero vote widget and above This Week at The Table. It is
+  **date-derived, not hand-kept**: `jz8Drops()` collapses the eight chapters into
+  the four Friday drops, and every paint recomputes what is out, the real songs
+  in this week's chapters (as pills), an 8-segment progress bar, the countdown to
+  the next drop, and which week's discussion question is live. Hides before the
+  premiere, says "All eight chapters are out" after the finale, and retires
+  itself at `JAYZ8.until` (2026-11-16). Nobody touches it on a Friday.
+- **The conversation** is `JAYZ8.talk` — four questions, one per drop, each
+  pinned to songs genuinely in that week's chapters, rotating on date. "Say your
+  piece" routes to the film page and focuses the comment box directly
+  (`jz8Join`), so the CTA lands in the thing we are shortest on.
+- Chapter 7's tracklist is not published yet, so it carries no songs rather than
+  a guess; Chapter 2's overview is thematic, so it shows its real note instead of
+  a song list. Visual language is the house spotlight standard (`emmySpinCenter`
+  sweep with the translateZ clip hardening, `emmyShine` eyebrow, `emmyTwinkle`
+  sparkles, gold-foil framed poster) plus a masked bleed of the real backdrop
+  filling the right of the card.
+- Verified in headless Chromium by time-travelling `jz8Day()` through every week
+  of the run (Sep 17 hidden, Sep 18 / Sep 26 / Oct 3 / Oct 10 each showing the
+  correct chapters, songs, question and countdown, Nov 20 retired), desktop and
+  mobile, zero console errors, zero overflow; full 16-route sweep PASS.
+
+### Why it was missed, and the fix
+`release-watch.cjs` only ever surfaced a title when someone **already in our
+cast or director lists** appeared in its credits. That is the right filter for
+scripted work and the wrong one for a music doc, whose entire credited cast is
+the subject and the director — JAŸ-Z in 8 lists exactly two people. It never
+reached the report. (Checked: it does sit inside the discover window and Jay-Z's
+name would clear the overlap test today, so the Sep 16 run either ranked it below
+the pages scanned or TMDB had not populated its credits yet — that ordering
+cannot be replayed, which is itself the argument for not depending on it.)
+Fixed with a second, **unfiltered** pass over documentary and music titles in
+the window, listed whether or not they overlap the catalog, capped at 30 so it
+stays readable; `--pages` default also raised 5 → 8. Report-only like everything
+else. The category we keep missing is now swept on its own terms.

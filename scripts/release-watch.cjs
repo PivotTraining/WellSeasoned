@@ -23,7 +23,7 @@ const arg = (flag, dflt) => {
   const i = process.argv.indexOf(flag);
   return i > 0 ? parseInt(process.argv[i + 1], 10) : dflt;
 };
-const DAYS = arg('--days', 60), PAGES = arg('--pages', 5);
+const DAYS = arg('--days', 60), PAGES = arg('--pages', 8);
 const STRLOG = { 3: 'DIR ', 2: 'LEAD', 1: 'supp' };
 
 const api = p => 'https://api.themoviedb.org/3' + p +
@@ -152,6 +152,59 @@ const api = p => 'https://api.themoviedb.org/3' + p +
       'of something we carry.', '');
   }
 
+  /* Second pass: documentaries and music titles, listed whether or not they
+     share talent with the catalog.
+     Why this exists: the pass above only ever surfaces a title when somebody
+     already in our cast or director lists turns up in its credits. That is the
+     right filter for scripted work and the wrong one for a music doc, where the
+     only two names on the call sheet are the subject and whoever is holding the
+     camera. JAY-Z IN 8 premiered 2026-09-18 with JAY-Z and Rick Rubin as the
+     entire credited cast and never reached this report, and it was the biggest
+     Black-culture premiere of the month. Docs in a 60-day window are a small
+     enough set to read straight through, so this one category gets swept
+     unfiltered instead of gated on overlap. */
+  const DOC_TV = 99, DOC_MOVIE = '99,10402';
+  const docs = [];
+  const listed = new Set(cands.map(c => c.kind + '/' + c.id));
+  for (const kind of ['movie', 'tv']) {
+    for (let page = 1; page <= 2; page++) {
+      const q = kind === 'movie'
+        ? api('/discover/movie?sort_by=popularity.desc&region=US&with_genres=' + DOC_MOVIE +
+              '&primary_release_date.gte=' + from + '&primary_release_date.lte=' + to +
+              '&page=' + page)
+        : api('/discover/tv?sort_by=popularity.desc&with_genres=' + DOC_TV +
+              '&first_air_date.gte=' + from + '&first_air_date.lte=' + to +
+              '&page=' + page);
+      const r = await get(q);
+      const rows = (r.json && r.json.results) || [];
+      if (!rows.length) break;
+      rows.forEach(row => {
+        const title = row.title || row.name || '';
+        const date = (row.release_date || row.first_air_date || '').slice(0, 10);
+        const year = date ? +date.slice(0, 4) : 0;
+        if (!title || !date) return;
+        if (have.has(norm(title) + '|' + year)) return;
+        if (soonIds.has(String(row.id))) return;
+        if (listed.has(kind + '/' + row.id)) return;
+        docs.push({ kind, id: row.id, title, date });
+      });
+    }
+  }
+  docs.sort((a, b) => (a.date < b.date ? -1 : 1));
+  const docTop = docs.slice(0, 30);
+  L.push('## Docs & music in the window (' + docTop.length + ')', '',
+    '_Unfiltered — these are NOT talent matches. A music doc\'s credited cast is ' +
+    'usually just the subject, so the overlap test above cannot see it. Read for ' +
+    'anything genuinely ours; most rows will not be._', '');
+  if (!docTop.length) {
+    L.push('No uncovered documentary or music titles in this window.', '');
+  } else {
+    L.push('| Release | Type | Title | TMDB |', '| --- | --- | --- | --- |');
+    docTop.forEach(d => L.push('| ' + d.date + ' | ' + d.kind + ' | **' + d.title +
+      '** | `' + d.kind + '/' + d.id + '` |'));
+    L.push('');
+  }
+
   fs.writeFileSync(path.join(ROOT, 'release-watch.md'), L.join('\n'));
-  console.log('\nFINDINGS=' + cands.length + '  -> release-watch.md');
+  console.log('\nFINDINGS=' + cands.length + ' + docs=' + docTop.length + '  -> release-watch.md');
 })();
