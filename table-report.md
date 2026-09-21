@@ -1,10 +1,10 @@
-# Table Report figures — 2026-09-10
+# Table Report figures — 2026-09-21
 
 _All counts read live from vote_counts. Quote the n beside any percentage._
 
-- Verdicts cast: **1048**
-- Films carrying a verdict: **340** of 1283 (943 still unruled)
-- Films resting on a single verdict: **168**
+- Verdicts cast: **1053**
+- Films carrying a verdict: **343** of 1286 (943 still unruled)
+- Films resting on a single verdict: **169**
 - Films with 4+ verdicts (quotable): **73**
 
 ## Most-voted (top 12)
