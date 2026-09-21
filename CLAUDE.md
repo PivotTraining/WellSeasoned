@@ -4882,3 +4882,56 @@ everything else in the unit.
   73/27 split post-vote off mocked counts, answer switch fires DELETE then POST
   with the right tags, re-click no-op, zero leak into film tags, zero overflow,
   zero console errors; full 16-route sweep PASS.
+
+## Debut sweep + banner refresh: Route 187, Neagley, Misty Green's real date (2026-09-21)
+Owner: "Are we missing anything else that may have debuted? Do we need to update
+the banner?" Both yes. Audited the marquee state, the COMING_SOON dates against
+TMDB, and ran a discover sweep of everything that premiered Aug 20 – Sep 21 and
+is not in the catalog.
+
+- **Route 187** (`route-187`, Paramount+, premiered **Sep 16**) — a four-episode
+  limited series out of BET Studios, created/written/directed by Mark E. Swinton
+  with **Tyler Perry** executive producing and directing. South Winslow's bus
+  route 87, nicknamed for the homicide code; a driver and a student are killed
+  and a print journalist goes after who did it. Unambiguously ours. Real TMDB
+  poster pinned and backdrop baked. **No trailer wired** — the only YouTube copy
+  sits on Blex Media, an outlet re-upload, not Paramount+ or BET's own channel
+  (same call as the CoBaB "Movie Trailer Titan" rejection). It had been sitting
+  in `release-watch.md` since the Sep 16 run as a director-signal candidate and
+  nobody had actioned it.
+- **Neagley** (`neagley`, Prime Video, premiered **Sep 16**) — the Reacher
+  spinoff, 8 episodes. **Closer bar, flagged**: Maria Sten leads (Congolese
+  father, Danish mother) and Tyrone Benskin plays her father, so the character is
+  Black, but Nick Santora and Nicholas Wootton created it. Same class as
+  `lioness`/`paradise`/`ride-or-die`, added as `'ours'` on the catalog norm
+  rather than a fresh call — say the word if it should be `'all'`. Trailer
+  `BOzNaa_o9_g` oEmbed-verified as the Prime Video upload.
+- **Misty Green's date was a placeholder and is now real.** It went in as
+  `2026-10-31` because A24 had only said "October 2026"; the date is now
+  announced as **Oct 9** (A24, after the TIFF premiere). `soon-watch.md` flagged
+  a -35 day drift to TMDB's Sep 26 — that is the **festival** date, not the
+  release, which is exactly the trap that report warns about. Fixed to Oct 9 and
+  the marquee eyebrow now reads "Chris Rock directs · In theaters Oct 9 · A24"
+  with an `eyLive` flip instead of the month-only hedge.
+- **Banner**: Diarra from Detroit's `until` passed Sep 20 so `featSlides()`
+  already dropped it — Route 187 took the freed slot and the array stays at 8,
+  no retirement needed. Order now leads with the newest thing out.
+- **Checked and NOT changed**: `soon-watch.md` also flagged Your Mother Your
+  Mother Your Mother as Sep 25 → Oct 9. Our Sep 25 is right — that is the NY/LA
+  opening, expanding Oct 2 and Oct 9 (Deadline). TMDB carries the wide date.
+  Worth remembering that both of this week's date flags were TMDB reporting a
+  different real milestone, not us being wrong.
+- Catalog 1284 → **1286**; ran `build-films-json.cjs`, generated both OG cards.
+  Verified in headless Chromium: both new titles resolve with real posters, vote
+  normally (4 verdict buttons, not the hype gate), Misty Green still correctly
+  gated as upcoming and now sits 4th on the slate at Oct 9, marquee returns 8
+  slides led by Route 187, zero console errors; 16-route sweep PASS.
+
+**Still on the table from `release-watch.md`, owner's call** (all real, all
+missing, each a Black lead with non-Black authorship): Love of Your Life (Oct 7,
+Aaron Pierre — the subject of our current Balcony cover), Animals (Oct 9, Kerry
+Washington), Treasure Island (Oct 11, David Oyelowo), Clayface (Oct 23, Naomi
+Ackie), Bass X Machina (Nov 3, Brian Tyree Henry + Janelle Monáe), 12 12 12
+(Nov 12, Anthony Mackie), How to Rob a Bank (Nov 13, Zoë Kravitz), plus the
+three carried over from Aug: S.W.A.T. Exiles, Cupertino, The Fall and Rise of
+Reggie Dinkins S2.
