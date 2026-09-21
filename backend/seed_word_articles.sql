@@ -457,7 +457,7 @@ update public.articles set subject='Tommy Davidson, Tyler Perry, Deon Cole, Mart
 -- gets re-published months later the numbers will be stale, so re-run the
 -- query before touching the body rather than editing it from memory.
 -- ---------------------------------------------------------------------------
-insert into articles (slug, kind, title, dek, author, film_slug, hero_image, body, published)
+insert into articles (slug, kind, title, dek, author, film_slug, hero_image, body, published, created_at)
 values (
   'a-thousand-verdicts-in',
   'article',
@@ -501,7 +501,8 @@ Now the part that undercuts all of it, because leaving it out would be a lie by 
 The canon does not need us. Malcolm X is a great film whether or not twenty-five more people confirm it. What needs us is everything else. The nine hundred and forty-nine titles nobody has ruled on. The hundred and sixty-three sitting on one lonely opinion. The films that are actually in question right now instead of settled thirty years ago.
 
 Go break a tie. That is the entire ask.$body$,
-  true
+  true,
+  '2026-09-03T09:00:00Z'
 )
 on conflict (slug) do nothing;
 
@@ -518,7 +519,7 @@ on conflict (slug) do nothing;
 -- conflict on whether he appears, and every source agrees only that he
 -- co-created and executive produces.
 -- ---------------------------------------------------------------------------
-insert into articles (slug, kind, title, dek, author, film_slug, subject, hero_image, body, published)
+insert into articles (slug, kind, title, dek, author, film_slug, subject, hero_image, body, published, created_at)
 values (
   'the-laugh-track-is-doing-all-the-work',
   'editorial',
@@ -563,6 +564,91 @@ Eight episodes is not much room to turn a show around. But there is a version of
 One person has ruled on it at The Table so far. They sent it back.
 
 Go tell me we are wrong.$body$,
-  true
+  true,
+  '2026-09-08T09:00:00Z'
+)
+on conflict (slug) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- The Only Archive Is Him (2026-09-21) — a feature on JAY-Z in 8, written
+-- while it is still airing (chapters drop two a week through Oct 9).
+-- Every factual claim verified before writing:
+--   * 8 chapters, 2 per Friday, premiered 2026-09-18, finale 2026-10-09,
+--     HBO and HBO Max. Directed by Rick Rubin, shot by Bradford Young,
+--     EPs include Shawn Carter, Rubin and Daniel Kaluuya.
+--   * The chapter-one quote about not loving being an artist is quoted from
+--     the episode as reported in coverage, not paraphrased into something
+--     stronger than he said.
+--   * Rubin produced 99 Problems (2003). Fade to Black (2004) is the filmed
+--     record of Jay composing in his head at Baseline with Rubin present.
+--   * Jay not writing lyrics down is long and independently documented,
+--     including his own account of trying and failing to write for The
+--     Black Album.
+--   * Bradford Young was the first African-American cinematographer
+--     nominated for the Best Cinematography Oscar (Arrival, 2017).
+--   * Critical reception is real and attributed: The Hollywood Reporter and
+--     Variety are quoted from their published reviews.
+-- No invented quotes, no invented scenes, no Kitchen score (that requires a
+-- seated critic through verify_critic, not an editorial).
+-- ---------------------------------------------------------------------------
+insert into articles (slug, kind, title, dek, author, film_slug, subject, hero_image, body, published, created_at)
+values (
+  'the-only-archive-is-him',
+  'article',
+  'The Only Archive Is Him',
+  'He never wrote any of it down. Eight chapters, two a week, and Rick Rubin has found the only key that fits the lock: do not ask the man about his life. Ask him about the line.',
+  'The Founder',
+  'jay-z-in-8',
+  'JAY-Z, Rick Rubin, Bradford Young',
+  'https://itswellseasoned.com/word/the-only-archive-is-him.jpg',
+$body$In 2003, in a room at Baseline Studios, a man stood still with his eyes closed and made a song out of nothing.
+
+There was no paper. There was no pen, no phone, no notebook open on the console. Rick Rubin had brought in the beat for what would become 99 Problems. Mike D was in the room. And what the two of them watched, for something like twenty minutes, was a man doing nothing at all in a way that looked like a malfunction. No lips moving. No pacing. Just standing there. Then he walked into the booth and delivered three verses, whole, in order, and walked back out.
+
+That session is on film. It is in Fade to Black, and the reason it survives is that somebody happened to have a camera running in a room where a thing happened that leaves no other trace. There is no draft of 99 Problems. There is no first pass with a bad third verse crossed out. There is no marginalia, no legal pad, no box in a climate-controlled warehouse in New Jersey with a curator's inventory number on it. The song existed nowhere until it existed on tape.
+
+Twenty-three years later, Rubin has him back at a table, and behind them the wall is covered floor to ceiling in the names of the songs.
+
+> Every other artist of this size leaves paper behind. He left nothing but the records and the man who made them.
+
+That image is the whole thesis of JAY-Z in 8, and I do not think the show is being coy about it. Eight chapters, two dropping every Friday since September 18, running through October 9. Seven-plus hours. Rubin directs and also sits in the frame as our proxy, playing a role he is unusually well cast for: the guy who knows the music cold and still asks the dumb question on purpose. Bradford Young shoots it. Shawn Carter, Rubin and Daniel Kaluuya executive produce.
+
+And the structure is the argument. It is not a life. It is a set list.
+
+That distinction is doing more work than it looks like it is doing, because the career-spanning documentary is a form that has failed this man specifically, over and over, for thirty years. Ask Jay-Z about his life and you get the speech. You have heard the speech. Marcy, the tape, the hustle, the risk, the business, the ownership, the billion. It is true and it is polished to a finish and it tells you precisely nothing, because he has been giving it since he was twenty-six and he has never once given it to someone who could catch him.
+
+Ask him about a bar and something else happens. He is not defending a legacy. He is explaining a choice. Those are different muscles, and only one of them is honest by accident.
+
+You can watch it work almost immediately. In the first chapter he says, flatly, that he did not love being an artist. That he did not like shooting videos, did not like interviews, did not like speaking, that he was mostly an introvert. That is not a confession in the tabloid sense and nobody is going to headline it. But set it against thirty years of a man performing appetite for the job, and it reframes the entire posture. The swagger was not enthusiasm. It was a cost of doing business.
+
+Elsewhere in those first two chapters he offers up that his favorite opening he ever recorded is the intro to The Dynasty, which is a fan's answer and not a statesman's. He talks about his mother putting rap in front of him through King Tim III. He talks about watching Jaz-O sign a four-hundred-thousand-dollar deal with EMI and understanding, in that moment, that this was not a hobby with a ceiling but an industry with a door. None of that is new information to anybody who has read the books. What is new is the register. A man annotating himself sounds nothing like a man being interviewed.
+
+> He has given the speech a thousand times. He has never had to show his work.
+
+Now the part I have to say, because leaving it out would make this a press release.
+
+Seven hours is a lot of hours. The Hollywood Reporter found that the thing "impresses and exasperates in equal measure," and Variety called it illuminating and possibly too thorough, which is a sentence I recognize as a critic being gentle about a real problem. There are stretches where the song-by-song discipline stops being a lens and starts being an obligation, where a track gets its dutiful eight minutes because it was on the album, not because there is anything left in it. The thing sprawls. It repeats itself. It has no editor willing to tell the subject that a verse he is proud of is not interesting.
+
+And the larger problem is structural, not editorial. Annotation is authorship. When the only surviving record of how a song got made is the memory of the man who made it, then the man who made it is not a source. He is the archive. He is also the archivist, and the curator, and the one deciding which drawers we get to open. Chapter after chapter you are watching a figure with total control of his own myth pick up a pen for the first time in his career, and what he is writing is the footnotes.
+
+So the softness is not surprising. There is very little here about the parts of the catalog that would cost something to explain. The record is handled. He is a producer on it.
+
+The obvious comparison is McCartney 3,2,1, which Rubin also sat across from and which is clearly the template. But the comparison cuts the other way from how it is usually deployed. McCartney has tape. He has Abbey Road session logs, eight-track masters, manuscripts, sixty years of scholars who can check him. When McCartney misremembers, somebody can go look. There is a correcting mechanism outside the man.
+
+> With him there is no tape to roll back to. There is only the story, and the story is being told by its own protagonist.
+
+There is no second draft of 99 Problems to compare against what he says about 99 Problems. That is not a knock on his honesty. It is a statement about what this show actually is. It is not a companion to the record. It becomes part of it. Whatever he says in these eight chapters is, from here forward, the primary source, and every book written about this catalog for the next fifty years is going to cite it.
+
+Which is exactly why the craft of it matters more than it would on a lesser project, and why hiring Bradford Young is the smartest decision anybody made here. Young shot Selma. He shot Pariah. He shot Mother of George. In 2017 he became the first African-American cinematographer ever nominated for the Best Cinematography Oscar, which ended a drought of eighty-seven years, a fact that should embarrass an entire industry and mostly does not. He does not light Black skin like a problem to be solved. He lights it like the subject.
+
+So this is not a talking-head reel with a tasteful score. It is composed. There is a shot in the first chapter of a man in a knit cap leaning back in a wooden chair, one hand mid-gesture, the wall behind him printed with every song he ever made, and the thing looks like a portrait because somebody decided it should. The form is arguing that this is a body of work and not a career.
+
+Which brings it back around. Eight chapters. Two a week. One man at a table explaining, out loud, for the first and probably last time, how he built something that never existed on paper.
+
+Watch it while it is still coming out. That is the part nobody tells you about a thing like this. Right now the last two chapters have not aired and nobody knows how it lands, and for about three more weeks this is an argument in progress instead of a monument.
+
+Go say what you think before it sets.$body$,
+  true,
+  '2026-09-21T09:00:00Z'
 )
 on conflict (slug) do nothing;
