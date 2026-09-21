@@ -646,3 +646,18 @@ Come argue about it while it is still being written.$body$,
   '2026-09-21T09:00:00Z'
 )
 on conflict (slug) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Fix a live ordering tie (2026-09-21).
+-- "A Thousand Verdicts In" and "The Laugh Track Is Doing All the Work" were
+-- published in the same transaction without an explicit created_at, so both
+-- rows carry the identical default now() timestamp. The magazine sorts
+-- created_at.desc, which makes their relative order undefined. The inserts
+-- above now stamp real dates, but on conflict (slug) do nothing means they
+-- never reach a row that already exists — so patch them here. Idempotent: a
+-- second run sets the same values.
+-- ---------------------------------------------------------------------------
+update articles set created_at = '2026-09-03T09:00:00Z'
+ where slug = 'a-thousand-verdicts-in';
+update articles set created_at = '2026-09-08T09:00:00Z'
+ where slug = 'the-laugh-track-is-doing-all-the-work';
