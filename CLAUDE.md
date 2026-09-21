@@ -4841,3 +4841,40 @@ Fixed with a second, **unfiltered** pass over documentary and music titles in
 the window, listed whether or not they overlap the catalog, capped at 30 so it
 stays readable; `--pages` default also raised 5 → 8. Report-only like everything
 else. The category we keep missing is now swept on its own terms.
+
+## The Weekly Watch gets a real poll (2026-09-21)
+Owner: "Create poll question around the episode." The unit's open-ended weekly
+question became a countable ballot. Each of the four Friday drops now carries a
+poll whose options are **songs genuinely in that week's chapters**, so the
+ballot can never ask about something nobody watched: Wk1 which Jay do you trust
+more (story / dream, off Meet the Parents vs Can't Knock the Hustle), Wk2 which
+confession lands hardest (This Can't Be Life / You Must Love Me / Where Have You
+Been / 4:44), Wk3 which one is peak Jay (U Don't Know / Dead Presidents II / 99
+Problems / Kill Jay-Z), Wk4 what record he leaves (The Story of O.J. / Legacy /
+No Church in the Wild / Family Feud). It rotates on date with the drops, same as
+everything else in the unit.
+- **No new table.** Votes go in `mini_tag_votes`, the site's existing generic
+  (thing, tag, identity) primitive — RLS already forces `user_id = auth.uid()`,
+  `mini_tag_counts` already aggregates publicly, and the migration is already
+  live. Same reuse call as `signups` for premiere hooks and `comments` for
+  featured reads.
+- **Namespaced `film_slug: 'poll:jay-z-in-8'`**, not the film's own slug, so
+  poll rows can never land in that film's mini-tag counts or the Vibe rankings
+  (both only read slugs that resolve to a real catalog entry). Verified:
+  `app.miniTagCounts['jay-z-in-8']` stays null and `find('poll:jay-z-in-8')` is
+  false after voting.
+- **One choice per week per identity.** Tag is `w<n>:<option>`; picking a second
+  option DELETEs the first row before inserting the new one (`jz8PollVote` →
+  the existing `syncMiniTag` remove path). Re-clicking your own answer is a
+  no-op, deliberately not a toggle-off — a poll answer is not a like.
+- **Results hidden until you answer** — pre-vote you only see how many have
+  answered, so the room can't anchor your pick. After voting, real percentages
+  and a fill bar per option. Zero votes reads "Nobody has called it yet," one
+  reads "One answer in, and it is yours." No seeded numbers, as always.
+- `jz8PollOnce()` pulls live counts once per load and repaints; the guard stops
+  the repaint from looping. Comment CTA reworded to "Say more about it" — the
+  poll is the quick take, comments are the long form.
+- Verified in headless Chromium desktop + mobile: hidden board pre-vote, real
+  73/27 split post-vote off mocked counts, answer switch fires DELETE then POST
+  with the right tags, re-click no-op, zero leak into film tags, zero overflow,
+  zero console errors; full 16-route sweep PASS.

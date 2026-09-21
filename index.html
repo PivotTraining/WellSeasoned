@@ -1068,6 +1068,24 @@
     border:1px solid rgba(244,197,66,.28);border-radius:99px;padding:5px 11px}
   .jz-q{font-family:var(--serif);font-weight:400;font-size:clamp(17px,2.1vw,21px);line-height:1.34;color:#F4ECD8;
     margin:18px 0 0;padding-left:16px;border-left:3px solid var(--gold);max-width:56ch}
+  .jz-poll{margin-top:18px;max-width:58ch}
+  .jz-poll-q{font-family:var(--serif);font-weight:400;font-size:clamp(19px,2.3vw,24px);line-height:1.22;color:#F4ECD8}
+  .jz-poll-sub{font-size:13px;color:rgba(244,236,216,.66);margin-top:6px;line-height:1.5}
+  .jz-opts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .jz-opt{position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    background:rgba(244,236,216,.07);border:1px solid rgba(244,197,66,.3);border-radius:var(--r);
+    padding:12px 14px;cursor:pointer;font:inherit;font-size:14.5px;font-weight:700;color:#F4ECD8;transition:all .15s}
+  .jz-opt:hover{border-color:var(--gold);background:rgba(244,197,66,.14)}
+  .jz-opt.done{cursor:default}
+  .jz-opt.done:hover{border-color:rgba(244,197,66,.3);background:rgba(244,236,216,.07)}
+  .jz-opt.on{border-color:var(--gold)}
+  .jz-opt-fill{position:absolute;left:0;top:0;bottom:0;z-index:0;background:linear-gradient(90deg,rgba(244,197,66,.3),rgba(231,162,27,.16));transition:width .5s ease}
+  .jz-opt.on .jz-opt-fill{background:linear-gradient(90deg,rgba(244,197,66,.5),rgba(231,162,27,.26))}
+  .jz-opt-lab{position:relative;z-index:1;flex:1;min-width:0}
+  .jz-opt-pct{position:relative;z-index:1;font-family:var(--mono);font-size:12.5px;color:var(--gold-soft);font-weight:700}
+  .jz-opt.on .jz-opt-pct{color:#F4C542}
+  .jz-poll-foot{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:rgba(244,236,216,.6);margin-top:10px}
+  @media(prefers-reduced-motion:reduce){ .jz-opt-fill{transition:none} }
   .jz-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
   .jz-cta .btn-ghost.light{border-color:rgba(255,255,255,.3);color:#F4ECD8}
   .jz-next{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(244,236,216,.62);margin-top:14px}
@@ -13281,13 +13299,22 @@ var JAYZ8={
     {n:7,d:'2026-10-09'},        /* HBO has not published this chapter's tracklist yet */
     {n:8,d:'2026-10-09',songs:['New York (Concept de Paris)','The Story of O.J.','No Church in the Wild','Family Feud','Legacy']}
   ],
-  /* One question per weekly drop, each tied to songs that are genuinely in that
-     week's chapters. Editorial, written by us, and it rotates on its own. */
+  /* One POLL per weekly drop. Every option is a song that is genuinely in that
+     week's chapters, so the ballot can never ask about something nobody watched.
+     Editorial questions, written by us, rotating on date with the drops. */
   talk:[
-    {d:'2026-09-18',q:'He opens on Meet the Parents and Can’t Knock the Hustle. Which Jay do you trust more — the one telling the story, or the one selling the dream?'},
-    {d:'2026-09-25',q:'This Can’t Be Life and 4:44 sit in the same chapter, twenty years apart. Did the honesty get better, or just louder?'},
-    {d:'2026-10-02',q:'Regrets, Kill Jay-Z, Ignorant Shit. He is arguing with himself across three decades. Who wins that argument?'},
-    {d:'2026-10-09',q:'It ends on The Story of O.J. and Legacy. After eight chapters, what is the record he actually leaves behind?'}
+    {d:'2026-09-18',q:'Which Jay do you trust more?',
+     sub:'He opens on Meet the Parents and Can’t Knock the Hustle in the same breath.',
+     opts:[{k:'story',label:'The one telling the story'},{k:'dream',label:'The one selling the dream'}]},
+    {d:'2026-09-25',q:'Which confession lands hardest?',
+     sub:'Four chapters of him telling on himself, twenty years apart.',
+     opts:[{k:'cantbelife',label:'This Can’t Be Life'},{k:'mustloveme',label:'You Must Love Me'},{k:'wherehaveyoubeen',label:'Where Have You Been'},{k:'444',label:'4:44'}]},
+    {d:'2026-10-02',q:'Which one is peak Jay?',
+     sub:'These two chapters are the run people argue about.',
+     opts:[{k:'udontknow',label:'U Don’t Know'},{k:'deadpres',label:'Dead Presidents II'},{k:'99',label:'99 Problems'},{k:'killjayz',label:'Kill Jay-Z'}]},
+    {d:'2026-10-09',q:'What is the record he actually leaves?',
+     sub:'Eight chapters in, it ends here.',
+     opts:[{k:'oj',label:'The Story of O.J.'},{k:'legacy',label:'Legacy'},{k:'nochurch',label:'No Church in the Wild'},{k:'familyfeud',label:'Family Feud'}]}
   ]
 };
 function jz8Day(){ var d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(); }
@@ -13326,6 +13353,91 @@ function jz8Talk(drops){
   return live;
 }
 
+/* ---- The weekly poll ----
+   Stored in mini_tag_votes, the site's existing generic (thing, tag, identity)
+   vote table, rather than a new one: RLS already forces user_id = auth.uid(),
+   the public mini_tag_counts view already aggregates it, and the migration is
+   already live. The film_slug is namespaced 'poll:jay-z-in-8' so these rows can
+   never land in the film's own mini-tag counts or the Vibe rankings, which only
+   ever read slugs that resolve to a real catalog entry.
+   One choice per week per identity: picking a second option retires the first,
+   through the same delete path syncMiniTag already uses. */
+var JZ8_POLL_SLUG='poll:jay-z-in-8';
+var _jz8PollLoaded=false;
+function jz8PollOnce(){ if(_jz8PollLoaded) return; _jz8PollLoaded=true; jz8LoadPoll(); }
+function jz8PollTag(wk,k){ return 'w'+wk+':'+k; }
+function jz8PollWeek(t){
+  for(var i=0;i<JAYZ8.talk.length;i++) if(JAYZ8.talk[i].d===t.d) return i+1;
+  return 1;
+}
+function jz8PollMine(wk){
+  var mine=app.miniTags[JZ8_POLL_SLUG]||{}, pre='w'+wk+':';
+  for(var tag in mine) if(mine.hasOwnProperty(tag)&&mine[tag]&&tag.indexOf(pre)===0) return tag.slice(pre.length);
+  return null;
+}
+function jz8PollCounts(t,wk){
+  var c=app.miniTagCounts[JZ8_POLL_SLUG]||{}, out={}, total=0;
+  t.opts.forEach(function(o){ var n=c[jz8PollTag(wk,o.k)]||0; out[o.k]=n; total+=n; });
+  out._total=total;
+  return out;
+}
+function jz8PollVote(wk,k){
+  var t=jz8Talk(); if(!t||!t.opts||jz8PollWeek(t)!==wk) return;
+  var mine=app.miniTags[JZ8_POLL_SLUG]||(app.miniTags[JZ8_POLL_SLUG]={});
+  var cnts=app.miniTagCounts[JZ8_POLL_SLUG]||(app.miniTagCounts[JZ8_POLL_SLUG]={});
+  var prev=jz8PollMine(wk);
+  if(prev===k) return;                       /* already their answer, not a toggle */
+  if(prev){                                  /* one choice per week: retire the old row */
+    var oldTag=jz8PollTag(wk,prev);
+    delete mine[oldTag]; cnts[oldTag]=Math.max(0,(cnts[oldTag]||0)-1);
+    syncMiniTag(JZ8_POLL_SLUG,oldTag,true);
+  }
+  var tag=jz8PollTag(wk,k);
+  mine[tag]=true; cnts[tag]=(cnts[tag]||0)+1;
+  syncMiniTag(JZ8_POLL_SLUG,tag,false);
+  track('jayz8_poll',{week:wk,pick:k});
+  saveState();
+  paintJayz8();
+}
+function jz8LoadPoll(){
+  if(!sbConfigured()) return;
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/mini_tag_counts?film_slug=eq.'+encodeURIComponent(JZ8_POLL_SLUG)+'&select=tag,count',{headers:sbHeaders()})
+      .then(function(r){return r.json();}).then(function(rows){
+        if(!Array.isArray(rows)) return;
+        var c={}; rows.forEach(function(x){ c[x.tag]=x.count||0; });
+        app.miniTagCounts[JZ8_POLL_SLUG]=c;
+        if(byId('jayz8')) paintJayz8();
+      }).catch(function(){});
+  }catch(e){}
+}
+/* The board stays hidden until you answer — real numbers only, and no anchoring
+   your pick to whatever the room already said. */
+function jz8PollHTML(t){
+  if(!t) return '';
+  if(!t.opts||!t.opts.length) return t.q?'<blockquote class="jz-q">'+esc(t.q)+'</blockquote>':'';
+  var wk=jz8PollWeek(t), mine=jz8PollMine(wk), c=jz8PollCounts(t,wk), total=c._total;
+  var rows=t.opts.map(function(o){
+    var on=(mine===o.k), n=c[o.k]||0;
+    var pct=(mine&&total)? Math.round(n/total*100) : 0;
+    return '<button class="jz-opt'+(on?' on':'')+(mine?' done':'')+'" onclick="jz8PollVote('+wk+',\''+esc(o.k)+'\')" aria-pressed="'+(on?'true':'false')+'">'+
+      (mine?'<span class="jz-opt-fill" style="width:'+pct+'%"></span>':'')+
+      '<span class="jz-opt-lab">'+esc(o.label)+'</span>'+
+      (mine?'<span class="jz-opt-pct">'+pct+'%</span>':'')+
+    '</button>';
+  }).join('');
+  var foot;
+  if(!mine) foot = total? fmt(total)+' answered so far. Yours is next.' : 'Nobody has called it yet. Open the floor.';
+  else if(total===1) foot = 'One answer in, and it is yours.';
+  else foot = fmt(total)+' answers in. You said '+esc(t.opts.filter(function(o){return o.k===mine;})[0].label)+'.';
+  return '<div class="jz-poll">'+
+    '<div class="jz-poll-q">'+esc(t.q)+'</div>'+
+    (t.sub?'<div class="jz-poll-sub">'+esc(t.sub)+'</div>':'')+
+    '<div class="jz-opts">'+rows+'</div>'+
+    '<div class="jz-poll-foot">'+foot+'</div>'+
+  '</div>';
+}
+
 function paintJayz8(){
   var el=byId('jayz8'); if(!el) return;
   var f=find(JAYZ8.id);
@@ -13335,6 +13447,7 @@ function paintJayz8(){
   drops.forEach(function(dr){ if(dr.out) live=dr; else if(!next) next=dr; });
   if(!live){ el.style.display='none'; return; }   /* nothing has aired yet */
   el.style.display='';
+  jz8PollOnce();
 
   var songs=jz8Songs(live.eps);
   var pills=songs.map(function(s){ return '<span class="jz-song">'+esc(s)+'</span>'; }).join('');
@@ -13357,9 +13470,9 @@ function paintJayz8(){
       '<p class="jz-now"><b>Out now: '+jz8Label(live.eps)+'.</b> '+
         (songs.length?'The songs on the table this week:':esc(note))+'</p>'+
       (songs.length?'<div class="jz-songs">'+pills+'</div>':'')+
-      (q?'<blockquote class="jz-q">'+esc(q.q)+'</blockquote>':'')+
+      jz8PollHTML(q)+
       '<div class="jz-cta">'+
-        '<button class="btn btn-gold" onclick="jz8Join()">Say your piece →</button>'+
+        '<button class="btn btn-gold" onclick="jz8Join()">Say more about it →</button>'+
         '<button class="btn btn-ghost light" onclick="go(\'film\',\''+JAYZ8.id+'\')">The full page</button>'+
       '</div>'+
       (next?'<p class="jz-next">Next drop · '+jz8Label(next.eps)+' · '+esc(jz8When(next.d))+'</p>'
