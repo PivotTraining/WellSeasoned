@@ -4845,9 +4845,13 @@ else. The category we keep missing is now swept on its own terms.
 ## The Weekly Watch gets a real poll (2026-09-21)
 Owner: "Create poll question around the episode." The unit's open-ended weekly
 question became a countable ballot. Each of the four Friday drops now carries a
-poll whose options are **songs genuinely in that week's chapters**, so the
-ballot can never ask about something nobody watched: Wk1 which Jay do you trust
-more (story / dream, off Meet the Parents vs Can't Knock the Hustle), Wk2 which
+poll grounded in what that week's chapters actually cover, so the ballot can
+never ask about something nobody watched: Wk1 what made him the writer he is
+(Brooklyn / The Jersey years / Losing Big / Surviving the fame — Ch1 is Brooklyn
+and Jersey, Ch2 is fame and Big/Pac; the first draft asked "which Jay do you
+trust more," which the owner rejected as vague, and swapping the option keys
+correctly orphaned the old rows rather than laundering them into a different
+question — `jz8PollCounts` only sums keys present in the live `opts`), Wk2 which
 confession lands hardest (This Can't Be Life / You Must Love Me / Where Have You
 Been / 4:44), Wk3 which one is peak Jay (U Don't Know / Dead Presidents II / 99
 Problems / Kill Jay-Z), Wk4 what record he leaves (The Story of O.J. / Legacy /
