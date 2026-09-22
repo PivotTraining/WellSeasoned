@@ -1088,6 +1088,66 @@
   @media(prefers-reduced-motion:reduce){ .jz-opt-fill{transition:none} }
   .jz-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
   .jz-cta .btn-ghost.light{border-color:rgba(255,255,255,.3);color:#F4ECD8}
+  /* ---- DROP NIGHT (#/dropnight) ----
+     Reuses the jz-* spotlight furniture (bleed, sparks, eyebrow, progress
+     segments, song pills) so the page reads as the same unit as the home
+     banner rather than a second design language. Only the page-level shell
+     and the countdown/RSVP row are new. */
+  .dn-stage{position:relative;overflow:hidden;isolation:isolate;transform:translateZ(0);-webkit-transform:translateZ(0);
+    border-radius:var(--r-lg);border:1px solid rgba(228,155,11,.26);margin-top:14px;
+    background:linear-gradient(155deg,#241A12,#140E09 60%,#1C130C);color:#F6ECD8;padding:clamp(24px,3.4vw,44px)}
+  .dn-stage::after{content:'';position:absolute;top:50%;left:50%;width:150%;aspect-ratio:1;
+    transform:translate(-50%,-50%);z-index:0;pointer-events:none;
+    background:conic-gradient(from 0deg,rgba(228,155,11,.17),transparent 26%,transparent 74%,rgba(228,155,11,.13));
+    animation:emmySpinCenter 18s linear infinite}
+  .dn-copy{position:relative;z-index:2;max-width:64ch}
+  .dn-h{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.6vw,50px);line-height:1.04;margin:10px 0 0;letter-spacing:-.5px}
+  .dn-lead{font-size:15px;line-height:1.6;opacity:.85;margin-top:12px;max-width:58ch}
+  .dn-row{display:flex;align-items:center;gap:clamp(16px,3vw,30px);margin-top:24px;flex-wrap:wrap}
+  .dn-div{width:1px;height:48px;background:rgba(246,236,216,.16)}
+  .dn-lab{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.17em;text-transform:uppercase;font-weight:700;color:rgba(228,155,11,.8)}
+  .dn-lab.dark{color:var(--ink-2)}
+  .dn-clock{display:flex;align-items:baseline;gap:2px;font-family:var(--display);font-weight:800;
+    font-size:clamp(28px,4vw,40px);letter-spacing:-1px;line-height:1.1;margin-top:3px;font-variant-numeric:tabular-nums}
+  .dn-clock i{font-style:normal;font-size:.45em;opacity:.6;margin-right:9px}
+  .dn-clock.dn-live{font-family:var(--serif);font-weight:400;letter-spacing:-.5px;color:var(--gold-soft)}
+  .dn-count{display:flex;align-items:baseline;gap:8px;margin-top:3px}
+  .dn-count b{font-family:var(--display);font-weight:800;font-size:clamp(26px,3.6vw,38px);letter-spacing:-1px}
+  .dn-count span{font-size:13.5px;opacity:.72}
+  .dn-count-none span{font-size:14px;opacity:.72;max-width:24ch;display:block;line-height:1.45;margin-top:6px}
+  .dn-cta{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .dn-sec{margin-top:clamp(26px,3.4vw,38px)}
+  .dn-sech{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .dn-sech h2{font-size:clamp(19px,2.3vw,24px);letter-spacing:-.3px}
+  .dn-cap{font-size:13px;color:var(--ink-2)}
+  .dn-bill{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .dn-chap{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px}
+  .dn-chap .jz-songs{margin-top:10px}
+  .jz-song.dark{background:rgba(228,155,11,.13);border-color:rgba(228,155,11,.34);color:var(--ink)}
+  .dn-note{font-size:13.5px;line-height:1.55;color:var(--ink-2);margin-top:9px}
+  /* The ballot is the jz-* poll component, whose type colours are cream and
+     assume the dark stage it normally sits on. Give it that ground here
+     rather than overriding every colour rule — it also ties the ballot
+     back to the banner above it. */
+  .dn-poll{background:linear-gradient(155deg,#241A12,#140E09 60%,#1C130C);
+    border:1px solid rgba(228,155,11,.26);border-radius:var(--r-md);padding:clamp(18px,2.4vw,26px)}
+  .dn-poll .jz-poll{margin-top:0;max-width:none}
+  .dn-poll .jz-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  @media(max-width:760px){ .dn-poll .jz-opts{grid-template-columns:minmax(0,1fr)} }
+  .dn-sched{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .dn-slot{background:var(--panel);border:1.5px solid var(--line);border-radius:var(--r-md);padding:13px 15px}
+  .dn-slot.done{opacity:.62}
+  .dn-slot.on{border-color:var(--gold);background:linear-gradient(160deg,rgba(244,183,51,.22),rgba(185,123,6,.14))}
+  .dn-slot-n{display:block;font-family:var(--display);font-weight:800;font-size:15px}
+  .dn-slot-d{display:block;font-size:12px;color:var(--ink-2);margin-top:2px}
+  .dn-foot{margin-top:26px}
+  @media(max-width:760px){
+    .dn-bill,.dn-sched{grid-template-columns:minmax(0,1fr)}
+    .dn-row{gap:18px}
+    .dn-div{display:none}
+    .dn-cta .btn{width:100%}
+  }
+  @media(prefers-reduced-motion:reduce){ .dn-stage::after{animation:none} }
   .jz-next{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(244,236,216,.62);margin-top:14px}
   @media(prefers-reduced-motion:reduce){ .jz-wrap::after{animation:none} .jz-spark{animation:none} .jz-ey{animation:none} }
   @media(max-width:860px){ .jz-art{flex:0 0 180px;padding:24px 0 24px 22px} .jz-copy{padding:24px 24px} }
@@ -2804,6 +2864,9 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
   <!-- ============ FILM EVENTS ============ -->
   <section class="view" data-view="events" aria-label="Film Events">
     <div class="wrap" id="eventsContent"></div>
+  </section>
+  <section class="view" data-view="dropnight" aria-label="Drop Night">
+    <div class="wrap" id="dropNightContent"></div>
   </section>
   <section class="view" data-view="wire" aria-label="The Wire">
     <div class="wrap" id="wireContent"></div>
@@ -7010,6 +7073,7 @@ function rerenderActive(){
      nothing else ever calls them again. */
   else if(v==='gap')renderGap(); else if(v==='dropped')renderDropped();
   else if(v==='unchallenged')renderUnchallenged();
+  else if(v==='dropnight')renderDropNight();
 }
 function hydrateFromTMDB(){
   var cache=loadPosterCache();
@@ -7271,7 +7335,7 @@ function setActiveNav(view){
 /* Hash-based routing so every view (and every film) has a shareable, back-button-able URL.
    go() writes the hash; the hashchange listener does the actual render, so links pasted
    straight into the address bar (e.g. .../#/film/sinners) open the right screen. */
-var KNOWN_VIEWS={unchallenged:1,gap:1,dropped:1,home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
+var KNOWN_VIEWS={dropnight:1,unchallenged:1,gap:1,dropped:1,home:1,film:1,browse:1,critic:1,vault:1,you:1,join:1,ranked:1,theaters:1,legal:1,curate:1,soon:1,submit:1,artist:1,word:1,read:1,bracket:1,inbox:1,apply:1,couch:1,advertise:1,kids:1,shop:1,pulse:1,events:1,kitchen:1,'perfect-ten':1,wire:1};
 function hashFor(view,arg){
   if(!view||view==='home')return '#/';
   if(arg==null||arg==='')return '#/'+view;
@@ -7337,6 +7401,7 @@ function render(view,arg){
   else if(view==='soon')renderSoon();
   else if(view==='advertise')renderAdvertise();
   else if(view==='events')renderEvents();
+  else if(view==='dropnight')renderDropNight();
   else if(view==='kitchen')renderKitchenBoard();
   else if(view==='wire')renderWire();
   // Reset to the top AFTER the view's content is in the DOM. The pre-render
@@ -13489,7 +13554,8 @@ function paintJayz8(){
       (songs.length?'<div class="jz-songs">'+pills+'</div>':'')+
       jz8PollHTML(q)+
       '<div class="jz-cta">'+
-        '<button class="btn btn-gold" onclick="jz8Join()">Say more about it →</button>'+
+        (next?'<button class="btn btn-gold" onclick="go(\'dropnight\')">Drop Night →</button>':'')+
+        '<button class="btn '+(next?'btn-ghost light':'btn-gold')+'" onclick="jz8Join()">Say more about it →</button>'+
         '<button class="btn btn-ghost light" onclick="go(\'film\',\''+JAYZ8.id+'\')">The full page</button>'+
       '</div>'+
       (next?'<p class="jz-next">Next drop · '+jz8Label(next.eps)+' · '+esc(jz8When(next.d))+'</p>'
@@ -13505,6 +13571,210 @@ function jz8Join(){
     var t=byId('cText'); if(!t) return;
     try{ t.scrollIntoView({block:'center'}); t.focus(); }catch(e){}
   },220);
+}
+
+/* ============ DROP NIGHT ============
+   The pre-game for each Friday drop of JAŸ-Z in 8: a countdown, who has said
+   they are watching, the songs those chapters actually cover, and this week's
+   ballot. Everything here is derived from JAYZ8.eps, so nobody has to touch it
+   on a Friday and it retires itself at JAYZ8.until alongside the home unit.
+
+   The RSVP reuses mini_tag_votes, the same generic (thing, tag, identity)
+   primitive the weekly poll uses, rather than a new table: RLS already forces
+   user_id = auth.uid() and mini_tag_counts already aggregates it publicly.
+   Namespaced 'rsvp:jay-z-in-8' so the rows can never reach the film's own mini
+   tags or the Vibe rankings, which only read slugs resolving to a catalog entry.
+
+   HONEST SCOPE: HBO has not published a drop TIME anywhere we could verify, so
+   this counts down to the DAY and the calendar file is an all-day event. No
+   invented "doors at 8pm" — the same bar the rest of the site holds. */
+var DN_SLUG='rsvp:jay-z-in-8';
+var _dnTimer=null;
+
+/* The drop this page is about, in priority order:
+     1. a drop landing TODAY — drop day is the whole point of the page, so it
+        stays on that drop rather than skipping a week ahead the moment the
+        chapters technically count as "out";
+     2. otherwise the next drop that has not landed;
+     3. otherwise the most recent one, so after the finale the page still has
+        something to be about instead of rendering empty. */
+function dnTarget(){
+  var drops=jz8Drops(), today=null, next=null, last=null;
+  drops.forEach(function(dr){
+    if(dr.out){ last=dr; if(jz8DaysTo(dr.d)===0) today=dr; }
+    else if(!next) next=dr;
+  });
+  return today||next||last;
+}
+function dnWeek(dr){
+  var drops=jz8Drops();
+  for(var i=0;i<drops.length;i++) if(drops[i].d===dr.d) return i+1;
+  return 1;
+}
+function dnTag(wk){ return 'w'+wk+':in'; }
+function dnMine(wk){ var m=app.miniTags[DN_SLUG]||{}; return !!m[dnTag(wk)]; }
+function dnCount(wk){ var c=app.miniTagCounts[DN_SLUG]||{}; return c[dnTag(wk)]||0; }
+
+function dnRsvp(wk){
+  var mine=app.miniTags[DN_SLUG]||(app.miniTags[DN_SLUG]={});
+  var cnts=app.miniTagCounts[DN_SLUG]||(app.miniTagCounts[DN_SLUG]={});
+  var tag=dnTag(wk), on=!!mine[tag];
+  /* a toggle, unlike the poll: you can change your mind about turning up */
+  if(on){ delete mine[tag]; cnts[tag]=Math.max(0,(cnts[tag]||1)-1); }
+  else  { mine[tag]=1;      cnts[tag]=(cnts[tag]||0)+1; }
+  saveState();
+  syncMiniTag(DN_SLUG,tag,on);
+  track('dropnight_rsvp',{week:wk,on:!on});
+  renderDropNight();
+}
+var _dnLoaded=false;
+function dnLoadOnce(){
+  if(_dnLoaded||!sbConfigured()) return; _dnLoaded=true;
+  fetch(SUPABASE_URL+'/rest/v1/mini_tag_counts?film_slug=eq.'+encodeURIComponent(DN_SLUG)+'&select=tag,count',{headers:sbHeaders()})
+    .then(function(r){ return r.ok?r.json():[]; })
+    .then(function(rows){
+      var c={}; (rows||[]).forEach(function(r){ c[r.tag]=r.count; });
+      app.miniTagCounts[DN_SLUG]=c;
+      if(parseHash().view==='dropnight') renderDropNight();
+    })['catch'](function(){});
+}
+
+/* Days/hours/minutes to midnight local of the drop date — the same instant
+   jz8Out() uses to flip a chapter to "out", so the countdown and the rest of
+   the site can never disagree about whether something has landed. */
+function dnLeft(d){
+  var ms=Date.parse(d+'T00:00:00')-Date.now();
+  if(ms<=0) return null;
+  return {d:Math.floor(ms/86400000),h:Math.floor(ms/3600000)%24,m:Math.floor(ms/60000)%60};
+}
+function dnClockHTML(l){
+  if(!l) return '<div class="dn-clock dn-live">It’s here.</div>';
+  function u(n,s){ return '<b>'+(n<10?'0':'')+n+'</b><i>'+s+'</i>'; }
+  return '<div class="dn-clock">'+u(l.d,'d')+u(l.h,'h')+u(l.m,'m')+'</div>';
+}
+
+/* A real .ics, generated client-side as a download. All-day event on the drop
+   date, because no verified broadcast time exists to put in it. */
+function dnCal(){
+  var dr=dnTarget(); if(!dr) return;
+  var d=dr.d.replace(/-/g,'');
+  var end=new Date(Date.parse(dr.d+'T00:00:00')+86400000);
+  var e=end.getFullYear()+('0'+(end.getMonth()+1)).slice(-2)+('0'+end.getDate()).slice(-2);
+  var title=JAYZ8.title+' — '+jz8Label(dr.eps).replace(/&amp;/g,'&');
+  var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Well Seasoned//Drop Night//EN','BEGIN:VEVENT',
+    'UID:jayz8-'+d+'@itswellseasoned.com','DTSTAMP:'+d+'T000000Z','DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+e,
+    'SUMMARY:'+title,'DESCRIPTION:'+jz8Label(dr.eps).replace(/&amp;/g,'&')+' of '+JAYZ8.title+' land today on '+JAYZ8.where+'. Come say what you think at itswellseasoned.com.',
+    'URL:https://itswellseasoned.com/#/dropnight','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  var a=document.createElement('a');
+  a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
+  a.download='jay-z-in-8-'+dr.d+'.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  track('dropnight_calendar',{drop:dr.d});
+}
+function dnShare(){
+  var dr=dnTarget(); if(!dr) return;
+  var url='https://itswellseasoned.com/#/dropnight';
+  var txt=jz8Label(dr.eps).replace(/&amp;/g,'&')+' of '+JAYZ8.title+' land '+(dnLeft(dr.d)?jz8When(dr.d):'today')+'. Pull up.';
+  if(navigator.share){ navigator.share({title:'Drop Night',text:txt,url:url})['catch'](function(){}); return; }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url+' — '+txt).then(function(){toast('Link copied — share it.');},function(){toast(url);});
+  } else { toast(url); }
+}
+
+function renderDropNight(){
+  var el=byId('dropNightContent'); if(!el) return;
+  if(_dnTimer){ clearInterval(_dnTimer); _dnTimer=null; }
+  var f=find(JAYZ8.id);
+  /* Same retirement gate as the home unit: once the run is over this page is
+     not a dead landing, it hands you back to the film. */
+  if(!f||jz8Day()>Date.parse(JAYZ8.until+'T00:00:00')){
+    el.innerHTML='<div class="browse-head"><h1>Drop Night is over</h1>'+
+      '<p style="color:var(--ink-2);margin-top:8px">All eight chapters are out. The conversation lives on the film page now.</p>'+
+      '<button class="btn btn-gold" style="margin-top:14px" onclick="go(\'film\',\''+JAYZ8.id+'\')">'+esc(JAYZ8.title)+' →</button></div>';
+    return;
+  }
+  dnLoadOnce(); jz8PollOnce();
+
+  var dr=dnTarget(); if(!dr) return;
+  var wk=dnWeek(dr), left=dnLeft(dr.d), mine=dnMine(wk), n=dnCount(wk);
+  var landed=!left;
+  var songs=jz8Songs(dr.eps);
+  var note=dr.eps.filter(function(e){return e.note;}).map(function(e){return e.note;})[0]||'';
+  var drops=jz8Drops();
+  var outCount=drops.filter(function(x){return x.out;}).reduce(function(a,x){return a+x.eps.length;},0);
+  var segs=JAYZ8.eps.map(function(e){ return '<span class="jz-seg'+(jz8Out(e)?' on':'')+'"></span>'; }).join('');
+
+  /* The count is the live aggregate and nothing else. At zero it says so
+     plainly rather than dressing up an empty room. */
+  var who = n>0
+    ? '<div class="dn-count"><b>'+n+'</b><span>'+(n===1?'person is in':'people are in')+'</span></div>'
+    : '<div class="dn-count dn-count-none"><span>'+(mine?'You’re the first one in.':'Nobody’s called it yet. Be first.')+'</span></div>';
+
+  var head='<button class="backbtn" onclick="go(\'home\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>Back</button>';
+
+  var stage='<div class="dn-stage">'+
+    '<span class="jz-spark s1"></span><span class="jz-spark s2"></span><span class="jz-spark s3"></span>'+
+    '<div class="jz-bleed" style="background-image:url(\''+esc(JAYZ8.bleed)+'\')"></div>'+
+    '<div class="dn-copy">'+
+      '<span class="jz-ey">'+esc(jz8Label(dr.eps).replace(/&amp;/g,'&'))+' · '+esc(JAYZ8.where)+'</span>'+
+      '<h1 class="dn-h">'+(landed?'They’re out.<br>Let’s get into it.':'Drop Night.<br>We press play together.')+'</h1>'+
+      '<p class="dn-lead">'+(landed
+        ? esc(jz8Label(dr.eps).replace(/&amp;/g,'&'))+' landed today on '+esc(JAYZ8.where)+'. Watch, then come back and say what you think — the room is reading the same two chapters you are.'
+        : esc(jz8Label(dr.eps).replace(/&amp;/g,'&'))+' land '+esc(jz8When(dr.d))+'. Say you’re in, then meet the room here when they drop.')+'</p>'+
+      '<div class="dn-row">'+
+        '<div><span class="dn-lab">'+(landed?'Out now':'Lands in')+'</span>'+dnClockHTML(left)+'</div>'+
+        '<div class="dn-div"></div>'+
+        '<div><span class="dn-lab">Who’s in</span>'+who+'</div>'+
+      '</div>'+
+      '<div class="dn-cta">'+
+        '<button class="btn '+(mine?'btn-ghost light':'btn-gold')+'" onclick="dnRsvp('+wk+')">'+
+          (mine?'✓ You’re in':(landed?'I’m watching tonight':'I’m in for '+esc(jz8Label(dr.eps).replace(/Chapters?/,'Ch').replace(/&amp;/g,'&'))))+'</button>'+
+        '<button class="btn btn-ghost light" onclick="dnCal()">Add to calendar</button>'+
+        '<button class="btn btn-ghost light" onclick="dnShare()">Share ↗</button>'+
+      '</div>'+
+      '<div class="jz-prog">'+segs+'<span class="jz-prog-lab">'+outCount+' of 8 chapters out · two more every Friday through Oct 9</span></div>'+
+    '</div>'+
+  '</div>';
+
+  var bill='';
+  if(songs.length||note){
+    bill='<div class="dn-sec"><div class="dn-sech"><h2>On the bill</h2>'+
+      '<span class="dn-cap">'+(songs.length?'The songs these chapters actually cover':'What these chapters are about')+'</span></div>'+
+      '<div class="dn-bill">'+dr.eps.map(function(e){
+        var ss=(e.songs||[]);
+        return '<div class="dn-chap"><span class="dn-lab dark">Chapter '+e.n+'</span>'+
+          (ss.length?'<div class="jz-songs">'+ss.map(function(x){return '<span class="jz-song dark">'+esc(x)+'</span>';}).join('')+'</div>'
+                    :'<p class="dn-note">'+esc(e.note||'HBO hasn’t published this chapter’s tracklist yet.')+'</p>')+
+        '</div>';
+      }).join('')+'</div></div>';
+  }
+
+  /* The live ballot is the one attached to the most recent drop that HAS
+     landed — you cannot answer a question about chapters nobody has seen. */
+  var q=jz8Talk(), poll='';
+  if(q){
+    poll='<div class="dn-sec"><div class="dn-sech"><h2>'+(landed?'Now that you’ve seen it':'Before you go in')+'</h2>'+
+      '<span class="dn-cap">This week’s ballot</span></div>'+
+      '<div class="dn-poll">'+jz8PollHTML(q)+'</div></div>';
+  }
+
+  var rest='<div class="dn-sec"><div class="dn-sech"><h2>The rest of the run</h2>'+
+    '<span class="dn-cap">Two chapters every Friday</span></div><div class="dn-sched">'+
+    drops.map(function(x,i){
+      var isT=x.d===dr.d;
+      return '<div class="dn-slot'+(x.out?' done':'')+(isT?' on':'')+'">'+
+        '<span class="dn-slot-n">'+jz8Label(x.eps).replace('Chapters','Ch').replace('Chapter','Ch')+'</span>'+
+        '<span class="dn-slot-d">'+(x.out?'Out now':esc(jz8When(x.d)))+'</span></div>';
+    }).join('')+'</div></div>';
+
+  el.innerHTML=head+stage+bill+poll+rest+
+    '<div class="dn-foot"><button class="btn btn-ghost" onclick="jz8Join()">Say more on the film page →</button></div>';
+
+  /* tick the clock so the page is never stale while somebody sits on it */
+  if(left) _dnTimer=setInterval(function(){
+    if(parseHash().view!=='dropnight'){ clearInterval(_dnTimer); _dnTimer=null; return; }
+    renderDropNight();
+  },60000);
 }
 
 /* ============ THE VAULT ============ */
