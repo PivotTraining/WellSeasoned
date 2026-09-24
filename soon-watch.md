@@ -1,13 +1,13 @@
 # Coming Soon watch
 
-_Generated 2026-09-17 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-09-24 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
 ## Release dates that moved (23)
 
 - `cs-1437396` **Your Mother Your Mother Your Mother** — we say 2026-09-25, TMDB says 2026-10-09 (+14 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1458099` **The Only Living Pickpocket in New York** — we say 2026-10-16, TMDB says 2026-10-30 (+14 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-791523` **Wildwood** — we say 2026-10-22, TMDB says 2026-10-23 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
-- `cs-1381221` **Misty Green** — we say 2026-10-31, TMDB says 2026-09-26 (-35 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-1381221` **Misty Green** — we say 2026-10-09, TMDB says 2026-09-26 (-13 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1288211` **The Great Beyond** — we say 2026-11-11, TMDB says 2027-10-01 (+324 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1286656` **I Play Rocky** — we say 2026-11-13, TMDB says 2026-11-20 (+7 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1630464` **Clarissa** — we say 2026-12-11, TMDB says 2026-10-04 (-68 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
