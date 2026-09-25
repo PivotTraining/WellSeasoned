@@ -13556,12 +13556,21 @@ function paintJayz8(){
       '<div class="jz-cta">'+
         (next?'<button class="btn btn-gold" onclick="go(\'dropnight\')">Drop Night →</button>':'')+
         '<button class="btn '+(next?'btn-ghost light':'btn-gold')+'" onclick="jz8Join()">Say more about it →</button>'+
+        '<button class="btn btn-ghost light" onclick="jz8Share()">Share ↗</button>'+
         '<button class="btn btn-ghost light" onclick="go(\'film\',\''+JAYZ8.id+'\')">The full page</button>'+
       '</div>'+
       (next?'<p class="jz-next">Next drop · '+jz8Label(next.eps)+' · '+esc(jz8When(next.d))+'</p>'
            :'<p class="jz-next">All eight chapters are out. The floor stays open.</p>')+
     '</div>'+
   '</div>';
+}
+/* The show is a released title with a real OG card, so this is the site's own
+   verdict card — which also stamps the sharer's own verdict when they have
+   cast one, same as sharing from the film page. Tracked separately only so the
+   banner can be told apart from the film page in analytics. */
+function jz8Share(){
+  track('jayz8_share',{});
+  openShareCard(JAYZ8.id);
 }
 /* straight into the comment box on the film page, since the ask is a conversation */
 function jz8Join(){
