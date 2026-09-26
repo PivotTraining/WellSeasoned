@@ -18,15 +18,11 @@
 // print the real n on both sides. A board with no qualifying rows says so
 // rather than padding itself out.
 import films from './films.json' with { type: 'json' };
+import { SITE, esc, shell, crumbs, crumbLd } from './_shell.js';
 
 const SUPABASE_URL = 'https://iherwgeuxwpapjreoofq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Owy8s8-j6LzxYhDmpCo53w_7ehrsGuh';
-const SITE = 'https://itswellseasoned.com';
 
-function esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 async function sb(path) {
   try {
     const r = await fetch(SUPABASE_URL + '/rest/v1/' + path,
@@ -141,22 +137,18 @@ export const BOARD_SLUGS = Object.keys(BOARDS);
 function page({ slug, b, rows }) {
   const url = SITE + '/boards/' + slug;
   const title = b.title + ' — Well Seasoned';
+  const path = [
+    { name: 'Well Seasoned', href: SITE + '/' },
+    { name: 'Boards', href: SITE + '/boards' },
+    { name: b.title, self: url },
+  ];
   const ld = {
     '@context': 'https://schema.org', '@type': 'ItemList', name: b.title,
-    description: b.desc, url,
-    numberOfItems: rows.length,
+    description: b.desc, url, numberOfItems: rows.length,
     itemListElement: rows.slice(0, 40).map((r, i) => ({
       '@type': 'ListItem', position: i + 1, name: r.f.t,
       url: SITE + '/f/' + encodeURIComponent(r.id),
     })),
-  };
-  const crumbLd = {
-    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Well Seasoned', item: SITE + '/' },
-      { '@type': 'ListItem', position: 2, name: 'Boards', item: SITE + '/boards' },
-      { '@type': 'ListItem', position: 3, name: b.title, item: url },
-    ],
   };
   const items = rows.length
     ? rows.map((r) => '<li class="row">' +
@@ -166,87 +158,40 @@ function page({ slug, b, rows }) {
         '<span class="note">' + esc(r.note) + '</span></span></li>').join('')
     : '<li class="empty">Nothing has qualified for this board yet. That is the honest state of it — we would rather show you an empty board than pad one.</li>';
 
-  return '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<title>' + esc(title) + '</title>' +
-    '<meta name="description" content="' + esc(b.desc) + '">' +
-    '<link rel="canonical" href="' + esc(url) + '">' +
-    '<meta property="og:type" content="website">' +
-    '<meta property="og:site_name" content="Well Seasoned">' +
-    '<meta property="og:url" content="' + esc(url) + '">' +
-    '<meta property="og:title" content="' + esc(title) + '">' +
-    '<meta property="og:description" content="' + esc(b.desc) + '">' +
-    '<meta property="og:image" content="' + SITE + '/og.png">' +
-    '<meta name="twitter:card" content="summary_large_image">' +
-    '<script type="application/ld+json">' + JSON.stringify(ld) + '</script>' +
-    '<script type="application/ld+json">' + JSON.stringify(crumbLd) + '</script>' +
-    '<style>' + CSS + '</style></head><body>' +
-    '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + SITE + '/">Well Seasoned</a><span>/</span>' +
-    '<a href="' + SITE + '/boards">Boards</a><span>/</span><span>' + esc(b.title) + '</span></nav>' +
+  const body = crumbs(path) +
     '<h1>' + esc(b.title) + '</h1>' +
     '<p class="lede">' + esc(b.lede) + '</p>' +
     (b.caveat ? '<p class="caveat">' + esc(b.caveat) + '</p>' : '') +
     '<p class="count">' + (rows.length ? rows.length + (rows.length === 1 ? ' title' : ' titles') : 'No titles yet') + '</p>' +
     '<ul class="list">' + items + '</ul>' +
     '<a class="cta" href="' + SITE + '/">Cast your own verdict on Well Seasoned →</a>' +
-    '<nav class="also"><span>Other boards</span>' +
-      BOARD_SLUGS.filter((s) => s !== slug).map((s) =>
-        '<a href="' + SITE + '/boards/' + s + '">' + esc(BOARDS[s].title) + '</a>').join('') +
-    '</nav></body></html>';
+    '<section class="more"><h2>Other boards</h2><ul class="list">' +
+      BOARD_SLUGS.filter((x) => x !== slug).map((x) =>
+        '<li class="row"><span class="body"><a href="' + SITE + '/boards/' + x + '">' + esc(BOARDS[x].title) + '</a>' +
+        '<span class="note">' + esc(BOARDS[x].desc) + '</span></span></li>').join('') +
+    '</ul></section>';
+
+  return shell({ title, desc: b.desc, url, ld: [ld, crumbLd(path)], body, hideFooterLink: '/boards/' + slug });
 }
 
 function indexPage() {
   const url = SITE + '/boards';
-  const desc = 'Boards you will not find anywhere else: where critics and the audience split, what is free on Tubi, what the room says you cannot watch with your mother.';
-  const crumbLd = {
-    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Well Seasoned', item: SITE + '/' },
-      { '@type': 'ListItem', position: 2, name: 'Boards', item: url },
-    ],
-  };
-  return '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<title>Boards — Well Seasoned</title>' +
-    '<meta name="description" content="' + esc(desc) + '">' +
-    '<link rel="canonical" href="' + esc(url) + '">' +
-    '<meta property="og:title" content="Boards — Well Seasoned">' +
-    '<meta property="og:description" content="' + esc(desc) + '">' +
-    '<meta property="og:url" content="' + esc(url) + '">' +
-    '<meta property="og:image" content="' + SITE + '/og.png">' +
-    '<script type="application/ld+json">' + JSON.stringify(crumbLd) + '</script>' +
-    '<style>' + CSS + '</style></head><body>' +
-    '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + SITE + '/">Well Seasoned</a><span>/</span><span>Boards</span></nav>' +
+  const desc = 'Boards you will not find anywhere else: where verified critics and the audience split, what is free on Tubi right now, and what the room says you cannot watch with your mother.';
+  const path = [
+    { name: 'Well Seasoned', href: SITE + '/' },
+    { name: 'Boards', self: url },
+  ];
+  const body = crumbs(path) +
     '<h1>Boards</h1>' +
     '<p class="lede">Ways into the catalog that only work because we keep two separate scores and let the room tag what a film is actually full of.</p>' +
-    '<ul class="list">' + BOARD_SLUGS.map((s) =>
-      '<li class="row"><span class="body"><a href="' + SITE + '/boards/' + s + '">' + esc(BOARDS[s].title) + '</a>' +
-      '<span class="note">' + esc(BOARDS[s].desc) + '</span></span></li>').join('') +
+    '<ul class="list">' + BOARD_SLUGS.map((x) =>
+      '<li class="row"><span class="body"><a href="' + SITE + '/boards/' + x + '">' + esc(BOARDS[x].title) + '</a>' +
+      '<span class="note">' + esc(BOARDS[x].desc) + '</span></span></li>').join('') +
     '</ul>' +
-    '<a class="cta" href="' + SITE + '/">Open Well Seasoned →</a>' +
-    '</body></html>';
+    '<a class="cta" href="' + SITE + '/">Open Well Seasoned →</a>';
+  return shell({ title: 'Boards — Well Seasoned', desc, url,
+    ld: [crumbLd(path)], body, hideFooterLink: '/boards' });
 }
-
-const CSS =
-  'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0c0602;color:#F6ECD7;margin:0 auto;padding:22px 20px 60px;max-width:760px}' +
-  'a{color:#F4B733}' +
-  'nav.crumbs{display:flex;flex-wrap:wrap;gap:6px;font-size:12.5px;color:rgba(246,236,215,.55);margin-bottom:22px}' +
-  'nav.crumbs a{color:rgba(246,236,215,.75);text-decoration:none}nav.crumbs a:hover{color:#F4B733}' +
-  'h1{font-size:30px;line-height:1.08;margin:0 0 12px}' +
-  '.lede{font-size:16px;line-height:1.55;color:rgba(246,236,215,.9);margin:0 0 14px}' +
-  '.caveat{font-size:13.5px;line-height:1.5;color:rgba(246,236,215,.62);border-left:3px solid rgba(228,155,11,.5);padding-left:12px;margin:0 0 14px}' +
-  '.count{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(246,236,215,.5);margin:0 0 16px}' +
-  'ul.list{list-style:none;padding:0;margin:0}' +
-  'li.row{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-top:1px solid rgba(246,236,215,.12)}' +
-  'li.row img,li.row .noart{width:52px;height:78px;flex:none;border-radius:6px;object-fit:cover;background:rgba(246,236,215,.08)}' +
-  'li.row .body{display:flex;flex-direction:column;gap:3px;min-width:0}' +
-  'li.row a{font-size:16.5px;font-weight:700;text-decoration:none}li.row a:hover{text-decoration:underline}' +
-  'li.row .meta{font-size:12.5px;color:rgba(246,236,215,.5)}' +
-  'li.row .note{font-size:13.5px;color:rgba(246,236,215,.75);line-height:1.45}' +
-  'li.empty{padding:18px 0;color:rgba(246,236,215,.7);line-height:1.55;border-top:1px solid rgba(246,236,215,.12)}' +
-  '.cta{display:inline-block;margin-top:26px;background:#E49B0B;color:#20160B;font-weight:800;padding:13px 26px;border-radius:999px;text-decoration:none;font-size:15px}' +
-  'nav.also{margin-top:34px;padding-top:18px;border-top:1px solid rgba(246,236,215,.12);display:flex;flex-direction:column;gap:8px;font-size:14px}' +
-  'nav.also span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(246,236,215,.5)}';
 
 export default async function handler(req, res) {
   const slug = String((req.query || {}).slug || '').toLowerCase();

@@ -57,6 +57,11 @@ FILMS.forEach(function (f) {
   var g = (f.tags || []).filter(Boolean);
   if (g.length) out[f.id].g = g; else delete out[f.id].g;
   if (f.scope && f.scope !== 'ours') out[f.id].s = f.scope; else delete out[f.id].s;
+  /* Genre carries the "more like this" row on /f/ pages. Tags alone cannot:
+     they are bespoke editorial phrases ("Ancestral memory", "Blues score"),
+     so exact tag overlap between two titles is rare enough that the row came
+     back empty on most films. */
+  if (f.genre) out[f.id].gn = f.genre; else delete out[f.id].gn;
 });
 
 fs.writeFileSync(path.join(root, 'api/films.json'), JSON.stringify(out));

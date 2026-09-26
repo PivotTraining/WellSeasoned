@@ -10,6 +10,8 @@
 // article, not just a title card), Article structured data, a canonical
 // link, breadcrumbs, and a clear "Read on Well Seasoned" CTA into the full
 // app instead of a zero-friction bounce.
+import { SITE, esc as _esc, shell, crumbs, crumbLd } from './_shell.js';
+
 const SUPABASE_URL = 'https://iherwgeuxwpapjreoofq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Owy8s8-j6LzxYhDmpCo53w_7ehrsGuh';
 
@@ -80,53 +82,49 @@ export default async function handler(req, res) {
     mainEntityOfPage: pageUrl,
   };
 
+  /* The Balcony is a dark magazine inside the app (body[data-view="read"]),
+     so the crawlable version keeps that identity rather than flipping to the
+     cream shell — the click through from here should not change the lights.
+     Same chrome, re-toned. */
+  const dark =
+    'body{background:#161210;color:var(--on-dark)}' +
+    'a{color:var(--gold-soft)}' +
+    'header.site,footer.site{background:#1D1714;border-color:rgba(246,236,215,.14)}' +
+    'header.site a.brand{color:var(--on-dark)}' +
+    '.btag,nav.crumbs{color:rgba(246,236,215,.55)}' +
+    'header.site nav a,nav.crumbs a,footer.site .links a{color:rgba(246,236,215,.78)}' +
+    'header.site nav a:hover,nav.crumbs a:hover,footer.site .links a:hover{color:var(--gold-soft)}' +
+    'footer.site .fine{color:rgba(246,236,215,.5)}' +
+    'img.hero{width:100%;max-height:360px;object-fit:cover;border-radius:var(--r-lg);display:block;margin:4px 0 20px;box-shadow:0 18px 40px -18px rgba(0,0,0,.7)}' +
+    '.kind{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.17em;text-transform:uppercase;color:var(--gold-soft)}' +
+    'h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.06;margin:10px 0 8px;letter-spacing:-.4px}' +
+    '.dek{font-size:17px;line-height:1.55;color:rgba(246,236,215,.8);margin:0 0 12px;max-width:60ch}' +
+    '.byline{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(246,236,215,.55);margin-bottom:24px}' +
+    '.copy p{font-size:17.5px;line-height:1.72;color:rgba(246,236,215,.92);margin:0 0 19px}' +
+    '.copy blockquote{font-family:var(--serif);font-size:25px;line-height:1.28;margin:28px 0;padding-left:18px;border-left:3px solid var(--paprika);color:var(--on-dark)}' +
+    '.cta{box-shadow:none}';
+
+  const path = [
+    { name: 'Well Seasoned', href: SITE + '/' },
+    { name: 'The Balcony', href: SITE + '/#/word' },
+    { name: a.title, self: pageUrl },
+  ];
+  const body = crumbs(path) +
+    (a.hero_image ? '<img class="hero" src="' + esc(a.hero_image) + '" alt="' + esc(a.title) + '">' : '') +
+    '<div class="kind">' + esc(kindLabel) + (a.subject ? ' · ' + esc(a.subject) : '') + '</div>' +
+    '<h1>' + esc(a.title) + '</h1>' +
+    (a.dek ? '<p class="dek">' + esc(a.dek) + '</p>' : '') +
+    '<div class="byline">' + (a.author ? 'By ' + esc(a.author) : 'Well Seasoned') + '</div>' +
+    '<div class="copy">' + bodyToHtml(a.body) + '</div>' +
+    '<a class="cta" href="' + esc(hashUrl) + '">Read on Well Seasoned →</a>';
+
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   // Short edge cache: an owner editing a piece right after publishing
   // shouldn't have to wait a full day for the page to catch up.
   res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
-  res.status(200).send('<!doctype html><html lang="en"><head><meta charset="utf-8">' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<title>' + esc(title) + '</title>' +
-    '<meta name="description" content="' + esc(desc) + '">' +
-    '<link rel="canonical" href="' + esc(pageUrl) + '">' +
-    '<meta property="og:type" content="article">' +
-    '<meta property="og:site_name" content="Well Seasoned">' +
-    '<meta property="og:url" content="' + esc(pageUrl) + '">' +
-    '<meta property="og:title" content="' + esc(a.title) + '">' +
-    '<meta property="og:description" content="' + esc(desc) + '">' +
-    '<meta property="og:image" content="' + esc(img) + '">' +
-    (a.author ? '<meta property="article:author" content="' + esc(a.author) + '">' : '') +
-    '<meta name="twitter:card" content="summary_large_image">' +
-    '<meta name="twitter:title" content="' + esc(a.title) + '">' +
-    '<meta name="twitter:description" content="' + esc(desc) + '">' +
-    '<meta name="twitter:image" content="' + esc(img) + '">' +
-    '<script type="application/ld+json">' + JSON.stringify(breadcrumbLd) + '</script>' +
-    '<script type="application/ld+json">' + JSON.stringify(articleLd) + '</script>' +
-    '<style>' +
-      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#161210;color:#F6ECD7;margin:0;padding:0 20px 60px;max-width:680px;margin-left:auto;margin-right:auto}' +
-      'a{color:#F4B733}' +
-      'nav.crumbs{display:flex;flex-wrap:wrap;gap:6px;font-size:12.5px;color:rgba(246,236,215,.55);padding:22px 0 18px}' +
-      'nav.crumbs a{color:rgba(246,236,215,.75);text-decoration:none}' +
-      'nav.crumbs a:hover{color:#F4B733}' +
-      'img.hero{width:100%;max-height:340px;object-fit:cover;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.5);display:block;margin:0 0 20px}' +
-      '.kind{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#F4B733}' +
-      'h1{font-family:Georgia,serif;font-size:32px;margin:8px 0 6px;line-height:1.12}' +
-      '.meta{color:rgba(246,236,215,.55);font-size:14px;margin-bottom:22px}' +
-      '.copy p{font-size:17px;line-height:1.68;color:rgba(246,236,215,.92);margin:0 0 18px}' +
-      '.copy blockquote{font-family:Georgia,serif;font-size:22px;line-height:1.3;margin:26px 0;padding-left:18px;border-left:3px solid #BE3B18;color:#F6ECD7}' +
-      '.cta{display:inline-block;margin-top:12px;background:#E49B0B;color:#20160B;font-weight:800;padding:13px 26px;border-radius:999px;text-decoration:none;font-size:15px}' +
-    '</style>' +
-    '</head><body>' +
-    '<nav class="crumbs" aria-label="Breadcrumb">' +
-      '<a href="' + esc(site) + '/">Well Seasoned</a><span>/</span>' +
-      '<a href="' + esc(site) + '/#/word">The Balcony</a><span>/</span>' +
-      '<span>' + esc(a.title) + '</span>' +
-    '</nav>' +
-    (a.hero_image ? '<img class="hero" src="' + esc(a.hero_image) + '" alt="' + esc(a.title) + '">' : '') +
-    '<div class="kind">' + esc(kindLabel) + (a.subject ? ' · ' + esc(a.subject) : '') + '</div>' +
-    '<h1>' + esc(a.title) + '</h1>' +
-    '<div class="meta">' + (a.author ? 'By ' + esc(a.author) : 'Well Seasoned') + '</div>' +
-    '<div class="copy">' + bodyToHtml(a.body) + '</div>' +
-    '<a class="cta" href="' + esc(hashUrl) + '">Read on Well Seasoned →</a>' +
-    '</body></html>');
+  res.status(200).send(shell({
+    title, desc, url: pageUrl, image: img, ogType: 'article',
+    head: a.author ? '<meta property="article:author" content="' + esc(a.author) + '">' : '',
+    ld: [articleLd, crumbLd(path)], body, css: dark,
+  }));
 }
