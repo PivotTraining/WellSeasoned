@@ -48,6 +48,15 @@ FILMS.forEach(function (f) {
   } else if (!out[f.id].p && pinned) {
     out[f.id].p = pinned; backfilled++;
   }
+  /* Fields the crawlable board pages (api/boards.js) filter on. Refreshed on
+     every run rather than only on insert, so an edit to where/tags/scope in
+     the catalog actually reaches the boards instead of being frozen at the
+     value the title had the day it was added. */
+  var w = (f.where || []).filter(Boolean);
+  if (w.length) out[f.id].w = w; else delete out[f.id].w;
+  var g = (f.tags || []).filter(Boolean);
+  if (g.length) out[f.id].g = g; else delete out[f.id].g;
+  if (f.scope && f.scope !== 'ours') out[f.id].s = f.scope; else delete out[f.id].s;
 });
 
 fs.writeFileSync(path.join(root, 'api/films.json'), JSON.stringify(out));

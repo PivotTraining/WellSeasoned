@@ -5,6 +5,7 @@
 // discoverable too — they were missing entirely until this pass, on top of
 // having been noindex'd (see api/read.js for that fix).
 import films from './films.json' with { type: 'json' };
+import { BOARD_SLUGS } from './boards.js';
 
 const SUPABASE_URL = 'https://iherwgeuxwpapjreoofq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Owy8s8-j6LzxYhDmpCo53w_7ehrsGuh';
@@ -18,6 +19,12 @@ export default async function handler(req, res) {
     { loc: site + '/apply/critic', priority: '0.3' },
     { loc: site + '/apply/writer', priority: '0.3' },
   ];
+  /* The board pages are the site's most distinctive surface and the only one
+     competitors cannot reproduce, so they sit above individual film pages in
+     priority. */
+  const boardUrls = [{ loc: site + '/boards', priority: '0.9' }].concat(
+    BOARD_SLUGS.map((s) => ({ loc: site + '/boards/' + s, priority: '0.9' }))
+  );
   const filmUrls = Object.keys(films).map((id) => ({
     loc: site + '/f/' + encodeURIComponent(id),
     priority: '0.8',
@@ -37,7 +44,7 @@ export default async function handler(req, res) {
     }
   } catch (e) { /* sitemap still ships with films + static pages if this fails */ }
 
-  const urls = staticUrls.concat(filmUrls).concat(articleUrls);
+  const urls = staticUrls.concat(boardUrls).concat(filmUrls).concat(articleUrls);
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +

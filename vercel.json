@@ -3,11 +3,37 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/f/:id", "destination": "/api/f?id=:id" },
-    { "source": "/apply/:role", "destination": "/api/apply?role=:role" },
-    { "source": "/apply", "destination": "/api/apply?role=critic" },
-    { "source": "/read/:slug", "destination": "/api/read?slug=:slug" },
-    { "source": "/advertise", "destination": "/api/advertise" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+    {
+      "source": "/boards/:slug",
+      "destination": "/api/boards?slug=:slug"
+    },
+    {
+      "source": "/boards",
+      "destination": "/api/boards"
+    },
+    {
+      "source": "/f/:id",
+      "destination": "/api/f?id=:id"
+    },
+    {
+      "source": "/apply/:role",
+      "destination": "/api/apply?role=:role"
+    },
+    {
+      "source": "/apply",
+      "destination": "/api/apply?role=critic"
+    },
+    {
+      "source": "/read/:slug",
+      "destination": "/api/read?slug=:slug"
+    },
+    {
+      "source": "/advertise",
+      "destination": "/api/advertise"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    }
   ]
 }
