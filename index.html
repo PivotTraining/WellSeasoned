@@ -10293,6 +10293,7 @@ function featSlides(){
   for(var i=0;i<FEATURED.length;i++){ var e=FEATURED[i];
     if(e.until && now>Date.parse(e.until)) continue;              // moment retired
     var f=find(e.id); if(!f) continue;
+    if(!homeOurs(f)) continue;   /* home is Our Films only, whatever the scope toggle says */
     var ey=(e.eyLive && e.premiere && now>=Date.parse(e.premiere)) ? e.eyLive : e.ey;
     out.push({f:f,ey:ey});
   }
@@ -10328,12 +10329,15 @@ function fallSlateItems(){
   function push(id,date){
     if(!id||!date||date<=today||seen[id]) return;
     var f=find(id); if(!f||f.noart) return;
+    if(!homeOurs(f)) return;   /* guard lives here so BOTH the FEATURED and the
+                                  catalog loop are covered — the FEATURED branch
+                                  had no scope check at all */
     seen[id]=1; out.push({f:f,date:date});
   }
   var F=(typeof FEATURED!=='undefined'&&FEATURED)||[];
   for(var i=0;i<F.length;i++){ if(F[i]&&F[i].premiere) push(F[i].id,F[i].premiere); }
   for(var j=0;j<FILMS.length;j++){
-    var f=FILMS[j]; if(!f||f.noart||f.scope==='all') continue;
+    var f=FILMS[j]; if(!f||f.noart) continue;   /* scope handled in push() */
     var c=upcomingSoonEntry(f); if(c) push(f.id,c.date);
   }
   out.sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
@@ -10605,6 +10609,10 @@ function loadCulTalk(){
     fetch(SUPABASE_URL+'/rest/v1/comments?featured=is.true&reported=is.false&select=film_slug,name,stance,body,created_at&order=created_at.desc&limit=8',{headers:sbHeaders()})
       .then(function(r){return r.json();}).then(function(rows){
         if(!Array.isArray(rows)||!rows.length){ s.style.display='none'; return; }
+        /* a comment can be featured on any film, including a scope:'all'
+           title, and this shelf sits on the home page */
+        rows=rows.filter(function(r){ var f=find(r.film_slug); return f&&homeOurs(f); });
+        if(!rows.length){ s.style.display='none'; return; }
         var html=rows.map(culTalkCardHTML).join('');
         if(!html){ s.style.display='none'; return; }
         g.innerHTML=html; s.style.display='';
