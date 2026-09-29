@@ -1,15 +1,27 @@
+<<<<<<< Updated upstream
 # Catalog health — 2026-09-28
+=======
+# Catalog health — 2026-09-29
+>>>>>>> Stashed changes
 
 ## Art now available (3)
 - doing-life-2026: poster now on TMDB (/5nZVjsCk5tWyyhLGt5U2TxsR85w.jpg) — nopo can come off
 - doing-life-2026: backdrop now on TMDB (/nDScZ6YR2nfNCeK5bmJ1ujb355b.jpg) — nobd can come off
 - only-child-2024: poster now on TMDB (/wNvzcVqAuUIfXk0z24Tn2Roc3Z0.jpg) — nopo can come off
 
+<<<<<<< Updated upstream
 ## Trailer candidates (12)
+=======
+## Trailer candidates (13)
+>>>>>>> Stashed changes
 - one-spoon-of-chocolate-2026: candidate eYkhefDTiXk "One Spoon of Chocolate | Trailer | RZA, Sham" — verify the channel before wiring
 - route-187: candidate r-x0zCk3f64 "ROUTE 187 | OFFICIAL Trailer" — verify the channel before wiring
 - bass-x-machina: candidate CWbZBIrEfqI "Official Teaser" — verify the channel before wiring
 - the-beast-2026: candidate 5ckqV_uf8E0 "Official Trailer" — verify the channel before wiring
+<<<<<<< Updated upstream
+=======
+- treasure-island-2026: candidate UsFVIvngwRA "Treasure Island | Official Trailer | Paramou" — verify the channel before wiring
+>>>>>>> Stashed changes
 - 12-12-12: candidate T6fXf4PmVVc "Date Announcement" — verify the channel before wiring
 - cupertino: candidate GMQXI9SP7T0 "Official Trailer" — verify the channel before wiring
 - love-of-your-life-2026: candidate HzGx48E64Xg "Official Trailer" — verify the channel before wiring

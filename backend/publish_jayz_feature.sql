@@ -2,9 +2,9 @@
 -- The Balcony — publish "The Only Archive Is Him" (JAY-Z in 8)
 --
 -- Paste this whole file into the Supabase SQL editor and run it once.
--- Safe to re-run: it upserts on slug, so a second run refreshes the body
--- rather than doing nothing. This is the only piece still unpublished —
--- the other two pending pieces went live on 2026-09-08.
+-- ALREADY RUN — this article is published and live. Kept for reference.
+-- Safe to re-run: it now does nothing on conflict, so it cannot overwrite the
+-- published version.
 --
 -- Requires the magazine columns (kind / subject / video_url), which are
 -- already applied on this project.
@@ -67,18 +67,13 @@ Come argue about it while it is still being written.$body$,
   true,
   '2026-09-21T09:00:00Z'
 )
-on conflict (slug) do update set
-  kind       = excluded.kind,
-  title      = excluded.title,
-  dek        = excluded.dek,
-  author     = excluded.author,
-  film_slug  = excluded.film_slug,
-  subject    = excluded.subject,
-  hero_image = excluded.hero_image,
-  body       = excluded.body,
-  published  = excluded.published,
-  created_at = excluded.created_at,
-  updated_at = now();
+on conflict (slug) do nothing;
+-- ^ Was an UPSERT while the piece was unpublished, so edits could be re-pushed
+-- while the series aired. The owner has since published their OWN edit of this
+-- article (live row differs from the draft in seed_word_articles.sql), so an
+-- upsert here would silently overwrite their text on any re-run. Changed to
+-- "do nothing": the LIVE ROW IS AUTHORITATIVE. To intentionally replace it,
+-- write a deliberate UPDATE rather than re-running this file.
 
 -- Repair the live ordering tie on the two pieces published 2026-09-08.
 update articles set created_at = '2026-09-03T09:00:00Z'
