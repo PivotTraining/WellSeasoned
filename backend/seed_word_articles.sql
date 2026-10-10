@@ -661,3 +661,89 @@ update articles set created_at = '2026-09-03T09:00:00Z'
  where slug = 'a-thousand-verdicts-in';
 update articles set created_at = '2026-09-08T09:00:00Z'
  where slug = 'the-laugh-track-is-doing-all-the-work';
+
+-- ---------------------------------------------------------------------------
+-- The Niche That Filled a Square (2026-10-10) — on Black Market's Guinness
+-- World Record screening in Lagos, and what it says about who the audience
+-- for Black film actually is.
+--
+-- Every figure here was verified, and the two load-bearing ones were checked
+-- against the PRIMARY source rather than press:
+--   * 51,258 verified viewers, Lagos, 26 September 2026 — fetched directly
+--     from Guinness World Records' own pages for BOTH titles it now holds
+--     ("Largest attendance at a film screening" and "Largest audience at a
+--     film premiere"), which name Switch Visual Limited, Damilola Osikoya,
+--     Rixel Studios and Nora Awolowo. Press almost universally rounded this
+--     to "51,000"; the real figure is 51,258 and the record IS ratified, not
+--     merely claimed. Google still serves a stale cached snippet of those
+--     pages showing the old holder, which is a trap worth knowing about.
+--   * The ~64,000 present vs 51,258 counted gap is real and is explained by
+--     GWR's rule that an attendee must watch from the opening frame to the
+--     closing credits. Reported by the Lagos State Deputy Governor.
+--   * Previous record 43,624 (Felix Manalo, Philippine Arena, 4 Oct 2015).
+--   * US all-time high 28,442 (Honor Flight, Miller Park, Milwaukee, 2012) —
+--     both from GWR's own news items.
+--   * ~369 screens and the Q1 2025 box-office figure are attributed in-text
+--     rather than asserted, because the screen count's scope is Anglophone
+--     West Africa rather than Nigeria alone.
+--
+-- DELIBERATELY NOT PRINTED, because the sourcing did not hold: any Nollywood
+-- share-of-GDP percentage (estimates span 1.1-2.3% and do not reconcile),
+-- Black Market's own box-office take (single aggregator, unreachable), any
+-- Netflix/Prime viewership figure (neither platform publishes it), and the
+-- common claim that Everybody Loves Jenifa is the highest-grossing Nigerian
+-- film — it was overtaken by Behind The Scenes in 2025.
+-- ---------------------------------------------------------------------------
+insert into articles (slug, kind, title, dek, author, film_slug, subject, hero_image, body, published, created_at)
+values (
+  'the-niche-that-filled-a-square',
+  'editorial',
+  'The Niche That Filled a Square',
+  'Fifty-one thousand two hundred and fifty-eight people sat through the closing credits of a Nollywood thriller, outdoors, in Lagos. The largest film screening ever held in America is barely half that.',
+  'The Founder',
+  'black-market-2026',
+  'Fatimah Binta Gimsay, Nora Awolowo, Lateef Adedimeji, Linda Ejiofor-Suleiman',
+  'https://itswellseasoned.com/word/the-niche-that-filled-a-square.jpg',
+$body$The rule is what makes the number mean anything.
+
+To be counted at Tafawa Balewa Square on the night of 26 September, you could not wander in during the second act, and you could not slip out when the shooting started. Guinness World Records requires that an attendee watch from the opening frame to the closing credits. Somewhere around sixty-four thousand people came to the square in Lagos that night, by the Lagos State Deputy Governor's count. Fifty-one thousand two hundred and fifty-eight of them were still sitting there when the names rolled.
+
+That is the record. Not how many showed up. How many stayed.
+
+It is now ratified, and it is two records rather than one: largest attendance at a film screening, and largest audience at a film premiere, both held simultaneously by a Nollywood crime thriller called Black Market, directed by Fatimah Binta Gimsay in her feature debut and produced by Nora Awolowo of Rixel Studios with Damilola Osikoya of Switch Visuals. Most of the coverage rounded the figure to fifty-one thousand. The precision matters here, so: 51,258.
+
+The mark it broke had stood for eleven years — 43,624, set at the Philippine Arena in 2015 for a film about the founder of Iglesia Ni Cristo. Before that, a documentary called Honor Flight filled Miller Park in Milwaukee with 28,442 people in 2012, and that remains, to this day, the largest film screening ever held in the United States. A country of three hundred and forty million, the richest film industry on earth, and its all-time high-water mark is barely more than half of what a first-time Nigerian director drew to a public square on a Saturday night.
+
+> The largest film screening in American history would not have filled this one to the halfway mark.
+
+Here is the part that should bother anyone who makes decisions about what Black film is worth. This was not a fluke. It was not a crowd that happened to gather. Rixel announced the attempt in July, named the venue, and named the number — fifty thousand — and then went and got it. Two months of architecture, publicly declared, executed in front of an official adjudicator. They told everyone exactly what they were going to do and the only thing they got wrong was that they undercounted themselves.
+
+And they did it in a country with almost nowhere to show a film. FilmOne's 2025 yearbook puts the screen count across Anglophone West Africa at roughly 369, spread over about 122 cinemas — a figure that is overwhelmingly Nigerian, and which has to serve a population north of two hundred million. Nigeria's entire theatrical box office in the first quarter of 2025 came to about $2.25 million. Not for a film. For the quarter. For the country.
+
+The streamers were supposed to be the answer to that, and for about two years they were. Then they left. One tracker that counts Nigerian titles arriving on Netflix logged nineteen in the first half of 2023, ten in the first half of 2024, and five in the first half of 2025. Netflix has publicly disputed the characterization that it is exiting Nigeria, and the licensing numbers did tick back up in 2026, but nobody seriously argues the commissioning rush survived.
+
+So read the square again with that in mind. Three hundred and sixty-nine screens. A two-million-dollar quarter. Streamers in retreat. In that context a free open-air screening for fifty thousand people is not a publicity stunt and it is not a feel-good story about community. It is a distribution strategy. It is what you build when the infrastructure you are supposed to use does not exist at the scale your audience does.
+
+> They did not fill a square because they lacked a better option. They filled a square because it was the better option.
+
+Which brings me to the word I have spent two years listening to American executives use, and which I would like to retire. Niche.
+
+Black-led films get budgeted as a niche. They get released as a niche — fewer international markets, shorter windows, smaller marketing spends. McKinsey's 2021 study of the industry found Black-led films budgeted roughly a quarter lower than comparable titles, and the gap widening when more than one Black creative worked behind the camera. UCLA's annual research keeps finding the same shape from a different angle: BIPOC leads clustered in the sub-ten-million tier, white male leads clustered in the fifty-million-and-up tier.
+
+Niche is presented as an observation about the audience. It has never been an observation. It is a budgeting decision that gets made first and then described afterward as though it were a finding, and the enormous convenience of it is that it is self-proving. Spend less, release narrower, and the returns come back modest, and the modest returns justify spending less next time. The machine has been running that loop long enough that the people inside it mistake its output for data about the world.
+
+Fifty-one thousand people in a square, counted one at a time, by an adjudicator, under a rule that excluded anyone who left early, is data about the world.
+
+I want to be careful not to overstate this, because overstating it would be its own kind of condescension. A record premiere is not a hit. Black Market's own commercial run is young and I am not going to print a box-office figure I cannot stand behind. The all-time Nigerian box-office record belongs to a 2025 film called Behind The Scenes, at roughly ₦2.76 billion, and one extraordinary night in Lagos does not rewrite the economics of an industry that still has 369 screens. Nigeria's film business has real structural problems and a world record does not solve a single one of them.
+
+> One night does not fix an industry. It does, however, demolish an excuse.
+
+But the excuse is the thing I came for. The claim underneath every one of those budgeting decisions is that the audience is not there — that it is small, that it is regional, that it does not turn out, that it has to be coaxed. Two hundred thousand square feet of Lagos disagreed, in person, for the length of a feature, in a country where going to the cinema is logistically difficult for almost everyone.
+
+They were not coaxed. They were not a test market. Nobody had to be convinced the story was for them.
+
+The next time a studio explains that a Black-led film has a ceiling, I would like someone in the room to ask what the ceiling is made of. Because the last time anybody actually measured, the number was 51,258, and the people doing the counting had to turn away the ones who showed up late.$body$,
+  true,
+  '2026-10-10T09:00:00Z'
+)
+on conflict (slug) do nothing;
