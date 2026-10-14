@@ -4395,7 +4395,10 @@ zero console errors, zero horizontal overflow.
   (Black lead, non-Black creator) that is the owner's to make. **All
   American** (the flagship, not just *Homecoming*) is also genuinely
   missing and is NOT a closer-bar case — worth adding on request.
-- **P-Valley S3** lands Dec 18, 2026 — queue a carousel moment for it.
+- **P-Valley S3** lands **Dec 4, 2026** (not Dec 18 — that date was wrong here
+  until 2026-10-14; corrected against TMDB's next_episode_to_air and trade
+  reporting). Nine episodes, two at once, and Katori Hall has said it is the
+  FINAL season — a real carousel moment.
 
 ## Marquee reshuffled for the new content + All American added (2026-08-10)
 Owner: "You have permission to shift what needs shifted on site to
