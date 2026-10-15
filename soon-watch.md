@@ -1,9 +1,13 @@
 # Coming Soon watch
 
-_Generated 2026-10-14 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-10-15 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
-## Release dates that moved (20)
+## Release dates that moved (24)
 
+- `cs-1591604` **Soul Patrol** — we say 2026-11-06, TMDB says 2026-01-25 (-285 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-1660660` **Marie Madeleine** — we say 2026-10-21, TMDB says 2026-10-18 (-3 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-1405200` **Ben'Imana** — we say 2027-02-03, TMDB says 2026-10-18 (-108 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-1666683` **Congo Boy** — we say 2026-11-25, TMDB says 2026-10-19 (-37 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1732479` **14th** — we say 2026-11-27, TMDB says 2026-12-04 (+7 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1596300` **Once Upon a Time in Harlem** — we say 2026-10-16, TMDB says 2026-01-25 (-264 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1458099` **The Only Living Pickpocket in New York** — we say 2026-10-16, TMDB says 2026-10-30 (+14 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
@@ -25,10 +29,15 @@ _Generated 2026-10-14 by scripts/soon-watch.cjs. Report only — nothing here is
 - `cs-216527` **Avatar 4** — we say 2029-12-19, TMDB says 2029-12-21 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-393209` **Avatar 5** — we say 2031-12-17, TMDB says 2031-12-19 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 
-## Trailers now available (2)
+## Trailers now available (7)
 
-- `cs-1700713` **National Theatre at Home: The Story** — candidate `ZIJPmyK6UNk` ("Official Trailer | The Story | National Theatre"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
-- `cs-1630464` **Clarissa** — candidate `sJAqmdXaM8U` ("Official Trailer"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1127282` **Prima Facie** — candidate `tnhynwj29Ew` ("Official Trailer"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1125403` **In the Shadows** — candidate `gyJk-8QQeVk` ("Official Trailer"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1709982` **Dear Ajayi** — candidate `AZGMQnJEyFM` ("DEAR AJAYI I Official Trailer HD I 2o9ine"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1744003` **The Secret Lives of Baba Segi's Wives** — candidate `A5s136fciMo` ("Official First Trailer: The Secret Lives of Baba Segi's Wives"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1532702` **Phoenix Fury** — candidate `n1H5zThWiyQ` ("Official Teaser"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1666683` **Congo Boy** — candidate `MZIcLNFK4rU` ("CONGO BOY Trailer | TIFF 2026"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1773759` **Seriously Single Too** — candidate `YnsY_9q7m6U` ("Seriously Single Too | Official Trailer | AfricaOnNetflix"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
 
 ## Could not resolve (1)
 
