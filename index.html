@@ -2547,6 +2547,42 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
 @media(max-width:560px){.sb-grid{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){.sb-card:hover{transform:none}}
 </style>
+
+<style>
+  .watch-start{
+    margin:18px 0 24px;
+    padding:20px 22px;
+    border:1px solid rgba(35,23,8,.14);
+    border-radius:20px;
+    background:linear-gradient(135deg,#fff7e7 0%,#f5e7c8 100%);
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:18px;
+    align-items:center;
+    box-shadow:0 8px 24px rgba(35,23,8,.05);
+  }
+  .watch-start .ws-k{
+    display:block;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:#9f4a19;
+    margin-bottom:4px;
+  }
+  .watch-start h2{margin:0 0 5px;font-size:clamp(22px,3vw,32px);line-height:1.05}
+  .watch-start p{margin:0;color:var(--ink-2);max-width:58ch;line-height:1.5}
+  .watch-start-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:560px}
+  .watch-start-actions .btn{white-space:nowrap}
+  @media(max-width:780px){
+    .watch-start{grid-template-columns:1fr;padding:18px 16px}
+    .watch-start-actions{justify-content:flex-start;max-width:none}
+    .watch-start-actions .btn{flex:1 1 calc(50% - 8px)}
+  }
+  @media(max-width:480px){
+    .watch-start-actions .btn{flex:1 1 100%}
+  }
+</style>
 </head>
 <body>
 <a href="#main" class="skip">Skip to content</a>
@@ -2638,12 +2674,25 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
         <section id="leadStory" class="lead-story" style="display:none"></section>
         <div class="hero-top">
           <div>
-            <span class="eyebrow">Focus this week</span>
-            <h1>What the culture is watching now.</h1>
-            <p class="hero-lead">Two verdicts on every film. The Kitchen is verified critics of the culture. The Table is the community that bought the ticket.</p>
+            <span class="eyebrow">What should we watch?</span>
+            <h1>Find something worth watching.</h1>
+            <p class="hero-lead">New releases, streaming picks, classics, and the titles everybody's talking about — with two verdicts to help you decide before you press play.</p>
             <div class="catalog-count" id="catalogCount"></div>
           </div>
         </div>
+        <section class="watch-start" aria-label="Find something to watch">
+          <div>
+            <span class="ws-k">Start here</span>
+            <h2>What kind of night is it?</h2>
+            <p>Skip the endless scrolling. Get a quick pick, see what's new, check theaters, or browse the whole kitchen.</p>
+          </div>
+          <div class="watch-start-actions">
+            <button class="btn btn-gold" onclick="openServe()">Pick something for me</button>
+            <button class="btn btn-ink" onclick="go('dropped')">What's new</button>
+            <button class="btn btn-ghost" onclick="go('theaters')">In theaters</button>
+            <button class="btn btn-ghost" onclick="go('browse')">Browse everything</button>
+          </div>
+        </section>
         <section id="freedomSection" class="freedom" style="display:none">
           <div class="freedom-top">
             <span class="aa-flag" role="img" aria-label="African-American flag">
@@ -2676,9 +2725,10 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
           <div class="teach-vote" id="teachVote"></div>
           <div class="teach-explain">
             <div class="teach-verdict2" id="teachVerdict"></div>
-            <p><b>How to read a score.</b> The Kitchen number comes from verified critics of the culture. The Table number is the audience. When they agree, it earns the seal. When they split, that gap tells you something.</p>
-            <button class="btn btn-ghost btn-sm" onclick="openTeach()">See how it works</button>
-            <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button><button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Serve me something</button>
+            <p><b>Two scores. Less guessing.</b> The Kitchen is verified critics. The Table is viewers. When they agree, it earns the seal. When they split, that disagreement is worth seeing.</p>
+            <button class="btn btn-gold btn-sm" onclick="openQuiz(0)">Find your picks</button>
+            <button class="btn btn-ink btn-sm" onclick="openServe()" style="margin-left:8px">Pick for me</button>
+            <button class="btn btn-ghost btn-sm" onclick="openTeach()" style="margin-left:8px">How the scores work</button>
           </div>
         </div>
         <section id="jayz8" class="jayz8" style="display:none"></section>
@@ -2703,8 +2753,8 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
           <div class="ctw-wrap">
             <div class="ctw-spark s1"></div><div class="ctw-spark s2"></div><div class="ctw-spark s3"></div>
             <span class="ctw-eyebrow">🗣️ Real talk · The Table</span>
-            <h2 class="ctw-h">What the culture's saying.</h2>
-            <p class="ctw-dek">Real reads, pulled straight from the room — nothing scripted, nothing bought.</p>
+            <h2 class="ctw-h">What viewers are saying.</h2>
+            <p class="ctw-dek">Real reactions from people who watched it — nothing scripted, nothing bought.</p>
             <div class="rail-wrap ctw-rail-wrap">
               <button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
               <div id="culTalkGrid" class="rail ctw-rail"></div>
@@ -2728,7 +2778,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
       </div>
 
       <section class="shelf" id="forYouSection" style="display:none">
-        <div class="shelf-head"><h2 id="forYouTitle">Picked for your taste</h2><button class="see" onclick="openQuiz(0)">Run it again</button></div>
+        <div class="shelf-head"><h2 id="forYouTitle">Picked for you</h2><button class="see" onclick="openQuiz(0)">Run it again</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="forYouRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
@@ -2738,17 +2788,17 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
       </section>
 
       <section class="shelf">
-        <div class="shelf-head"><h2>New on the stove</h2><button class="see" onclick="go('browse')">See all</button></div>
+        <div class="shelf-head"><h2>Worth watching right now</h2><button class="see" onclick="go('browse')">See all</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="stoveRail" class="rail rail-lg"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
       <section class="shelf shelf-band" id="tvSection">
-        <div class="shelf-head"><h2>On the small screen</h2><button class="see" onclick="setFilter('type','tv');go('browse')">See all series</button></div>
+        <div class="shelf-head"><h2>New &amp; noteworthy on TV</h2><button class="see" onclick="setFilter('type','tv');go('browse')">See all series</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="tvRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
       <section class="shelf shelf-band shelf-band-tubi" id="tubiSection">
-        <div class="shelf-head"><h2>Free on Tubi</h2><button class="see" onclick="setFilter('where','Tubi');go('browse')">See all</button></div>
+        <div class="shelf-head"><h2>Watch free right now · Tubi</h2><button class="see" onclick="setFilter('where','Tubi');go('browse')">See all</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="tubiRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
@@ -2779,7 +2829,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
 
 
       <section class="shelf shelf-band shelf-band-vintage" id="classicSection">
-        <div class="shelf-head"><h2>Grandma’s Recipes · Classic films</h2><button class="see" onclick="setFilter('era','1990s');go('browse')">See all</button></div>
+        <div class="shelf-head"><h2>Classics worth going back to</h2><button class="see" onclick="setFilter('era','1990s');go('browse')">See all</button></div>
         <div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><div id="classicRail" class="rail"></div><button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
