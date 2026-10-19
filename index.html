@@ -2583,6 +2583,42 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
     .watch-start-actions .btn{flex:1 1 100%}
   }
 </style>
+
+<style>
+  .fresh-now{margin:14px 0 28px}
+  .fn-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:0 0 12px}
+  .fn-k,.ad-k{display:block;font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+  .fn-k{color:#9f4a19}
+  .fn-head h2,.ad-head h2{margin:4px 0 4px;font-size:clamp(24px,3.2vw,36px);line-height:1}
+  .fn-head p{margin:0;color:var(--ink-2);font-size:14px}
+  .fn-see{flex:0 0 auto}
+  .fn-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .fn-card{position:relative;min-height:250px;border:0;border-radius:18px;overflow:hidden;padding:0;text-align:left;cursor:pointer;background:#1a1008;color:#fff;box-shadow:0 8px 24px rgba(35,23,8,.12)}
+  .fn-card:hover{transform:translateY(-3px)}
+  .fn-bg{position:absolute;inset:0;background-size:cover!important;background-position:center!important;transition:transform .35s ease}
+  .fn-card:hover .fn-bg{transform:scale(1.025)}
+  .fn-copy{position:absolute;inset:auto 0 0;padding:18px;display:flex;flex-direction:column;gap:6px;z-index:1}
+  .fn-ey{font-size:10.5px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:#ffd06a}
+  .fn-copy strong{font-family:var(--font-heading);font-size:22px;line-height:1.02}
+  .fn-dek{font-size:12.5px;line-height:1.38;color:rgba(255,255,255,.83)}
+  .fn-go{font-size:11px;font-weight:800;margin-top:3px;color:#fff}
+  .after-dark{margin:28px -18px 12px;padding:24px 18px 28px;border-radius:24px;background:
+    radial-gradient(circle at 85% 10%,rgba(196,48,43,.22),transparent 28%),
+    linear-gradient(135deg,#100914,#1b0c13 55%,#120b08);color:#fff;overflow:hidden}
+  .ad-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:14px}
+  .ad-k{color:#ff9b6a}
+  .ad-head h2{color:#fff}
+  .ad-head p{margin:0;color:rgba(255,255,255,.72);font-size:14px}
+  .after-dark .card{box-shadow:0 10px 24px rgba(0,0,0,.26)}
+  .after-dark .rail-btn{background:rgba(255,255,255,.92)}
+  @media(max-width:980px){.fn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fn-card{min-height:225px}}
+  @media(max-width:680px){
+    .fn-head,.ad-head{align-items:flex-start;flex-direction:column}
+    .fn-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+    .fn-card{min-width:78vw;min-height:235px;scroll-snap-align:start}
+    .after-dark{margin-left:-10px;margin-right:-10px;border-radius:18px}
+  }
+</style>
 </head>
 <body>
 <a href="#main" class="skip">Skip to content</a>
@@ -2693,6 +2729,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
             <button class="btn btn-ghost" onclick="go('browse')">Browse everything</button>
           </div>
         </section>
+        <section id="freshNow" class="fresh-now" style="display:none" aria-label="On the Plate"></section>
         <section id="freedomSection" class="freedom" style="display:none">
           <div class="freedom-top">
             <span class="aa-flag" role="img" aria-label="African-American flag">
@@ -2745,6 +2782,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
              sits with the review loop rather than in the dessert tier, since
              every one of these is a place to cast a verdict. -->
         <section id="settleBoards" class="sb-sec" style="display:none"></section>
+        <section id="afterDark" class="after-dark" style="display:none" aria-label="October after dark"></section>
         <!-- Engagement/spotlight units — dessert, below the core film grid.
              "What the culture's saying" leads the dessert tier now: it's real
              audience voice, the strongest proof the reviews are genuine, so
@@ -10559,9 +10597,9 @@ function paintFallSlate(){
   var cards=items.map(function(it,i){ return fsCardHTML(it,i,maxDays); }).join('');
   el.innerHTML='<div class="fs-wrap">'+
     '<div class="fs-head">'+
-      '<span class="fs-ey">What&rsquo;s coming &middot; Dated and tracked</span>'+
-      '<h2 class="fs-h">The slate.</h2>'+
-      '<p class="fs-dek">Every premiere we&rsquo;re counting down to. Tap one to open its page &mdash; hype vote, cast, and the day it drops.</p>'+
+      '<span class="fs-ey">Next up &middot; Dates we&rsquo;re watching</span>'+
+      '<h2 class="fs-h">Put these on your radar.</h2>'+
+      '<p class="fs-dek">The next premieres worth knowing about. Tap one for the cast, trailer, hype vote and release date.</p>'+
       '<button class="btn btn-gold btn-sm fs-share" onclick="openSlateShare()">Share the slate &#8599;</button>'+
     '</div>'+
     '<div class="fs-rail">'+cards+'</div>'+
@@ -10660,9 +10698,81 @@ function leadArm(){
 }
 function leadPause(){ if(_leadTimer){ clearTimeout(_leadTimer); _leadTimer=null; } }
 function leadResume(){ leadArm(); }
+
+/* ============ HOME: ON THE PLATE ============
+   Current, time-boxed picks directly below the hero. Every item resolves to a
+   real catalog page; labels switch or expire by date so this block does not
+   become another stale homepage monument. */
+var FRESH_PLATE=[
+  {id:'once-upon-a-time-in-harlem-2026',until:'2026-11-02',
+   ey:'In theaters now · Limited',
+   dek:'The Harlem Renaissance tells its own story in William Greaves\' long-unfinished 1972 footage, completed more than fifty years later.'},
+  {id:'reasonable-doubt',until:'2026-12-10',
+   ey:'Season 4 · Streaming now · Hulu',
+   dek:'Jax Stewart is back, the new firm is under pressure, and the season is already in motion.'},
+  {id:'abbott',until:'2026-12-15',
+   ey:'Season 6 · Wednesdays · ABC + Hulu',
+   dek:'School is back in session. Catch the new season weekly, then bring your verdict to The Table.'},
+  {id:'all-the-queens-men',until:'2026-11-20',switch:'2026-10-21',
+   ey:'Returns Oct 21 · Paramount+',eyAfter:'New final-season episodes · Paramount+',
+   dek:'Madam\'s final-season run is about to resume.',dekAfter:'Madam\'s final-season run is back with new episodes.'}
+];
+function freshPlateItems(){
+  var today=isoToday(), out=[];
+  FRESH_PLATE.forEach(function(x){
+    if(x.until && today>x.until) return;
+    var f=find(x.id); if(!f||f.noart||!homeOurs(f)) return;
+    var after=x.switch && today>=x.switch;
+    out.push({f:f,ey:(after&&x.eyAfter)||x.ey,dek:(after&&x.dekAfter)||x.dek});
+  });
+  return out;
+}
+function freshPlateCard(it,i){
+  var f=it.f, art=f.backdrop||servePoster(f)||f.poster||'';
+  var style=art
+    ? "background-image:linear-gradient(180deg,rgba(8,5,2,.08),rgba(8,5,2,.88) 78%),url('"+esc(art)+"')"
+    : "background:"+(f.grad||'#25180c');
+  return '<button class="fn-card fn-'+i+'" onclick="go(\'film\',\''+esc(f.id)+'\')" aria-label="'+esc(f.title)+'">'+
+    '<span class="fn-bg" style="'+style+'"></span>'+
+    '<span class="fn-copy"><span class="fn-ey">'+esc(it.ey)+'</span>'+
+    '<strong>'+esc(f.title)+'</strong><span class="fn-dek">'+esc(it.dek)+'</span>'+
+    '<span class="fn-go">Open the page →</span></span></button>';
+}
+function paintFreshNow(){
+  var el=byId('freshNow'); if(!el)return;
+  var items=freshPlateItems();
+  if(!items.length){ el.style.display='none'; return; }
+  el.style.display='';
+  el.innerHTML='<div class="fn-head"><div><span class="fn-k">On the Plate · Right now</span>'+
+    '<h2>Four things worth knowing this week.</h2>'+
+    '<p>In theaters, streaming, back on TV, or about to land. No stale carousel energy.</p></div>'+
+    '<button class="see fn-see" onclick="go(\'dropped\')">See everything new →</button></div>'+
+    '<div class="fn-grid">'+items.map(freshPlateCard).join('')+'</div>';
+}
+
+/* ============ OCTOBER: AFTER DARK ============
+   A seasonal culture shelf, intentionally date-gated through Halloween. */
+var AFTER_DARK_IDS=['sinners','getout','us','candyman','the-blackening','nope','his-house'];
+function paintAfterDark(){
+  var el=byId('afterDark'); if(!el)return;
+  var today=isoToday();
+  if(today<'2026-10-01'||today>'2026-11-02'){ el.style.display='none'; return; }
+  var ids=AFTER_DARK_IDS.filter(function(id){ var f=find(id); return f&&!f.noart&&homeOurs(f); }).slice(0,7);
+  if(!ids.length){ el.style.display='none'; return; }
+  el.style.display='';
+  el.innerHTML='<div class="ad-head"><div><span class="ad-k">After Dark · October</span>'+
+    '<h2>Turn the lights down.</h2>'+
+    '<p>Black horror, thrillers and the movies that know exactly when you looked away.</p></div>'+
+    '<button class="btn btn-ghost light btn-sm" onclick="setFilter(\'genre\',\'Horror\');go(\'browse\')">More horror →</button></div>'+
+    '<div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M15 18l-6-6 6-6"/></svg></button>'+
+    '<div class="rail ad-rail">'+ids.map(cardHTML).join('')+'</div>'+
+    '<button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg></button></div>';
+}
+
 function renderHome(){
   paintCatalogCount();
   paintLeadStory();
+  paintFreshNow();
   paintJayz8();
   paintFreedom();
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
@@ -10700,6 +10810,7 @@ function renderHome(){
   paintVoteBar();
   paintFallSlate();
   paintSettleBoards();
+  paintAfterDark();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+
@@ -13542,8 +13653,8 @@ var EVENTS=[
    url:'https://www.abffpopup.com/',cta:'See the lineup'},
   {id:'abff-popup-atl-2026',name:'ABFF Pop Up \u00b7 Atlanta',start:'2026-10-24',end:'2026-10-25',
    city:'Atlanta, GA',mode:'In-person',
-   blurb:'The tour lands at AMC Madison Yards 8 in the city that has become the industry\u2019s second home.',
-   url:'https://www.abffpopup.com/',cta:'See the lineup'},
+   blurb:'Two days at AMC Madison Yards 8 with screenings, filmmaker talkbacks, the HBO Short Film Showcase, masterclasses and culture in the room.',
+   url:'https://www.abffpopup.com/atlanta/',cta:'Get tickets'},
   {id:'abff-popup-hou-2026',name:'ABFF Pop Up \u00b7 Houston',start:'2026-11-07',end:'2026-11-08',
    city:'Houston, TX',mode:'In-person',
    blurb:'The fall tour closes at Regal Edwards Houston Marq\u2019E.',
@@ -13633,7 +13744,7 @@ var JAYZ8={
   where:'HBO · HBO Max',
   art:'https://image.tmdb.org/t/p/w780/ncwa0H2NxO64sHnY3Xda0pWtdcl.jpg',
   bleed:'https://image.tmdb.org/t/p/w1280/trSG5vNAzqhcrTMEnXKSODCMoxy.jpg',
-  until:'2026-11-16',            /* the unit comes down five weeks after the finale */
+  until:'2026-10-18',            /* homepage moment retired after the Oct 9 finale; title stays in the catalog */
   eps:[
     {n:1,d:'2026-09-18',songs:['Intro','Meet the Parents','Can’t Knock the Hustle']},
     {n:2,d:'2026-09-18',note:'Early fame, the East Coast–West Coast beef, and his relationships with Biggie and Pac.'},
