@@ -10763,7 +10763,7 @@ function paintAfterDark(){
   el.innerHTML='<div class="ad-head"><div><span class="ad-k">After Dark · October</span>'+
     '<h2>Turn the lights down.</h2>'+
     '<p>Black horror, thrillers and the movies that know exactly when you looked away.</p></div>'+
-    '<button class="btn btn-ghost light btn-sm" onclick="setFilter(\'genre\',\'Horror\');go(\'browse\')">More horror →</button></div>'+
+    '<button class="btn btn-ghost light btn-sm" onclick="setFilter(\'q\',\'horror\');go(\'browse\')">More horror →</button></div>'+
     '<div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M15 18l-6-6 6-6"/></svg></button>'+
     '<div class="rail ad-rail">'+ids.map(cardHTML).join('')+'</div>'+
     '<button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg></button></div>';
@@ -10855,18 +10855,17 @@ function renderHome(){
   var sec=byId('forYouSection');
   if(app.taste){
     var recs=recommend(app.taste).slice(0,8);
-    byId('forYouTitle').textContent = app.name ? ('Picked for you, '+app.name.split(/\s+/)[0]) : 'Picked for your taste';
+    byId('forYouTitle').textContent = app.name ? ('Picked for you, '+app.name.split(/\s+/)[0]) : 'Picked for you';
     byId('forYouRail').innerHTML=recs.map(cardHTML).join('');
     sec.style.display='';
   }else{ sec.style.display='none'; }
   // Bracket teaser reflects the current tournament
   (function(){ var abk=activeBracket(); if(byId('brtTitle')&&abk) byId('brtTitle').textContent=abk.title+' — vote the tournament'; })();
-  // Just Dropped — Coming Soon titles whose release date has arrived. Window
-  // is 30 days: at 45 a title five weeks old still sat under a shelf headed
-  // "Just Dropped", which stops being true well before it stops rendering.
+  // Just Dropped — titles whose release date has actually arrived. Keep the
+  // window tight enough that "just" still means something on a weekly visit.
   (function(){
     var s=byId('dropSection'), g=byId('dropGrid'); if(!s||!g)return;
-    var cut=isoDaysAgo(30), today=isoToday(), items=[];
+    var cut=isoDaysAgo(14), today=isoToday(), items=[];
     COMING_SOON.forEach(function(c,i){ if(c.date && c.date<=today && c.date>=cut) items.push({c:c,i:i}); });
     items.sort(function(a,b){ return a.c.date<b.c.date?1:-1; });
     if(items.length){ g.innerHTML=items.slice(0,8).map(function(x){return soonCard(x.c,x.i);}).join(''); s.style.display=''; }
