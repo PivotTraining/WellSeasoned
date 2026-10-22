@@ -2619,6 +2619,26 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
     .after-dark{margin-left:-10px;margin-right:-10px;border-radius:18px}
   }
 </style>
+
+<style>
+.card-check{margin:18px 0 28px}
+.cc-wrap{position:relative;min-height:320px;border-radius:24px;overflow:hidden;background:#1b1009;color:#fff;box-shadow:0 14px 38px rgba(35,23,8,.13)}
+.cc-art{position:absolute;inset:0;background-size:cover;background-position:center 35%}
+.cc-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,9,5,.96) 0%,rgba(16,9,5,.9) 45%,rgba(16,9,5,.42) 76%,rgba(16,9,5,.18) 100%)}
+.cc-copy{position:relative;z-index:1;width:min(700px,70%);padding:28px}
+.cc-ey{font-size:11px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#ffd36a}
+.cc-copy h2{font-size:clamp(30px,5vw,54px);line-height:.95;margin:8px 0 10px;color:#fff}
+.cc-hook{font-size:17px;line-height:1.45;color:rgba(255,255,255,.86);max-width:48ch}
+.cc-score{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.cc-score span{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:13px;padding:10px 13px;min-width:118px}
+.cc-score b{display:block;font-size:22px;line-height:1}.cc-score small{display:block;margin-top:5px;color:rgba(255,255,255,.68);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.cc-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cc-vote{border:0;border-radius:999px;padding:10px 15px;font-weight:900;cursor:pointer}
+.cc-vote.for{background:#d9edae;color:#253015}.cc-vote.against{background:#f6b0a3;color:#46160e}.cc-vote.on{box-shadow:0 0 0 3px #fff}
+.cc-foot{display:flex;justify-content:space-between;gap:18px;margin-top:18px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);font-size:11px;color:rgba(255,255,255,.68)}
+.cc-foot a{color:#ffd36a;text-decoration:none;font-weight:800}
+@media(max-width:760px){.cc-wrap{min-height:420px}.cc-scrim{background:linear-gradient(180deg,rgba(16,9,5,.32),rgba(16,9,5,.96) 54%)}.cc-copy{width:100%;padding:22px;position:absolute;left:0;right:0;bottom:0}.cc-foot{flex-direction:column;gap:5px}.cc-score span{min-width:96px}}
+</style>
 </head>
 <body>
 <a href="#main" class="skip">Skip to content</a>
@@ -2730,6 +2750,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
           </div>
         </section>
         <section id="freshNow" class="fresh-now" style="display:none" aria-label="On the Plate"></section>
+        <section id="cardCheck" class="card-check" style="display:none" aria-label="Card Check"></section>
         <section id="freedomSection" class="freedom" style="display:none">
           <div class="freedom-top">
             <span class="aa-flag" role="img" aria-label="African-American flag">
@@ -10769,10 +10790,82 @@ function paintAfterDark(){
     '<button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg></button></div>';
 }
 
+
+/* ============ CARD CHECK ============
+   One weekly argument, selected from real low-sample Table data so one more
+   vote can materially change the story. It hides until live vote_counts have
+   loaded; zero-vote titles are never promoted as if a conversation exists. */
+var _cardCheckId=null;
+function cardCheckPick(){
+  if(_cardCheckId){ var keep=find(_cardCheckId); if(keep) return keep; }
+  var pool=FILMS.filter(function(f){
+    if(!f||f.noart||!homeOurs(f)||upcomingSoonEntry(f)) return false;
+    var n=(f.votes.for||0)+(f.votes.against||0);
+    return n>0&&n<12;
+  });
+  if(!pool.length) return null;
+  pool.sort(function(a,b){
+    function rank(f){
+      var n=(f.votes.for||0)+(f.votes.against||0), t=tableScore(f);
+      if(t!=null&&n>=4&&t>=45&&t<=70) return 0;
+      if(n===1) return 1;
+      if(n<4) return 2;
+      return 3;
+    }
+    var ra=rank(a), rb=rank(b);
+    if(ra!==rb) return ra-rb;
+    var na=(a.votes.for||0)+(a.votes.against||0), nb=(b.votes.for||0)+(b.votes.against||0);
+    return na-nb || a.title.localeCompare(b.title);
+  });
+  var top=pool.slice(0,Math.min(18,pool.length));
+  var pick=seededShuffle(top,(HOME_SEED+29)>>>0)[0]||pool[0];
+  _cardCheckId=pick.id;
+  return pick;
+}
+function cardCheckHook(f){
+  var n=(f.votes.for||0)+(f.votes.against||0), t=tableScore(f);
+  if(n===1) return 'One person has ruled. Nobody has answered them yet.';
+  if(t!=null&&t>=45&&t<=70) return 'The room is split. One vote can move this.';
+  if(n<4) return 'The verdict is still thin. The room needs another voice.';
+  return 'This one is not settled yet.';
+}
+function cardCheckVote(ev,id,side){
+  ev.stopPropagation(); ev.preventDefault();
+  var prev=app.votes[id];
+  if(prev===side){ toast('You already picked '+(side==='for'?'seasoned':'sent back')+'.'); return; }
+  applyVote(id,side); track('vote',{film:id,side:side,src:'card_check'});
+  if(side==='for'){ sprinkle(ev.target); sfx('for'); toast('Seasoned. Your vote counted.'); }
+  else { sfx('against'); toast('Sent it back. Your vote counted.'); }
+  paintCardCheck();
+}
+function paintCardCheck(){
+  var el=byId('cardCheck'); if(!el)return;
+  var f=cardCheckPick(); if(!f){el.style.display='none';return;}
+  var n=(f.votes.for||0)+(f.votes.against||0), t=tableScore(f), art=f.backdrop||servePoster(f)||f.poster||'';
+  var mine=app.votes[f.id];
+  el.style.display='';
+  el.innerHTML='<div class="cc-wrap">'+
+    '<div class="cc-art"'+(art?' style="background-image:url(\''+esc(art)+'\')"':'')+'><span class="cc-scrim"></span></div>'+
+    '<div class="cc-copy"><span class="cc-ey">Card Check · Settle this</span>'+
+      '<h2>'+esc(f.title)+'</h2>'+
+      '<p class="cc-hook">'+esc(cardCheckHook(f))+'</p>'+
+      '<div class="cc-score">'+
+        '<span><b>'+(t==null?'—':t+'%')+'</b><small>The Table</small></span>'+
+        '<span><b>'+n+'</b><small>verdict'+(n===1?'':'s')+'</small></span>'+
+        '<span><b>'+(f.votes.for||0)+' / '+(f.votes.against||0)+'</b><small>seasoned / sent back</small></span>'+
+      '</div>'+
+      '<div class="cc-actions"><button class="cc-vote for'+(mine==='for'?' on':'')+'" onclick="cardCheckVote(event,\''+esc(f.id)+'\',\'for\')">It’s Seasoned</button>'+
+        '<button class="cc-vote against'+(mine==='against'?' on':'')+'" onclick="cardCheckVote(event,\''+esc(f.id)+'\',\'against\')">Send It Back</button>'+
+        '<button class="btn btn-ghost light btn-sm" onclick="go(\'film\',\''+esc(f.id)+'\')">Open the room →</button></div>'+
+      '<div class="cc-foot"><span>One title. One argument. Your vote moves the number.</span>'+
+        '<a href="/table-report" onclick="event.stopPropagation()">The Table Report →</a></div>'+
+    '</div></div>';
+}
 function renderHome(){
   paintCatalogCount();
   paintLeadStory();
   paintFreshNow();
+  paintCardCheck();
   paintJayz8();
   paintFreedom();
   var focus=app.curation.featured.concat(['sinners','nickel','woman-king','moonlight','getout','beale','rye-lane','judas','black-panther','creed'])
