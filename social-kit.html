@@ -1,292 +1,165 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Well Seasoned · Social Kit</title>
-<meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Well Seasoned Social Kit 2.0</title>
 <style>
-  /* Well Seasoned brand tokens — the design's design-system variables resolved to
-     the real site palette (The Kitchen = warm gold/paprika accent, The Table =
-     green accent-2, cream/brown neutrals). */
-  :root{
-    --font-heading:"Bricolage Grotesque","Inter",sans-serif;
-    --font-body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
-    --color-text:#201e1d;
-    --color-accent-200:#F4E3BE; --color-accent-300:#F0C878; --color-accent-400:#E7A73C;
-    --color-accent-500:#E49B0B; --color-accent-600:#B04A1C; --color-accent-700:#8A5A0C; --color-accent-800:#5E3A0A;
-    --color-accent-2-200:#DEE9C6; --color-accent-2-300:#B9CB8C; --color-accent-2-400:#93AC5C;
-    --color-accent-2-600:#586E2E; --color-accent-2-800:#2E3A16;
-    --color-neutral-100:#F5EFE1; --color-neutral-300:#E4D7BF; --color-neutral-400:#BBAA88;
-    --color-neutral-500:#9C8D70; --color-neutral-600:#7C6D54; --color-neutral-700:#5B4A34; --color-neutral-800:#3A2E1E;
-    --color-divider:rgba(122,82,6,.28);
-    --shadow-sm:0 2px 8px rgba(40,22,6,.12);
-    --shadow-md:0 10px 30px rgba(40,22,6,.22);
-    --shadow-lg:0 20px 60px rgba(20,12,4,.5);
-  }
-  *{box-sizing:border-box}
-  body{margin:0}
-  .frame { position:absolute; top:0; left:0; width:1080px; height:1920px; transform:scale(0.3333); transform-origin:top left; overflow:hidden; display:flex; flex-direction:column; }
-  .shot { position:relative; width:360px; height:640px; border-radius:26px; overflow:hidden; box-shadow: var(--shadow-lg); flex:none; }
-  .lockup { font-family:var(--font-heading); font-size:40px; line-height:1; }
-  .kick { font-size:24px; letter-spacing:0.22em; text-transform:uppercase; font-weight:700; }
-  .foot { position:absolute; left:80px; right:80px; bottom:74px; display:flex; align-items:center; justify-content:space-between; font-size:26px; }
-  /* poster drop zones (owner adds real, verified art) */
-  .img-slot{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:64px;
-    background:linear-gradient(135deg,#3a2c1a,#171009); color:rgba(245,234,216,.5); font-family:var(--font-heading); font-size:30px; line-height:1.3; }
+:root{--cream:#f5ead8;--ink:#21180f;--gold:#e49b0b;--red:#c4302b;--olive:#667548;--dark:#18100b;--line:#d7c8ae}
+*{box-sizing:border-box}body{margin:0;background:#eee7db;color:var(--ink);font:15px/1.45 Inter,Arial,sans-serif}
+header{padding:28px 32px;background:#21180f;color:#fff}.brand{font:700 30px Georgia,serif}.sub{opacity:.75;max-width:780px;margin-top:6px}
+.layout{display:grid;grid-template-columns:340px 1fr;gap:24px;padding:24px;align-items:start}.panel{background:#fff;border:1px solid #ddd0bd;border-radius:18px;padding:18px;position:sticky;top:18px}
+label{display:block;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:14px 0 6px}
+select,textarea,button{font:inherit}select,textarea{width:100%;border:1px solid #cfc3b2;border-radius:10px;padding:10px;background:#fff}textarea{min-height:150px;resize:vertical}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{border:0;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--gold);color:#261808}.dark{background:#24170d;color:#fff}.soft{background:#eee5d7;color:#3c2a1d}.tiny{font-size:12px;padding:7px 10px}
+.note{font-size:12px;color:#756657;margin-top:10px}.status{font-size:12px;font-weight:700;margin-top:8px;min-height:18px}
+.stage{display:flex;justify-content:center;align-items:flex-start;min-height:720px;overflow:auto;padding:8px}
+.card{width:540px;height:675px;position:relative;overflow:hidden;border-radius:0;background:var(--cream);box-shadow:0 18px 60px rgba(40,25,10,.18);color:var(--ink)}
+.card.story{height:960px}.card.square{height:540px}
+.poster{position:absolute;inset:0;background-size:cover;background-position:center}.scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,9,5,.18),rgba(15,9,5,.9) 77%,rgba(15,9,5,.98))}
+.pad{position:absolute;inset:0;padding:42px;display:flex;flex-direction:column}.lock{font:700 23px Georgia,serif;letter-spacing:.01em}.ey{font-size:12px;letter-spacing:.15em;text-transform:uppercase;font-weight:900}.title{font:700 54px/.95 Georgia,serif;margin-top:12px;letter-spacing:-.03em}.big{font:700 96px/.9 Georgia,serif}.copy{font-size:22px;line-height:1.3}.bottom{margin-top:auto}.footer{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:800;letter-spacing:.04em;margin-top:24px}
+.darkcard{background:#21150f;color:#f8ead5}.darkcard .ey{color:#ffd368}.darkcard .footer{color:#d8c3a7}
+.scoregrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}.score{border-radius:18px;padding:20px;background:#fff3dc;color:#21150f}.score.table{background:#65764a;color:#f5ffe7}.score .lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:900}.score .num{font:700 66px/.95 Georgia,serif;margin-top:8px}
+.redcard{background:#2b1110;color:#fff1e7}.redcard .ey{color:#ff8e76}.redcard .accent{color:#ff826a}
+.greencard{background:#334026;color:#f3f9e8}.greencard .ey{color:#d9efaa}.greencard .accent{color:#d9efaa}
+.reportcard{background:linear-gradient(145deg,#f7eddc,#ead6af)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}.metric{background:rgba(255,255,255,.62);border:1px solid rgba(60,35,10,.12);border-radius:16px;padding:15px}.metric b{display:block;font:700 40px/.95 Georgia,serif}.metric span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.09em;margin-top:7px}
+.photo-title{font:700 58px/.96 Georgia,serif;color:#fff}.pill{display:inline-block;border-radius:999px;padding:9px 14px;background:var(--gold);color:#271608;font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.panel{position:static}.stage{justify-content:flex-start}.card{transform-origin:top left}}
 </style>
 </head>
 <body>
-<div style="min-height:100vh; background:#e7dcc7; padding:64px 72px 120px; font-family:var(--font-body); color:var(--color-text)">
+<header><div class="brand">Well Seasoned · Social Kit 2.0</div><div class="sub">Live marketing cards powered by the same public Kitchen and Table data as the site. Pick a format, pick a title, download the PNG, post it, and send people directly to the verdict.</div></header>
+<div class="layout">
+  <aside class="panel">
+    <label for="type">Card franchise</label>
+    <select id="type">
+      <option value="settle">Settle This</option>
+      <option value="gap">The Gap</option>
+      <option value="spoken">The Table Has Spoken</option>
+      <option value="unchallenged">One Person Doesn't Speak for the Cookout</option>
+      <option value="spotlight">Spotlight</option>
+      <option value="report">The Table Report</option>
+    </select>
 
-  <header style="max-width:1100px; margin:0 0 12px">
-    <div style="font-family:var(--font-heading); font-size:22px; letter-spacing:0.24em; text-transform:uppercase; color:var(--color-accent-700)">Well Seasoned · Social Kit</div>
-    <h1 style="font-family:var(--font-heading); font-size:58px; line-height:1.04; margin:10px 0 14px; max-width:16ch">Rated by the culture, posted for the culture.</h1>
-    <p style="font-size:19px; max-width:64ch; color:var(--color-neutral-700); margin:0">Seven Instagram Stories (1080×1920) and three Threads posts. Frames are live at full resolution — drop real poster art onto any tile, edit any line in place. Film spotlights <strong>tease the verdict on purpose</strong> to pull people to the site.</p>
-  </header>
+    <label for="film">Title</label>
+    <select id="film"></select>
 
-  <!-- ══════════ INSTAGRAM STORIES ══════════ -->
-  <div style="display:flex; align-items:center; gap:16px; margin:46px 0 22px">
-    <span style="font-family:var(--font-heading); font-size:30px">Instagram Stories</span>
-    <span style="height:2px; flex:1; background:var(--color-divider); max-width:520px"></span>
-    <span style="font-size:15px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600)">1080 × 1920</span>
-  </div>
+    <label for="format">Format</label>
+    <select id="format">
+      <option value="feed">Feed · 1080×1350</option>
+      <option value="story">Story · 1080×1920</option>
+      <option value="square">Square · 1080×1080</option>
+    </select>
 
-  <div style="display:flex; flex-wrap:wrap; gap:52px 44px; align-items:flex-start">
-
-    <!-- STORY 01 — Manifesto -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 01</span><span style="font-size:13px; color:var(--color-neutral-600)">Manifesto · brand</span></div>
-      <div class="shot">
-        <div class="frame" style="background:radial-gradient(120% 90% at 50% 0%, #4a2c14 0%, #2e2b25 62%); color:#f5ead8; padding:82px 80px">
-          <div class="lockup">Well Seasoned</div>
-          <div style="display:flex; justify-content:center; margin:60px 0 34px">
-            <svg viewBox="0 0 64 64" width="300" height="300" aria-hidden="true" style="filter:drop-shadow(0 16px 38px rgba(0,0,0,.5))">
-              <defs>
-                <linearGradient id="wsHatGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D7A233"/><stop offset="1" stop-color="#A6740F"/></linearGradient>
-                <linearGradient id="wsBodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2C158"/><stop offset=".55" stop-color="#E5A72E"/><stop offset="1" stop-color="#B87E14"/></linearGradient>
-              </defs>
-              <path d="M21 22 a11 11 0 0 1 22 0 v3 h-22 z" fill="url(#wsHatGrad)" stroke="#2A1B10" stroke-width="0.6"></path>
-              <circle cx="32" cy="14.8" r="2.3" fill="#F7EFDC"></circle>
-              <circle cx="26.5" cy="15.5" r="1.8" fill="#F7EFDC"></circle>
-              <circle cx="37.5" cy="15.5" r="1.8" fill="#F7EFDC"></circle>
-              <circle cx="28" cy="20.7" r="1.8" fill="#F7EFDC"></circle>
-              <circle cx="36" cy="20.7" r="1.8" fill="#F7EFDC"></circle>
-              <rect x="19" y="25" width="26" height="5" rx="2.5" fill="#F7EFDC" stroke="#D8C7A0" stroke-width="0.4"></rect>
-              <path d="M21.5 32 h21 l2.5 19.5 a6.5 6.5 0 0 1 -6.5 7 h-13 a6.5 6.5 0 0 1 -6.5 -7 z" fill="url(#wsBodyGrad)" stroke="#2A1B10" stroke-width="0.6"></path>
-              <path d="M24.5 34.5 q-1.4 12 .8 19.5" stroke="#FCE7B8" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".55"></path>
-              <path transform="translate(32 45)" d="M0,-6.5 L1.95,-2.05 L6.5,-2.05 L2.8,0.95 L4,5.4 L0,2.6 L-4,5.4 L-2.8,0.95 L-6.5,-2.05 L-1.95,-2.05 Z" fill="#2A1B10" stroke="#2A1B10" stroke-width="0.5"></path>
-            </svg>
-          </div>
-          <div class="kick" style="color:var(--color-accent-300)">Two verdicts · one seal</div>
-          <h2 style="font-family:var(--font-heading); font-size:104px; line-height:0.98; margin:26px 0 0">The critics and the culture, on the same film.</h2>
-          <p style="font-size:34px; line-height:1.5; margin-top:44px; color:#e9dcc7; max-width:22ch">The Kitchen is verified critics of the culture. The Table is everyone who bought the ticket. No studio thumb on the scale.</p>
-          <div class="foot" style="color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Link sticker → itswellseasoned.com. Poll sticker: “Critics or the cookout — who do you trust?” <span style="color:var(--color-accent-700)">#WellSeasoned #RatedByTheCulture #BlackFilm</span></div>
+    <div class="btns">
+      <button class="soft tiny" id="pickSplit">Best split</button>
+      <button class="soft tiny" id="pickOne">One verdict</button>
+      <button class="soft tiny" id="pickMost">Most voted</button>
     </div>
 
-    <!-- STORY 02 — How to read a score -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 02</span><span style="font-size:13px; color:var(--color-neutral-600)">Explainer</span></div>
-      <div class="shot">
-        <div class="frame" style="background:#f5ead8; color:#201e1d; padding:82px 80px">
-          <div class="lockup" style="color:var(--color-accent-700)">Well Seasoned</div>
-          <div class="kick" style="color:var(--color-neutral-600); margin-top:70px">How to read a score</div>
-          <div style="display:flex; flex-direction:column; gap:30px; margin-top:52px">
-            <div style="background:var(--color-accent-600); color:#fff2eb; border-radius:32px; padding:40px 46px; display:flex; align-items:center; justify-content:space-between"><div><div style="font-size:28px; letter-spacing:0.14em; text-transform:uppercase">The Kitchen</div><div style="font-size:26px; opacity:.85">verified critics of the culture</div></div><div style="font-family:var(--font-heading); font-size:118px; line-height:1">94</div></div>
-            <div style="background:var(--color-accent-2-600); color:#f0fae1; border-radius:32px; padding:40px 46px; display:flex; align-items:center; justify-content:space-between"><div><div style="font-size:28px; letter-spacing:0.14em; text-transform:uppercase">The Table</div><div style="font-size:26px; opacity:.85">everyone who bought the ticket</div></div><div style="font-family:var(--font-heading); font-size:118px; line-height:1">91</div></div>
-          </div>
-          <p style="font-size:34px; line-height:1.45; margin-top:52px; max-width:24ch">When they agree, it earns <strong>the seal</strong>. When they split, that gap tells you something.</p>
-          <div class="foot"><span style="color:var(--color-neutral-600)">itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-700)">@Wellseasonedreviews</span></div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Quiz sticker: “Which number do you check first?” Save this to your highlight “How it works.” <span style="color:var(--color-accent-700)">#TwoVerdicts #FilmTwitter</span></div>
+    <label for="caption">Caption</label>
+    <textarea id="caption"></textarea>
+    <div class="btns">
+      <button class="primary" id="download">Download PNG</button>
+      <button class="dark" id="copy">Copy caption</button>
+      <button class="soft" id="openFilm">Open film page</button>
     </div>
-
-    <!-- STORY 03 — The Gap -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 03</span><span style="font-size:13px; color:var(--color-neutral-600)">The gap · engagement</span></div>
-      <div class="shot">
-        <div class="frame" style="background:#2e2b25; color:#f5ead8; padding:82px 80px">
-          <div class="lockup">Well Seasoned</div>
-          <div class="kick" style="color:var(--color-accent-300); margin-top:120px">The gap is the conversation</div>
-          <div style="display:flex; align-items:baseline; gap:28px; margin-top:40px; font-family:var(--font-heading); line-height:0.9">
-            <span style="font-size:190px; color:var(--color-accent-400)">94</span>
-            <span style="font-size:120px; color:var(--color-neutral-500)">/</span>
-            <span style="font-size:190px; color:var(--color-accent-2-400)">61</span>
-          </div>
-          <div style="display:flex; gap:60px; font-size:26px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-400); margin-top:14px"><span>The Kitchen</span><span style="margin-left:auto">The Table</span></div>
-          <p style="font-size:36px; line-height:1.45; margin-top:56px; max-width:22ch">Critics loved the craft. The room walked out arguing. So — where do <em>you</em> land?</p>
-          <div style="margin-top:30px; display:inline-block; background:var(--color-accent-500); color:#2e2b25; font-family:var(--font-heading); font-size:34px; padding:22px 42px; border-radius:999px">Cast your verdict ↗</div>
-          <div class="foot" style="color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Swap in a real split from the site. Slider sticker “Rate it yourself” + link to the film. <span style="color:var(--color-accent-700)">#ThePeoplesCut</span></div>
-    </div>
-
-    <!-- STORY 04 — Lanterns / Coming Soon -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 04</span><span style="font-size:13px; color:var(--color-neutral-600)">Coming soon · Lanterns</span></div>
-      <div class="shot">
-        <div class="frame" style="background:#221f1a; color:#f5ead8; padding:0">
-          <div style="position:absolute; inset:0"><img src="https://image.tmdb.org/t/p/w1280/moA5NNpOsSeQ2gNkOBgbMeNOl3d.jpg" alt="Lanterns" style="width:100%; height:100%; object-fit:cover" onerror="this.style.display='none'"></div>
-          <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,18,14,0.72) 0%, rgba(20,18,14,0.1) 34%, rgba(20,18,14,0.2) 60%, rgba(20,18,14,0.92) 100%); pointer-events:none"></div>
-          <div style="position:absolute; inset:0; padding:82px 80px; display:flex; flex-direction:column; pointer-events:none">
-            <div class="lockup">Well Seasoned</div>
-            <div style="margin-top:26px; align-self:flex-start; background:var(--color-accent-500); color:#211a12; font-family:var(--font-heading); font-size:28px; letter-spacing:0.06em; padding:14px 30px; border-radius:999px">🔥 THE STOVE IS ON</div>
-            <div style="margin-top:auto">
-              <div class="kick" style="color:var(--color-accent-300)">Coming soon</div>
-              <h2 style="font-family:var(--font-heading); font-size:118px; line-height:0.96; margin:14px 0 0">Lanterns</h2>
-              <p style="font-size:34px; line-height:1.45; margin-top:26px; max-width:24ch; color:#eaddc8">Aaron Pierre in the series the culture's already tracking. Watch the trailer, mark your calendar — then come back and cast the first verdict.</p>
-              <div style="margin-top:26px; display:inline-block; border:3px solid var(--color-accent-300); color:var(--color-accent-300); font-family:var(--font-heading); font-size:30px; padding:16px 34px; border-radius:999px">Verdict pending</div>
-            </div>
-            <div class="foot" style="position:static; margin-top:44px; color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Countdown sticker to release. Link → the film's page. Verify cast/title before posting. <span style="color:var(--color-accent-700)">#Lanterns #AaronPierre #ComingSoon</span></div>
-    </div>
-
-    <!-- STORY 05 — The Seal / Why Did I Get Married -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 05</span><span style="font-size:13px; color:var(--color-neutral-600)">The seal · spotlight</span></div>
-      <div class="shot">
-        <div class="frame" style="background:#f5ead8; color:#201e1d; padding:78px 80px">
-          <div class="lockup" style="color:var(--color-accent-700)">Well Seasoned</div>
-          <div style="display:flex; gap:40px; align-items:flex-start; margin-top:48px">
-            <div style="width:300px; height:432px; border-radius:24px; overflow:hidden; flex:none; box-shadow:var(--shadow-md); background:#171009"><img src="https://image.tmdb.org/t/p/w780/rwaxLuOkJ5mMvJU5juNaPcKADOW.jpg" alt="Why Did I Get Married Again? poster" style="width:100%; height:100%; object-fit:cover" onerror="this.style.display='none'"></div>
-            <div style="padding-top:8px">
-              <div style="width:210px; height:210px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; box-shadow:0 0 0 10px #f5ead8, 0 0 0 16px var(--color-accent-600)"><div style="font-size:26px; letter-spacing:0.18em">THE GOAL</div><div style="font-family:var(--font-heading); font-size:56px; line-height:0.95; margin-top:2px">The Seal</div></div>
-            </div>
-          </div>
-          <h2 style="font-family:var(--font-heading); font-size:70px; line-height:0.98; margin:44px 0 0">Why Did I Get Married Again?</h2>
-          <p style="font-size:33px; line-height:1.45; margin-top:22px; max-width:26ch">The seal lands only when the Kitchen and the Table agree — critics and the cookout in the same place. Tyler Perry's back Sep 9.</p>
-          <p style="font-size:30px; margin-top:20px; color:var(--color-accent-700); font-weight:700">Premieres Sep 9 — pull up → itswellseasoned.com</p>
-          <div class="foot"><span style="color:var(--color-neutral-600)">itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-700)">@Wellseasonedreviews</span></div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Tease, don't spoil: link → the film page so they check the seal themselves. Confirm exact title/year on the site, and only post the seal once a film has genuinely earned it. <span style="color:var(--color-accent-700)">#EarnedTheSeal</span></div>
-    </div>
-
-    <!-- STORY 06 — Fightland / New on the stove -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-200); color:var(--color-accent-800); padding:4px 10px; border-radius:999px">IG STORY 06</span><span style="font-size:13px; color:var(--color-neutral-600)">Independent · Fightland</span></div>
-      <div class="shot">
-        <div class="frame" style="background:#211f1a; color:#f5ead8; padding:0">
-          <div style="position:absolute; inset:0"><img src="https://image.tmdb.org/t/p/w780/qRlOEIiwkfLy6ERRMbyQNGQQ6Lc.jpg" alt="Fightland" style="width:100%; height:100%; object-fit:cover" onerror="this.style.display='none'"></div>
-          <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,18,14,0.78) 0%, rgba(20,18,14,0.12) 40%, rgba(20,18,14,0.94) 100%); pointer-events:none"></div>
-          <div style="position:absolute; inset:0; padding:82px 80px; display:flex; flex-direction:column; pointer-events:none">
-            <div class="lockup">Well Seasoned</div>
-            <div class="kick" style="color:var(--color-accent-2-300); margin-top:22px">New on the stove</div>
-            <div style="margin-top:auto">
-              <h2 style="font-family:var(--font-heading); font-size:112px; line-height:0.96; margin:0">Fightland</h2>
-              <p style="font-size:35px; line-height:1.45; margin-top:26px; max-width:23ch; color:#eaddc8">Independent. Unbought. Exactly the kind of film this table was built to show up for.</p>
-              <p style="font-size:31px; margin-top:22px; font-family:var(--font-heading); color:var(--color-accent-300)">Premieres Jul 31 · Starz — come cast the first verdict ↗</p>
-            </div>
-            <div class="foot" style="position:static; margin-top:44px; color:#cbb79b"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading); color:var(--color-accent-300)">@Wellseasonedreviews</span></div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Great slot for filmmaker submissions. “Made something? Submit your film.” Confirm title/details before posting. <span style="color:var(--color-accent-700)">#IndependentFilm #SubmitYourFilm</span></div>
-    </div>
-
-    <!-- STORY 07 — CTA / The Table -->
-    <div style="width:360px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-accent-2-200); color:var(--color-accent-2-800); padding:4px 10px; border-radius:999px">IG STORY 07</span><span style="font-size:13px; color:var(--color-neutral-600)">CTA · sign up</span></div>
-      <div class="shot">
-        <div class="frame" style="background:radial-gradient(130% 80% at 20% 8%, #6d7c52 0%, #56633f 70%); color:#f0fae1; padding:82px 80px">
-          <div class="lockup">Well Seasoned</div>
-          <div style="position:absolute; right:-90px; top:520px; width:520px; height:520px; border-radius:999px; background:rgba(255,255,255,0.08)"></div>
-          <div class="kick" style="color:var(--color-accent-2-200); margin-top:190px">Membership · free</div>
-          <h2 style="font-family:var(--font-heading); font-size:114px; line-height:0.96; margin:24px 0 0">Pull up a seat at The Table.</h2>
-          <p style="font-size:35px; line-height:1.48; margin-top:40px; max-width:22ch; position:relative">Save your votes. Track where you land against the room. Get picks made for how you actually watch.</p>
-          <div style="margin-top:46px; display:inline-block; background:#f5ead8; color:#3d472b; font-family:var(--font-heading); font-size:38px; padding:24px 48px; border-radius:999px; box-shadow:var(--shadow-md)">Create your free account →</div>
-          <div class="foot" style="color:#dfe8cb"><span>itswellseasoned.com</span><span style="font-family:var(--font-heading)">@Wellseasonedreviews</span></div>
-        </div>
-      </div>
-      <div style="margin-top:14px; background:var(--color-neutral-100); border-radius:16px; padding:16px 18px; font-size:14px; line-height:1.55; box-shadow:var(--shadow-sm)"><div style="font-weight:700; margin-bottom:4px">Sticker / link idea</div>Link sticker → create account. Pin to your profile highlight “Join the Table.” <span style="color:var(--color-accent-700)">#PullUpASeat #TheTable</span></div>
-    </div>
-
-  </div>
-
-  <!-- ══════════ THREADS ══════════ -->
-  <div style="display:flex; align-items:center; gap:16px; margin:72px 0 22px">
-    <span style="font-family:var(--font-heading); font-size:30px">Threads</span>
-    <span style="height:2px; flex:1; background:var(--color-divider); max-width:520px"></span>
-    <span style="font-size:15px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600)">Copy · three voices</span>
-  </div>
-
-  <div style="display:flex; flex-wrap:wrap; gap:34px; align-items:flex-start">
-
-    <!-- THREAD A — site voice -->
-    <div style="width:600px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-neutral-300); color:var(--color-neutral-800); padding:4px 10px; border-radius:999px">THREAD A</span><span style="font-size:13px; color:var(--color-neutral-600)">Site voice</span></div>
-      <div style="background:#faf5ec; border-radius:24px; padding:30px 32px; box-shadow:var(--shadow-md)">
-        <div style="display:flex; gap:14px; align-items:center; margin-bottom:16px">
-          <div style="width:48px; height:48px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; font-family:var(--font-heading); font-size:24px; display:flex; align-items:center; justify-content:center">W</div>
-          <div style="line-height:1.2"><div style="font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px">Well Seasoned <span style="color:var(--color-accent-600)">✔</span></div><div style="font-size:15px; color:var(--color-neutral-600)">@Wellseasonedreviews · 2h</div></div>
-        </div>
-        <p style="font-size:19px; line-height:1.6; margin:0">Two numbers on every film. The Kitchen — verified critics of the culture. The Table — everybody who actually bought the ticket.<br><br>When they agree, it earns the seal. When they split? That's the whole conversation.<br><br>Built for the culture, rated by the culture. → itswellseasoned.com</p>
-        <div style="display:flex; gap:34px; margin-top:20px; color:var(--color-neutral-500); font-size:15px">♡ &nbsp; 💬 &nbsp; ↻ &nbsp; ➤</div>
-      </div>
-    </div>
-
-    <!-- THREAD B — punchy / meme -->
-    <div style="width:600px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-neutral-300); color:var(--color-neutral-800); padding:4px 10px; border-radius:999px">THREAD B</span><span style="font-size:13px; color:var(--color-neutral-600)">Punchier / meme-aware</span></div>
-      <div style="background:#faf5ec; border-radius:24px; padding:30px 32px; box-shadow:var(--shadow-md)">
-        <div style="display:flex; gap:14px; align-items:center; margin-bottom:16px">
-          <div style="width:48px; height:48px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; font-family:var(--font-heading); font-size:24px; display:flex; align-items:center; justify-content:center">W</div>
-          <div style="line-height:1.2"><div style="font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px">Well Seasoned <span style="color:var(--color-accent-600)">✔</span></div><div style="font-size:15px; color:var(--color-neutral-600)">@Wellseasonedreviews · 5h</div></div>
-        </div>
-        <p style="font-size:19px; line-height:1.6; margin:0">a critic gave it a 34. the whole cookout gave it a 96.<br><br>somebody's lying and it's not the cookout 🍿<br><br>two scores. one seal. no studio thumb on the scale. pull up a seat → itswellseasoned.com</p>
-        <div style="display:flex; gap:34px; margin-top:20px; color:var(--color-neutral-500); font-size:15px">♡ &nbsp; 💬 &nbsp; ↻ &nbsp; ➤</div>
-      </div>
-    </div>
-
-    <!-- THREAD C — editorial -->
-    <div style="width:600px">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px"><span style="font-size:12px; font-weight:700; letter-spacing:0.14em; background:var(--color-neutral-300); color:var(--color-neutral-800); padding:4px 10px; border-radius:999px">THREAD C</span><span style="font-size:13px; color:var(--color-neutral-600)">Editorial / elevated</span></div>
-      <div style="background:#faf5ec; border-radius:24px; padding:30px 32px; box-shadow:var(--shadow-md)">
-        <div style="display:flex; gap:14px; align-items:center; margin-bottom:16px">
-          <div style="width:48px; height:48px; border-radius:999px; background:var(--color-accent-600); color:#fff2eb; font-family:var(--font-heading); font-size:24px; display:flex; align-items:center; justify-content:center">W</div>
-          <div style="line-height:1.2"><div style="font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px">Well Seasoned <span style="color:var(--color-accent-600)">✔</span></div><div style="font-size:15px; color:var(--color-neutral-600)">@Wellseasonedreviews · 1d</div></div>
-        </div>
-        <p style="font-size:19px; line-height:1.6; margin:0">Criticism lived at the kitchen table long before it reached a masthead.<br><br>Well Seasoned puts both on the record: verified critics of the culture, beside the room that bought the ticket. Same film, two honest verdicts — and the gap between them treated as the point, not the problem.<br><br>A seat that's earned, never bought.</p>
-        <div style="display:flex; gap:34px; margin-top:20px; color:var(--color-neutral-500); font-size:15px">♡ &nbsp; 💬 &nbsp; ↻ &nbsp; ➤</div>
-      </div>
-    </div>
-
-  </div>
+    <div class="status" id="status"></div>
+    <div class="note">Numbers are live and cached for a few minutes. Re-open or refresh before posting a score-sensitive card.</div>
+  </aside>
+  <main class="stage"><div id="card" class="card"></div></main>
 </div>
-
-<!-- Full-resolution export: click any story tile to blow it up to true 1080×1920,
-     then screenshot it (real brand fonts load in your browser). Click to close. -->
-<div id="exportOverlay" style="display:none; position:fixed; inset:0; background:rgba(20,14,6,.88); z-index:100; overflow:auto; padding:28px 18px; text-align:center">
-  <div style="color:#f5ead8; font-family:var(--font-body); font-size:14px; margin-bottom:14px">Full 1080 × 1920 — screenshot this frame to post, then click anywhere to close</div>
-  <div id="exportHost" style="display:inline-block"></div>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-  document.getElementById('exportOverlay').addEventListener('click', function(){ this.style.display='none'; });
-  document.querySelectorAll('.shot').forEach(function(shot){
-    shot.style.cursor='zoom-in';
-    shot.addEventListener('click', function(){
-      var frame = shot.querySelector('.frame').cloneNode(true);
-      frame.style.transform = 'none';
-      frame.style.position = 'relative';
-      var wrap = document.createElement('div');
-      wrap.style.cssText = 'width:1080px; height:1920px; position:relative; border-radius:26px; overflow:hidden; box-shadow:0 30px 90px rgba(0,0,0,.6); margin:0 auto';
-      wrap.appendChild(frame);
-      var host = document.getElementById('exportHost'); host.innerHTML = ''; host.appendChild(wrap);
-      document.getElementById('exportOverlay').style.display = 'block';
-      window.scrollTo(0,0);
-    });
-  });
+(function(){
+var D=null,films=[],byId={};
+var type=document.getElementById('type'), filmSel=document.getElementById('film'), format=document.getElementById('format');
+var card=document.getElementById('card'), caption=document.getElementById('caption'), status=document.getElementById('status');
+function e(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmt(n){return n==null?'—':Number(n).toLocaleString('en-US');}
+function img(f){return f&&f.poster&&f.poster.indexOf('https://image.tmdb.org/')===0?'/api/social-image?src='+encodeURIComponent(f.poster):'';}
+function selected(){return byId[filmSel.value]||films[0]||null;}
+function pageUrl(f){return location.origin+(f?f.href:'/');}
+function eligibleFor(kind){
+  if(kind==='gap') return films.filter(function(f){return f.gap!=null&&f.total>0;}).sort(function(a,b){return b.gap-a.gap;});
+  if(kind==='spoken') return films.filter(function(f){return f.total>=4&&f.table>=85;}).sort(function(a,b){return b.total-a.total;});
+  if(kind==='unchallenged') return films.filter(function(f){return f.total===1;});
+  if(kind==='settle') return films.filter(function(f){return f.total>0&&f.total<12;}).sort(function(a,b){return a.total-b.total;});
+  return films;
+}
+function fillTitles(keep){
+  var list=eligibleFor(type.value); if(!list.length) list=films;
+  filmSel.innerHTML=list.map(function(f){return '<option value="'+e(f.id)+'">'+e(f.title)+' · '+f.year+(f.total?' · '+f.total+' verdict'+(f.total===1?'':'s'):'')+'</option>';}).join('');
+  if(keep&&byId[keep]&&list.some(function(x){return x.id===keep;})) filmSel.value=keep;
+}
+function posterLayer(f){
+  var u=img(f);
+  return u?'<div class="poster" style="background-image:url(\''+e(u)+'\')"></div><div class="scrim"></div>':'';
+}
+function footer(){return '<div class="footer"><span>itswellseasoned.com</span><span>@Wellseasonedreviews</span></div>';}
+function render(){
+  var f=selected(),k=type.value, cls='card',h='',cap='';
+  card.className='card '+(format.value==='story'?'story ':format.value==='square'?'square ':'');
+  if(k==='report'){
+    var r=D.report||{};
+    card.className+=' reportcard';
+    h='<div class="pad"><div class="lock">Well Seasoned</div><div class="bottom" style="margin-top:70px"><div class="ey">THE TABLE REPORT · LIVE</div><div class="title">The room, by the numbers.</div>'+
+      '<div class="metrics"><div class="metric"><b>'+fmt(r.votes_all_time)+'</b><span>Verdicts cast</span></div><div class="metric"><b>'+fmt(r.votes_7d)+'</b><span>Last 7 days</span></div><div class="metric"><b>'+fmt(r.films_with_verdict)+'</b><span>Titles ruled on</span></div><div class="metric"><b>'+fmt(r.one_verdict)+'</b><span>One verdict only</span></div></div>'+
+      '<p class="copy" style="margin-top:24px">The culture is not a focus group. It is the room. See what the Table is actually saying.</p><div class="pill">Read the live report →</div>'+footer()+'</div></div>';
+    cap='The Table Report is live. '+fmt(r.votes_all_time)+' verdicts have been cast across '+fmt(r.films_with_verdict)+' titles. '+fmt(r.one_verdict)+' titles are still sitting on one person\'s opinion. Pull up a chair: '+location.origin+'/table-report';
+  } else if(!f){card.innerHTML='<div class="pad">No qualifying title yet.</div>';return;}
+  else if(k==='gap'){
+    card.className+=' darkcard';
+    h='<div class="pad"><div class="lock">Well Seasoned</div><div class="bottom"><div class="ey">THE GAP IS THE CONVERSATION</div><div class="title">'+e(f.title)+'</div>'+
+      '<div class="scoregrid"><div class="score"><div class="lab">The Kitchen</div><div class="num">'+(f.kitchen==null?'—':f.kitchen)+'</div></div><div class="score table"><div class="lab">The Table</div><div class="num">'+(f.table==null?'—':f.table)+'</div></div></div>'+
+      '<p class="copy">'+(f.gap==null?'Two verdicts. One room.':'That is a '+f.gap+'-point gap. Who got it right?')+'</p><div class="pill">Cast your verdict →</div>'+footer()+'</div></div>';
+    cap='The Kitchen says '+(f.kitchen==null?'not scored yet':f.kitchen+'%')+'. The Table says '+(f.table==null?'still counting':f.table+'%')+'. '+(f.gap==null?'':'That is a '+f.gap+'-point gap. ')+'Where do you land? '+pageUrl(f);
+  } else if(k==='spoken'){
+    card.className+=' greencard';
+    h='<div class="pad">'+posterLayer(f)+'<div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%"><div class="lock">Well Seasoned</div><div class="bottom"><div class="ey">THE TABLE HAS SPOKEN</div><div class="photo-title">'+e(f.title)+'</div><div class="big accent" style="margin-top:16px">'+f.table+'%</div><p class="copy">'+f.total+' verdict'+(f.total===1?'':'s')+'. '+f.for_count+' seasoned · '+f.against_count+' sent it back.</p><div class="pill">See the full verdict →</div>'+footer()+'</div></div></div>';
+    cap='The Table has spoken on '+f.title+': '+f.table+'% Seasoned from '+f.total+' verdicts. Agree or send it back? '+pageUrl(f);
+  } else if(k==='unchallenged'){
+    card.className+=' redcard';
+    var sent=f.against_count===1;
+    h='<div class="pad">'+posterLayer(f)+'<div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%"><div class="lock">Well Seasoned</div><div class="bottom"><div class="ey">ONE PERSON DOESN\'T SPEAK FOR THE COOKOUT</div><div class="photo-title">'+e(f.title)+'</div><p class="copy" style="margin-top:20px"><span class="accent">One person '+(sent?'sent it back.':'called it seasoned.')+'</span><br>Nobody has answered them yet.</p><div class="pill">Go settle it →</div>'+footer()+'</div></div></div>';
+    cap='One person '+(sent?'sent '+f.title+' back':'called '+f.title+' seasoned')+'. Respectfully, one person does not speak for the whole cookout. Go settle it: '+pageUrl(f);
+  } else if(k==='spotlight'){
+    card.className+=' darkcard';
+    h='<div class="pad">'+posterLayer(f)+'<div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%"><div class="lock">Well Seasoned</div><div class="bottom"><div class="ey">ON THE PLATE</div><div class="photo-title">'+e(f.title)+'</div><p class="copy" style="margin-top:18px">'+e((f.where||[]).join(' · ')||'Find where to watch on Well Seasoned')+'</p><div class="pill">Open the page →</div>'+footer()+'</div></div></div>';
+    cap=f.title+' is on the plate. See where to watch it, check the scores, and cast your verdict: '+pageUrl(f);
+  } else {
+    card.className+=' darkcard';
+    var hook=f.total===1?'One person has ruled. Nobody has answered.':(f.table==null?'The room has not ruled yet.':f.table+'% Seasoned from '+f.total+' verdicts.');
+    h='<div class="pad">'+posterLayer(f)+'<div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%"><div class="lock">Well Seasoned</div><div class="bottom"><div class="ey">SETTLE THIS</div><div class="photo-title">'+e(f.title)+'</div><p class="copy" style="margin-top:20px">'+e(hook)+'</p><div class="pill">Cast your verdict →</div>'+footer()+'</div></div></div>';
+    cap='SETTLE THIS: '+f.title+'. '+hook+' Where do you land? '+pageUrl(f);
+  }
+  card.innerHTML=h; caption.value=cap;
+}
+function choose(arr){if(arr&&arr.length){fillTitles(arr[0].id);filmSel.value=arr[0].id;render();}}
+type.onchange=function(){var keep=filmSel.value;fillTitles(keep);render();};
+filmSel.onchange=render; format.onchange=render;
+document.getElementById('pickSplit').onclick=function(){type.value='gap';fillTitles();choose(D.boards.gap);};
+document.getElementById('pickOne').onclick=function(){type.value='unchallenged';fillTitles();choose(films.filter(function(f){return f.total===1;}));};
+document.getElementById('pickMost').onclick=function(){type.value='spoken';fillTitles();choose(films.filter(function(f){return f.total>=4;}).sort(function(a,b){return b.total-a.total;}));};
+document.getElementById('copy').onclick=function(){navigator.clipboard.writeText(caption.value).then(function(){status.textContent='Caption copied.';});};
+document.getElementById('openFilm').onclick=function(){var f=selected();window.open(type.value==='report'?'/table-report':(f?f.href:'/'),'_blank');};
+document.getElementById('download').onclick=function(){
+  status.textContent='Rendering PNG…';
+  if(!window.html2canvas){status.textContent='PNG renderer did not load. Screenshot the card instead.';return;}
+  window.html2canvas(card,{scale:2,useCORS:true,backgroundColor:null}).then(function(canvas){
+    var a=document.createElement('a'),f=selected();
+    a.download='well-seasoned-'+type.value+'-'+(f?f.id:'table-report')+'-'+format.value+'.png';
+    a.href=canvas.toDataURL('image/png'); a.click(); status.textContent='PNG downloaded.';
+  }).catch(function(){status.textContent='PNG export failed. Refresh and try again, or screenshot the card.';});
+};
+fetch('/api/social-data').then(function(r){return r.json();}).then(function(j){
+  D=j;films=j.films||[];films.forEach(function(f){byId[f.id]=f;});
+  fillTitles();
+  if(D.boards&&D.boards.split&&D.boards.split.length){filmSel.value=D.boards.split[0].id;}
+  render(); status.textContent='Live data loaded · '+new Date(j.generated_at).toLocaleString();
+}).catch(function(){status.textContent='Could not load live data.';});
+})();
 </script>
 </body>
 </html>
