@@ -32,6 +32,10 @@
       "destination": "/api/advertise"
     },
     {
+      "source": "/table-report",
+      "destination": "/api/table-report"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     }
