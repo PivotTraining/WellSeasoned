@@ -4938,3 +4938,76 @@ Ackie), Bass X Machina (Nov 3, Brian Tyree Henry + Janelle Monáe), 12 12 12
 (Nov 12, Anthony Mackie), How to Rob a Bank (Nov 13, Zoë Kravitz), plus the
 three carried over from Aug: S.W.A.T. Exiles, Cupertino, The Fall and Rise of
 Reggie Dinkins S2.
+
+## Refresh sweep: marquee back to cap, four real events, two date fixes (2026-10-29)
+Owner: "refresh everywhere needed." Audited every date-gated surface, then acted.
+- **Marquee was at 10 live slides, over the documented 8 cap** (the Oct 28 push
+  appended Kordell Stewart and The Eyes of Ghana without retiring anything).
+  Retired the three most-spent — `reasonable-doubt` (23 days), `misty-green-2026`
+  (20 days) and `diarra-from-detroit` (its `until` had already passed) — and
+  reordered to soonest-real-moment-first: the two newest out, then upcoming
+  ascending, then Treasure Island (out since Oct 11). All three retired titles
+  stay in the catalog, unwire-don't-delete as always. The orphaned "The Drop and
+  A Different World hoisted to lead" comment (both slides long gone) was replaced
+  with the actual cap rule, so the next session reads it in place.
+- **`EVENTS` was 6 of 7 elapsed**, leaving only ABFF Pop Up Houston. Pruned the
+  six dead entries and added three, each verified on the organizer's own site
+  rather than a press aggregator: **Black Harvest Film Festival** (Nov 6–15,
+  Chicago, 32nd year, Gene Siskel Film Center, tickets on sale — confirmed from
+  web.saic.edu/blackharvestfest), **Pan African Film & Arts Festival** (Feb
+  15–21 2027, LA, 35th anniversary, passes on pre-sale through 11/26 — confirmed
+  from paff.org's own JSON-LD and hero), and **ABFF 2027** (May 20–23, **Los
+  Angeles** — a real move after decades in Miami Beach, confirmed from abff.com).
+  The home spotlight now leads with Black Harvest at "In 8 days." Sundance 2027
+  was considered and left out: not a Black-focused festival, and the pattern here
+  is Black film events, not general festivals.
+- **Two real date errors fixed.** `I Play Rocky` carried **Nov 13**, which is an
+  early trade date matching nothing in TMDB's own breakdown (and, coincidentally,
+  the St. Louis festival). Amazon's own announcement and Wikipedia both give
+  **Nov 6 limited / Nov 20 wide**; we carry the limited opening, same call as
+  Your Mother Your Mother Your Mother. A `_dateNote` on the entry says so, since
+  `soon-watch` will now flag +14 against TMDB's wide date forever — that flag is
+  expected, not a drift to fix. `14th` was checked against the same breakdown and
+  our "In theaters Nov 27 · Netflix Dec 4" is exactly right (TMDB US type2 Nov 27,
+  type4 Dec 4), so nothing changed.
+- **Date-drift flags that were NOT bugs**, for the record: Soul Patrol's -285 d
+  is its Sundance premiere, Clarissa/Congo Boy/Ben'Imana's large negatives are
+  festival dates, and the ±1–2 day spread across Avengers/Dune/Avatar is TMDB's
+  own wobble. Same trap as every prior sweep: most `soon-watch` DATE flags are
+  TMDB reporting a different real milestone, not us being wrong. Verify with
+  `/release_dates` **type** breakdown (type1 festival, 2 limited, 3 wide, 4
+  digital) before touching a date.
+- **Catalog health acted on**: `seriously-single-too-2026` lost its now-stale
+  `nobd` flag — TMDB has since published a real backdrop (`/vVVTDymwLVogjz4Jxo
+  Nv1BAfYCH.jpg`, verified 200), baked in. Trailers wired after oEmbed + embed
+  checks: `lady-2026` → `MuJHJTK0Pmg` (MetFilm Distribution, the film's real
+  distributor) and Phoenix Fury's COMING_SOON entry → `n1H5zThWiyQ` (Fizzy K
+  Pictures, confirmed via TMDB as the film's own production company; its FILMS
+  pin already existed). Rejected: `miss-governor`'s candidate (oEmbed 404,
+  unusable) and `emma-and-bruce-willis-the`'s (an ABC News Diane Sawyer segment,
+  not a trailer).
+- **`FRESH_PLATE` extended through year end** — it would have dropped to two
+  items by Nov 19 and one by Dec 17. Added three real dated titles with
+  pre/post-premiere copy: Tyler Perry's The Gospel of Christmas (Nov 11,
+  Netflix), 14th (Nov 27 theaters / Dec 4 Netflix) and Give Me Some Sugah
+  (Dec 16, Netflix). Simulated forward weekly: plate and marquee both thin but
+  never break through late December, which is about the right runway — more
+  would mean committing copy to dates that can still move.
+- **Left alone deliberately**: `LEAD_STORY` still points at "The Niche That
+  Filled a Square" (Oct 10) because it is genuinely the newest published Balcony
+  piece and its premise is evergreen — the honest move is a new feature, not
+  repointing the banner at an older one. The JAŸ-Z Weekly Watch retired itself
+  on `until:'2026-10-18'` and is correctly hidden, no takedown needed.
+- Verified: `scripts/verify.cjs` PASS (16 routes × desktop/mobile, 1331 films, 0
+  dupes, no overflow, 0 errors), plus a targeted render check of the home marquee
+  (8 slides, 9 lead segments including the article, correct pre/post eyebrows),
+  the fresh plate, the slate, the home event spotlight and `#/events` (four real
+  festivals, correct countdowns).
+
+**File-editing gotcha that cost real time here**: a Python splice on index.html
+truncated 10,573 lines before an assertion caught it. Every scripted edit to
+index.html now asserts `out.endswith(s[-200:])` and that the length delta is
+within a few KB before writing — and `node -e 'require("./scripts/lib.cjs").films()'`
+after. Related, already-documented and hit again: `literal()` is string-aware but
+NOT comment-aware, so a lone apostrophe in a comment inside a parsed array
+("the organizer's own site") opens a phantom string and breaks the parse.

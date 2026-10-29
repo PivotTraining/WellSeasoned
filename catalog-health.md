@@ -1,10 +1,9 @@
-# Catalog health — 2026-10-26
+# Catalog health — 2026-10-29
 
-## Art now available (1)
-- seriously-single-too-2026: backdrop now on TMDB (/vVVTDymwLVogjz4JxoNv1BAfYCH.jpg) — nobd can come off
+## Art now available (0)
+- nothing
 
-## Trailer candidates (3)
-- lady-2026: candidate MuJHJTK0Pmg "Official Trailer" — verify the channel before wiring
+## Trailer candidates (2)
 - miss-governor: candidate FLiJiBTLdFM "Official Trailer" — verify the channel before wiring
 - emma-and-bruce-willis-the: candidate wY_w_vPoz9s "‘Emma and Bruce Willis – The Unexpected Jour" — verify the channel before wiring
 
@@ -13,3 +12,5 @@
 
 ## Dead streaming services (0)
 - nothing
+
+FINDINGS=2
