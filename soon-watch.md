@@ -1,6 +1,6 @@
 # Coming Soon watch
 
-_Generated 2026-10-29 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-11-05 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
 ## Release dates that moved (21)
 
@@ -34,6 +34,6 @@ None. Every upcoming title either has a trailer or TMDB still has nothing.
 
 The id matched neither a movie nor a series with this title. Either the title changed on TMDB or the id is wrong.
 
-- cs-church-wives-2026  Church Wives
 - cs-love-hip-hop-final-chapter-2026  Love & Hip Hop: The Final Chapter
+- cs-1559980  Tyler Perry's The Gospel of Christmas
 - cs-1720841  Jurassic World: Liberation
