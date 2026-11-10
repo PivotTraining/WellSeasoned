@@ -386,6 +386,11 @@
   .catalog-count{display:inline-flex;align-items:baseline;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
   .catalog-count b{font-family:var(--display);font-size:23px;font-weight:800;color:var(--gold-ink);letter-spacing:-.01em}
   .catalog-count span{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+  /* Instagram follow link under the hero count. The account is the brand's main
+     social home, and the site linked to it nowhere before this. */
+  .ig-follow{display:flex;align-items:center;gap:8px;margin-top:12px;width:max-content;max-width:100%;font-size:14px;font-weight:600;color:var(--gold-ink);text-decoration:none}
+  .ig-follow:hover span,.ig-follow:focus-visible span{text-decoration:underline}
+  .ig-follow b{font-weight:800}
   /* teaching strip */
   .teach{display:flex;flex-direction:column;gap:16px;background:linear-gradient(180deg,#FEFAF1,var(--panel));border:1px solid rgba(40,26,10,.10);border-left:4px solid var(--gold);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:22px;box-shadow:var(--shadow-2),inset 0 1px 0 rgba(255,251,240,.8)}
   .hero-top .hero-lead{padding-right:8px}
@@ -2714,6 +2719,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
             <h1>Find something worth watching.</h1>
             <p class="hero-lead">New releases, streaming picks, classics, and the titles everybody's talking about — with two verdicts to help you decide before you press play.</p>
             <div class="catalog-count" id="catalogCount"></div>
+            <a class="ig-follow" href="https://www.instagram.com/wellseasonedreviews/" target="_blank" rel="noopener" aria-label="Follow Well Seasoned on Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span>Follow us on Instagram <b>@wellseasonedreviews</b></span></a>
           </div>
         </div>
         <section class="watch-start" aria-label="Find something to watch">
@@ -3147,7 +3153,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
   </div>
   <div class="wrap foot-row">
     <span class="ftag">Built for the culture. Rated by the culture. · itswellseasoned.com</span>
-    <span><a href="/boards">Boards</a> · <a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('events')" style="cursor:pointer">Film Events</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('pulse')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Pulse</a></span></span>
+    <span><a href="https://www.instagram.com/wellseasonedreviews/" target="_blank" rel="noopener">Instagram</a> · <a href="/boards">Boards</a> · <a onclick="go('home')" style="cursor:pointer">Home</a> · <a onclick="go('browse')" style="cursor:pointer">Browse</a> · <a onclick="go('kids')" style="cursor:pointer">Kids</a> · <a onclick="go('ranked')" style="cursor:pointer">Rankings</a> · <a onclick="go('bracket')" style="cursor:pointer">The Bracket</a> · <a onclick="go('word')" style="cursor:pointer">The Balcony</a> · <a onclick="go('events')" style="cursor:pointer">Film Events</a> · <a onclick="go('vault')" style="cursor:pointer">The Vault</a> · <a onclick="go('soon')" style="cursor:pointer">Coming Soon</a> · <a onclick="go('shop')" style="cursor:pointer">Shop</a> · <a onclick="go('submit')" style="cursor:pointer">Submit your film</a> · <a onclick="openSuggestTitle('')" style="cursor:pointer">Suggest a title</a> · <a onclick="go('advertise')" style="cursor:pointer">Advertise</a> · <a onclick="go('legal','privacy')" style="cursor:pointer">Privacy</a> · <a onclick="go('legal','terms')" style="cursor:pointer">Terms</a><span id="adminLinks" hidden> · <a onclick="go('curate')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Curate</a> · <a onclick="go('pulse')" style="color:var(--gold-ink);font-weight:700;cursor:pointer">Pulse</a></span></span>
   </div>
   <div class="wrap"><p class="fine">Every title is real — films, directors, cast, runtimes, and where-to-watch via TMDB. Scores are earned, never bought: The Kitchen is verified critics of the culture, The Table is the community's live vote, and the seal only lands when both agree. Content pepper flags (language, violence, sexual content) are estimated from ratings and content keywords, not a scene-by-scene guide. Where-to-watch opens each provider directly, with every option on JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
 </footer>
