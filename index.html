@@ -4674,7 +4674,7 @@ var FILMS=[
    cast:['Stevie J','Joseline Hernandez','Yandy Smith','Mimi Faust','Rasheeda Frost','Trina'],moods:['Nostalgic','Messy'],era:'2020s',where:[],
    syn:'A six-part look back at fifteen years of Love & Hip Hop, bringing together stars, producers and cultural voices from New York, Atlanta, Hollywood and Miami to revisit the franchise\'s biggest moments and its impact on reality television and music culture.',
    tags:['Reality TV','Music','Culture','VH1','BET'],votes:{for:0,against:0},reviews:[]},
-  {id:'the-gospel-of-christmas-2026',title:'Tyler Perry\'s The Gospel of Christmas',year:2026,rt:'1h 43m',genre:'Drama',k:null,t:null,scope:'ours',type:'movie',grad:'linear-gradient(160deg,#1e2a1c,#070b07)',nobd:true,nopo:true,
+  {id:'the-gospel-of-christmas-2026',title:'Tyler Perry\'s The Gospel of Christmas',year:2026,rt:'1h 43m',genre:'Drama',k:null,t:null,scope:'ours',type:'movie',grad:'linear-gradient(160deg,#1e2a1c,#070b07)',backdrop:'https://image.tmdb.org/t/p/w1280/p1Ag7etCR5yUvElhwZmWsMo5IFu.jpg',
    dir:'Tyler Perry',cast:['Tank','Fantasia Barrino','Ricco Ross','Chant\u00e9 Moore','John Gray','Yolanda Adams','Fred Hammond','Shirley Caesar'],moods:['Warm'],era:'2020s',where:['Netflix'],
    syn:'Tyler Perry writes and directs, Kirk Franklin produces the music: a struggling pastor and his wife, and a gospel bench that runs from Yolanda Adams and The Clark Sisters to Shirley Caesar and Fred Hammond.',
    tags:['Drama','Holiday','Music'],votes:{for:0,against:0},reviews:[]},
@@ -4682,6 +4682,12 @@ var FILMS=[
    dir:'Tasha Smith',cast:['Taraji P. Henson','Joey Bada$$','Aunjanue Ellis-Taylor','Russell Hornsby','Alexis Louder','Arischa Conner','Angela Davis','Caroline Avery Granger'],moods:['Warm'],era:'2020s',where:['Netflix'],
    syn:'Tasha Smith directs Taraji P. Henson as a South Shore Chicago baker, from the real viral story. Produced by Tyler Perry and DeVon Franklin, with Joey Bada$$ and Aunjanue Ellis-Taylor.',
    tags:['Drama'],votes:{for:0,against:0},reviews:[]},
+  /* A Proud Family Wizmas (2026): stop-motion holiday special from the Proud
+     Family team, Disney+ Nov 14. TMDB movie 1716604 (art pinned below). */
+  {id:'a-proud-family-wizmas-2026',title:'A Proud Family Wizmas',year:2026,rt:'51m',genre:'Animation',k:null,t:null,scope:'ours',type:'movie',grad:'linear-gradient(160deg,#1b2a6b,#070b22)',backdrop:'https://image.tmdb.org/t/p/w1280/8hp2pULH1tBxYdbrQHkYjo7kffC.jpg',
+   dir:'David H. Brooks',cast:['Kyla Pratt','Tommy Davidson','Paula Jai Parker','Jo Marie Payton','Cedric the Entertainer','Keke Palmer','Gabrielle Union','JB Smoove','Anderson .Paak'],moods:['Playful','Warm'],era:'2020s',where:['Disney+'],
+   syn:'Penny Proud\'s rant about Wizmas and the commercialization of Christmas makes Santa quit on Christmas Eve, so Penny ends up in the red suit herself. A stop-motion special from Bruce W. Smith and Ralph Farquhar.',
+   tags:['Family','Animation','Comedy','Holiday'],votes:{for:0,against:0},reviews:[]},
   {id:'barbershop-2027',title:'Barbershop',year:2027,rt:'8 episodes',genre:'Comedy',k:null,t:null,scope:'ours',type:'tv',grad:'linear-gradient(160deg,#241a2b,#0a070d)',nobd:true,
    dir:'TBA',cast:['Jermaine Fowler','Punkie Johnson','Brett Gray','Roy Wood Jr.','E.J. Bonilla'],moods:['Playful'],era:'2020s',where:['Prime Video'],
    syn:'Marshall Todd, who co-wrote the 2002 film, brings the shop to series with Jermaine Fowler in the chair. All eight episodes at once, with Punkie Johnson, Brett Gray, Roy Wood Jr. and Bokeem Woodbine.',
@@ -7124,6 +7130,8 @@ var META={
    This makes The Table score a live percentage: every vote you cast moves the number. */
 /* Real TMDB poster URLs, resolved at build time (key not stored in file) */
 var WS_POSTERS={
+  'a-proud-family-wizmas-2026':'https://image.tmdb.org/t/p/w500/9nFa7GEw9FmZWn3gaFhLvVrhVDY.jpg',
+  'the-gospel-of-christmas-2026':'https://image.tmdb.org/t/p/w500/ihbN6lNDXKe6w9xE6IBFMVF2Rkr.jpg',
   'church-wives-2026':'https://public-assets-pressexpress.s3.amazonaws.com/assets/releases/docimages/252aace2/21557e8b53260d361491afd55a47037a.jpg',
   'love-hip-hop-final-chapter-2026':'https://public-assets-pressexpress.s3.amazonaws.com/assets/releases/docimages/67574944/d3058934c5ba3a4fb024cef05de0e39c.jpg',
   'eyes-of-ghana-2026':'https://image.tmdb.org/t/p/w500/xDHvu4ILIe40OZ8d2kqMA1Gn568.jpg',
@@ -10572,14 +10580,19 @@ var FEATURED=[
      longer array pushes the newest titles out of reach of a single visit.
      When something new earns the marquee, retire the most-spent slide
      instead of appending. */
-  {id:'kordell-stewart-slash-burn-2026',ey:'HBO Sports · Oct 27 · HBO Max',eyLive:'Now streaming · HBO Max',premiere:'2026-10-27',until:'2026-11-20'},
-  {id:'eyes-of-ghana-2026',ey:'Higher Ground · In theaters Oct 28',eyLive:'Now in theaters',premiere:'2026-10-28',until:'2026-11-20'},
-  {id:'bass-x-machina',ey:'Bass Reeves, reimagined · Premieres Nov 3 · Netflix',eyLive:'New series · Netflix',premiere:'2026-11-03',until:'2026-12-15'},
-  {id:'the-greatest-2026',ey:'The authorized Ali series · Premieres Nov 4 · Prime Video',eyLive:'New series · Prime Video',premiere:'2026-11-04',until:'2026-12-15'},
-  {id:'14th-2026',ey:'Ava DuVernay \u00b7 In theaters Nov 27 \u00b7 Netflix Dec 4',eyLive:'Ava DuVernay \u00b7 Now in theaters',premiere:'2026-11-27',until:'2027-01-15'},
+  {id:'a-proud-family-wizmas-2026',ey:'Holiday special \u00b7 Now streaming \u00b7 Disney+',premiere:'2026-11-14',until:'2026-12-31'},
+  {id:'the-gospel-of-christmas-2026',ey:'Tyler Perry \u00b7 Now streaming \u00b7 Netflix',premiere:'2026-11-11',until:'2026-12-26'},
+  {id:'the-greatest-2026',ey:'The authorized Ali series \u00b7 Prime Video',premiere:'2026-11-04',until:'2026-12-15'},
+  {id:'church-wives-2026',ey:'New series \u00b7 BET',premiere:'2026-11-04',until:'2026-12-01'},
+  {id:'14th-2026',ey:'Ava DuVernay \u00b7 In theaters Nov 27 \u00b7 Netflix Dec 4',eyLive:'Ava DuVernay \u00b7 Now in theaters \u00b7 Netflix Dec 4',premiere:'2026-11-27',until:'2027-01-15'},
   {id:'pvalley',ey:'The final season \u00b7 Premieres Dec 4 \u00b7 Starz',eyLive:'The final season \u00b7 Starz',premiere:'2026-12-04',until:'2027-02-15'},
-  {id:'the-secret-lives-of-baba-segis-wives-2026',ey:'Mo Abudu \u00b7 In cinemas Dec 4',eyLive:'Now in cinemas',premiere:'2026-12-04',until:'2027-01-20'},
-  {id:'treasure-island-2026',ey:'David Oyelowo is Long John Silver · Premieres Oct 11 · MGM+',eyLive:'New series · MGM+',premiere:'2026-10-11',until:'2026-11-20'}
+  {id:'the-secret-lives-of-baba-segis-wives-2026',ey:'Mo Abudu \u00b7 In US theaters Dec 11',eyLive:'Now in theaters',premiere:'2026-12-11',until:'2027-01-20'},
+  {id:'frisco-king',ey:'Samuel L. Jackson \u00b7 Premieres Dec 18 \u00b7 Paramount+',eyLive:'New series \u00b7 Paramount+',premiere:'2026-12-18',until:'2027-02-15'}
+  /* Retired 2026-11-16 to hold the cap, all four still in the catalog:
+     kordell-stewart-slash-burn-2026 (20 days spent), eyes-of-ghana-2026 (its
+     one-night theatrical run was Oct 28), treasure-island-2026 (premiered
+     Oct 11) and bass-x-machina (two weeks spent). Baba Segi moved to its US
+     date, Dec 11 (Nigeria opens Dec 4), per TMDB release dates.
   /* Retired 2026-10-29 to hold the cap, all three still in the catalog:
      reasonable-doubt (23 days spent), misty-green-2026 (20 days spent) and
      diarra-from-detroit (its until had already passed).
@@ -10801,9 +10814,15 @@ var FRESH_PLATE=[
   {id:'the-gospel-of-christmas-2026',start:'2026-11-05',until:'2026-11-30',switch:'2026-11-11',
    ey:'Premieres Nov 11 \u00b7 Netflix',eyAfter:'Now streaming \u00b7 Netflix',
    dek:'Tyler Perry writes and directs, Kirk Franklin produces the music, and the gospel bench runs from Yolanda Adams and The Clark Sisters to Shirley Caesar.',dekAfter:'Tyler Perry and Kirk Franklin put a gospel bench deep enough for Yolanda Adams, The Clark Sisters and Shirley Caesar behind one Christmas story.'},
+  {id:'a-proud-family-wizmas-2026',start:'2026-11-14',until:'2026-11-30',
+   ey:'Now streaming \u00b7 Disney+',
+   dek:'Penny Proud ends up in Santa\'s suit after her Wizmas rant makes him quit on Christmas Eve. Stop-motion, with Gabrielle Union, JB Smoove and Anderson .Paak dropping in.'},
   {id:'14th-2026',start:'2026-11-16',until:'2026-12-14',switch:'2026-11-27',
    ey:'In theaters Nov 27 \u00b7 Netflix Dec 4',eyAfter:'Now in theaters \u00b7 Netflix Dec 4',
    dek:'Ava DuVernay returns to the territory of 13th, this time on the Fourteenth Amendment: citizenship, due process, and who the promise was ever written for.',dekAfter:'DuVernay follows 13th with the Fourteenth Amendment, in theaters now and on Netflix Dec 4.'},
+  {id:'pvalley',start:'2026-11-19',until:'2026-12-20',switch:'2026-12-04',
+   ey:'The final season \u00b7 Premieres Dec 4 \u00b7 Starz',eyAfter:'The final season \u00b7 Now on Starz',
+   dek:'Katori Hall brings The Pynk back for one last run. Nine episodes to close out Chucalissa.',dekAfter:'The Pynk is open for its last run. Bring the verdict to The Table.'},
   {id:'give-me-some-sugah-2026',start:'2026-12-01',until:'2026-12-28',switch:'2026-12-16',
    ey:'Premieres Dec 16 \u00b7 Netflix',eyAfter:'Now streaming \u00b7 Netflix',
    dek:'Tasha Smith directs Taraji P. Henson as a South Shore Chicago baker, from the real viral story, with Joey Bada$$ and Aunjanue Ellis-Taylor.',dekAfter:'Taraji P. Henson as a South Shore baker, directed by Tasha Smith, from the real viral story.'}
