@@ -1,4 +1,4 @@
-# Catalog health — 2026-11-09
+# Catalog health — 2026-11-16
 
 ## Art now available (1)
 - soul-patrol-2026: backdrop now on TMDB (/svYJolViDboW44AVC12PdkbJ8Ec.jpg) — nobd can come off
