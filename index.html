@@ -8694,20 +8694,22 @@ function paintMarriedFeature(){
     '<button class="btn btn-ghost mf-more" onclick="'+open+'">More on this title →</button>'+
   '</div>';
 }
-/* Ten-years-on home spotlight — a dark stage card celebrating the "class of
-   2016" milestone for two culture-defining shows (Insecure, Atlanta). Real
-   premiere dates + real TMDB backdrops; links straight to each show's catalog
-   page. No fabricated scores — the point is the anniversary, not a verdict.
-   The Insecure line references the genuine 10th-anniversary tour Issa Rae
-   announced (2026). Edit TEN_YEARS to change the honorees. */
+/* Home two-up spotlight (the #tenYears slot). Until Nov 18 2026 this held
+   "Ten years on · Class of 2016" (Insecure & Atlanta). The owner asked for it
+   to be removed and replaced with current titles, so it now spotlights two
+   new Black releases. Each show carries its own badge and link label; edit
+   TEN_YEARS to change them. Real dates and official art only, no scores.
+   God With Us: Jimmy Jenkins, select theaters Nov 13 2026 (Variance Films),
+   TMDB movie 1568267. Love & Hip Hop: The Final Chapter: six-part VH1
+   retrospective, premiered Nov 10 2026; art is Paramount's press image. */
 var TEN_YEARS={
-  eyebrow:'Ten years on · Class of 2016',
-  title:'Insecure & Atlanta turned 10.',
-  dek:'A decade since two shows rewrote what our stories could look like on TV — messy, funny, specific, ours. Pull up a seat and revisit them.',
-  note:'Issa Rae has a 10th-anniversary Insecure celebration in the works — the culture never left.',
+  eyebrow:'Just landed · November 2026',
+  title:'Two new ones worth your night.',
+  dek:'A Nativity story set in a Maryland neighborhood, and the last word on fifteen years of Love & Hip Hop. Both are out now.',
+  note:'',
   shows:[
-    {id:'insecure',name:'Insecure',sub:'Premiered Oct 9, 2016 · HBO',backdrop:'https://image.tmdb.org/t/p/w1280/jS2R26p1S7JQtSCo4MjA9El45A8.jpg'},
-    {id:'atlanta',name:'Atlanta',sub:'Premiered Sep 6, 2016 · FX',backdrop:'https://image.tmdb.org/t/p/w1280/vN84JlTvOZvZzxi0D2SJQNFvtjS.jpg'}
+    {id:'god-with-us-2026',name:'God With Us',sub:'In select theaters since Nov 13',badge:'In theaters',go:'See it →',backdrop:'https://image.tmdb.org/t/p/w1280/fr4dLge7GZAG3Wza7ff8E01Xt7I.jpg'},
+    {id:'love-hip-hop-final-chapter-2026',name:'Love & Hip Hop: The Final Chapter',sub:'Premiered Nov 10 · VH1',badge:'New series',go:'See it →',backdrop:'https://public-assets-pressexpress.s3.amazonaws.com/assets/releases/docimages/67574944/d3058934c5ba3a4fb024cef05de0e39c.jpg'}
   ]
 };
 function paintTenYears(){
@@ -8720,10 +8722,10 @@ function paintTenYears(){
     return '<a class="ty-show" onclick="go(\'film\',\''+esc(s.id)+'\')">'+
       '<span class="ty-show-art"'+bg+'></span>'+
       '<span class="ty-show-scrim"></span>'+
-      '<span class="ty-show-body"><span class="ty-show-badge">10 years</span>'+
+      '<span class="ty-show-body"><span class="ty-show-badge">'+esc(s.badge||'New')+'</span>'+
       '<span class="ty-show-name">'+esc(s.name)+'</span>'+
       '<span class="ty-show-sub">'+esc(s.sub)+'</span>'+
-      '<span class="ty-show-go">Revisit →</span></span></a>';
+      '<span class="ty-show-go">'+esc(s.go||'See it →')+'</span></span></a>';
   }).join('');
   el.innerHTML='<div class="ty-wrap">'+
     '<div class="ty-spark s1"></div><div class="ty-spark s2"></div><div class="ty-spark s3"></div>'+
@@ -9369,16 +9371,16 @@ function buildPerfectTenCard(done){
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     ctx.textAlign='left';
     ctx.fillStyle='#F4B733'; ctx.font='500 19px "DM Mono", ui-monospace, monospace';
-    ctx.fillText('THE PERFECT TEN', 78, 112);
+    ctx.fillText('THE SEASON’S TEN', 78, 112);
     ctx.fillStyle='#FBF3DE'; ctx.font='400 74px "Instrument Serif", Georgia, serif';
-    ctx.fillText(st.mode==='mine'?'No bad parts.':'The room’s answer.', 78, 196);
+    ctx.fillText(st.mode==='mine'?'Watching these first.':'The room’s answer.', 78, 196);
     ctx.fillStyle='rgba(244,236,216,.78)'; ctx.font='600 25px Inter, system-ui, sans-serif';
     var sub = st.mode==='mine'
-      ? 'Not my favourite. Not the most important.'
-      : (st.total? st.total+' picks cast so far.' : 'Ten films. Two picks. One question.');
+      ? 'Out now or landing before Christmas.'
+      : (st.total? st.total+' picks cast so far.' : 'Ten titles. Two picks. One question.');
     ctx.fillText(scClip(ctx,sub,W-156), 78, 244);
     ctx.fillStyle='rgba(244,236,216,.62)'; ctx.font='600 25px Inter, system-ui, sans-serif';
-    ctx.fillText(st.mode==='mine'?'The two with nothing to skip.':'Which one has no bad parts at all?', 78, 282);
+    ctx.fillText(st.mode==='mine'?'My first two this season.':'What are you watching first?', 78, 282);
     /* the two posters */
     var pw=430, ph=Math.round(pw*1.5), gap=34, x0=78, y0=350;
     st.films.slice(0,2).forEach(function(f,i){
@@ -9396,7 +9398,7 @@ function buildPerfectTenCard(done){
     });
     /* the challenge line */
     ctx.fillStyle='#FBF3DE'; ctx.font='400 44px "Instrument Serif", Georgia, serif';
-    ctx.fillText(st.mode==='mine'?'Two picks. Tell me I’m wrong.':'Two picks. Where do you land?', 78, H-186);
+    ctx.fillText(st.mode==='mine'?'Two picks. What are yours?':'Two picks. Where do you land?', 78, H-186);
     ctx.fillStyle='#F4B733'; ctx.font='500 20px "DM Mono", ui-monospace, monospace';
     ctx.fillText('ITSWELLSEASONED.COM', 78, H-120);
     ctx.fillStyle='rgba(244,236,216,.55)'; ctx.font='500 17px "DM Mono", ui-monospace, monospace';
@@ -9410,8 +9412,8 @@ function openPerfectTenShare(){
   _p10Canvas=null; track('share_perfect_ten',{mode:st.mode});
   var url='https://itswellseasoned.com/#/perfect-ten';
   var title=st.mode==='mine'
-    ? 'My two: '+st.films.map(function(f){return f.title;}).join(' + ')+' — which film has no bad parts?'
-    : 'Ten Black films. Two picks. Which one has no bad parts at all?';
+    ? 'My first two this season: '+st.films.map(function(f){return f.title;}).join(' + ')+'. What are you watching first?'
+    : 'Ten new Black films and shows. Two picks. What are you watching first?';
   showModal('<button class="close" aria-label="Close" onclick="closeModal()">✕</button>'+
     '<h2>Share your two</h2><p class="m-sub">Post your picks and let people argue with them. That’s the point.</p>'+
     '<div id="p10Wrap" style="text-align:center;margin:4px 0 14px"><span style="color:var(--ink-3);font-size:13px">Building your card…</span></div>'+
@@ -9433,7 +9435,7 @@ function p10CardBlob(cb){
 function saveP10Card(){
   p10CardBlob(function(b){
     if(!b){ toast('Could not build the card.'); return; }
-    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='well-seasoned-perfect-ten.png';
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='well-seasoned-seasons-ten.png';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
     toast('Card saved. Post it.');
@@ -9444,13 +9446,13 @@ function nativeP10Share(){
     var st=p10ShareState();
     var link='https://itswellseasoned.com/#/perfect-ten';
     var txt=st.mode==='mine'
-      ? 'My two films with no bad parts: '+st.films.map(function(f){return f.title;}).join(' + ')
-      : 'Ten Black films. Two picks. Which has no bad parts at all?';
-    if(!b){ if(navigator.share)navigator.share({title:'The Perfect Ten',text:txt,url:link}).catch(function(){}); return; }
-    var file=new File([b],'well-seasoned-perfect-ten.png',{type:'image/png'});
-    var data={files:[file],title:'The Perfect Ten',text:txt+' · itswellseasoned.com'};
+      ? 'My first two this season: '+st.films.map(function(f){return f.title;}).join(' + ')
+      : 'Ten new Black films and shows. Two picks. What are you watching first?';
+    if(!b){ if(navigator.share)navigator.share({title:'The Season’s Ten',text:txt,url:link}).catch(function(){}); return; }
+    var file=new File([b],'well-seasoned-seasons-ten.png',{type:'image/png'});
+    var data={files:[file],title:'The Season’s Ten',text:txt+' · itswellseasoned.com'};
     if(navigator.canShare&&navigator.canShare(data)) navigator.share(data).catch(function(){});
-    else if(navigator.share) navigator.share({title:'The Perfect Ten',text:txt,url:link}).catch(function(){});
+    else if(navigator.share) navigator.share({title:'The Season’s Ten',text:txt,url:link}).catch(function(){});
   });
 }
 /* ============ AIRING NOW — what drops this week ============
@@ -11812,31 +11814,30 @@ function kbCardHTML(row){
     '</span>'+
     '<span class="kb-go">Score it →</span></button>';
 }
-/* ============ THE PERFECT TEN (home poll) ============
-   "Which of these has no bad parts in it at all?" — not best, not favourite.
-   Airtight. No stretch you skip, no scene you defend.
-   Two picks max, and the maximum is enforced by the backend, not by a client
-   guard: debate_votes carries a unique index on (debate_id, user_id), so each
-   of the two slot ids can hold exactly one row per identity. Tapping a third
-   film is refused; tapping one you already picked releases that slot.
-   Reuses debate_votes / debate_tallies exactly as the Bracket does — no new
-   table, no migration. */
-var P10_SLOTS=['p10-a','p10-b'];
+/* ============ THE SEASON'S TEN (home poll, the #perfectTen slot) ============
+   Until Nov 18 2026 this was "The Perfect Ten": ten classics, "which one has no
+   bad parts". The owner asked for it to be removed and replaced with current
+   titles, so it now asks which of ten current Black films and shows people
+   are watching first. Same mechanics: two picks max, enforced by the unique
+   index on debate_votes (debate_id, user_id). New slot ids (p10s-*) and a new
+   localStorage key keep the old classics' votes out of these tallies.
+   Notes use the dates checked Nov 16 to 18 2026; swap titles as they age out. */
+var P10_SLOTS=['p10s-a','p10s-b'];
 var PERFECT_TEN=[
-  {id:'coming-to-america', note:'1988 · Landis'},
-  {id:'do-the-right-thing', note:'1989 · Lee'},
-  {id:'boyz',               note:'1991 · Singleton'},
-  {id:'friday',             note:'1995 · Gray'},
-  {id:'set-it-off',         note:'1996 · Gray'},
-  {id:'love-jones',         note:'1997 · Witcher'},
-  {id:'love-basketball',    note:'2000 · Prince-Bythewood'},
-  {id:'moonlight',          note:'2016 · Jenkins'},
-  {id:'getout',             note:'2017 · Peele'},
-  {id:'sinners',            note:'2025 · Coogler'}
+  {id:'a-proud-family-wizmas-2026',               note:'Disney+ · Now streaming'},
+  {id:'the-gospel-of-christmas-2026',             note:'Netflix · Now streaming'},
+  {id:'church-wives-2026',                        note:'BET · New series'},
+  {id:'the-greatest-2026',                        note:'Prime Video · New series'},
+  {id:'reasonable-doubt',                         note:'Hulu · Season 4'},
+  {id:'the-fall-and-rise-of-reggie-dinkins',      note:'NBC · Season 2'},
+  {id:'14th-2026',                                note:'Theaters Nov 27 · Netflix Dec 4'},
+  {id:'pvalley',                                  note:'Starz · Final season Dec 4'},
+  {id:'the-secret-lives-of-baba-segis-wives-2026',note:'US theaters · Dec 11'},
+  {id:'frisco-king',                              note:'Paramount+ · Dec 18'}
 ];
 var _p10Tally={};
-function p10Mine(){ try{ return JSON.parse(localStorage.getItem('ws_p10')||'[]')||[]; }catch(e){ return []; } }
-function p10Save(a){ try{ localStorage.setItem('ws_p10',JSON.stringify(a)); }catch(e){} }
+function p10Mine(){ try{ return JSON.parse(localStorage.getItem('ws_p10s')||'[]')||[]; }catch(e){ return []; } }
+function p10Save(a){ try{ localStorage.setItem('ws_p10s',JSON.stringify(a)); }catch(e){} }
 function p10Counts(){
   var out={}, tot=0;
   for(var d in _p10Tally){ var picks=_p10Tally[d]; for(var p in picks){ out[p]=(out[p]||0)+picks[p]; tot+=picks[p]; } }
@@ -11863,9 +11864,9 @@ function paintPerfectTen(){
   el.innerHTML='<div class="p10-wrap">'+
     '<div class="p10-spark s1"></div><div class="p10-spark s2"></div>'+
     '<div class="p10-head">'+
-      '<span class="p10-ey">The Perfect Ten</span>'+
-      '<h2 class="p10-h">Which one has <em>no bad parts</em>?</h2>'+
-      '<p class="p10-lede">Not your favourite. Not the most important. The one with no stretch you skip, no scene you have to explain. Pick up to two.</p>'+
+      '<span class="p10-ey">The Season’s Ten</span>'+
+      '<h2 class="p10-h">What are you <em>watching first</em>?</h2>'+
+      '<p class="p10-lede">Ten Black films and shows that are out now or landing before Christmas. Pick the two you’re starting with.</p>'+
       '<p class="p10-status">'+(mine.length?(mine.length+' of 2 picked'+(mine.length===2?' — tap one to swap':'')):'Two picks maximum')+
         (c.total?' · '+c.total+' pick'+(c.total===1?'':'s')+' cast':'')+'</p>'+
       '<button class="p10-share" onclick="openPerfectTenShare()">'+(mine.length?'Share your two ↗':'Share the poll ↗')+'</button>'+
@@ -11890,7 +11891,7 @@ function p10Pick(id){
   }
   if(mine.length>=2){ toast('Two picks maximum — tap one to swap it out.'); return; }
   var slotIdx=mine.length, slotId=P10_SLOTS[slotIdx];
-  mine.push(id); p10Save(mine); sfx('for'); track('perfect_ten',{pick:id,slot:slotId}); paintPerfectTen();
+  mine.push(id); p10Save(mine); sfx('for'); track('seasons_ten',{pick:id,slot:slotId}); paintPerfectTen();
   if(!sbConfigured())return;
   ensureIdentityThen(function(){
     fetch(SUPABASE_URL+'/rest/v1/debate_votes?on_conflict=debate_id,user_id',{
@@ -11902,7 +11903,7 @@ function p10Pick(id){
 }
 function loadPerfectTen(){
   if(!sbConfigured()){ paintPerfectTen(); return; }
-  fetch(SUPABASE_URL+'/rest/v1/debate_tallies?debate_id=like.p10-*&select=debate_id,pick,n',{headers:sbHeaders()})
+  fetch(SUPABASE_URL+'/rest/v1/debate_tallies?debate_id=like.p10s-*&select=debate_id,pick,n',{headers:sbHeaders()})
     .then(function(r){return r.ok?r.json():[];})
     .then(function(rows){
       _p10Tally={}; (rows||[]).forEach(function(x){ if(!_p10Tally[x.debate_id])_p10Tally[x.debate_id]={}; _p10Tally[x.debate_id][x.pick]=x.n; });

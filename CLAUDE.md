@@ -5011,3 +5011,14 @@ within a few KB before writing — and `node -e 'require("./scripts/lib.cjs").fi
 after. Related, already-documented and hit again: `literal()` is string-aware but
 NOT comment-aware, so a lone apostrophe in a comment inside a parsed array
 ("the organizer's own site") opens a phantom string and breaks the parse.
+
+## Perfect Ten and Ten Years On replaced with current titles (2026-11-18)
+Owner: "the perfect ten and ten years on need to be removed and replaced."
+- `#tenYears` slot (TEN_YEARS / paintTenYears) now spotlights two new releases:
+  God With Us (select theaters Nov 13) and Love & Hip Hop: The Final Chapter
+  (VH1, Nov 10). Each show now carries its own `badge` and `go` label.
+- `#perfectTen` slot (PERFECT_TEN / paintPerfectTen) is now "The Season's Ten":
+  "What are you watching first?" over ten current Black films and shows. Slot
+  ids moved to `p10s-a`/`p10s-b`, tallies read `like.p10s-*`, localStorage key
+  `ws_p10s`, so the old classics' votes stay out. Share card copy updated.
+  The `#/perfect-ten` route still lands on this section for old links.
