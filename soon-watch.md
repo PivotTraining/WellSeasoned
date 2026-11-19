@@ -1,6 +1,6 @@
 # Coming Soon watch
 
-_Generated 2026-11-12 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-11-19 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
 ## Release dates that moved (20)
 
@@ -25,9 +25,10 @@ _Generated 2026-11-12 by scripts/soon-watch.cjs. Report only — nothing here is
 - `cs-216527` **Avatar 4** — we say 2029-12-19, TMDB says 2029-12-21 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-393209` **Avatar 5** — we say 2031-12-17, TMDB says 2031-12-19 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 
-## Trailers now available (0)
+## Trailers now available (2)
 
-None. Every upcoming title either has a trailer or TMDB still has nothing.
+- `cs-1559982` **Give Me Some Sugah** — candidate `tLdpJLVaVRQ` ("GIVE ME SOME SUGAH - Trailer"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
+- `cs-1732479` **14th** — candidate `xO92LnyDxQg` ("14TH | Official Trailer | Netflix"). **Verify the channel via oEmbed before wiring it** — TMDB indexes re-uploads, and an unofficial upload can be pulled at any time.
 
 ## Could not resolve (1)
 
