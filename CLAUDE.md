@@ -5077,3 +5077,52 @@ family as the July 4 `#freedomSection` and the October `#afterDark`.
   0 dupes, no overflow, 0 errors); the skin confirmed present on `#/browse` as
   well as home; zero horizontal overflow at 390px; screenshots checked at both
   phases, desktop and mobile.
+
+## Holiday theme turned up — it wasn't reading (2026-11-25)
+Owner asked for the holiday theme a second time, hours after it shipped. The
+skin WAS live (verified against production, 11 matches for
+`holidayTable`/`data-season`) — the problem was that I built it too quietly.
+The harvest phase was a 3px sumac/paprika/gold bar on a site whose whole
+palette is already warm gold and cream, so it read as no change at all. A
+seasonal theme nobody notices is a theme that does not exist; "decorative
+chrome only" was the right instinct for contrast safety and the wrong one for
+whether the season lands.
+- **Both phases now carry the SAME evergreen/gold/cranberry Christmas
+  palette.** The harvest/yule split still switches the shelf's copy and film
+  list (the gathering films through Thanksgiving, the Christmas canon after),
+  but the season should look like the season from the day it starts, not from
+  Black Friday. Harvest's shelf gained an evergreen wash so it matches what
+  the garland is announcing.
+- **The hairline rule became a real string of lights.** `.topnav::after` is
+  now 15px: a cord plus red/gold/green bulbs repeating every 60px, all as
+  background layers on the one pseudo-element — one paint, no extra DOM — with
+  a slow opacity twinkle that `prefers-reduced-motion` switches off.
+- **Snowfall**, which is what actually signals the season. `#snowCanvas` +
+  `snowStart`/`snowFrame`/`snowToggle`: ONE fixed canvas, `pointer-events:
+  none`, drawn on rAF. Deliberately not a field of DOM nodes — this page
+  already carries several large blurred stage cards and the documented
+  scroll-repaint flicker came from exactly that kind of per-frame compositing
+  load; a single canvas on its own layer composites once and never touches
+  layout. Flake count scales with viewport width (24–80), the loop is
+  **cancelled** (not just hidden) when the tab goes to background, and it
+  never starts off-season, under reduced-motion, or when the visitor has
+  turned it off. Flake alpha runs .55–.95 rather than the .35 I first wrote:
+  white vanishes into a cream page, which only showed up on a screenshot.
+- **A visitor can turn it off** — `.snow-toggle` bottom-left, remembered in
+  `localStorage ws_snow`, `track('snow_toggle')`. It moves to the right on
+  `#/kids`, where the Kids Key dock already owns bottom-left.
+- **The shelf moved above the mosaic**, directly after This Week at The Table.
+  The review loop still leads the page per the standing guardrail, but the
+  season no longer sits below the entire film grid where the owner would have
+  to go looking for it.
+- Verified in headless Chromium at both phases, desktop + mobile: garland
+  renders 15px with 3 bulb layers, flakes measurably animate, toggle flips
+  both ways and persists, reduced-motion kills snow AND the twinkle,
+  off-season (Dec 28) leaves no season attribute, no garland, no canvas class
+  and **no running rAF**, and the eyebrow dash reverts cleanly to base
+  `--paprika`. Skin confirmed on `#/browse`, so it is genuinely site-wide.
+  `scripts/verify.cjs` PASS (16 routes × 2 viewports, 1332 films, 0 overflow,
+  0 errors).
+- **Lesson worth keeping:** when the brief is "make it feel like X," ship it
+  loud enough to notice and let the owner dial it back. Subtlety on a palette
+  that already matches the season is indistinguishable from doing nothing.

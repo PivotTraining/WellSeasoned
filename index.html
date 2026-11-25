@@ -2635,24 +2635,53 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
      tint on the hero eyebrow, and the shelf below. Core panel/ink tokens are
      untouched, because recolouring those is how card text loses its contrast
      (the .shelf-band lesson). */
-  .topnav::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;display:none;pointer-events:none}
+  /* A real string of lights under the nav, not a hairline rule. The first pass
+     used a 3px sumac/gold bar during the harvest phase, which on a site that is
+     already warm gold-and-cream read as no change at all -- the owner asked for
+     the holiday twice before it registered. Both phases now carry the SAME
+     evergreen/gold/cranberry Christmas palette: the phase still switches the
+     shelf's copy and film list below, but the season should look like the
+     season from the day it starts, not from Black Friday.
+     Cord + three alternating bulbs repeating every 60px, all background layers
+     on one pseudo-element, so it costs one paint and no extra DOM. */
+  .topnav::after{content:"";position:absolute;left:0;right:0;bottom:-15px;height:15px;display:none;pointer-events:none;
+    background-image:
+      radial-gradient(circle 4px at 10px 9px,#C62828 96%,transparent 100%),
+      radial-gradient(circle 4px at 30px 11px,#E49B0B 96%,transparent 100%),
+      radial-gradient(circle 4px at 50px 9px,#2E8B57 96%,transparent 100%),
+      linear-gradient(#5E3E04,#5E3E04);
+    background-size:60px 15px,60px 15px,60px 15px,100% 2px;
+    background-repeat:repeat-x;
+    animation:xmasTwinkle 3.4s ease-in-out infinite}
   body[data-season] .topnav::after{display:block}
-  body[data-season="harvest"] .topnav::after{
-    background:repeating-linear-gradient(90deg,#5E140C 0 14px,#BE3B18 14px 28px,#E49B0B 28px 42px,#BE3B18 42px 56px)}
-  body[data-season="yule"] .topnav::after{
-    background:repeating-linear-gradient(90deg,#1C6B41 0 14px,#E49B0B 14px 26px,#A8231B 26px 40px,#E49B0B 40px 52px)}
+  @keyframes xmasTwinkle{0%,100%{opacity:.78}50%{opacity:1}}
   /* Every page's kicker picks up the season, so the theme reads above the fold
      site-wide and not only where the shelf renders. Only the decorative dash
      is recoloured -- .eyebrow's own text stays --gold-ink, which is the
      contrast that is already proven against the cream page. */
-  body[data-season="harvest"] .eyebrow::before{background:linear-gradient(90deg,#5E140C,#BE3B18,#E49B0B)}
-  body[data-season="yule"] .eyebrow::before{background:linear-gradient(90deg,#1C6B41,#E49B0B,#A8231B)}
+  body[data-season] .eyebrow::before{background:linear-gradient(90deg,#2E8B57,#E49B0B,#C62828)}
+
+  /* ---- Snowfall ---- */
+  #snowCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70;display:none}
+  body[data-season] #snowCanvas.on{display:block}
+  .snow-toggle{position:fixed;left:18px;bottom:18px;z-index:71;display:none;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:7px 11px;border-radius:99px;cursor:pointer;
+    background:rgba(12,24,18,.86);color:#F6ECD7;border:1px solid rgba(246,236,215,.26)}
+  .snow-toggle:hover{border-color:var(--gold-soft);color:var(--gold-soft)}
+  body[data-season] .snow-toggle{display:inline-flex}
+  body[data-view="kids"] .snow-toggle{left:auto;right:18px}   /* the Kids Key dock owns bottom-left */
+  @media(prefers-reduced-motion:reduce){ .topnav::after{animation:none;opacity:.92} }
+  @media(max-width:640px){ .snow-toggle{bottom:calc(var(--tab-h) + 14px);font-size:10px;padding:6px 9px} }
 
   /* ---- The seasonal shelf (dark stage, same family as .after-dark) ---- */
   .holiday-table{margin:28px -18px 12px;padding:24px 18px 28px;border-radius:24px;color:#fff;overflow:hidden;position:relative}
+  /* Harvest keeps a warmer base than yule but still carries the evergreen and
+     the gold, so the shelf reads as the same season the garland is announcing. */
   .holiday-table[data-phase="harvest"]{background:
     radial-gradient(circle at 84% 8%,rgba(228,155,11,.26),transparent 30%),
-    linear-gradient(135deg,#1a0d05,#2a1208 52%,#180e07)}
+    radial-gradient(circle at 10% 92%,rgba(46,139,87,.22),transparent 34%),
+    linear-gradient(135deg,#1a0d05,#2a1208 52%,#140f0a)}
   .holiday-table[data-phase="yule"]{background:
     radial-gradient(circle at 84% 8%,rgba(228,155,11,.24),transparent 30%),
     radial-gradient(circle at 12% 92%,rgba(28,107,65,.30),transparent 34%),
@@ -2854,6 +2883,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
              is a film & TV review platform — voting + the catalog lead; games and
              spotlights stay BELOW the film grid, supporting and never the front door. -->
         <section id="weekTable" class="week-table" style="display:none"></section>
+        <section id="holidayTable" class="holiday-table" style="display:none" aria-label="Holiday season shelf"></section>
         <div id="debateBox" class="debate-box" style="display:none"></div>
         <div id="marriedFeature" class="married-feat" style="display:none"></div>
         <div id="homeSortBar" class="rank-toggle" style="margin:2px 0 14px"></div>
@@ -2864,7 +2894,6 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
              every one of these is a place to cast a verdict. -->
         <section id="settleBoards" class="sb-sec" style="display:none"></section>
         <section id="afterDark" class="after-dark" style="display:none" aria-label="October after dark"></section>
-        <section id="holidayTable" class="holiday-table" style="display:none" aria-label="Holiday season shelf"></section>
         <!-- Engagement/spotlight units — dessert, below the core film grid.
              "What the culture's saying" leads the dessert tier now: it's real
              audience voice, the strongest proof the reviews are genuine, so
@@ -3184,6 +3213,11 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
 </div>
 
 <!-- Floating, expandable legend (persists while scrolling) -->
+<!-- Holiday snowfall. Hidden and inert outside the season; see snowStart(). -->
+<canvas id="snowCanvas" aria-hidden="true"></canvas>
+<button class="snow-toggle" id="snowToggle" type="button" onclick="snowToggle()" aria-pressed="true">
+  <span id="snowToggleLabel">❄ Snow on</span>
+</button>
 <div class="legend-dock" id="legendDock">
   <div class="legend-panel" id="legendPanel" role="region" aria-label="Score legend" hidden></div>
   <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()" aria-expanded="false" aria-controls="legendPanel"><span class="lt-ic">?</span><span class="lt-tx">Key</span></button>
@@ -11032,11 +11066,98 @@ function paintHolidayTable(){
 }
 /* Stamps body[data-season] so the CSS skin (ribbon under the nav, seasonal
    eyebrow dash) applies on every view, not only home. Called from render(). */
+/* ============ HOLIDAY SNOWFALL ============
+   One fixed canvas, pointer-events:none, drawn on rAF. Deliberately NOT a
+   field of DOM nodes: this page already carries several large blurred stage
+   cards, and the documented scroll-repaint flicker came from exactly that kind
+   of per-frame compositing load. A single canvas on its own layer composites
+   once and never touches page layout.
+   Off outside the season, off under prefers-reduced-motion, off while the tab
+   is hidden, and off for good if the visitor says so (localStorage). */
+var _snowRAF=null, _snowFlakes=null, _snowCv=null, _snowCtx=null, _snowW=0, _snowH=0;
+function snowWanted(){
+  if(!holidayPhase()) return false;
+  try{ if(localStorage.getItem('ws_snow')==='off') return false; }catch(e){}
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches) return false;
+  return true;
+}
+function snowSize(){
+  if(!_snowCv) return;
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  _snowW=window.innerWidth; _snowH=window.innerHeight;
+  _snowCv.width=Math.round(_snowW*dpr); _snowCv.height=Math.round(_snowH*dpr);
+  if(_snowCtx) _snowCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function snowSeed(){
+  /* Count scales with width so a phone isn't drawing a desktop's worth. */
+  var n=Math.max(24,Math.min(80,Math.round(_snowW/16)));
+  _snowFlakes=[];
+  for(var i=0;i<n;i++) _snowFlakes.push({
+    x:Math.random()*_snowW, y:Math.random()*_snowH,
+    r:1.1+Math.random()*2.4, sp:0.25+Math.random()*0.85,
+    /* Alpha runs high because the page ground is cream, not a night sky --
+       white at .35 vanished into it. Reads on both the paper background and
+       the dark stage cards. */
+    dx:-0.35+Math.random()*0.7, a:0.55+Math.random()*0.4,
+    ph:Math.random()*Math.PI*2
+  });
+}
+function snowFrame(){
+  if(!_snowCtx){ _snowRAF=null; return; }
+  _snowCtx.clearRect(0,0,_snowW,_snowH);
+  for(var i=0;i<_snowFlakes.length;i++){
+    var f=_snowFlakes[i];
+    f.y+=f.sp; f.ph+=0.01; f.x+=f.dx+Math.sin(f.ph)*0.3;
+    if(f.y-f.r>_snowH){ f.y=-4; f.x=Math.random()*_snowW; }
+    if(f.x<-6) f.x=_snowW+4; else if(f.x>_snowW+6) f.x=-4;
+    _snowCtx.globalAlpha=f.a;
+    _snowCtx.beginPath(); _snowCtx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    _snowCtx.fillStyle='#FDFDFF'; _snowCtx.fill();
+  }
+  _snowCtx.globalAlpha=1;
+  _snowRAF=window.requestAnimationFrame(snowFrame);
+}
+function snowStop(){
+  if(_snowRAF){ window.cancelAnimationFrame(_snowRAF); _snowRAF=null; }
+  if(_snowCtx&&_snowW) _snowCtx.clearRect(0,0,_snowW,_snowH);
+  if(_snowCv) _snowCv.className='';
+}
+function snowStart(){
+  _snowCv=byId('snowCanvas'); if(!_snowCv) return;
+  snowLabel();
+  if(!snowWanted()){ snowStop(); return; }
+  if(!_snowCtx){
+    try{ _snowCtx=_snowCv.getContext('2d'); }catch(e){ return; }
+    if(!_snowCtx) return;
+  }
+  _snowCv.className='on';
+  snowSize(); snowSeed();
+  if(!_snowRAF) _snowRAF=window.requestAnimationFrame(snowFrame);
+}
+function snowLabel(){
+  var b=byId('snowToggle'), l=byId('snowToggleLabel'); if(!b||!l) return;
+  var off=false; try{ off=localStorage.getItem('ws_snow')==='off'; }catch(e){}
+  l.innerHTML=off?'❄ Snow off':'❄ Snow on';
+  b.setAttribute('aria-pressed',off?'false':'true');
+}
+function snowToggle(){
+  var off=false; try{ off=localStorage.getItem('ws_snow')==='off'; }catch(e){}
+  try{ localStorage.setItem('ws_snow',off?'on':'off'); }catch(e){}
+  if(off) snowStart(); else { snowStop(); snowLabel(); }
+  track('snow_toggle',{on:off?1:0});
+}
+window.addEventListener('resize',function(){ if(_snowRAF){ snowSize(); snowSeed(); } });
+document.addEventListener('visibilitychange',function(){
+  /* Nothing should burn frames behind another tab. */
+  if(document.hidden) { if(_snowRAF){ window.cancelAnimationFrame(_snowRAF); _snowRAF=null; } }
+  else if(snowWanted()&&_snowCtx&&!_snowRAF){ _snowRAF=window.requestAnimationFrame(snowFrame); }
+});
 function refreshSeasonSkin(){
   if(!document.body) return;
   var phase=holidayPhase();
   if(phase) document.body.setAttribute('data-season',phase);
   else document.body.removeAttribute('data-season');
+  snowStart();   /* starts, stops or stays off depending on season + preference */
 }
 
 function renderHome(){
