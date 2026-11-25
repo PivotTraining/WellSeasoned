@@ -747,3 +747,69 @@ The next time a studio explains that a Black-led film has a ceiling, I would lik
   '2026-10-10T09:00:00Z'
 )
 on conflict (slug) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Filed Under Race, Not Christmas (2026-11-25)
+-- The spine is verified: TMDB release dates/budgets/revenue for the theatrical
+-- titles, contemporaneous trade coverage for the 2013 weekend and the USA Today
+-- headline, and our own catalog for the streaming run. The "last one to open in
+-- theaters" claim is deliberately scoped to this catalog, which is a thing we
+-- can actually stand behind, rather than to all cinema everywhere.
+-- ---------------------------------------------------------------------------
+insert into articles (slug, kind, title, dek, author, film_slug, subject, hero_image, body, published, created_at)
+values (
+  'filed-under-race-not-christmas',
+  'article',
+  'Filed Under Race, Not Christmas',
+  'In 2013 a Christmas movie with a Black cast came within eight million dollars of Thor, and the headline the next morning called it race-themed. Ten Novembers have passed since the last one opened in a theater.',
+  'The Founder',
+  'the-best-man-holiday',
+  'Malcolm D. Lee, David E. Talbert, Preston A. Whitmore II, Kasi Lemmons',
+  'https://itswellseasoned.com/word/filed-under-race-not-christmas.jpg',
+  $body$The forecast said mid-twenties. Box Office Mojo had penciled in something in the twenty-millions, respectable for a sequel arriving fourteen years after the original, and nobody in the trade press expected to write about it twice.
+
+By Friday night the arithmetic had come apart. *The Best Man Holiday* — Malcolm D. Lee's reunion picture, the one where the friends from 1999 gather at Lance and Mia's house for Christmas and spend four days failing to avoid everything they have not said — opened on November 15, 2013, and took enough on its first day to come within sight of a Marvel movie in its second weekend. It finished Sunday a little over thirty million dollars against a seventeen-million-dollar budget. *Thor: The Dark World* held the top spot with thirty-eight. The audience handed the film an A+ CinemaScore, a grade most films never see. Universal's exit polling put that audience at eighty-seven percent Black and three-quarters women.
+
+Then the box-office story went up, and the headline read: Holiday nearly beat Thor as race-themed films soar.
+
+It was revised twice. First to "ethnically diverse," which satisfied nobody, and finally to something that just named the movie. An editor's note mentioned good intentions. No apology was issued, and I am not sure one was owed, because I do not think anyone sat down that Sunday meaning to insult a Christmas comedy. That is the part worth sitting with. It was not malice. It was filing.
+
+A movie about four old college friends arguing over a holiday dinner was not filed under Christmas. It was filed under race.
+
+> A Christmas movie about old college friends was not filed under Christmas. It was filed under race, and it has stayed there.
+
+The record does not support the idea that these were strange, unproven bets. *This Christmas*, Preston A. Whitmore II's 2007 film about the Whitfield siblings coming home to their mother's house, cost thirteen million and took something close to fifty worldwide, opening to eighteen in a single weekend. *Almost Christmas*, David E. Talbert's 2016 picture about a widower trying to get five grown children through five days under one roof, cost seventeen million and returned nearly forty-three. Put seventeen million dollars in and take thirty back out in three days, as *The Best Man Holiday* did, and you have not run a risk. You have run a business.
+
+Not all of them worked, and I am not going to pretend otherwise. *Black Nativity*, Kasi Lemmons's adaptation of the Langston Hughes play, came out five weeks after *The Best Man Holiday* with a seventeen-and-a-half-million-dollar budget and took seven. It lost money. That is what a genre looks like — some land, some do not, and the studio keeps making them because the ones that land pay for the ones that do not. Every genre in the business is underwritten by exactly that math. Nobody stopped making Christmas movies because *Deck the Halls* flopped.
+
+> Seventeen million in, thirty million out in three days. That is not a gamble. That is a business.
+
+So here is the thing I went looking for in our own catalog, which now runs to more than thirteen hundred titles, and which I can check in a way I cannot check the whole of American cinema. I pulled every Black Christmas movie in it and sorted by year, and the list breaks cleanly in half.
+
+On one side: *Soul Food*. *Friday After Next*. *The Perfect Holiday*. *This Christmas*. *A Madea Christmas*. *Black Nativity*. *The Best Man Holiday*. *Almost Christmas*. All of them opened in theaters.
+
+On the other: *Holiday Rush*, Netflix. *Jingle Jangle*, Netflix. *Dashing Through the Snow*, Disney+. *Candy Cane Lane*, Prime Video. *Meet Me Next Christmas*, Netflix. *Tyler Perry's Finding Joy*, Netflix. This month, *Tyler Perry's The Gospel of Christmas*, Netflix, and *A Proud Family Wizmas*, Disney+.
+
+The break is November 11, 2016. *Almost Christmas* is the last Black Christmas movie in this catalog that opened in a theater, and it opened ten years ago this month. Ten Novembers. Not one of them since has been given a weekend.
+
+The nearest thing to an exception proves the shape of it. *Jingle Jangle: A Christmas Journey* got a brief theatrical run before it landed on Netflix on November 13, 2020 — and it is the same David E. Talbert who directed *Almost Christmas*, four years earlier, when the thing still came with a weekend attached. He has said the film took him twenty years to get made. It finally got made by a streamer. Ask what it grossed and there is no answer, because that is not a number streamers publish.
+
+Which is, I have come to think, the whole point.
+
+A film that opens in a theater can embarrass somebody. It can beat the forecast by ten million dollars, sit one slot behind a Marvel movie on a Sunday morning, and force a newsroom to rewrite a headline twice before lunch. It generates a public number that anyone can check against what the industry claimed the audience was. *The Best Man Holiday* did not just make money in 2013. It made an argument, out loud, in a currency the business cannot dispute.
+
+Move the same film to a streamer and the argument goes quiet. The audience may well be larger. We have no way of knowing, and neither do you, and that is not an accident of accounting.
+
+> You cannot have a shocking opening weekend if you do not have an opening weekend.
+
+I want to be precise about what I am and am not saying. Streaming did not single out Black Christmas movies; the mid-budget adult comedy has been migrating off theatrical screens for a decade, and plenty of white Christmas movies went with it. These films are still getting made, still getting watched, in some cases watched by more people than ever bought a ticket. Nobody is being erased.
+
+But something was traded away, and it is worth naming. For about twenty years, a Black family Christmas movie could walk into the first weekend of November, outperform its forecast, and produce a receipt. The receipt was the useful part. It was evidence, renewable annually, that the audience everyone kept describing as a niche would turn out in the cold for a film about their own people at a dinner table.
+
+That evidence stopped being generated in 2016, and in the ten years since, nothing has replaced it.
+
+So this season we put the whole canon on one shelf — the eight that got a weekend and the eight that did not — and set it next to a vote, which is the only receipt we can actually issue here. It is a smaller currency than a box-office gross. It has the advantage of being ours, and of being public, and of being impossible to file under anything but what it is.$body$,
+  true,
+  '2026-11-25T09:00:00Z'
+)
+on conflict (slug) do nothing;

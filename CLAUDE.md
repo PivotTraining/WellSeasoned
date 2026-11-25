@@ -5126,3 +5126,63 @@ whether the season lands.
 - **Lesson worth keeping:** when the brief is "make it feel like X," ship it
   loud enough to notice and let the owner dial it back. Subtlety on a palette
   that already matches the season is indistinguishable from doing nothing.
+
+## The Balcony: "Filed Under Race, Not Christmas" (2026-11-25)
+Owner: "We need a new article as well." The newest published piece was 46 days
+old. Written in the house NYMag/VF voice — delayed lead, no subheads, 3 pull
+quotes, 6,588-char body — and tied to the holiday shelf that shipped the same
+week, so the editorial and the product argue the same thing.
+- **The delayed lead is a real, documented 2013 weekend.** *The Best Man
+  Holiday* opened Nov 15 2013 (TMDB), $17M budget, just over $30M in three days
+  against a mid-$20M forecast, second to *Thor: The Dark World* (~$38.4M), A+
+  CinemaScore, and Universal's own exit polling at 87% Black / 75% women. Then
+  the box-office story ran under "Holiday nearly beat Thor as race-themed films
+  soar," was revised twice (to "ethnically diverse," then to just the title),
+  and carried an editor's note citing good intentions. **No apology was issued
+  and the piece does not claim one was** — the argument is deliberately that it
+  was filing, not malice, which is both more defensible and more damning.
+- **The finding is from our own catalog**, which is the part no competitor can
+  publish. Sorting every Black Christmas title by year breaks the list cleanly
+  in two: eight that opened in theaters (Soul Food → Almost Christmas) and
+  eight that went straight to a streamer (Holiday Rush → this month's Gospel of
+  Christmas and A Proud Family Wizmas). The break is **Nov 11 2016**, ten years
+  ago this month. The claim is scoped to "in this catalog" on purpose — a claim
+  about all of cinema is one we cannot stand behind.
+- **It does not cherry-pick.** *Black Nativity* (Kasi Lemmons, $17.5M budget,
+  $7.0M revenue per TMDB) lost real money, and the piece says so, because "some
+  land, some do not" is what a genre looks like and pretending otherwise would
+  be the same dishonesty the piece is objecting to. It also states plainly that
+  the mid-budget adult comedy left theatrical generally, that these films are
+  still being made and watched, and that nobody is being erased — the loss
+  named is the *public receipt*, not the films.
+- **The David E. Talbert hinge**: he directed *Almost Christmas* (2016, the last
+  one with a weekend) and *Jingle Jangle* (Netflix, Nov 13 2020, after a short
+  theatrical run — noted rather than glossed), a film he has said took twenty
+  years to get made. Ask what it grossed and there is no answer.
+- Hero art: the real TMDB *Best Man Holiday* still (`/yDt3yYyilrfzEVsd6zkf2M
+  WBNjx.jpg`, the ensemble at the holiday party) through the house treatment,
+  committed to `word/filed-under-race-not-christmas.jpg`. **First attempt used
+  the top-voted backdrop and it was a white-background studio promo — the warm
+  grade and vignette had nothing to bite on.** Pull a contact sheet of the
+  candidates before grading; vote count does not mean cinematic.
+- `subject` = Malcolm D. Lee, David E. Talbert, Preston A. Whitmore II, Kasi
+  Lemmons (featured-people chips). `film_slug` = the-best-man-holiday.
+  `LEAD_STORY` repointed to it — the home banner is baked, so it shows before
+  the seed runs; the article body needs the seed.
+- **Not auto-published**, as always: this environment cannot authenticate to the
+  owner-gated `publish_article` RPC. Owner runs `backend/seed_word_articles.sql`
+  once. The art deploys with the push.
+- **Throwaway-Postgres gotcha worth keeping**: the first validation run inserted
+  only 5 of 17 rows and reported no obvious failure, because my hand-written
+  test table was missing `hero_pos` (a real column on the live `articles` table,
+  added by the `articles_hero_position` migration, used by the very first insert
+  in the seed). psql keeps going after an error unless you look for it. **Build
+  the test schema from the seed's own column lists + `backend/schema.sql`, and
+  grep the run for `ERROR`, not just the row count.** After the fix: 17 rows,
+  zero errors, re-run inserts 0, new piece sorts newest so it is the cover.
+- **Data error found while researching and fixed**: `jingle-jangle-a-christmas-
+  journey-2020` carried `where:["Rent"]`. It is a Netflix original and streams
+  there. Corrected to `["Netflix"]`.
+- Verified: article renders on the dark read page desktop + mobile (title, 3
+  `.read-pq`, 20 paragraphs, 4 people chips, hero, 772px paper column, zero
+  overflow, zero console errors); `scripts/verify.cjs` PASS.
