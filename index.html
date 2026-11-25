@@ -2624,6 +2624,81 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
     .after-dark{margin-left:-10px;margin-right:-10px;border-radius:18px}
   }
 </style>
+<style>
+  /* ============ HOLIDAY SEASON SKIN — Thanksgiving through Christmas ============
+     Date-gated site-wide, set as body[data-season] by render() (see
+     holidayPhase()). "harvest" runs the Monday of Thanksgiving week through
+     Thanksgiving day; "yule" runs Black Friday through Dec 26, which is when
+     the season actually turns. Both derive from the real 4th-Thursday date, so
+     this recurs every year and retires itself with no takedown.
+     Deliberately decorative chrome only — the ribbon under the nav, a seasonal
+     tint on the hero eyebrow, and the shelf below. Core panel/ink tokens are
+     untouched, because recolouring those is how card text loses its contrast
+     (the .shelf-band lesson). */
+  .topnav::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;display:none;pointer-events:none}
+  body[data-season] .topnav::after{display:block}
+  body[data-season="harvest"] .topnav::after{
+    background:repeating-linear-gradient(90deg,#5E140C 0 14px,#BE3B18 14px 28px,#E49B0B 28px 42px,#BE3B18 42px 56px)}
+  body[data-season="yule"] .topnav::after{
+    background:repeating-linear-gradient(90deg,#1C6B41 0 14px,#E49B0B 14px 26px,#A8231B 26px 40px,#E49B0B 40px 52px)}
+  /* Every page's kicker picks up the season, so the theme reads above the fold
+     site-wide and not only where the shelf renders. Only the decorative dash
+     is recoloured -- .eyebrow's own text stays --gold-ink, which is the
+     contrast that is already proven against the cream page. */
+  body[data-season="harvest"] .eyebrow::before{background:linear-gradient(90deg,#5E140C,#BE3B18,#E49B0B)}
+  body[data-season="yule"] .eyebrow::before{background:linear-gradient(90deg,#1C6B41,#E49B0B,#A8231B)}
+
+  /* ---- The seasonal shelf (dark stage, same family as .after-dark) ---- */
+  .holiday-table{margin:28px -18px 12px;padding:24px 18px 28px;border-radius:24px;color:#fff;overflow:hidden;position:relative}
+  .holiday-table[data-phase="harvest"]{background:
+    radial-gradient(circle at 84% 8%,rgba(228,155,11,.26),transparent 30%),
+    linear-gradient(135deg,#1a0d05,#2a1208 52%,#180e07)}
+  .holiday-table[data-phase="yule"]{background:
+    radial-gradient(circle at 84% 8%,rgba(228,155,11,.24),transparent 30%),
+    radial-gradient(circle at 12% 92%,rgba(28,107,65,.30),transparent 34%),
+    linear-gradient(135deg,#07130d,#0d1f16 52%,#0a1410)}
+  .ht-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:14px}
+  .ht-k{display:block;font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+  .holiday-table[data-phase="harvest"] .ht-k{color:#F4B733}
+  .holiday-table[data-phase="yule"] .ht-k{color:#7FD6A3}
+  .ht-head h2{margin:4px 0 4px;font-size:clamp(24px,3.2vw,36px);line-height:1;color:#fff}
+  .ht-head p{margin:0;color:rgba(255,255,255,.74);font-size:14px;max-width:62ch;line-height:1.5}
+  .holiday-table .card{box-shadow:0 10px 24px rgba(0,0,0,.3)}
+  .holiday-table .rail-btn{background:rgba(255,255,255,.92)}
+  /* Card metadata assumes a light page, so on a dark stage the title, the
+     score labels and the quick-vote buttons all render dark-on-dark. Same
+     scoped light-on-dark override the dark .plan tier and the married feature
+     needed. .after-dark is included because it has the identical latent bug
+     and comes back every October. */
+  .holiday-table .c-name,.after-dark .c-name{color:var(--on-dark)}
+  .holiday-table .c-sub,.after-dark .c-sub{color:rgba(255,255,255,.66)}
+  .holiday-table .cs-lab,.after-dark .cs-lab{color:rgba(255,255,255,.58)}
+  .holiday-table .cscores .cs-season .cs-lab,
+  .after-dark .cscores .cs-season .cs-lab{color:var(--gold-soft)}
+  .holiday-table .cscores .cs-season,
+  .after-dark .cscores .cs-season{border-right-color:rgba(255,255,255,.22)}
+  .holiday-table .c-where,.after-dark .c-where{color:var(--gold-soft)}
+  .holiday-table .cert-chip,.after-dark .cert-chip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.34)}
+  .holiday-table .pep-chip,.after-dark .pep-chip{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20);color:rgba(255,255,255,.86)}
+  .holiday-table .qv,.after-dark .qv{border-color:rgba(255,255,255,.26);color:rgba(255,255,255,.80)}
+  .holiday-table .qv:hover,.after-dark .qv:hover{border-color:#fff;color:#fff}
+  .holiday-table .qv.for.on,.after-dark .qv.for.on{background:var(--gold);border-color:var(--gold);color:#241703}
+  .holiday-table .qv.against.on,.after-dark .qv.against.on{background:var(--paprika);border-color:var(--paprika);color:#fff}
+  /* A string of lights across the top edge — CSS only, and the glow pulse is
+     the only motion, so there is nothing to drop frames over. */
+  .ht-lights{position:absolute;top:0;left:0;right:0;height:16px;display:flex;gap:18px;justify-content:center;pointer-events:none;opacity:.85}
+  .ht-bulb{width:7px;height:7px;border-radius:50%;margin-top:4px;animation:htGlow 3.2s ease-in-out infinite}
+  .ht-bulb:nth-child(3n){animation-delay:.5s}
+  .ht-bulb:nth-child(3n+1){animation-delay:1.1s}
+  @keyframes htGlow{0%,100%{opacity:.45;box-shadow:0 0 4px currentColor}50%{opacity:1;box-shadow:0 0 11px 2px currentColor}}
+  .ht-count{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.58);margin-top:12px;display:block}
+  @media(prefers-reduced-motion:reduce){ .ht-bulb{animation:none;opacity:.85} }
+  @media(max-width:680px){
+    .ht-head{align-items:flex-start;flex-direction:column}
+    .holiday-table{margin-left:-10px;margin-right:-10px;border-radius:18px}
+    .ht-lights{gap:12px}
+  }
+</style>
 </head>
 <body>
 <a href="#main" class="skip">Skip to content</a>
@@ -2789,6 +2864,7 @@ body[data-view="word"] .wire-link,body[data-view="word"] .wire-all{color:var(--g
              every one of these is a place to cast a verdict. -->
         <section id="settleBoards" class="sb-sec" style="display:none"></section>
         <section id="afterDark" class="after-dark" style="display:none" aria-label="October after dark"></section>
+        <section id="holidayTable" class="holiday-table" style="display:none" aria-label="Holiday season shelf"></section>
         <!-- Engagement/spotlight units — dessert, below the core film grid.
              "What the culture's saying" leads the dessert tier now: it's real
              audience voice, the strongest proof the reviews are genuine, so
@@ -7718,6 +7794,7 @@ function parseHash(){
   return {view:view,arg:arg};
 }
 function render(view,arg){
+  refreshSeasonSkin();
   if(view==='perfect-ten'){
     /* Shareable deep link for the poll, which lives as a home section. Render
        home, then bring the poll into view — landing at the top of a 20-section
@@ -10882,6 +10959,86 @@ function paintAfterDark(){
     '<button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg></button></div>';
 }
 
+/* ============ HOLIDAY SEASON: THANKSGIVING THROUGH CHRISTMAS ============
+   Derived from the real 4th-Thursday-of-November date, not a hardcoded window,
+   so the whole thing turns itself on and off every year with no takedown and
+   no edit. Two phases, because the season genuinely has two halves:
+     harvest  the Monday of Thanksgiving week through Thanksgiving day
+     yule     Black Friday through Dec 26
+   Honest about the content: Black cinema has almost no Thanksgiving movies, so
+   the harvest shelf does not pretend otherwise -- it is the gathering films,
+   named as such. The Christmas shelf is a real canon and deep enough to carry
+   the month on its own. Every id is checked through find() before it renders,
+   so a card can never point at a title the catalog does not have. */
+function thanksgivingDay(y){
+  /* 4th Thursday of November. getDay() 4 = Thursday. */
+  var first=new Date(y,10,1);
+  return new Date(y,10,1+((4-first.getDay()+7)%7)+21);
+}
+function holidayPhase(){
+  var now=new Date(), y=now.getFullYear();
+  var t=thanksgivingDay(y);
+  /* Dec 26 belongs to the previous year's Thanksgiving, so in late December
+     compare against this year's; in early January there is no season at all. */
+  var start=new Date(t.getFullYear(),t.getMonth(),t.getDate()-3);
+  var end=new Date(y,11,26,23,59,59);
+  if(now<start||now>end) return null;
+  return now<=new Date(t.getFullYear(),t.getMonth(),t.getDate(),23,59,59)?'harvest':'yule';
+}
+/* The gathering: everybody in one house, one dinner, one argument. */
+var HOLIDAY_GATHERING=['soul-food','this-christmas','almost-christmas-2016','the-best-man-holiday',
+  'friday-after-next','soul-food-2','last-holiday','holiday-heart'];
+/* The Black Christmas canon, leading with the ones people actually rewatch. */
+var HOLIDAY_YULE=['this-christmas','the-best-man-holiday','almost-christmas-2016','black-nativity',
+  'friday-after-next','a-madea-christmas','jingle-jangle-a-christmas-journey-2020',
+  'the-gospel-of-christmas-2026','candy-cane-lane','the-perfect-holiday','holiday-rush',
+  'meet-me-next-christmas','dashing-through-the-snow','tyler-perry-s-finding-joy-2025',
+  'a-proud-family-wizmas-2026','boxing-day','madea-s-christmas-special','last-holiday','soul-food'];
+var HOLIDAY_COPY={
+  harvest:{
+    k:'The Gathering · Thanksgiving week',
+    h:'Everybody’s at the table.',
+    p:'Black film never really made a Thanksgiving movie — so take the next best thing. The whole family in one house, one dinner, and at least one argument nobody lets go of.',
+    cta:'Browse the classics →', bulbs:['#E49B0B','#BE3B18','#F4B733','#5E140C','#E49B0B','#BE3B18','#F4B733']
+  },
+  yule:{
+    k:'The Season · Now through Christmas',
+    h:'The Christmas table is set.',
+    p:'The Black Christmas canon, in one place — the rewatches, the church play, the Madea year, and the new ones still earning their verdict. Cast yours on the way through.',
+    cta:'Browse holiday titles →', bulbs:['#1C6B41','#E49B0B','#A8231B','#2E8B57','#F4B733','#A8231B','#1C6B41']
+  }
+};
+function paintHolidayTable(){
+  var el=byId('holidayTable'); if(!el)return;
+  var phase=holidayPhase();
+  if(!phase){ el.style.display='none'; el.innerHTML=''; return; }
+  var c=HOLIDAY_COPY[phase];
+  var ids=(phase==='harvest'?HOLIDAY_GATHERING:HOLIDAY_YULE).filter(function(id){
+    var f=find(id); return f&&!f.noart&&homeOurs(f);
+  });
+  if(!ids.length){ el.style.display='none'; return; }
+  el.setAttribute('data-phase',phase);
+  el.style.display='';
+  el.innerHTML='<div class="ht-lights">'+c.bulbs.map(function(col){
+      return '<span class="ht-bulb" style="color:'+col+';background:'+col+'"></span>';
+    }).join('')+'</div>'+
+    '<div class="ht-head"><div><span class="ht-k">'+esc(c.k)+'</span>'+
+    '<h2>'+esc(c.h)+'</h2><p>'+esc(c.p)+'</p></div>'+
+    '<button class="btn btn-ghost light btn-sm" onclick="setFilter(\'q\',\''+(phase==='harvest'?'soul food':'christmas')+'\');go(\'browse\')">'+esc(c.cta)+'</button></div>'+
+    '<div class="rail-wrap"><button class="rail-btn prev" aria-label="Scroll back" onclick="railBy(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M15 18l-6-6 6-6"/></svg></button>'+
+    '<div class="rail ht-rail">'+ids.map(cardHTML).join('')+'</div>'+
+    '<button class="rail-btn next" aria-label="Scroll forward" onclick="railBy(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 6l6 6-6 6"/></svg></button></div>'+
+    '<span class="ht-count">'+ids.length+' titles in the catalog · every verdict here is the room’s, not ours</span>';
+}
+/* Stamps body[data-season] so the CSS skin (ribbon under the nav, seasonal
+   eyebrow dash) applies on every view, not only home. Called from render(). */
+function refreshSeasonSkin(){
+  if(!document.body) return;
+  var phase=holidayPhase();
+  if(phase) document.body.setAttribute('data-season',phase);
+  else document.body.removeAttribute('data-season');
+}
+
 function renderHome(){
   paintCatalogCount();
   paintLeadStory();
@@ -10924,6 +11081,7 @@ function renderHome(){
   paintFallSlate();
   paintSettleBoards();
   paintAfterDark();
+  paintHolidayTable();
   refreshScopeToggles();
   if(byId('teachVerdict')){ byId('teachVerdict').innerHTML=
     '<span class="tv-item"><span class="tv-lab">Kitchen</span>'+auraRing(96,'certified',54,true)+'</span>'+

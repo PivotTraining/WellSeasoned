@@ -5022,3 +5022,58 @@ Owner: "the perfect ten and ten years on need to be removed and replaced."
   ids moved to `p10s-a`/`p10s-b`, tallies read `like.p10s-*`, localStorage key
   `ws_p10s`, so the old classics' votes stay out. Share card copy updated.
   The `#/perfect-ten` route still lands on this section for old links.
+
+## Holiday season skin — Thanksgiving through Christmas (2026-11-25)
+Owner: "Holiday theme the site... from thanksgiving to Christmas." Built as a
+self-managing seasonal skin plus one real content shelf, in the same date-gated
+family as the July 4 `#freedomSection` and the October `#afterDark`.
+- **`thanksgivingDay(y)` / `holidayPhase()`** — derived from the real 4th
+  Thursday of November, NOT a hardcoded window, so it turns itself on and off
+  every year with no takedown and no edit. Two phases, because the season has
+  two genuinely different halves: **harvest** (the Monday of Thanksgiving week
+  through Thanksgiving day) and **yule** (Black Friday through Dec 26 — the
+  season really does turn on Black Friday). Verified by replicating the date
+  math 2026–2030 and by time-travelling the real page to Nov 25 / Nov 27 /
+  Dec 10 / Dec 28.
+- **Site-wide skin** (`refreshSeasonSkin()` stamps `body[data-season]` at the
+  TOP of `render()`, so the `perfect-ten` and `apply` early-return branches get
+  it too): a seasonal ribbon under the top nav (`.topnav::after`) and a
+  seasonal gradient on every page's `.eyebrow::before` dash. Harvest is
+  sumac/paprika/gold; yule is evergreen/gold/cranberry. Deliberately
+  **decorative chrome only** — no core panel or ink token is recoloured,
+  because recolouring those is exactly how card text loses its contrast (the
+  `.shelf-band` lesson). Off-season the dash reverts cleanly to its base
+  `--paprika` (verified: computed `background-image` goes to `none` and
+  `background-color` back to rgb(190,59,24)); the ribbon disappears entirely.
+- **`#holidayTable` / `paintHolidayTable()`** — a dark stage shelf whose copy,
+  palette, light-string colours and film list all switch on the phase. Every id
+  goes through `find()` + `!noart` + `homeOurs()`, so a card can never point at
+  a title the catalog does not have. Placed directly after `#afterDark`, at the
+  head of the dessert tier: it is real film content, and the cards carry the
+  normal inline quick-vote buttons, so it ties back to the review loop per the
+  standing guardrail.
+- **Honest about the content.** Black cinema has essentially no Thanksgiving
+  movies, so the harvest shelf does not invent a category — it is framed as
+  *the gathering* ("Black film never really made a Thanksgiving movie — so take
+  the next best thing"), 8 real family-dinner titles led by Soul Food. The yule
+  shelf is a genuine canon: 19 real catalog titles (This Christmas, The Best Man
+  Holiday, Almost Christmas, Black Nativity, Friday After Next, Jingle Jangle,
+  the Madea and Tyler Perry entries, Candy Cane Lane, A Proud Family Wizmas…).
+  All 22 candidate ids were checked against the parsed catalog first — every one
+  resolves, `scope:'ours'`, with real art.
+- **Real contrast bug found and fixed in passing.** `cardHTML`'s metadata
+  (`.c-name`, `.c-sub`, `.cs-lab`, `.qv` vote buttons, `.cert-chip`,
+  `.pep-chip`, `.c-where`) is all styled for a light page, so on any dark stage
+  it renders dark-on-dark — the first screenshot had unreadable titles and
+  invisible "It's Seasoned / Send It Back" buttons. Added a scoped
+  light-on-dark override, same pattern the dark `.plan` tier and the married
+  feature needed. **`.after-dark` is included in the same selector list** — it
+  had the identical latent bug and comes back every October.
+- Motion is one CSS glow pulse on the light bulbs, nothing else, and it is
+  disabled under `prefers-reduced-motion` — deliberately no page-wide snow
+  particles, given the documented scroll-repaint flicker on a page already
+  carrying several large blurred stage cards.
+- Verified: `scripts/verify.cjs` PASS (16 routes × desktop/mobile, 1332 films,
+  0 dupes, no overflow, 0 errors); the skin confirmed present on `#/browse` as
+  well as home; zero horizontal overflow at 390px; screenshots checked at both
+  phases, desktop and mobile.
