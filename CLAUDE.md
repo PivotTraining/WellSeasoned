@@ -5186,3 +5186,79 @@ week, so the editorial and the product argue the same thing.
 - Verified: article renders on the dark read page desktop + mobile (title, 3
   `.read-pq`, 20 paragraphs, 4 people chips, hero, 772px paper column, zero
   overflow, zero console errors); `scripts/verify.cjs` PASS.
+
+## GQ's Jay-Z interview brought into "The Only Archive Is Him" (2026-11-26)
+Owner: "can we bring in the Jay Z interview with Mr Thorpe from gq that dropped?"
+Two corrections to the premise, both verified against GQ's own page before
+anything was built: the interviewer is **Frazier Tharpe** (not Thorpe), and it
+did not just drop — GQ published it **2026-03-24**, eight months ago. The
+`datePublished` in the page's own JSON-LD is `2026-03-24T07:55:00-04:00`, and
+searches turned up no November Jay-Z/GQ piece, so this is the March cover story.
+- **We already had a published Jay-Z piece**, so this is an attach-and-extend,
+  not a second article. `the-only-archive-is-him` (published 2026-09-21,
+  `film_slug: jay-z-in-8`) argues that the Rubin series is an archive being
+  built on camera. The GQ interview is the same argument six months earlier,
+  which is exactly why it belongs in that piece rather than its own.
+- **It is NOT filed as an interview.** `kind` stays `article`, so the eyebrow
+  reads "The Balcony" and nothing implies we conducted it. The writing is ours;
+  the interview is GQ's and is named as theirs in every paragraph that uses it.
+- **`video_url` carries GQ's OWN YouTube upload** (`Uu_MVMOdbvY`, channel
+  `@GQVideos`, oEmbed-verified, `playableInEmbed:true`), so `renderRead`'s
+  existing embed plays it from GQ's channel with GQ's branding. `renderRead`
+  embeds on `ytId(video_url)` regardless of `kind`, so no renderer change was
+  needed. Body links out to the real article (URL returns 200).
+- **Quotes are verbatim from the primary source.** gq.com blocks WebFetch, but
+  plain `curl` with a browser UA gets the page, so the quotes, the byline, the
+  *Reasonable Doubt* 30-year peg and the "pair of two-hour interviews" in
+  January all came from GQ's own HTML, not from aggregators. Worth remembering:
+  **a WebFetch block is not the same as unreachable** — try curl before settling
+  for secondhand summaries. The one quote the aggregators carried was also
+  slightly wrong: it is "we played enough defense. **2026 is all offense**"
+  with a period, not a comma.
+- **`source_url` still does not exist** (probed live, 400), so The Wire's
+  migration remains unrun and attribution lives in the body as a markdown link.
+
+### Seed/live drift found on this slug — the patch handles both
+The live row for `the-only-archive-is-him` (8,891 chars, closing "It is
+beginning to build one") has **diverged from the copy in
+`backend/seed_word_articles.sql`** (6,093 chars, still closing on the Weekly
+Watch CTA "Two chapters a week through October 9", which expired). Because the
+seed inserts `on conflict (slug) do nothing`, the stale copy can never
+overwrite production — harmless, but the file is not a mirror of what is live.
+The patch therefore uses **two anchors** in one statement (`replace()` is a
+no-op when its anchor is absent, so whichever body is present gets the section
+and the other does nothing), inserts the section **before** the existing
+closing so the piece keeps its ending, and is guarded on
+`position('Tharpe' in body) = 0` so a re-run cannot append twice.
+Validated against a throwaway Postgres 16 across all three paths: seed-only
+body (section lands, 17 rows, 0 errors), the **real live body copied out of
+production** (8,891 → 11,140 chars, original close preserved, GQ link and
+quote present, 0 errors), and a re-run (`INSERT 0 0`, length unchanged).
+Schema gotcha hit again and worth restating: hand-writing the test table loses
+columns silently — `updated_at` was missing and psql reported one ERROR while
+still inserting 5 of 17 rows. **Build the test table from a live row's keys**
+(`select=*&limit=1` through PostgREST) and grep the run for `ERROR`.
+Fixture gotcha: `copy (…) to stdout` escapes newlines as literal `\n`, which
+made mdToHtml render the whole body as ONE paragraph with zero pull quotes in
+the first browser test — a fixture bug, not a code bug. Extract with a plain
+`psql -XAt -c "select body …"` instead.
+- Verified in headless Chromium desktop + mobile: GQ player embeds with the
+  `strict-origin-when-cross-origin` referrerpolicy, 61 paragraphs, the new
+  `.read-pq` pull quote renders, the GQ link is the only outbound link, the
+  piece still ends on "It is beginning to build one", 0 overflow, 0 console
+  errors. `scripts/verify.cjs` PASS (16 routes × 2 viewports, 1332 films).
+
+### Not done, and why
+- **Nothing was written about The Greatest.** Asked in the same message. It is
+  in the catalog (`the-greatest-2026`, Prime Video, created by Ben Watkins,
+  premiered Nov 4) with a verified trailer and a live marquee slide, but it has
+  **zero marketing posts and zero Balcony coverage** — confirmed by grepping
+  `marketing/` and the seed. That is a real gap and a good next piece; it was a
+  question, not an instruction, so no article was written for it.
+- **The seed is unrun since September.** Live newest is
+  `the-only-archive-is-him` (Sep 21), so the Aaron Pierre cover, the Denzel
+  feature and "Filed Under Race, Not Christmas" are all written, committed and
+  **not published**. The home banner for the Christmas piece is baked and
+  already showing, which means the banner currently links to a piece that is
+  not live. Running `backend/seed_word_articles.sql` once publishes all of them
+  and applies this GQ patch in the same pass.

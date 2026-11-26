@@ -813,3 +813,55 @@ So this season we put the whole canon on one shelf — the eight that got a week
   '2026-11-25T09:00:00Z'
 )
 on conflict (slug) do nothing;
+
+
+-- ===========================================================================
+-- 2026-11-26 : bring GQ's Jay-Z interview into "The Only Archive Is Him"
+-- ---------------------------------------------------------------------------
+-- GQ, "Exclusive: The Jay-Z Interview", by Frazier Tharpe (photography by
+-- Rashid Johnson), 2026-03-24, pegged to 30 years since Reasonable Doubt.
+-- Every quote was taken from GQ's own page (fetched live, 200) and is
+-- attributed to GQ in the prose: this is commentary on their interview, not a
+-- reproduction of it. video_url carries GQ's OWN YouTube upload (channel
+-- @GQVideos, playableInEmbed:true), so the player runs from their channel
+-- with their branding rather than us restaging their scoop.
+--
+-- Two anchors on purpose. The live row for this slug has drifted from the
+-- copy inserted above (live ends on "beginning to build one"; the copy here
+-- still ends on the Weekly Watch CTA, which expired Oct 9). replace() is a
+-- no-op when its anchor is absent, so one of the two fires and the other
+-- does nothing, whichever body is present. Guarded on the body not already
+-- naming Tharpe, so re-running this file cannot append the section twice.
+-- ===========================================================================
+update public.articles a set
+  video_url = 'https://www.youtube.com/watch?v=Uu_MVMOdbvY',
+  body = replace(
+           replace(a.body, s.live_anchor, s.section || E'\n\n' || s.live_anchor),
+           s.seed_anchor, s.section || E'\n\n' || s.seed_anchor)
+from (select
+  $anchor1$The series is not discovering an archive.$anchor1$ as live_anchor,
+  $anchor2$Two chapters a week through October 9.$anchor2$ as seed_anchor,
+  $add$Six months before any of this, he had already started.
+
+On March 24, GQ ran a cover interview with him — “Exclusive: The Jay-Z Interview,” by the editor Frazier Tharpe, photographed by Rashid Johnson, pegged to the thirty years since *Reasonable Doubt*. Tharpe met him in January for what he describes as a pair of two-hour interviews, and the piece ran as a transcript of both, alongside a video on GQ’s own channel — the one at the top of this page.
+
+Early in it, Jay explains why he is talking at all. “This is the first thing I’m doing, actually,” he tells Tharpe. “It was just like, alright man, we played enough defense. 2026 is all offense.”
+
+Keep reading and the method shows. Tharpe notes that Jay kept sending material after the sittings were over — adding context, issuing clarifications, or “just setting the record straight on narratives he’d seen reported erroneously elsewhere.”
+
+That is a man editing his own record in real time. It is the same instinct that put him in a chair across from Rubin, and it is why the two belong in the same sentence even while they do different jobs. Tharpe got the subject: the lawsuit and what it cost him, the feud, his wife, his daughter, the business. Rubin never asks him who he is. Rubin plays a song and asks how it got made.
+
+The most useful thing he says to GQ, for our purposes, is about memory — and it is about his own. He grants that he has shown the losses, from “You Must Love Me” to “Regrets,” and then concedes what the catalog does to a listener anyway.
+
+> But the wins are so big that I can see where that can dominate a person’s memory, that you forget the losses. I do say: “I will not lose.” So I could add to the perception, as well.
+
+An artist who understands that his own record distorts the memory of it has a reason to go on camera and annotate the thing himself.
+
+GQ’s own dek says he had kept his thoughts to himself for the better part of a decade. Nine years since *4:44*. Then, inside a single calendar year, he gave a magazine four hours in January and a producer eight chapters in the fall.
+
+You do not do that while you still believe somebody else is going to get it right.
+
+Tharpe’s interview is at [GQ](https://www.gq.com/story/jay-z-cover-interview-april-2026).$add$ as section
+) s
+where a.slug = 'the-only-archive-is-him'
+  and position('Tharpe' in a.body) = 0;
