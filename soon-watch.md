@@ -1,15 +1,14 @@
 # Coming Soon watch
 
-_Generated 2026-11-19 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
+_Generated 2026-11-26 by scripts/soon-watch.cjs. Report only — nothing here is applied automatically._
 
-## Release dates that moved (20)
+## Release dates that moved (19)
 
 - `cs-1744003` **The Secret Lives of Baba Segi's Wives** — we say 2026-12-04, TMDB says 2026-12-11 (+7 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
+- `cs-1753884` **The Four: No One Fights Alone** — we say 2026-12-11, TMDB says 2026-12-02 (-9 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1405200` **Ben'Imana** — we say 2027-02-03, TMDB says 2026-10-18 (-108 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
-- `cs-1666683` **Congo Boy** — we say 2026-11-25, TMDB says 2026-10-19 (-37 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1732479` **14th** — we say 2026-11-27, TMDB says 2026-12-04 (+7 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1630464` **Clarissa** — we say 2026-12-11, TMDB says 2026-10-04 (-68 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
-- `cs-923493` **Samo Lives** — we say 2026-12-12, TMDB says 2026-12-11 (-1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1003596` **Avengers: Doomsday** — we say 2026-12-16, TMDB says 2026-12-18 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-1170608` **Dune: Part Three** — we say 2026-12-16, TMDB says 2026-12-18 (+2 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
 - `cs-621304` **Children of Blood and Bone** — we say 2027-01-14, TMDB says 2027-01-15 (+1 days). Check the trades before changing it; TMDB sometimes carries a festival date as the release.
